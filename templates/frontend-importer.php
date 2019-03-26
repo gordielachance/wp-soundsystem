@@ -1,8 +1,6 @@
 <?php
 global $wpsstm_tracklist;
-
-
-    ?>
+?>
 
 <div id="frontend-importer">
 

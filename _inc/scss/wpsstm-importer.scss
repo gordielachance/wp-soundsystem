@@ -2,10 +2,8 @@
 @import "compass/typography/text/ellipsis";
 @import "_wpsstm-shared";
 
-#wpsstm-metabox-importer{
-    
-    font-size:2em;
-    
+#wpsstm-importer{
+
     h3{
         font-weight: bold;
     }
@@ -18,9 +16,6 @@
         padding: .25em 0;
         > * {
             &.wpsstm-importer-row-label{
-                padding-right:1em;
-                width:30%;
-                
             }
             &.wpsstm-importer-row-content{
                 @include flex-grow(1);
@@ -31,8 +26,7 @@
     }
     
     input[type="text"],input[type="number"]{
-        font-size: 1em;
-        padding: .25em;
+        padding: .5em;
     }
     
     button[type="submit"] {
@@ -72,7 +66,6 @@
         max-height: calc(3 * 211px);
         overflow-y: auto;
     }
-    
 
     #wpsstm-importer-sections-header{
         clear:both;
@@ -87,12 +80,7 @@
     }
 
     .wpsstm-importer-section{
-        margin: 1em 0;
-        padding: 1em 0;
-        margin-top: 0;
-        padding-top: 0;
 
-        border-bottom: 1px solid #ddd;
         
         .wpsstm-importer-section-label{
             margin:1em;
@@ -143,11 +131,63 @@
             }
         }
     }
+    
+    //tabs
+    &.ui-tabs{
+        ul.ui-tabs-nav{
+            li.ui-state-default{
+                &.ui-state-active{
+                    background: #f9f9f9;
+                }
+            }
+        }
 
-    .ui-tabs-panel > h3:first-of-type {
-            display: none;
+        .ui-tabs-panel{
+            padding:1em;
+            background: #f9f9f9;
+        }
+        
+        //second level
+        .ui-tabs{
+            ul.ui-tabs-nav{
+                li.ui-state-default{
+                    &.ui-state-active{
+                        background: #FFF;
+                    }
+                }
+            }
+
+            .ui-tabs-panel{
+                background: #FFF;
+            }
+        
+        }
+        
+    }
+    
+}
+
+//tabs
+.ui-tabs{
+    ul.ui-tabs-nav{
+        margin: 0px;
+        padding: 0px;
+        list-style: none;
+        li.ui-state-default{
+            margin-bottom: 0;
+            padding: 10px 15px;
+            display: inline-block;
+            @extend .wpsstm-can-click;
+        }
     }
 
+    .ui-tabs-panel{
+        display: none;
+        padding: 15px;
+        &.current{
+            display: inherit;
+        }
+    }
 }
 
 #frontend-importer{

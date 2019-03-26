@@ -2,18 +2,24 @@
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_preset();
 ?>
+<div id="wpsstm-importer">
+    <ul id="wpsstm-importer-tabs">
+        <li><a href="#wpsstm-importer-step-feed-url"><?php _e('Feed URL','wpsstm');?></a></li>
+        <li><a href="#wpsstm-importer-step-tracks"><?php _e('Tracks','wpsstm');?></a></li>
+        <li><a href="#wpsstm-importer-step-single-track"><?php _e('Details','wpsstm');?></a></li>
+        <li><a href="#wpsstm-importer-step-options"><?php _e('Options','wpsstm');?></a></li>
+    </ul>
 
-<!--remote url-->
-<div class="wpsstm-importer-section">
-    <h3 class="wpsstm-importer-section-label"><?php _e('Remote URL','wpsstm');?></h3>
-    <div>
-
-        <input type="text" name="wpsstm_wizard[feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Type something or enter a tracklist URL','wpsstm');?>" />
+    <!--remote url-->
+    <div id="wpsstm-importer-step-feed-url" class="wpsstm-importer-section">
+        <h3 class="wpsstm-importer-section-label"><?php _e('Feed URL','wpsstm');?></h3>
+        <div>
+            <input type="text" name="wpsstm_wizard[feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Type something or enter a tracklist URL','wpsstm');?>" />
+        </div>
     </div>
-</div>
-<div class="wpsstm-advanced-importer">
+    
     <!--track-->
-    <div class="wpsstm-importer-section">
+    <div id="wpsstm-importer-step-tracks" class="wpsstm-importer-section wpsstm-importer-section-advanced">
         <h3 class="wpsstm-importer-section-label"><?php _e('Tracks','wpsstm');?></h3>
         <!--tracks selector-->
         <div class="wpsstm-importer-row">
@@ -60,7 +66,7 @@ $wpsstm_tracklist->populate_preset();
     </div>
 
     <!--track details-->
-    <div class="wpsstm-importer-section">
+    <div id="wpsstm-importer-step-single-track" class="wpsstm-importer-section  wpsstm-importer-section-advanced">
         <div class="wpsstm-importer-section-label">
             <h3><?php _e('Track details','wpsstm');?></h3>
             <small>
@@ -76,30 +82,39 @@ $wpsstm_tracklist->populate_preset();
                 ?>
             </small>
         </div>
-        <div class="wpsstm-importer-row">
-            <h4 class="wpsstm-importer-row-label"><?php _e('Artist Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_artist');?></div>
-        </div>
-        <div class="wpsstm-importer-row">
-            <h4 class="wpsstm-importer-row-label"><?php _e('Title Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_title');?></div>
-        </div>
-        <div class="wpsstm-importer-row">
-            <h4 class="wpsstm-importer-row-label"><?php _e('Album Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_album');?></div>
-        </div>
-        <div class="wpsstm-importer-row">
-            <h4 class="wpsstm-importer-row-label"><?php _e('Image Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_image');?></div>
-        </div>
-        <div class="wpsstm-importer-row">
-            <h4 class="wpsstm-importer-row-label"><?php _e('Source URLs Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_source_urls');?></div>
+        <div id="wpsstm-single-track-setup">
+            <ul id="wpsstm-single-track-tabs">
+                <li><a href="#wpsstm-importer-single-track-artist"><?php _e('Artist','wpsstm');?></a></li>
+                <li><a href="#wpsstm-importer-single-track-title"><?php _e('Title','wpsstm');?></a></li>
+                <li><a href="#wpsstm-importer-single-track-album"><?php _e('Album','wpsstm');?></a></li>
+                <li><a href="#wpsstm-importer-single-track-image"><?php _e('Image','wpsstm');?></a></li>
+                <li><a href="#wpsstm-importer-single-track-sources"><?php _e('Sources','wpsstm');?></a></li>
+            </ul>
+            <div id="wpsstm-importer-single-track-artist" class="wpsstm-importer-row">
+                <h4 class="wpsstm-importer-row-label"><?php _e('Artist Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+                <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_artist');?></div>
+            </div>
+            <div id="wpsstm-importer-single-track-title" class="wpsstm-importer-row">
+                <h4 class="wpsstm-importer-row-label"><?php _e('Title Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+                <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_title');?></div>
+            </div>
+            <div id="wpsstm-importer-single-track-album" class="wpsstm-importer-row">
+                <h4 class="wpsstm-importer-row-label"><?php _e('Album Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+                <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_album');?></div>
+            </div>
+            <div id="wpsstm-importer-single-track-image" class="wpsstm-importer-row">
+                <h4 class="wpsstm-importer-row-label"><?php _e('Image Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+                <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_image');?></div>
+            </div>
+            <div id="wpsstm-importer-single-track-sources" class="wpsstm-importer-row">
+                <h4 class="wpsstm-importer-row-label"><?php _e('Source URLs Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+                <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_source_urls');?></div>
+            </div>
         </div>
     </div>
-
+    
     <!--options-->
-    <div class="wpsstm-importer-section">
+    <div id="wpsstm-importer-step-options" class="wpsstm-importer-section wpsstm-importer-section-advanced">
         <div class="wpsstm-importer-section-label">
             <h3><?php _e('Tracklist options','wpsstm');?></h3>
         </div>
@@ -129,7 +144,7 @@ $wpsstm_tracklist->populate_preset();
             </div>
         </div>
     </div>
+    <?php
+    wp_nonce_field( 'wpsstm_tracklist_importer_meta_box', 'wpsstm_tracklist_importer_meta_box_nonce' );
+    ?>
 </div>
-<?php
-wp_nonce_field( 'wpsstm_tracklist_importer_meta_box', 'wpsstm_tracklist_importer_meta_box_nonce' );
-?>

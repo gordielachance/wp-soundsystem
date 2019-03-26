@@ -1,6 +1,11 @@
 var $ = jQuery.noConflict();
 
 $( document ).ready(function() {
+    
+    /* Backend */
+    $("#wpsstm-importer").tabs();
+    $("#wpsstm-single-track-setup").tabs();
+    
     /*
     advanced selectors
     */

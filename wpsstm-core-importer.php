@@ -35,15 +35,18 @@ class WPSSTM_Core_Importer{
 
     function importer_register_scripts_styles(){
         
-        // JS
-        wp_register_script( 'wpsstm-importer', wpsstm()->plugin_url . '_inc/js/wpsstm-importer.js',array('jquery'),wpsstm()->version);
+        $wp_scripts = wp_scripts();
         
+        // JS
+        wp_register_script( 'wpsstm-importer', wpsstm()->plugin_url . '_inc/js/wpsstm-importer.js',array('jquery','jquery-ui-tabs'),wpsstm()->version);
+
         //CSS
         wp_register_style( 'wpsstm-importer', wpsstm()->plugin_url . '_inc/css/wpsstm-importer.css',null,wpsstm()->version );
-        
-        ///
 
-        wp_enqueue_script('wpsstm-importer');
+        ///
+        if ( is_admin() ){
+            wp_enqueue_script('wpsstm-importer');
+        }
         wp_enqueue_style('wpsstm-importer');
     }
 
@@ -88,7 +91,7 @@ class WPSSTM_Core_Importer{
         
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
 
-        $success = self::save_wizard($tracklist,$data);
+        $success = self::save_importer($tracklist,$data);
 
     }
 
@@ -328,7 +331,7 @@ class WPSSTM_Core_Importer{
         
     }
 
-    static private function save_wizard(WPSSTM_Post_Tracklist $tracklist,$wizard_data){
+    static private function save_importer(WPSSTM_Post_Tracklist $tracklist,$wizard_data){
         $post_id = $tracklist->post_id;
         $post_type = get_post_type($post_id);
 
@@ -338,7 +341,7 @@ class WPSSTM_Core_Importer{
         
         //settings
         $db_settings = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
-        $wizard_data = self::sanitize_wizard_settings($wizard_data);
+        $wizard_data = self::sanitize_importer_settings($wizard_data);
 
         //feed URL
         $feed_url = wpsstm_get_array_value('feed_url',$wizard_data);
@@ -373,7 +376,7 @@ class WPSSTM_Core_Importer{
      * Sanitize wizard data
      */
     
-    static function sanitize_wizard_settings($input){
+    static function sanitize_importer_settings($input){
 
         $new_input = array();
 
@@ -422,13 +425,17 @@ class WPSSTM_Core_Importer{
         return $new_input;
     }
     
+    /*
+    Feedback
+    */
     
-    function feedback_data_type_callback(){
+    
+    static function feedback_data_type_callback(){
         global $wpsstm_tracklist;
 
         $output = "—";
 
-        if ( $wpsstm_tracklist->response_type ){
+        if ( $wpsstm_tracklist->preset->response_type ){
             $output = $wpsstm_tracklist->response_type;
         }
         
@@ -436,12 +443,12 @@ class WPSSTM_Core_Importer{
 
     }
 
-    function feedback_source_content_callback(){
+    static function feedback_source_content_callback(){
         global $wpsstm_tracklist;
 
         $output = "—";
 
-        if ( $body_node = $wpsstm_tracklist->body_node ){
+        if ( $body_node = $wpsstm_tracklist->preset->body_node ){
             
             $content = $body_node->html();
 
@@ -458,13 +465,13 @@ class WPSSTM_Core_Importer{
 
     }
 
-    function feedback_tracks_callback(){
+    static function feedback_tracks_callback(){
         global $wpsstm_tracklist;
 
         $output = "—"; //none
         $tracks_output = array();
-        
-        if ( $track_nodes = $wpsstm_tracklist->track_nodes ){
+
+        if ( $track_nodes = $wpsstm_tracklist->preset->track_nodes ){
 
             foreach ($track_nodes as $single_track_node){
                 
