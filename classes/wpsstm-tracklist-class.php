@@ -1032,7 +1032,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
             foreach($user_ids as $user_id){
                 $user_info = get_userdata($user_id);
-                $links[] = sprintf('<a href="%s" target="_blank">%s</a>',get_author_posts_url($user_id),$user_info->user_login);
+                $links[] = sprintf('<a href="%s" target="_blank">%s</a>',get_author_posts_url($user_id),$user_info->user_nicename);
             }
             $output = implode(', ',$links);
         }

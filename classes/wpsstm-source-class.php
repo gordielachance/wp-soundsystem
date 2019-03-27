@@ -275,7 +275,7 @@ class WPSSTM_Source{
 
         if ($can_delete_source){
             $actions['trash'] = array(
-                'text' =>       __('Trash', 'wpsstm'),
+                'text' =>       __('Trash'),
                 'desc' =>       __('Trash this source','wpsstm'),
                 'href' =>       $this->get_source_action_url('trash'),
             );
