@@ -461,7 +461,7 @@ class WPSSTM_LastFM{
         }else{
 
             if ($do_enable){
-                delete_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name );
+                update_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_enabled_meta_name, true );
                 $connected = ( $this->lastfm_user->is_user_connected() === true );
                 if (!$connected){
                     $result['success'] = false;
@@ -471,7 +471,7 @@ class WPSSTM_LastFM{
                
             }else{
                 $result['success'] = true;
-                update_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_disabled_meta_name, true );
+                delete_user_option( $user_id, WPSSTM_LastFM_User::$lastfm_user_scrobbler_enabled_meta_name );
             }
         }
         
@@ -699,7 +699,7 @@ class WPSSTM_LastFM_User{
     private $is_user_api_logged = null;
     var $user_auth = null;
     
-    static $lastfm_user_scrobbler_disabled_meta_name = 'wpsstm_scrobbler_disabled';
+    static $lastfm_user_scrobbler_enabled_meta_name = 'wpsstm_scrobbler_enabled';
     
     function __construct($user_id = null){
 
@@ -724,9 +724,9 @@ class WPSSTM_LastFM_User{
         $can_api = $wpsstm_lastfm->can_lastfm_api();
         if ( !$can_api ) return false;
         
-        $service_disabled = get_user_option( self::$lastfm_user_scrobbler_disabled_meta_name, $this->user_id );
+        $enabled = get_user_option( self::$lastfm_user_scrobbler_enabled_meta_name, $this->user_id );
 
-        return !$service_disabled;
+        return $enabled;
     }
     
     public function is_user_connected(){
