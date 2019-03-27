@@ -76,25 +76,24 @@ class WPSSTM_LastFM{
     function artist_bang_to_lastfm_url($url){
         $pattern = '~^artist:([^:]+)(?::([^:]+))?~i';
         preg_match($pattern, $url, $matches);
+        
         $artist = isset($matches[1]) ? $matches[1] : null;
         $artist = urlencode($artist);
-        $subpage = isset($matches[2]) ? $matches[2] : 'tracks';
 
-        if ( $artist ){
-            $url = sprintf('https://www.last.fm/music/%s',$artist);
-            if ($subpage){
-                switch($subpage){
-                    
-                    case 'similar':
-                        $url = sprintf('https://www.last.fm/player/station/music/%s',$artist);
-                    break;
-                        
-                    default:
-                        $url = trailingslashit($url) . '+' . $subpage;
-                    break;
-                }
-                
-            }
+        if ( !$artist ) return $url;
+        $url = sprintf('https://www.last.fm/music/%s',$artist);
+        
+        $subpage = isset($matches[2]) ? $matches[2] : 'tracks';
+        
+        switch($subpage){
+
+            case 'similar':
+                $url = sprintf('https://www.last.fm/player/station/music/%s',$artist);
+            break;
+
+            default:
+                $url = trailingslashit($url) . '+' . $subpage;
+            break;
         }
 
         return $url;
