@@ -6,20 +6,24 @@ class WPSSTM_Core_Live_Playlists{
 
     function __construct() {
         
-        wpsstm()->tracklist_post_types[] = 'wpsstm_live_playlist';
-
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array('WPSSTM_Core_Tracklists','tracks_count_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array('WPSSTM_Core_Tracklists','favorited_tracklist_column_register') );
-        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array('WPSSTM_Core_Tracklists','tracklists_columns_content') );
-
-        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_live_playlist' ));
-        add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
-
-        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
-
-        add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
+        if ( ( wpsstm()->can_radios() === true ) && wpsstm()->get_options('radios_enabled') ){
         
-        add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
+            wpsstm()->tracklist_post_types[] = 'wpsstm_live_playlist';
+
+            add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array('WPSSTM_Core_Tracklists','tracks_count_column_register') );
+            add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array('WPSSTM_Core_Tracklists','favorited_tracklist_column_register') );
+            add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array('WPSSTM_Core_Tracklists','tracklists_columns_content') );
+
+            add_action( 'wpsstm_init_post_types', array($this,'register_post_type_live_playlist' ));
+            add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
+
+            add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
+
+            add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
+
+            add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
+            
+        }
 
     }
 

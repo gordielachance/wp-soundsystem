@@ -132,15 +132,13 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-user.php';
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';
         require $this->plugin_dir . 'wpsstm-core-api.php';
+        require $this->plugin_dir . 'classes/wpsstm-music-details.php';
 
         if ( WPSSTM_Core_API::can_wpsstmapi() === true ){
-            require $this->plugin_dir . 'classes/wpsstm-music-details.php';
             require $this->plugin_dir . 'wpsstm-core-importer.php';
         }
-        if ( ( wpsstm()->can_radios() === true ) && $this->get_options('radios_enabled') ){
-            require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
-        }
 
+        require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-source-class.php';
