@@ -88,7 +88,7 @@ class WPSSTM_LastFM{
         switch($subpage){
 
             case 'similar':
-                $url = sprintf('https://www.last.fm/player/station/music/%s',$artist);
+                $url = sprintf('lastfm:station:music:%s:similar',$artist);
             break;
 
             default:
@@ -108,9 +108,7 @@ class WPSSTM_LastFM{
         if ( ( $page == 'music' )  && $artist ){
             $url = sprintf('https://www.last.fm/player/station/music/%s',$artist);
         }
-        
-        wpsstm()->debug_log($url,"lastfm_station_artist_bang_to_url");
-        
+
         return $url;
     }
     function lastfm_station_user_bang_to_url($url){
@@ -132,10 +130,10 @@ class WPSSTM_LastFM{
 
     function register_lastfm_presets($presets){
 
-        $presets[] = new WPSSTM_LastFM_Music_URL_Preset();
-        $presets[] = new WPSSTM_LastFM_User_URL_Preset();
         $presets[] = new WPSSTM_LastFM_User_Station_Preset();
         $presets[] = new WPSSTM_LastFM_Music_Station_Preset();
+        $presets[] = new WPSSTM_LastFM_Music_URL_Preset();
+        $presets[] = new WPSSTM_LastFM_User_URL_Preset();
 
         return $presets;
     }
@@ -843,7 +841,7 @@ class WPSSTM_LastFM_User{
         }elseif ($api_metas){
             //TOUFIX is this at the right place ?
             delete_user_meta( $this->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name );
-            $this->debug_log("***deleted lastfm user api metas");
+            $this->debug_log("deleted lastfm user api metas");
         }
     }
     
@@ -1010,7 +1008,7 @@ class WPSSTM_LastFM_Music_URL_Preset extends WPSSTM_LastFM_URL_Preset{
 
     function init_url($url){
         $this->artist_slug = self::get_artist_slug($url);
-        
+
         if ($this->artist_slug){
             
             $this->artist_page = self::get_artist_page($url);
@@ -1148,8 +1146,7 @@ class WPSSTM_LastFM_Music_Station_Preset extends WPSSTM_LastFM_Station_Preset{
         
         $this->station_type = self::get_station_type($url);
         $this->artist_slug = self::get_artist_slug($url);
-        
-        return ( ($this->station_type == 'music') & $this->artist_slug );
+        return ( ($this->station_type == 'music') && $this->artist_slug );
 
     }
 
