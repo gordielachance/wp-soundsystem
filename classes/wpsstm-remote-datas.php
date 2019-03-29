@@ -598,20 +598,19 @@ class WPSSTM_Remote_Tracklist{
             
             //regex pattern
             if ( $selector_regex ){
-                $pattern = $selector_regex;
-            }
 
-            if($pattern) {
-
-                $pattern = sprintf('~%s~m',$pattern);
+                $pattern = sprintf('~%s~m',$selector_regex);
                 preg_match($pattern, $string, $matches);
 
                 $matches = array_filter($matches);
                 $matches = array_values($matches);
+                $match = (isset($matches[1])) ? $matches[1] : null;
 
-                if (isset($matches[1])){
-                    $string = strip_tags($matches[1]);
+                if ($match){
+                    $string = strip_tags($match);
                 }
+                
+                //wpsstm()->debug_log(array('selector'=>$selectors,'pattern'=>$pattern,'input'=>$string,'match'=>(bool)$match),"parse node (regex)");
 
             }
 
