@@ -1156,7 +1156,9 @@ class WPSSTM_Tracklist{
             $add_tracks[] = $track;
         }
 
+        $add_tracks = apply_filters('wpsstm_input_tracks',$add_tracks,$this);
         $new_tracks = $this->validate_tracks($add_tracks);
+        
         $this->tracks = array_merge($this->tracks,$new_tracks);
         $this->track_count = count($this->tracks);
         

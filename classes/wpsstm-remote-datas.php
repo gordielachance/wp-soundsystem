@@ -195,7 +195,7 @@ class WPSSTM_Remote_Tracklist{
         //tracks
         $tracks = $this->parse_track_nodes();
         $this->remote_log(count($tracks),'found tracks' );
-        return $tracks;
+        return apply_filters('wpsstm_url_tracks',$tracks,$this->remote_request_url,$this);
 
     }
 
