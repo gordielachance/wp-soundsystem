@@ -599,7 +599,7 @@ class WPSSTM_Remote_Tracklist{
             //regex pattern
             if ( $selector_regex ){
 
-                $pattern = sprintf('~%s~m',$selector_regex);
+                $pattern = sprintf('~%s~mi',$selector_regex);
                 preg_match($pattern, $string, $matches);
 
                 $matches = array_filter($matches);
@@ -610,7 +610,7 @@ class WPSSTM_Remote_Tracklist{
                     $string = strip_tags($match);
                 }
                 
-                //wpsstm()->debug_log(array('selector'=>$selectors,'pattern'=>$pattern,'input'=>$string,'match'=>(bool)$match),"parse node (regex)");
+                wpsstm()->debug_log(array('selector'=>$selectors,'pattern'=>$pattern,'input'=>$string,'match'=>(bool)$match),"parse node (regex)");
 
             }
 
