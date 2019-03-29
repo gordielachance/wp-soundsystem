@@ -13,7 +13,7 @@ if ($is_debug){
 ?>
 <div id="wpsstm-importer">
     <ul id="wpsstm-importer-tabs">
-        <li><a href="#wpsstm-importer-step-feed-url"><?php _e('Feed URL','wpsstm');?></a></li>
+        <li><a href="#wpsstm-importer-step-feed-url"><?php _e('URLs','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-tracks"><?php _e('Tracks','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-single-track"><?php _e('Details','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-options"><?php _e('Options','wpsstm');?></a></li>
@@ -24,9 +24,13 @@ if ($is_debug){
     <!--remote url-->
     <div id="wpsstm-importer-step-feed-url" class="wpsstm-importer-section">
         <h3 class="wpsstm-importer-section-label"><?php _e('Feed URL','wpsstm');?></h3>
-        <div>
+        <p>
             <input type="text" name="wpsstm_wizard[feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Type something or enter a tracklist URL','wpsstm');?>" />
-        </div>
+        </p>
+        <h3 class="wpsstm-importer-section-label"><?php _e('Website URL','wpsstm');?></h3>
+        <p>
+            <input type="text" name="wpsstm_wizard[website_url]" value="<?php echo $wpsstm_tracklist->website_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e("If the feed URL isn't readable by humans, you can set an alternative URL here.",'wpsstm');?>" />
+        </p>
     </div>
     
     <!--track-->

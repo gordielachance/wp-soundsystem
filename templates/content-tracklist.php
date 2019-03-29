@@ -53,19 +53,23 @@ $notice = $wpsstm_tracklist->importer_notice();
             </p>
             <?php
                 //original link
-                if ( ($wpsstm_tracklist->tracklist_type == 'live') && ($wpsstm_tracklist_url = $wpsstm_tracklist->feed_url) ){
+                if ($wpsstm_tracklist->tracklist_type == 'live'){
 
-                    //$wpsstm_tracklist_url = substr($wpsstm_tracklist_url, 0, strrpos($wpsstm_tracklist_url, ' ')) . " ...";
+                    $wpsstm_tracklist_url = ($wpsstm_tracklist->website_url) ? $wpsstm_tracklist->website_url : $wpsstm_tracklist->feed_url;
+                    
+                    if ($wpsstm_tracklist_url){
+                        ?>
+                        <p>
+                            <a class="wpsstm-live-tracklist-link" target="_blank" href="<?php echo $wpsstm_tracklist_url;?>">
+                                <i class="fa fa-link" aria-hidden="true"></i> 
+                                <?php echo wpsstm_shorten_text($wpsstm_tracklist_url);?>
+                            </a>
+                        </p>
 
-                    ?>
-                    <p>
-                        <a class="wpsstm-live-tracklist-link" target="_blank" href="<?php echo $wpsstm_tracklist_url;?>">
-                            <i class="fa fa-link" aria-hidden="true"></i> 
-                            <?php echo wpsstm_shorten_text($wpsstm_tracklist_url);?>
-                        </a>
-                    </p>
+                        <?php
+                    }
 
-                    <?php
+
                 }
 
                 //actions

@@ -21,10 +21,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $paged_var = 'tracklist_page';
 
     //live
-    static $feed_url_meta_name = '_wpsstm_scraper_url';
-    private static $remote_title_meta_name = 'wpsstm_remote_title';
     static $scraper_meta_name = '_wpsstm_scraper_options';
+    static $feed_url_meta_name = '_wpsstm_scraper_url';
+    static $website_url_meta_name = '_wpsstm_website_url';
+    private static $remote_title_meta_name = 'wpsstm_remote_title';
     public $feed_url = null;
+    public $website_url = null;
     
     var $preset;
     
@@ -113,7 +115,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         //live
-        $this->feed_url = get_post_meta($this->post_id, self::$feed_url_meta_name, true );
+        $this->feed_url =       get_post_meta($this->post_id, self::$feed_url_meta_name, true );
+        $this->website_url =    get_post_meta($this->post_id, self::$website_url_meta_name, true );
 
         //location
         $this->location = get_permalink($this->post_id);

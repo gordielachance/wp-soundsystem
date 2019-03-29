@@ -357,6 +357,16 @@ class WPSSTM_Core_Importer{
         }else{
             delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name);
         }
+        
+        //website URL
+        $website_url = wpsstm_get_array_value('website_url',$wizard_data);
+        
+        if ($website_url){
+            update_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name,$website_url);
+            unset($wizard_data['website_url']);//we don't want to save it in the scraper settings
+        }else{
+            delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name);
+        }
 
         //settings have been updated, clear tracklist cache
         if ($db_settings != $wizard_data){
@@ -387,10 +397,9 @@ class WPSSTM_Core_Importer{
 
         //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
 
-        //feed URL
-        if ( isset($input['feed_url']) ){
-            $new_input['feed_url'] = trim($input['feed_url']);
-        }
+        
+        $new_input['feed_url'] = isset($input['feed_url']) ? trim($input['feed_url']) : null;
+        $new_input['website_url'] = isset($input['website_url']) ? trim($input['website_url']) : null;
         
         //cache
         if ( isset($input['remote_delay_min']) && ctype_digit($input['remote_delay_min']) ){
