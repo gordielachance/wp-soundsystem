@@ -191,6 +191,14 @@ class WP_SoundSystem {
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
         
+        /*
+        URGENT
+        WP breaks our shortcode HTML output because wraps with <p/>.
+        Quite of hackish/hardcore - we should be able to remove it for OUR shortcodes only.
+        https://stackoverflow.com/questions/5940854/disable-automatic-formatting-inside-wordpress-shortcodes
+        */
+        remove_filter( 'the_content', 'wpautop' );
+        //add_filter( 'the_content', array($this,'remove_shortcodes_autop'),99);
         
 
         do_action('wpsstm_init');
@@ -711,6 +719,16 @@ class WP_SoundSystem {
     */
     public function get_available_detail_engines(){
         return apply_filters('wpsstm_get_music_detail_engines',array());
+    }
+    
+    function remove_shortcodes_autop($content){
+        $content = str_replace('<p><wpsstm-track>', '<wpsstm-track>', $content);
+        $content = str_replace('</wpsstm-track></p>', '</wpsstm-track>', $content);
+        
+        $content = str_replace('<p><wpsstm-tracklist>', '<wpsstm-tracklist>', $content);
+        $content = str_replace('</wpsstm-tracklist></p>', '</wpsstm-tracklist>', $content);
+        
+        return $content;
     }
 
 }
