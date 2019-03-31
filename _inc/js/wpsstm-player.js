@@ -301,6 +301,8 @@ class WpsstmPlayer extends HTMLElement{
 
         //post track
         track.queueNode = queueTrack;
+        
+        player.refresh_queue_tracks_positions();
 
         return queueTrack;
         
@@ -482,6 +484,15 @@ class WpsstmPlayer extends HTMLElement{
         player.current_track = track;
         player.render_queue_controls();
         track.get_instances().addClass('track-active');
+    }
+    
+    refresh_queue_tracks_positions(){
+        var player = this;
+        var all_rows = $(player).find( 'wpsstm-track' );
+        jQuery.each( all_rows, function( key, value ) {
+            var position = jQuery(this).find('.wpsstm-track-position [itemprop="position"]');
+            position.text(key + 1);
+        });
     }
 
     render_queue_controls(){
