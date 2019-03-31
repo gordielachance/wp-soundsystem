@@ -971,7 +971,7 @@ class WPSSTM_Core_Tracks{
     //TOUFIX TOUCHECK
     function shortcode_track( $atts ) {
         global $post;
-        global $wpsstm_tracklist;
+        global $wpsstm_track;
 
         $output = null;
 
@@ -987,12 +987,12 @@ class WPSSTM_Core_Tracks{
         if ( $post_type !== wpsstm()->post_type_track ) return;
         
         //single track tracklist
-        $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
-        $track = new WPSSTM_Track( $atts['post_id'] );
-        $wpsstm_tracklist->add_tracks($track);
-        $output = $wpsstm_tracklist->get_tracklist_html();
-
-        return $output;
+        $wpsstm_track = new WPSSTM_Track( $atts['post_id'] );
+        
+        ob_start();
+        wpsstm_locate_template( 'content-track.php', true, false );
+        $track_content = ob_get_clean();
+        return sprintf('<div class="wpsstm-standalone-track">%s</div>',$track_content);
 
     }
     

@@ -64,7 +64,7 @@ $( document ).ready(function() {
         });
     }
 
-    $('wpsstm-tracklist').each(function(index,tracklist) {
+    $('wpsstm-tracklist,.wpsstm-standalone-track').each(function(index,tracklist) {
         
         tracklist.setAttribute('id','wpsstm-tracklist-'+index);
 
