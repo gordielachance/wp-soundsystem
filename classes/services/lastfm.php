@@ -370,19 +370,13 @@ class WPSSTM_LastFM{
         try{
             $basic_auth = new AuthApi('setsession', $auth_args);
         }catch(Exception $e){
-            $basic_auth = self::handle_api_exception($e);
+            return new WP_Error( $e->getCode(), $e->getMessage() );
         }
 
         return $basic_auth;
 
     }
 
-    public static function handle_api_exception($e){
-        $message = sprintf(__('Last.fm PHP Api Error [%s]: %s','wpsstm'),$e->getCode(),$e->getMessage());
-        wpsstm()->debug_log($message);
-        return new WP_Error( 'lastfm_php_api', new WP_Error( 'lastfm_php_api',$message,$e->getCode() ) );
-    }
-    
     public function search_artists($input){
         $auth = $this->get_basic_api_auth();
 
@@ -394,7 +388,7 @@ class WPSSTM_LastFM{
             $artist_api = new ArtistApi($auth);
             $results = $artist_api->search(array("artist" => $input));
         }catch(Exception $e){
-            return self::handle_api_exception($e);
+            return new WP_Error( $e->getCode(), $e->getMessage() );
         }
         
         return $results;
@@ -412,7 +406,7 @@ class WPSSTM_LastFM{
             $artistInfo = $artist_api->getInfo(array("artist" => $artist));
             $results = $artistInfo['bio'];
         }catch(Exception $e){
-            return self::handle_api_exception($e);
+            return new WP_Error( $e->getCode(), $e->getMessage() );
         }
         
         return $results;
@@ -434,7 +428,7 @@ class WPSSTM_LastFM{
                 )
             );
         }catch(Exception $e){
-            return self::handle_api_exception($e);
+            return new WP_Error( $e->getCode(), $e->getMessage() );
         }
         
         return $results;
@@ -796,7 +790,7 @@ class WPSSTM_LastFM_User{
             $this->debug_log($usermetas,"WPSSTM_LastFM_User::set_lastfm_user_api_metas()");
 
         }catch(Exception $e){
-            return WPSSTM_LastFM::handle_api_exception($e);
+            return new WP_Error( $e->getCode(), $e->getMessage() );
         }
         
         if ( $usermetas && !is_wp_error($usermetas) ){
@@ -832,7 +826,7 @@ class WPSSTM_LastFM_User{
             try{
                 $user_auth = new AuthApi('setsession', $auth_args);
             }catch(Exception $e){
-                WPSSTM_LastFM::handle_api_exception($e);
+                return new WP_Error( $e->getCode(), $e->getMessage() );
             }
         }
         
@@ -902,7 +896,7 @@ class WPSSTM_LastFM_User{
                 $results = $track_api->unlove($api_args);
             }
         }catch(Exception $e){
-            return WPSSTM_LastFM::handle_api_exception($e);
+            return new WP_Error( $e->getCode(), $e->getMessage() );
         }
         
         $debug_args = $api_args;
@@ -936,7 +930,7 @@ class WPSSTM_LastFM_User{
             $track_api = new TrackApi($this->user_auth);
             $results = $track_api->updateNowPlaying($api_args);
         }catch(Exception $e){
-            return WPSSTM_LastFM::handle_api_exception($e);
+            return new WP_Error( $e->getCode(), $e->getMessage() );
         }
         
         return $results;
@@ -972,7 +966,7 @@ class WPSSTM_LastFM_User{
             $track_api = new TrackApi($this->user_auth);
             $results = $track_api->scrobble($api_args);
         }catch(Exception $e){
-            return WPSSTM_LastFM::handle_api_exception($e);
+            return new WP_Error( $e->getCode(), $e->getMessage() );
         }
         
         return $results;
