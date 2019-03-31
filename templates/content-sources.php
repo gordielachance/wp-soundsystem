@@ -8,7 +8,7 @@ if ( !wpsstm()->get_options('ajax_load_tracklists') && !$wpsstm_track->have_sour
 }
 
 if ( $wpsstm_track->have_sources() ) { ?>
-    <ul class="wpsstm-track-sources-list">
+    <div class="wpsstm-track-sources-list">
         <?php
         while ( $wpsstm_track->have_sources() ) {
             
@@ -16,7 +16,7 @@ if ( $wpsstm_track->have_sources() ) { ?>
             global $wpsstm_source;
             ?>
             <wpsstm-source <?php echo wpsstm_get_html_attr($wpsstm_source->get_single_source_attributes());?> >
-                <i class="wpsstm-source-icon wpsstm-icon" href="#"></i>
+                <i class="wpsstm-source-icon wpsstm-icon"></i>
                 <?php
                 if ( $actions = $wpsstm_source->get_source_links('page') ){
                     echo get_actions_list($actions,'source');
@@ -28,6 +28,6 @@ if ( $wpsstm_track->have_sources() ) { ?>
 
         }
         ?>
-    </ul>
+    </div>
     <?php 
 }

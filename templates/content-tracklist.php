@@ -98,7 +98,7 @@ $notice = $wpsstm_tracklist->importer_notice();
 
     if ( $wpsstm_tracklist->have_subtracks() ) {
     ?>
-        <ul class="wpsstm-tracks-list">
+        <div class="wpsstm-tracks-list">
             <?php
 
             while ( $wpsstm_tracklist->have_subtracks() ) {
@@ -107,7 +107,7 @@ $notice = $wpsstm_tracklist->importer_notice();
                 wpsstm_locate_template( 'content-track.php', true, false );
             }
             ?>
-       </ul>
+       </div>
     <?php
     }
     
@@ -117,7 +117,7 @@ $notice = $wpsstm_tracklist->importer_notice();
     
     if ( $wpsstm_tracklist->user_can_reorder_tracks() ){
         ?>
-        <div class="wpsstm-new-subtrack" action="<?php echo $wpsstm_tracklist->get_tracklist_action_url('queue');?>" method="post">
+        <div class="wpsstm-new-subtrack">
             <label><?php _e('New track','wpsstm');?></label>
             <p class="wpsstm-new-subtrack-fields">
             <input type="text" name="wpsstm_track_data[artist]" placeholder="<?php _e('Artist','wpsstm');?>"/>
