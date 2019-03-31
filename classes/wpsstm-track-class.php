@@ -658,6 +658,7 @@ class WPSSTM_Track{
     function autosource(){
 
         $new_sources = array();
+        $sources_auto = array();
 
         if ( !wpsstm()->get_options('autosource') ){
             return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
@@ -672,12 +673,6 @@ class WPSSTM_Track{
 
         $valid = $this->validate_track();
         if ( is_wp_error($valid) ) return $valid;
-        
-        /*
-        Get sources automatically - services should be hooked here to fetch results.
-        */
-        
-        $sources_auto = array();
         
         /*
         Create community post if track does not exists yet, since we need to store some datas, including the autosource time.
@@ -699,17 +694,18 @@ class WPSSTM_Track{
         }
         
         /*
+        Hook filter here to add autosources (array)
+        */
+
+        $sources_auto = apply_filters('wpsstm_autosource_input',$sources_auto,$this);
+        if ( is_wp_error($sources_auto) ) return $sources_auto;
+        
+        /*
         save autosourced time so we won't query autosources again too soon
         */
         $now = current_time('timestamp');
         update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
         $this->did_autosource = true;
-        
-        /*
-        Hook filter here to add autosources (array)
-        */
-
-        $sources_auto = apply_filters('wpsstm_autosource_input',$sources_auto,$this);
 
         foreach((array)$sources_auto as $key=>$args){
             
