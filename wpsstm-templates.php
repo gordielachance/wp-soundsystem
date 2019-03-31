@@ -132,6 +132,8 @@ function get_actions_list($actions,$prefix){
             'href' =>                   $action['href'],
             'target' =>                 $action['target'],
         );
+        $link_attr = array_filter($link_attr);
+        
         $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$action['text']);
         $link = $action['link_before'].$link.$action['link_after'];
         
