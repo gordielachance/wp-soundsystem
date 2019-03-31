@@ -40,7 +40,7 @@ class WPSSTM_LastFM{
         
         add_action( 'init', array($this,'setup_lastfm_user') ); //TO FIX only if player is loaded ?
         add_action( 'wp', array($this,'after_app_auth') );
-        add_action('wp_head',array($this,'app_auth_notice'),11);
+        add_action( 'wp_head',array($this,'app_auth_notice'),11);
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
         
         add_filter('wpsstm_get_player_actions', array($this,'get_lastfm_actions'));
@@ -329,7 +329,7 @@ class WPSSTM_LastFM{
     Get the URL of the app authentification at last.fm.
     */
     
-    private function get_app_auth_url($redirect_url = null){
+    public function get_app_auth_url($redirect_url = null){
 
         if ( !$redirect_url ) $redirect_url = home_url();
         

@@ -244,6 +244,7 @@ class WpsstmSource extends HTMLElement{
         success.done(function(v) {
             player.tracksHistory.push(track);
             source.can_play = true;
+            //TOUFIX ajax --> +1 track play; user now playing...
         })
         success.fail(function() {
             source.can_play = false;

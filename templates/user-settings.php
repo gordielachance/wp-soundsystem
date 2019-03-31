@@ -1,5 +1,8 @@
 <?php
 global $wpsstm_lastfm;
+$enabled = $wpsstm_lastfm->lastfm_user->is_user_enabled();
+$connected = ( $wpsstm_lastfm->lastfm_user->is_user_connected() === true);
+
 /**
  * BuddyPress - Members Single Profile
  *
@@ -16,9 +19,8 @@ do_action( 'bp_before_member_settings_template' ); ?>
     
     <h2>Last.fm</h2>
     <?php
-    $connected = ( $wpsstm_lastfm->lastfm_user->is_user_connected() === true);
     if (!$connected){
-        $lastfm_auth_url = self::get_app_auth_url();
+        $lastfm_auth_url = $wpsstm_lastfm->get_app_auth_url();
         $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
         ?>
     
@@ -48,10 +50,7 @@ do_action( 'bp_before_member_settings_template' ); ?>
     }
     ?>
 	<label for="user-lastfm-scrobble">
-    <input type="checkbox" name="user-lastfm-scrobble" value="" <?php disabled(!$is_lastfm_auth);?>/> <?php _e('Scrobble tracks to Last.fm','wpsstm');?>
-    </label>
-	<label for="user-lastfm-love">
-    <input type="checkbox" name="user-lastfm-love" value="" <?php disabled(!$is_lastfm_auth);?>/> <?php _e('When a track is favorited, love it on  Last.fm too','wpsstm');?>
+    <input type="checkbox" name="user-lastfm-scrobble" value="on" <?php checked($enabled);?>/> <?php _e('Scrobble tracks to Last.fm','wpsstm');?>
     </label>
     
 	<div class="submit">
