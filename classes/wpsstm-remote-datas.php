@@ -610,7 +610,7 @@ class WPSSTM_Remote_Tracklist{
                     $string = strip_tags($match);
                 }
                 
-                wpsstm()->debug_log(array('selector'=>$selectors,'pattern'=>$pattern,'input'=>$string,'match'=>(bool)$match),"parse node (regex)");
+                //wpsstm()->debug_log(array('selector'=>$selectors,'pattern'=>$pattern,'input'=>$string,'match'=>(bool)$match),"parse node (regex)");
 
             }
 
