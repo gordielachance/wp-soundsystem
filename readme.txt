@@ -61,10 +61,12 @@ More advanced setups are also available, if you are somewhat familiar with [CSS 
 Our player uses of the [MediaElement.js](https://www.mediaelementjs.com) library, which is native in WordPress. It supports audio (& video) files, but also links from various services like Youtube or Soundcloud.
 It has been extended with various features built on top of it, like a tracks queue or a Last.fm scrobbler.
 
+= Social =
+
+**Last.fm**
 In addition of being able to scrobble on [Last.fm](https://www.last.fm/), every track favorited by a user connected to his account will also be loved on that service.
 
-= BuddyPress =
-
+**BuddyPress**
 Users profiles will get a new music section that lists the user favorite tracks, tracklists, and the ones he created. 
 It will also fire new *BuddyPress activity* items.
 
@@ -115,18 +117,18 @@ This plugin requires PHP Version 5.4 or later.
 
 == Frequently Asked Questions ==
 
-== How can I embed a track or a playlist in a post ? =
+== How can I embed a track or a playlist ? =
 
 Using shortcodes:
 
-`[wpsstm-track post_id="150"]`
-
 `[wpsstm-tracklist post_id="160"]`
+
+`[wpsstm-track post_id="150"]`
 
 Or directly with PHP functions:
 
 `<?php
-$tracklist = new WPSSTM_Post_Tracklist(); //optionally accepts a post_id as argument
+$tracklist = new WPSSTM_Post_Tracklist($post_id);
 echo $tracklist->get_tracklist_html();
 ?>`
 
@@ -147,15 +149,18 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= 2.5.8 =
-* fix url encoding & regexes for Last.fm presets
+= 2.5.9 =
 * tracklist expiration bugfix
 * improved importer and importer settings
 * importer debug GUI
 * bugfix populate sources/autosources
+* fix files dependencies when no API key
+* fix url encoding & regexes for Last.fm presets
 * fix last.fm importer
 * last.fm scrobbler disabled by default
-* fix files dependencies when no API key
+* abord autosource if 'wpsstm_autosource_input' returns an error
+* standalone track shortcode
+* more small fixes
 
 = 2.5.3 =
 * new class WPSSTM_Music_Data
