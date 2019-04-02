@@ -317,7 +317,7 @@ class WPSSTM_Core_Importer{
                                         '<p class="wpsstm-importer-selector-regex">
                                         <span>~</span>
                                         <input class="regex" name="%s[selectors][%s][regex]" type="text" value="%s" %s />
-                                        <span>~m</span>
+                                        <span>~mi</span>
                                         </p>',
                                         'wpsstm_wizard',
                                         $selector,
