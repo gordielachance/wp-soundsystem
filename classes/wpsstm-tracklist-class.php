@@ -47,8 +47,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $this->default_options = array(
             'autosource'                => ( wpsstm()->get_options('autosource') && $can_autosource ),
-            'tracks_strict'             => true, //requires a title AND an artist
-            'remote_delay_min'  => 15, //toufix broken if within the default options of WPSSTM_Remote_Tracklist
+            'remote_delay_min'          => 15, //toufix broken if within the default options of WPSSTM_Remote_Tracklist
         );
 
         $this->set_tracklist_pagination($pagination_args);
@@ -841,11 +840,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
     
-    function validate_subtrack(WPSSTM_Track $track,$strict = true){
+    function validate_subtrack(WPSSTM_Track $track){
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_missing_tracklist_id', __("Missing tracklist ID.",'wpsstm') );
         }
-        return $track->validate_track($strict);
+        return $track->validate_track();
     }
     
     function queue_track(WPSSTM_Track $track){
@@ -1172,12 +1171,11 @@ class WPSSTM_Tracklist{
 
         $valid_tracks = $rejected_tracks = array();
         $error_codes = array();
-        $use_strict = $this->get_options('tracks_strict');
         
         $pending_tracks = array_unique($tracks);
         
         foreach($pending_tracks as $track){
-            $valid = $track->validate_track($use_strict);
+            $valid = $track->validate_track();
             if ( is_wp_error($valid) ){
 
                 $error_codes[] = $valid->get_error_code();
