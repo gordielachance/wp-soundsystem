@@ -37,7 +37,7 @@ class WPSSTM_Core_Tracks{
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_community_view') );
 
-        //tracklist shortcode
+        //track shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
         
         /* manager */
@@ -967,32 +967,28 @@ class WPSSTM_Core_Tracks{
             update_post_meta( $post_id, self::$length_metakey, $value );
         }
     }
-    
-    //TOUFIX TOUCHECK
-    function shortcode_track( $atts ) {
-        global $post;
-        global $wpsstm_track;
 
+    function shortcode_track( $atts ) {
         $output = null;
 
         // Attributes
         $default = array(
-            'post_id'       => $post->ID 
+            'post_id'   => null,
+            'title'     => null,
+            'artist'    => null,
+            'album'     => null,
         );
         
         $atts = shortcode_atts($default,$atts);
-        $post_id = wpsstm_get_array_value('post_id',$atts);
-        $post_type = get_post_type($post_id);
-        
-        if ( $post_type !== wpsstm()->post_type_track ) return;
-        
-        //single track tracklist
-        $wpsstm_track = new WPSSTM_Track( $atts['post_id'] );
-        
-        ob_start();
-        wpsstm_locate_template( 'content-track.php', true, false );
-        $track_content = ob_get_clean();
-        return sprintf('<div class="wpsstm-standalone-track">%s</div>',$track_content);
+        $track = new WPSSTM_Track();
+        $track->from_array($atts);
+
+        if ( $track->validate_track() === true ){
+            $output = $track->get_track_html();
+            $output = sprintf('<div class="wpsstm-standalone-track">%s</div>',$output);
+        }
+
+        return $output;
 
     }
     
@@ -1023,8 +1019,7 @@ class WPSSTM_Core_Tracks{
     }
 
     function ajax_track_html(){
-        global $wpsstm_track;
-        
+
         $ajax_data = wp_unslash($_POST);
         $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
         $track = new WPSSTM_Track();
@@ -1038,13 +1033,7 @@ class WPSSTM_Core_Tracks{
             'track'     => $track->to_array(),
         );
         
-        //define global
-        $wpsstm_track = $track;
-
-        ob_start();
-        wpsstm_locate_template( 'content-track.php', true, false );
-        $updated_track = ob_get_clean();
-        $result['html'] = $updated_track;
+        $result['html'] = $track->get_track_html();
         $result['success'] = true;
 
         header('Content-type: application/json');

@@ -124,12 +124,18 @@ Using shortcodes:
 `[wpsstm-tracklist post_id="160"]`
 
 `[wpsstm-track post_id="150"]`
+`[wpsstm-track artist="Patrick Sébastien" album="Pochette surprise" title="Les Sardines"]`
 
 Or directly with PHP functions:
 
 `<?php
 $tracklist = new WPSSTM_Post_Tracklist($post_id);
 echo $tracklist->get_tracklist_html();
+?>`
+
+`<?php
+$track = new WPSSTM_Track($post_id);
+echo $track->get_track_html();
 ?>`
 
 ! There is currently a Wordpress bug that breaks our shortcodes.  See [the issue on Github](https://github.com/gordielachance/wp-soundsystem/issues/82)..

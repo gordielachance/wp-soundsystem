@@ -223,6 +223,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function get_tracklist_html(){
+        global $wpsstm_tracklist;
+        $old_tracklist = $wpsstm_tracklist; //store temp
+        $wpsstm_tracklist = $this;
 
         if ( wpsstm()->get_options('ajax_load_tracklists') && !wp_doing_ajax() ){
             $this->tracklist_log("force is_expired to FALSE (we'll rely on ajax to refresh the tracklist)");
@@ -232,6 +235,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         ob_start();
         wpsstm_locate_template( 'content-tracklist.php', true, false );
         $content = ob_get_clean();
+        
+        $wpsstm_tracklist = $old_tracklist; //restore global
         
         return $content;
 
