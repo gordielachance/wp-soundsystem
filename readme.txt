@@ -157,6 +157,9 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= XXX =
+* new radio.fr service
+
 = 2.6.0 =
 * tracklist expiration bugfix
 * improved importer and its settings
