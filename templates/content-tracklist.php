@@ -104,7 +104,7 @@ $notice = $wpsstm_tracklist->importer_notice();
             while ( $wpsstm_tracklist->have_subtracks() ) {
                 $wpsstm_tracklist->the_subtrack();
                 global $wpsstm_track;
-                wpsstm_locate_template( 'content-track.php', true, false );
+                echo $wpsstm_track->get_track_html();
             }
             ?>
        </div>

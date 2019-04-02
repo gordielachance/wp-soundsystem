@@ -124,6 +124,7 @@ Using shortcodes:
 `[wpsstm-tracklist post_id="160"]`
 
 `[wpsstm-track post_id="150"]`
+`[wpsstm-track artist="Patrick Sébastien" album="Pochette surprise" title="Les Sardines"]`
 
 Or directly with PHP functions:
 
@@ -131,6 +132,13 @@ Or directly with PHP functions:
 $tracklist = new WPSSTM_Post_Tracklist($post_id);
 echo $tracklist->get_tracklist_html();
 ?>`
+
+`<?php
+$track = new WPSSTM_Track($post_id);
+echo $track->get_track_html();
+?>`
+
+! There is currently a Wordpress bug that breaks our shortcodes.  See [the issue on Github](https://github.com/gordielachance/wp-soundsystem/issues/82)..
 
 = What is the community user ? =
 
@@ -149,18 +157,16 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= 2.5.9 =
+= 2.6.0 =
 * tracklist expiration bugfix
-* improved importer and importer settings
+* improved importer and its settings
+* improved shortcodes
 * importer debug GUI
 * bugfix populate sources/autosources
 * fix files dependencies when no API key
-* fix url encoding & regexes for Last.fm presets
-* fix last.fm importer
-* last.fm scrobbler disabled by default
+* Last.fm : fix url encoding / fix regexes / fix importer / scrobbler disabled by default
 * abord autosource if 'wpsstm_autosource_input' returns an error
-* standalone track shortcode
-* more small fixes
+* + various bug fixes
 
 = 2.5.3 =
 * new class WPSSTM_Music_Data

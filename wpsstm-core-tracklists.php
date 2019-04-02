@@ -98,19 +98,18 @@ class WPSSTM_Core_Tracklists{
     }
     
     function ajax_reload_tracklist(){
-        global $wpsstm_tracklist;
-        
+
         $ajax_data = wp_unslash($_POST);
         $post_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
-        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
-        $wpsstm_tracklist->is_expired = ($wpsstm_tracklist->tracklist_type == 'live' ); //force refresh, but only for live tracklists
-        $html = $wpsstm_tracklist->get_tracklist_html();
+        $tracklist = new WPSSTM_Post_Tracklist($post_id);
+        $tracklist->is_expired = ($tracklist->tracklist_type == 'live' ); //force refresh, but only for live tracklists
+        $html = $tracklist->get_tracklist_html();
 
         $result = array(
             'success' =>    true,
             'message' =>    null,
             'input' =>      $ajax_data,
-            'tracklist' =>  $wpsstm_tracklist->to_array(),
+            'tracklist' =>  $tracklist->to_array(),
             'html' =>       $html,
         ); 
 
@@ -247,23 +246,18 @@ class WPSSTM_Core_Tracklists{
     
     function shortcode_tracklist( $atts ) {
 
-        global $post;
-        global $wpsstm_tracklist;
         $output = null;
 
         // Attributes
         $default = array(
-            'post_id'       => $post->ID,
-            'max_rows'      => -1    
+            'post_id'       => null,
         );
         $atts = shortcode_atts($default,$atts);
 
         if ( ( $post_type = get_post_type($atts['post_id']) ) && in_array($post_type,wpsstm()->tracklist_post_types) ){ //check that the post exists
             
-            //set global $wpsstm_tracklist
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($atts['post_id']);
-            
-            $output = $wpsstm_tracklist->get_tracklist_html();
+            $tracklist = new WPSSTM_Post_Tracklist($atts['post_id']);
+            $output = $tracklist->get_tracklist_html();
         }
 
         return $output;

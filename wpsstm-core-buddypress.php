@@ -206,13 +206,10 @@ class WPSSTM_Core_BuddyPress{
     }
 
     function user_favorite_tracks_subnav_content(){
-        global $wpsstm_tracklist;
-        
-        //set global $wpsstm_tracklist
         $user_id = bp_displayed_user_id();
         $tracklist_id = WPSSTM_Core_User::get_user_favorites_id($user_id);
-        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-        echo $wpsstm_tracklist->get_tracklist_html();
+        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+        echo $tracklist->get_tracklist_html();
     }
     
     /*

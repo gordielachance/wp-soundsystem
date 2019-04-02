@@ -278,6 +278,20 @@ class WPSSTM_Track{
         return array_filter($output);
     }
     
+    function get_track_html(){
+        global $wpsstm_track;
+        $old_track = $wpsstm_track; //store temp
+        $wpsstm_track = $this;
+        
+        ob_start();
+        wpsstm_locate_template( 'content-track.php', true, false );
+        $content = ob_get_clean();
+        
+        $wpsstm_track = $old_track; //restore global
+        
+        return $content;
+    }
+    
     function validate_track($strict = true){
 
         if ($strict){

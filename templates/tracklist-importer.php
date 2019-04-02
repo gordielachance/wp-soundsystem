@@ -1,15 +1,6 @@
 <?php
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_preset();
-
-$is_debug = isset($_GET['wpsstm_tracklist_debug']);
-
-if ($is_debug){
-    $wpsstm_tracklist->is_expired = true;
-    $wpsstm_tracklist->populate_subtracks();
-}
-
-
 ?>
 <div id="wpsstm-importer">
     <ul id="wpsstm-importer-tabs">
@@ -24,12 +15,15 @@ if ($is_debug){
     <!--remote url-->
     <div id="wpsstm-importer-step-feed-url" class="wpsstm-importer-section">
         <h3 class="wpsstm-importer-section-label"><?php _e('Feed URL','wpsstm');?></h3>
+        <?php _e('URL where we could fetch the tracklist.  The data could be HTML, XML, XSPF, JSON,..','wpsstm');?>
         <p>
-            <input type="text" name="wpsstm_wizard[feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Type something or enter a tracklist URL','wpsstm');?>" />
+            <input type="text" name="wpsstm_wizard[feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a tracklist URL or type a bang (eg. artist:Gorillaz)','wpsstm');?>" />
         </p>
         <h3 class="wpsstm-importer-section-label"><?php _e('Website URL','wpsstm');?></h3>
+        <?php _e("URL of the link that will be displayed in the tracklist header.",'wpsstm');?><br/>
+        <?php _e("If empty, the Feed URL will be used : fill it when the feed URL points to raw datas.",'wpsstm');?>
         <p>
-            <input type="text" name="wpsstm_wizard[website_url]" value="<?php echo $wpsstm_tracklist->website_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e("If the feed URL isn't readable by humans, you can set an alternative URL here.",'wpsstm');?>" />
+            <input type="text" name="wpsstm_wizard[website_url]" value="<?php echo $wpsstm_tracklist->website_url;?>" class="wpsstm-fullwidth" />
         </p>
     </div>
     
@@ -167,9 +161,7 @@ if ($is_debug){
         <div class="wpsstm-importer-row">
         <?php
             $importer_tracklist = new WPSSTM_Post_Tracklist(get_the_ID());
-            $importer_tracklist->is_expired = true;
             $importer_tracklist->populate_subtracks();
-            $importer_tracklist->title = WPSSTM_Post_Tracklist::get_cached_title(get_the_ID()); //use cached title
             $output = $importer_tracklist->get_tracklist_html();
             echo $output;
         ?>
@@ -181,6 +173,9 @@ if ($is_debug){
             <h3><?php _e('Tracklist Debug','wpsstm');?></h3>
         </div>
         <?php
+        
+        $is_debug = isset($_GET['wpsstm_tracklist_debug']);
+
         if (!$is_debug){
             ?>
                 <div class="wpsstm-block-notice">
@@ -195,6 +190,10 @@ if ($is_debug){
                 </div>
             <?php
         }else{
+            //force reload
+            $wpsstm_tracklist->is_expired = true;
+            $wpsstm_tracklist->populate_subtracks();
+            
             ?>
             <!--preset-->
              <div class="wpsstm-importer-row">
