@@ -88,7 +88,7 @@ class WPSSTM_RadioFR_Preset extends WPSSTM_Remote_Tracklist{
     }
     
     function get_remote_request_url(){
-        return sprintf('https://api.radio.fr/info/v2/search/nowplayingbystations?stations=%s&apikey=0f7572fe7ad5ed80c810fc9f3bbcaeb42df2cbc2&numberoftitles=50',$this->station_id,WPSSTM_radiofr::$api_key);
+        return sprintf('https://api.radio.fr/info/v2/search/nowplayingbystations?stations=%s&apikey=0f7572fe7ad5ed80c810fc9f3bbcaeb42df2cbc2&numberoftitles=%s',$this->station_id,WPSSTM_radiofr::$api_key,50);
     }
 
 }
