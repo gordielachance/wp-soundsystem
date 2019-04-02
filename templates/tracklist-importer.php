@@ -1,15 +1,6 @@
 <?php
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_preset();
-
-$is_debug = isset($_GET['wpsstm_tracklist_debug']);
-
-if ($is_debug){
-    $wpsstm_tracklist->is_expired = true;
-    $wpsstm_tracklist->populate_subtracks();
-}
-
-
 ?>
 <div id="wpsstm-importer">
     <ul id="wpsstm-importer-tabs">
@@ -170,9 +161,7 @@ if ($is_debug){
         <div class="wpsstm-importer-row">
         <?php
             $importer_tracklist = new WPSSTM_Post_Tracklist(get_the_ID());
-            $importer_tracklist->is_expired = true;
             $importer_tracklist->populate_subtracks();
-            $importer_tracklist->title = WPSSTM_Post_Tracklist::get_cached_title(get_the_ID()); //use cached title
             $output = $importer_tracklist->get_tracklist_html();
             echo $output;
         ?>
@@ -184,6 +173,9 @@ if ($is_debug){
             <h3><?php _e('Tracklist Debug','wpsstm');?></h3>
         </div>
         <?php
+        
+        $is_debug = isset($_GET['wpsstm_tracklist_debug']);
+
         if (!$is_debug){
             ?>
                 <div class="wpsstm-block-notice">
@@ -198,6 +190,10 @@ if ($is_debug){
                 </div>
             <?php
         }else{
+            //force reload
+            $wpsstm_tracklist->is_expired = true;
+            $wpsstm_tracklist->populate_subtracks();
+            
             ?>
             <!--preset-->
              <div class="wpsstm-importer-row">
