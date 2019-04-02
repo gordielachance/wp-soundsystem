@@ -8,8 +8,12 @@ class WPSSTM_Core_BuddyPress{
         define("WPSSTM_FAVORITE_TRACKLISTS_SLUG", "favorite-tracklists");
         
         add_action( 'bp_setup_nav', array($this,'register_music_menu'), 99 );
+        
         add_action( 'wpsstm_queue_track', array($this,'queue_track_activity'), 10, 2 );
+        add_action( 'wpsstm_dequeue_track', array($this,'dequeue_track_activity') );
+        
         add_action( 'wpsstm_love_tracklist', array($this,'love_tracklist_activity') );
+        add_action( 'wpsstm_unlove_tracklist', array($this,'unlove_tracklist_activity') );
     }
     
     function register_music_menu() {
@@ -232,16 +236,29 @@ class WPSSTM_Core_BuddyPress{
 
     function queue_track_activity($track,$tracklist_id){
         
-        $user_link = bp_core_get_userlink( get_current_user_id() );
-        $track_link = sprintf('<strong>%s</strong>',(string)$track);
-        $tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($tracklist_id),get_the_title($tracklist_id));
+        //check tracklist is published
+        if ( get_post_status( $tracklist_id ) !== 'publish' ) return;
         
-        $action_text = sprintf(__('%s queued the track %s to %s','wpsstm'),$user_link,$track_link,$tracklist_link);
+        $user_id = get_current_user_id();
+        $user_link = bp_core_get_userlink( $user_id );
+        $favorites_id = WPSSTM_Core_User::get_user_favorites_id($user_id);
+        
+        $track_link = sprintf('<strong>%s</strong>',(string)$track);
         
         //from tracklist
         if ($track->from_tracklist && get_post_type($track->from_tracklist) ){
             $from_tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($track->from_tracklist),get_the_title($track->from_tracklist));
-            $action_text = sprintf(__('%s spotted the track %s in %s and queued it to %s','wpsstm'),$user_link,$track_link,$from_tracklist_link,$tracklist_link);
+            $from_tracklist = sprintf(__('from %s','wpsstm'),$from_tracklist_link);
+            $from_tracklist = sprintf('<span class="wpsstm-from-tracklist"> %s</span>',$from_tracklist);
+            $track_link .= $from_tracklist;
+        }
+        
+        $tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($tracklist_id),get_the_title($tracklist_id));
+
+        if ($tracklist_id == $favorites_id){
+            $action_text = sprintf(__('%s just ♥ the track %s','wpsstm'),$user_link,$track_link);
+        }else{
+            $action_text = sprintf(__('%s queued the track %s to %s','wpsstm'),$user_link,$track_link,$tracklist_link);
         }
 
         $args = array(
@@ -262,6 +279,15 @@ class WPSSTM_Core_BuddyPress{
         $activity_id = bp_activity_add($args);
     }
     
+    function dequeue_track_activity($track){
+        $args = array(
+            'component' =>      WPSSTM_BASE_SLUG,
+            'item_id'           => $track->subtrack_id,
+            'type' =>           'queue_track',
+        );
+        bp_activity_delete_by_item_id( $args );
+    }
+    
     function love_tracklist_activity($tracklist_id){
         $user_link = bp_core_get_userlink( get_current_user_id() );
         $tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($tracklist_id),get_the_title($tracklist_id));
@@ -271,7 +297,7 @@ class WPSSTM_Core_BuddyPress{
         
         $args = array(
             //'id' =>
-            'action' =>         sprintf(__('%s loved the tracklist %s','wpsstm'),$user_link,$tracklist_link),
+            'action' =>         sprintf(__('%s just ♥ the tracklist %s','wpsstm'),$user_link,$tracklist_link),
             //'content' =>
             'component' =>      WPSSTM_BASE_SLUG,
             'type' =>           'loved_tracklist',
@@ -285,6 +311,15 @@ class WPSSTM_Core_BuddyPress{
             
         );
         $activity_id = bp_activity_add($args);
+    }
+    
+    function unlove_tracklist_activity($tracklist_id){
+        $args = array(
+            'component' =>      WPSSTM_BASE_SLUG,
+            'item_id' =>        $tracklist_id,
+            'type' =>           'loved_tracklist',
+        );
+        bp_activity_delete_by_item_id( $args );
     }
     
 }
