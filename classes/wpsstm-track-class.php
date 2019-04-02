@@ -756,7 +756,7 @@ class WPSSTM_Track{
         $this->add_sources($new_sources);
         $new_ids = $this->save_new_sources();
         
-        $this->track_log(array('track_id'=>$this->post_id,'sources_found'=>count($this->source_count),'sources_saved'=>count($new_ids)),'autosource results');
+        $this->track_log(array('track_id'=>$this->post_id,'sources_found'=>$this->source_count,'sources_saved'=>count($new_ids)),'autosource results');
         
         return $new_ids;
 
