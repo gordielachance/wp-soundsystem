@@ -132,6 +132,8 @@ $tracklist = new WPSSTM_Post_Tracklist($post_id);
 echo $tracklist->get_tracklist_html();
 ?>`
 
+! There is currently a Wordpress bug that breaks our shortcodes.  See [the issue on Github](https://github.com/gordielachance/wp-soundsystem/issues/82)..
+
 = What is the community user ? =
 
 The community user is a Wordpress user you need to create, and that will be assigned as author to the content created automatically by the plugin, for instance imported tracks or sources.
