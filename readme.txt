@@ -157,18 +157,16 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= 2.5.9 =
+= 2.6.0 =
 * tracklist expiration bugfix
-* improved importer and importer settings
+* improved importer and its settings
+* improved shortcodes
 * importer debug GUI
 * bugfix populate sources/autosources
 * fix files dependencies when no API key
-* fix url encoding & regexes for Last.fm presets
-* fix last.fm importer
-* last.fm scrobbler disabled by default
+* Last.fm : fix url encoding / fix regexes / fix importer / scrobbler disabled by default
 * abord autosource if 'wpsstm_autosource_input' returns an error
-* standalone track shortcode
-* more small fixes
+* + various bug fixes
 
 = 2.5.3 =
 * new class WPSSTM_Music_Data
