@@ -71,20 +71,8 @@ class WPSSTM_RadioFR_Preset extends WPSSTM_Remote_Tracklist{
 
             $content = wp_remote_retrieve_body( $response );
 
-            libxml_use_internal_errors(true);
-
-            //QueryPath
-            try{
-                $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WPSSTM_Remote_Tracklist::$querypath_options )->attr('content');
-            }catch(Exception $e){
-                return new WP_Error( $e->getCode(), $e->getMessage() );
-            }
-
-            libxml_clear_errors();
-
-            $dir = dirname($imagepath);
-            $pattern = '~(\d+)$~';
-            preg_match($pattern, $dir, $matches);
+            $pattern = '~"rank":.*,"id":([^,]+),~m';
+            preg_match($pattern, $content, $matches);
 
             if ( !isset($matches[1]) ){
                 return new WP_Error( 'wpsstm_radiofr_missing_station_id', __('Required station ID missing.','wpsstm') );
@@ -100,7 +88,7 @@ class WPSSTM_RadioFR_Preset extends WPSSTM_Remote_Tracklist{
     }
     
     function get_remote_request_url(){
-        return sprintf('https://api.radio.fr/info/v2/search/nowplayingbystations?stations=%s&apikey=0f7572fe7ad5ed80c810fc9f3bbcaeb42df2cbc2&numberoftitles=20',$this->station_id,WPSSTM_radiofr::$api_key);
+        return sprintf('https://api.radio.fr/info/v2/search/nowplayingbystations?stations=%s&apikey=0f7572fe7ad5ed80c810fc9f3bbcaeb42df2cbc2&numberoftitles=50',$this->station_id,WPSSTM_radiofr::$api_key);
     }
 
 }
