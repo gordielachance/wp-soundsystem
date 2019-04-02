@@ -64,10 +64,10 @@ class WPSSTM_Radionomy_API_Preset extends WPSSTM_Remote_Tracklist{
 
         if ( false === ( $station_id = get_transient($transient_name ) ) ) {
 
-            $station_url = sprintf('http://www.radionomy.com/en/radio/%1$s',$station_slug);
+            $station_url = sprintf('http://www.radionomy.com/en/radio/%s',$station_slug);
             $response = wp_remote_get( $station_url );
 
-            if ( is_wp_error($response) ) return;
+            if ( is_wp_error($response) ) return $response;
 
             $response_code = wp_remote_retrieve_response_code( $response );
             if ($response_code != 200) return;
@@ -80,7 +80,7 @@ class WPSSTM_Radionomy_API_Preset extends WPSSTM_Remote_Tracklist{
             try{
                 $imagepath = htmlqp( $content, 'head meta[property="og:image"]', WPSSTM_Remote_Tracklist::$querypath_options )->attr('content');
             }catch(Exception $e){
-                return false;
+                return new WP_Error( $e->getCode(), $e->getMessage() );
             }
 
             libxml_clear_errors();
