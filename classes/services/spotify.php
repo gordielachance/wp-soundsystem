@@ -374,7 +374,7 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
     }
     
     static function get_playlist_id_from_url($url){
-        $pattern = '~^https?://(?:open|play).spotify.com/user/([^/]+)/playlist/([\w\d]+)~i';
+        $pattern = '~^https?://(?:open|play).spotify.com/(?:user/([^/]+)/)?playlist/([\w\d]+)~i';
         preg_match($pattern,$url, $matches);
 
         $user_id =  isset($matches[1]) ? $matches[1] : null;
