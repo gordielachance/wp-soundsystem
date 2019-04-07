@@ -46,7 +46,7 @@ It will search for remote sources and attach them to your tracks.
 Radios are how we call *live playlists*. 
 Those playlists are synced with remote webpages or services, and are refreshed seamlessly after a short delay.
 
-[Check some Radios on Spiff Radio](http://spiff-radio.org/?post_type=wpsstm_live_playlist)
+[Check some Radios on Spiff Radio](http://spiff-radio.org/?post_type=wpsstm_live_playlist&tag=editors-pick&author=1)
 
 = Tracklist Importer (requires an API key) =
 
@@ -157,8 +157,14 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= XXX =
-* new radio.fr service
+= 2.6.1 =
+* BuddyPress - improved queue track/ love tracklist activities
+* Radio.fr - new service
+* Spotify: improved playlists regex
+* new image assets
+* new 'pre_get_tracklist_by_pulse' function hooked on 'pre_get_posts'
+* migrate 'remote_delay_min' option from 'scraper option' post meta -> 'wpsstm_cache_min' post meta
+* database --> 202
 
 = 2.6.0 =
 * tracklist expiration bugfix
