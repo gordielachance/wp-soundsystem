@@ -27,6 +27,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     private static $remote_title_meta_name = 'wpsstm_remote_title';
     public $feed_url = null;
     public $website_url = null;
+    public $cache_min = null;
     
     var $preset;
     
@@ -47,7 +48,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $this->default_options = array(
             'autosource'                => ( wpsstm()->get_options('autosource') && $can_autosource ),
-            'remote_delay_min'          => 15, //toufix broken if within the default options of WPSSTM_Remote_Tracklist
+            'cache_min'          => 15, //toufix broken if within the default options of WPSSTM_Remote_Tracklist
         );
 
         $this->set_tracklist_pagination($pagination_args);
@@ -116,6 +117,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //live
         $this->feed_url =       get_post_meta($this->post_id, self::$feed_url_meta_name, true );
         $this->website_url =    get_post_meta($this->post_id, self::$website_url_meta_name, true );
+        $this->cache_min =      ($meta = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true)) ? $meta : $this->options['cache_min'];
 
         //location
         $this->location = get_permalink($this->post_id);
@@ -769,11 +771,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
         if(!$updated_time) return 0;//never imported
 
-        $cache_min = $this->get_options('remote_delay_min');
+        if (!$this->cache_min) return 0; //no delay
 
-        if (!$cache_min) return 0; //no delay
-
-        $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
+        $expiration_time = $updated_time + ($this->cache_min * MINUTE_IN_SECONDS);
         $now = current_time( 'timestamp', true );
 
         return $expiration_time - $now;
@@ -783,7 +783,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         if ($this->tracklist_type != 'live') return false;
 
-        $cache_seconds = ( $cache_min = $this->get_options('remote_delay_min') ) ? $cache_min * MINUTE_IN_SECONDS : false;
+        $cache_seconds = $this->cache_min ? $this->cache_min * MINUTE_IN_SECONDS : false;
 
         if ( !$cache_seconds ) return false;
         

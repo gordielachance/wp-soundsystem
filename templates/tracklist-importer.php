@@ -132,9 +132,7 @@ $wpsstm_tracklist->populate_preset();
             <div class="wpsstm-importer-row-content">
                 <?php
 
-                $forced_option = $wpsstm_tracklist->preset->get_preset_options('remote_delay_min');
-                $option = ($forced_option) ? $forced_option : $wpsstm_tracklist->preset->get_options('remote_delay_min');
-                $disabled = disabled( (bool)$forced_option, true, false );
+                $option = $wpsstm_tracklist->cache_min;
 
                 $desc[] = __('If set, posts will be created for each track when the remote playlist is retrieved.','wpsstm');
                 $desc[] = __("They will be flushed after the cache time has expired; if the track does not belong to another playlist or user's likes.",'wpsstm');
@@ -142,10 +140,9 @@ $wpsstm_tracklist->populate_preset();
                 $desc = implode("<br/>",$desc);
 
                 printf(
-                    '<input type="number" name="%s[remote_delay_min]" size="4" min="0" value="%s" %s /> %s<br/><small>%s</small>',
+                    '<input type="number" name="%s[cache_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
                     'wpsstm_wizard',
                     $option,
-                    $disabled,
                     __('minutes','spiff'),
                     $desc
                 );

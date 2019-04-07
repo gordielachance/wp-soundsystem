@@ -344,10 +344,10 @@ class WPSSTM_Core_Importer{
             return new WP_Error('wpsstm_invalid_tracklist',__('Invalid tracklist','wpsstm'));
         }
         
-        //settings
+        //scraper
         $db_settings = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
         $wizard_data = self::sanitize_importer_settings($wizard_data,$tracklist);
-
+        
         //feed URL
         $feed_url = wpsstm_get_array_value('feed_url',$wizard_data);
         
@@ -366,6 +366,16 @@ class WPSSTM_Core_Importer{
             unset($wizard_data['website_url']);//we don't want to save it in the scraper settings
         }else{
             delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name);
+        }
+        
+        //cache time
+        $cache_min = wpsstm_get_array_value('cache_min',$wizard_data);
+        
+        if ($cache_min){
+            update_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name,$cache_min);
+            unset($wizard_data['cache_min']);//we don't want to save it in the scraper settings
+        }else{
+            delete_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name);
         }
 
         //settings have been updated, clear tracklist cache
@@ -402,8 +412,8 @@ class WPSSTM_Core_Importer{
         $new_input['website_url'] = isset($input['website_url']) ? trim($input['website_url']) : null;
         
         //cache
-        if ( isset($input['remote_delay_min']) && ctype_digit($input['remote_delay_min']) ){
-            $new_input['remote_delay_min'] = $input['remote_delay_min'];
+        if ( isset($input['cache_min']) && ctype_digit($input['cache_min']) ){
+            $new_input['cache_min'] = $input['cache_min'];
         }
 
         //selectors 

@@ -38,7 +38,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '201';
+    public $db_version = '202';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -338,6 +338,27 @@ class WP_SoundSystem {
                 //
                 $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_spotify_time', '_wpsstm_spotify_data_time' );
                 $result = $wpdb->get_results ( $querystr );
+            }
+            
+            if ($current_version < 202){
+                
+                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", WPSSTM_Post_Tracklist::$scraper_meta_name );
+                
+                $rows = $wpdb->get_results($querystr);
+
+                foreach($rows as $row){
+                    $metadata = maybe_unserialize($row->meta_value);
+                    
+                    $min = isset($metadata['remote_delay_min']) ? $metadata['remote_delay_min'] : false;
+                    if( $min === false ) continue;
+
+                    update_post_meta($row->post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name, $min);
+                    
+                    unset($metadata['remote_delay_min']);
+                    update_post_meta($row->post_id, WPSSTM_Post_Tracklist::$scraper_meta_name, $metadata);
+                    
+                    
+                }
             }
 
         }
