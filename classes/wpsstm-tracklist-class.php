@@ -100,6 +100,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //author
         $post_author_id = get_post_field( 'post_author', $this->post_id );
         $this->author = get_the_author_meta( 'display_name', $post_author_id );
+
+        //live
+        $this->feed_url =       get_post_meta($this->post_id, self::$feed_url_meta_name, true );
+        $this->website_url =    get_post_meta($this->post_id, self::$website_url_meta_name, true );
+        $this->cache_min =      ($meta = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true)) ? $meta : $this->options['cache_min'];
         
         //time updated
         //TOUFIX bad logic.  We should rather update the post time when an import is done.
@@ -114,11 +119,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $this->is_expired = ( ($seconds !== false) && ($seconds <= 0) );
         }
 
-        //live
-        $this->feed_url =       get_post_meta($this->post_id, self::$feed_url_meta_name, true );
-        $this->website_url =    get_post_meta($this->post_id, self::$website_url_meta_name, true );
-        $this->cache_min =      ($meta = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true)) ? $meta : $this->options['cache_min'];
-
         //location
         $this->location = get_permalink($this->post_id);
         if ( $this->tracklist_type == 'live' ){
@@ -126,13 +126,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         //classes
-        if( $this->is_expired ) {
-            $this->classes[] = 'tracklist-expired';
-        }
         if( $this->is_tracklist_favorited_by() ) {
             $this->classes[] = 'favorited-tracklist';
         }
-        
 
     }
     

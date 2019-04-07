@@ -92,11 +92,8 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = this;
 
         tracklist.post_id =     Number( $(tracklist).data('wpsstm-tracklist-id') );
-        tracklist.isExpired =   $(tracklist).hasClass('tracklist-expired');
-
-        if (!tracklist.isExpired){
-            tracklist.init_tracklist_expiration();
-        }
+        
+        tracklist.init_tracklist_expiration();
 
         /*
         New subtracks
@@ -328,6 +325,7 @@ class WpsstmTracklist extends HTMLElement{
 
         }else{
             tracklist.isExpired = true;
+            tracklist.addClass('tracklist-expired');
         }
         
         if (remaining_sec < 0){
