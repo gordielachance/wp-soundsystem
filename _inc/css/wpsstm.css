@@ -187,13 +187,20 @@ input.wpsstm-fullwidth {
   padding: .75em;
   position: relative;
   z-index: 10;
+  display: -webkit-flex;
+  display: flex;
 }
-/* line 159, ../scss/_wpsstm-shared.scss */
-.wpsstm-block-notice .wpsstm-close-notice {
-  float: right;
+/* line 160, ../scss/_wpsstm-shared.scss */
+.wpsstm-block-notice > * {
+  flex: 1;
+}
+/* line 162, ../scss/_wpsstm-shared.scss */
+.wpsstm-block-notice > *.wpsstm-close-notice {
+  flex-grow: 0;
+  text-align: center;
 }
 
-/* line 164, ../scss/_wpsstm-shared.scss */
+/* line 169, ../scss/_wpsstm-shared.scss */
 .wpsstm-align-both, wpsstm-tracklist .tracklist-header .wpsstm-live-tracklist-icon, wpsstm-tracklist .wpsstm-new-subtrack .wpsstm-new-subtrack-fields, wpsstm-player .player-row > * {
   display: -webkit-flex;
   display: flex;

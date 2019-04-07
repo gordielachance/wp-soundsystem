@@ -156,8 +156,13 @@ input{
     padding:.75em;
     position:relative;
     z-index:10;
-    .wpsstm-close-notice{
-        float:right;
+    @include display-flex;
+    > *{
+        flex:1;
+        &.wpsstm-close-notice{
+            flex-grow:0;
+            text-align:center;
+        }
     }
 }
 
