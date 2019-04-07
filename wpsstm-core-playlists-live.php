@@ -24,7 +24,7 @@ class WPSSTM_Core_Live_Playlists{
 
             add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
             
-            add_filter( 'pre_get_posts', array($this,'pre_get_live_tracklist_by_cache_time') );
+            add_filter( 'pre_get_posts', array($this,'pre_get_tracklist_by_pulse') );
             
         }
 
@@ -176,12 +176,12 @@ class WPSSTM_Core_Live_Playlists{
         return $new_actions + $actions;
     }
     
-    function pre_get_live_tracklist_by_cache_time( $query ) {
+    function pre_get_tracklist_by_pulse( $query ) {
         
         //TOUFIX what if the post doesn't have a cache min meta ?
         
         if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
-        $max = $query->get( 'max-cache-min' );
+        $max = $query->get( 'pulse-max' );
         
         if ( $max && ctype_digit($max) ) {
             

@@ -67,7 +67,7 @@ class WPSSTM_Core_Tracklists{
         $vars[] = 'tracklists-favorited-by';
         $vars[] = 'tracklist_id';
         $vars[] = 'subtrack_position';
-        $vars[] = 'max-cache-min';
+        $vars[] = 'pulse-max';
         return $vars;
     }
 
