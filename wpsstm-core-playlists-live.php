@@ -2,6 +2,7 @@
 class WPSSTM_Core_Live_Playlists{
     static $remote_author_meta_name = 'wpsstm_remote_author_name';
     static $time_updated_meta_name = 'wpsstm_remote_query_time';
+    static $cache_min_meta_name = 'wpsstm_cache_min';
     public $presets;
 
     function __construct() {
@@ -22,6 +23,8 @@ class WPSSTM_Core_Live_Playlists{
             add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
 
             add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
+            
+            add_filter( 'pre_get_posts', array($this,'pre_get_live_tracklist_by_cache_time') );
             
         }
 
@@ -171,6 +174,32 @@ class WPSSTM_Core_Live_Playlists{
         );
         
         return $new_actions + $actions;
+    }
+    
+    function pre_get_live_tracklist_by_cache_time( $query ) {
+        
+        //TOUFIX what if the post doesn't have a cache min meta ?
+        
+        if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
+        $max = $query->get( 'max-cache-min' );
+        
+        if ( $max && ctype_digit($max) ) {
+            
+            $meta_query[] = array(
+                'key' => self::$cache_min_meta_name,
+                'value' => $max,
+                'type' => 'NUMERIC',
+                'compare' => '<='
+            );
+            
+            $query->set( 'meta_query', $meta_query);
+
+        }
+        
+
+        
+
+        return $query;
     }
 
 }
