@@ -153,6 +153,6 @@ function wpsstm_shorten_text($str,$skiptext = ' ... '){
     }
 }
 
-function wpsstm_notice($msg){
-    printf('<div class="wpsstm-block-notice"><span>%s</span><a href="#" class="wpsstm-close-notice"><i class="fa fa-close"></i></a></div>',$msg);
+function wpsstm_get_notice($msg){
+    return sprintf('<div class="wpsstm-block-notice"><span>%s</span><a href="#" class="wpsstm-close-notice"><i class="fa fa-close"></i></a></div>',$msg);
 }

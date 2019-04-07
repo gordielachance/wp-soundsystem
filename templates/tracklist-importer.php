@@ -177,18 +177,13 @@ $wpsstm_tracklist->populate_preset();
         $is_debug = isset($_GET['wpsstm_tracklist_debug']);
 
         if (!$is_debug){
-            ?>
-                <div class="wpsstm-block-notice">
-                    <span>
-                        <?php 
-                        $url = get_edit_post_link();
-                        $url = add_query_arg(array('wpsstm_tracklist_debug'=>true),$url) . '#wpsstm-importer-step-debug';
-                        $link = sprintf('<a href="%s">%s</a>',$url,__('Reload tracklist','wpsstm'));
-                        printf(__('%s to display the feedback','wpsstm'),$link);
-                        ?>
-                        </span>
-                </div>
-            <?php
+            
+            $url = get_edit_post_link();
+            $url = add_query_arg(array('wpsstm_tracklist_debug'=>true),$url) . '#wpsstm-importer-step-debug';
+            $link = sprintf('<a href="%s">%s</a>',$url,__('Reload tracklist','wpsstm'));
+            $notice = sprintf(__('%s to display the feedback','wpsstm'),$link);
+            echo wpsstm_get_notice($notice);
+
         }else{
             //force reload
             $wpsstm_tracklist->is_expired = true;

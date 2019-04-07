@@ -300,7 +300,7 @@ class WPSSTM_LastFM{
             $lastfm_auth_text = sprintf(__('You need to authorize this website on Last.fm: click %s.','wpsstm'),$lastfm_auth_link);
             $notice = sprintf('<p id="wpsstm-dialog-lastfm-auth-notice">%s</p>',$lastfm_auth_text);
 
-            wpsstm_notice( $notice );
+            echo wpsstm_get_notice( $notice );
         }
 
     }
@@ -322,7 +322,7 @@ class WPSSTM_LastFM{
     
     public function after_app_auth_notice(){
         $username = $this->lastfm_user->get_lastfm_user_metas('username');
-        wpsstm_notice(sprintf(__('Your Last.fm account is now connected, %s.','wpsstm'),$username));
+        echo wpsstm_get_notice(sprintf(__('Your Last.fm account is now connected, %s.','wpsstm'),$username));
     }
                       
     /*
