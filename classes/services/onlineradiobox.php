@@ -41,12 +41,13 @@ class WPSSTM_OnlineRadioBox_Preset extends WPSSTM_Remote_Tracklist{
     }
     
     function get_remote_request_url(){
-        return sprintf('http://onlineradiobox.com/gr/%s/playlist',$this->station_slug);
+        return trailingslashit($this->url) . 'playlist';
     }
 
     function get_station_slug($url){
-        $pattern = '~^https?://(?:www.)?onlineradiobox.com/[^/]+/([^/]+)/~i';
+        $pattern = '~^https?://(?:www.)?onlineradiobox.com/[^/]+/([^/]+)~i';
         preg_match($pattern,$url, $matches);
+
         return isset($matches[1]) ? $matches[1] : null;
     }
 
