@@ -420,7 +420,7 @@ class WPSSTM_Musicbrainz_Release_ID_Preset extends WPSSTM_Remote_Tracklist{
         
     }
 
-    function init_url($url){
+    public function init_url($url){
         global $wpsstm_musicbrainz;
         
         if ( $this->mbid = self::get_release_mbid($url) ){

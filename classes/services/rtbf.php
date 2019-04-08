@@ -28,7 +28,7 @@ class WPSSTM_RTBF_Preset extends WPSSTM_Remote_Tracklist{
         parent::__construct($url,$options);
     }
     
-    function init_url($url){
+    public function init_url($url){
         $this->station_slug = $this->get_station_slug($url);
         return $this->station_slug;
     }

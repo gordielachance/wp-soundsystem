@@ -1000,7 +1000,7 @@ class WPSSTM_LastFM_Music_URL_Preset extends WPSSTM_LastFM_URL_Preset{
     var $artist_page;
     var $album_slug;
 
-    function init_url($url){
+    public function init_url($url){
         $this->artist_slug = self::get_artist_slug($url);
 
         if ($this->artist_slug){
@@ -1053,7 +1053,7 @@ class WPSSTM_LastFM_User_URL_Preset extends WPSSTM_LastFM_URL_Preset{
     var $user_slug;
     var $user_page;
 
-    function init_url($url){
+    public function init_url($url){
         $this->user_slug = self::get_user_slug($url);
         $this->user_page = self::get_user_page($url);
         return (bool)$this->user_slug;
@@ -1105,7 +1105,7 @@ class WPSSTM_LastFM_User_Station_Preset extends WPSSTM_LastFM_Station_Preset{
     var $user_slug;
     var $user_page;
 
-    function init_url($url){
+    public function init_url($url){
         
         $this->station_type = self::get_station_type($url);
         $this->user_slug = self::get_user_slug($url);
@@ -1136,7 +1136,7 @@ class WPSSTM_LastFM_Music_Station_Preset extends WPSSTM_LastFM_Station_Preset{
 
     var $artist_slug;
 
-    function init_url($url){
+    public function init_url($url){
         
         $this->station_type = self::get_station_type($url);
         $this->artist_slug = self::get_artist_slug($url);

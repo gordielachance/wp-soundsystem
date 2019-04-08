@@ -41,7 +41,7 @@ class WPSSTM_IndieShuffle_Preset extends WPSSTM_Remote_Tracklist{
         parent::__construct($url,$options);
     }
     
-    function init_url($url){
+    public function init_url($url){
         $domain = wpsstm_get_url_domain( $url );
         return ( $domain == 'indieshuffle.com');
     }

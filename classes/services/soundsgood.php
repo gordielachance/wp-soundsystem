@@ -42,7 +42,7 @@ class WPSSTM_Soundsgood_Api_Preset extends WPSSTM_Remote_Tracklist{
 
     }
 
-    function init_url($url){
+    public function init_url($url){
         $this->station_slug = $this->get_station_slug($url);
         $this->client_id = WPSSTM_SoundsGood::get_client_id();
         return ($this->station_slug && $this->client_id);

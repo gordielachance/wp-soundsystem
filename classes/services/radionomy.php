@@ -39,7 +39,7 @@ class WPSSTM_Radionomy_API_Preset extends WPSSTM_Remote_Tracklist{
 
     }
     
-    function init_url($url){
+    public function init_url($url){
         if ( $this->station_slug = $this->get_website_url_station_slug($url) ) {
             $this->station_id = $this->get_station_id($this->station_slug);
         }

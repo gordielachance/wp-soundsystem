@@ -42,7 +42,7 @@ class WPSSTM_Reddit_Api_Preset extends WPSSTM_Remote_Tracklist{
 
     }
     
-    function init_url($url){
+    public function init_url($url){
         $this->subreddit_slug = $this->get_subreddit_slug($url);
         return $this->subreddit_slug;
     }

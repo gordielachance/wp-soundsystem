@@ -26,7 +26,7 @@ class WPSSTM_Twitter_Timeline_Preset extends WPSSTM_Remote_Tracklist{
 
     }
     
-    function init_url($url){
+    public function init_url($url){
         $this->user_slug = $this->get_user_slug($url);
         return $this->user_slug;
     }

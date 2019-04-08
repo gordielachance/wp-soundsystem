@@ -256,7 +256,7 @@ class WPSSTM_Soundcloud_User_Api_Preset extends WPSSTM_Remote_Tracklist{
 
     }
 
-    function init_url($url){
+    public function init_url($url){
         $this->user_slug = $this->get_user_slug($url);
         $this->page_slug = $this->get_user_page($url);
         $this->user_id = $this->get_user_id($this->user_slug);
