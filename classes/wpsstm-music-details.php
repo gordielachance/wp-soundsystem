@@ -39,7 +39,7 @@ abstract class WPSSTM_Music_Data{
         /*
         frontend
         */
-        add_filter('wpsstm_get_track_xspf','xspf_track_identifier', 10, 2);
+        add_filter('wpsstm_get_track_xspf',array($this,'xspf_track_identifier'), 10, 2);
         
         /*
         AJAX TOUFIX TOUCHECK
@@ -223,8 +223,7 @@ abstract class WPSSTM_Music_Data{
         if ( $url = $this->get_music_item_url($track->post_id) ){
             $output['identifier'] = $url;
         }
-        return $output;
-            
+        return $output;            
     }
       
     public function get_music_item_link($post_id){
