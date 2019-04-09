@@ -20,6 +20,7 @@ class WPSSTM_OnlineRadioBox{
 class WPSSTM_OnlineRadioBox_Preset extends WPSSTM_Remote_Tracklist{
     
     var $station_slug;
+    var $country_code;
 
     function __construct($url = null,$options = null) {
         
@@ -35,16 +36,23 @@ class WPSSTM_OnlineRadioBox_Preset extends WPSSTM_Remote_Tracklist{
 
     }
     
-    function init_url($url){
-        $this->station_slug = $this->get_station_slug($url);
-        return $this->station_slug;
+    public function init_url($url){
+        $this->station_slug = self::get_station_slug($url);
+        $this->country_code = self::get_country_code($url);
+        return ($this->country_code && $this->station_slug);
     }
     
     function get_remote_request_url(){
-        return trailingslashit($this->url) . 'playlist';
+        return sprintf('https://onlineradiobox.com/%s/%s/playlist/',$this->country_code,$this->station_slug);
+    }
+    
+    static private function get_country_code($url){
+        $pattern = '~^https?://(?:www.)?onlineradiobox.com/([^/]+)~i';
+        preg_match($pattern,$url, $matches);
+        return isset($matches[1]) ? $matches[1] : null;
     }
 
-    function get_station_slug($url){
+    static private function get_station_slug($url){
         $pattern = '~^https?://(?:www.)?onlineradiobox.com/[^/]+/([^/]+)~i';
         preg_match($pattern,$url, $matches);
 

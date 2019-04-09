@@ -35,7 +35,7 @@ class WPSSTM_Deezer_Preset extends WPSSTM_Remote_Tracklist{
         
     }
     
-    function init_url($url){
+    public function init_url($url){
         $this->playlist_id = $this->get_playlist_id($url);
         return $this->playlist_id;
     }

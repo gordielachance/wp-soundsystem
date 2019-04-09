@@ -79,7 +79,7 @@ class WPSSTM_Remote_Tracklist{
     Test if this URL can be handled by the preset.
     Your preset class SHOULD override this funtion.
     */
-    function init_url($url){
+    public function init_url($url){
         return (filter_var($url, FILTER_VALIDATE_URL) !== FALSE);
     }
     

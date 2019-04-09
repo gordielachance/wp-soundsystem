@@ -342,7 +342,7 @@ class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
 
     }
     
-    function init_url($url){
+    public function init_url($url){
         global $wpsstm_spotify;
 
         if ( $this->playlist_id = self::get_playlist_id_from_url($url) ){

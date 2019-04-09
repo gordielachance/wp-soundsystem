@@ -40,7 +40,7 @@ class WPSSTM_8Tracks_Preset extends WPSSTM_Remote_Tracklist{
 
     }
     
-    function init_url($url){
+    public function init_url($url){
         $this->user_slug = self::get_user_slug($url);
         $this->playlist_slug = self::get_tracklist_slug($url);
         

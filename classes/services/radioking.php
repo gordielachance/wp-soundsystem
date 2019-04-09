@@ -39,7 +39,7 @@ class WPSSTM_RadioKing_Api_Preset extends WPSSTM_Remote_Tracklist{
 
     }
     
-    function init_url($url){
+    public function init_url($url){
         
         $this->station_slug = $this->get_station_slug($url);
         $this->station_data = ($this->station_slug) ? $this->get_station_data($this->station_slug) : null;
