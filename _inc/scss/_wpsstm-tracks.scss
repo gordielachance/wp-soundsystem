@@ -129,7 +129,7 @@ wpsstm-track{
         content:"\f04b"; //.fa-play
     }
 
-    &.track-playing .wpsstm-track-icon:before,.track-pause .wpsstm-track-icon:before{
+    &.track-playing .wpsstm-track-icon:before{
         content:"\f04c"; //.fa-pause;
     }
 

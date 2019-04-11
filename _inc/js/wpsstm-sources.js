@@ -1,7 +1,7 @@
 var $ = jQuery.noConflict();
 
 //play source
-$(document).on('click', '.wpsstm-source-title', function(e) {
+$(document).on('click', '.wpsstm-source-icon,.wpsstm-source-title', function(e) {
     e.preventDefault();
     var source = this.closest('wpsstm-source');
     var track = this.closest('wpsstm-track');
@@ -16,8 +16,11 @@ $(document).on('click', '.wpsstm-source-title', function(e) {
     player = track.closest('wpsstm-player');
 
     //toggle tracklist sources
-    var list = $(track).find('.wpsstm-track-sources-list');
-    $( list ).removeClass('active');
+    if ( !$(track).hasClass('track-playing') ){
+        var list = $(track).find('.wpsstm-track-sources-list');
+        $( list ).removeClass('active');
+    }
+
 
     player.play_queue(trackIdx,sourceIdx);
 
@@ -173,7 +176,7 @@ class WpsstmSource extends HTMLElement{
         var source = this;
         var track = this.closest('wpsstm-track');
         var track_instances = source.track.get_instances();
-        var source_instances = track_instances.find('wpsstm-source');
+        var source_instances = source.get_instances();
         var tracks_container = track_instances.parents('.tracks-container');
         var player = this.closest('wpsstm-player');
         var success = $.Deferred();

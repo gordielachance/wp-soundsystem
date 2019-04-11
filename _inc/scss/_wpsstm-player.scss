@@ -110,27 +110,6 @@ wpsstm-player{
 
 }
 
-.wpsstm-player-tracklist{
-    .wpsstm-track{
-        display:block!important;
-        .wpsstm-track-actions{
-            margin-left:inherit;
-        }
-        .wpsstm-track-sources{
-            @include opacity(.6);
-            wpsstm-source{
-                @include opacity(.6);
-                &.source-playing{
-                    @include opacity(.8);
-                }
-                &:hover{
-                    @include opacity(1);
-                }
-            }
-        }
-    }
-}
-
 .tracks-container{
     
     .wpsstm-tracks-container-icon{
