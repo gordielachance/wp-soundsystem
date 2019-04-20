@@ -24,9 +24,11 @@ wpsstm-tracklist{
         .wpsstm-tracklist-actions{
             display:block;
             list-style: none;
-            line-height: 2.8em;
+            font-size:.8em;
+            line-height: 2em;
             text-align:center;
-            margin-top:1em;
+            margin:.5em 0;
+            font-size:.8em;
 
             .wpsstm-tracklist-action{
                 padding: .25em .5em;
@@ -54,6 +56,19 @@ wpsstm-tracklist{
         margin-bottom:1em;
         font-size:.9em;
         text-align:center;
+        
+        border-bottom: 5px solid rgba(0, 0, 0, .1);
+        
+        .tracklist-header-img{
+            width:150px;
+            float:left;
+            img{
+                vertical-align: top;
+                object-fit: cover;
+                width: 100%;
+                height: 100%;
+            }
+        }
 
         .wpsstm-live-tracklist-icon{
             position: absolute;
@@ -71,23 +86,26 @@ wpsstm-tracklist{
         
         .wpsstm-tracklist-title{
             font-size:1.5em;
-            text-align: center;
-        }
-        
-        p{
-            padding:0;
             margin:0;
+            margin-bottom:.5em;
         }
 
         .wpsstm-live-tracklist-link{
-            
             display:block;
             @extend .wpsstm-no-underline;
         }
-        
-        .wpsstm-tracklist-refresh-time{
-            @include opacity(.25);
+        .wpsstm-tracklist-time{
+            font-size:.8em;
+            .wpsstm-tracklist-refresh-time{
+                @include opacity(.25);
+            }
         }
+        .wpsstm-live-tracklist-link{
+            display:block;
+            font-size:.8em;
+        }
+
+        
     }
 
     &.tracklist-reloading{

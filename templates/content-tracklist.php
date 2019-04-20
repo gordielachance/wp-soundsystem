@@ -28,57 +28,53 @@ $notice = $wpsstm_tracklist->importer_notice();
                 }
                 ?>
         </h3>
-        <div class="tracklist-advanced-header">
-            <p class="wpsstm-tracklist-time">
+
+        <p class="wpsstm-tracklist-time">
+            <?php
+            //updated
+            if ($updated = $wpsstm_tracklist->updated_time){
+                ?>
+                <time class="wpsstm-tracklist-updated">
+                    <i class="fa fa-clock-o" aria-hidden="true"></i> 
+                    <?php echo wpsstm_get_datetime( $updated );?>
+                </time>
+                <?php 
+            }
+            //refreshed
+            if ( ($wpsstm_tracklist->tracklist_type == 'live') && ( $rate = $wpsstm_tracklist->get_human_next_refresh_time() ) ){
+                ?>
+                <time class="wpsstm-tracklist-refresh-time">
+                    <i class="fa fa-rss" aria-hidden="true"></i> 
+                    <?php printf(__('cached for %s','wpsstm'),$rate);?>
+                </time>
                 <?php
-                //updated
-                if ($updated = $wpsstm_tracklist->updated_time){
+            }
+            ?>
+        </p>
+        <?php
+            //original link
+            if ($wpsstm_tracklist->tracklist_type == 'live'){
+
+                $wpsstm_tracklist_url = ($wpsstm_tracklist->website_url) ? $wpsstm_tracklist->website_url : $wpsstm_tracklist->feed_url;
+
+                if ($wpsstm_tracklist_url){
                     ?>
-                    <time class="wpsstm-tracklist-updated">
-                        <i class="fa fa-clock-o" aria-hidden="true"></i> 
-                        <?php echo wpsstm_get_datetime( $updated );?>
-                    </time>
-                    <?php 
-                }
-                //refreshed
-                if ( ($wpsstm_tracklist->tracklist_type == 'live') && ( $rate = $wpsstm_tracklist->get_human_next_refresh_time() ) ){
-                    ?>
-                    <time class="wpsstm-tracklist-refresh-time">
-                        <i class="fa fa-rss" aria-hidden="true"></i> 
-                        <?php printf(__('cached for %s','wpsstm'),$rate);?>
-                    </time>
+                    <a class="wpsstm-live-tracklist-link" target="_blank" href="<?php echo $wpsstm_tracklist_url;?>">
+                        <i class="fa fa-link" aria-hidden="true"></i> 
+                        <?php echo wpsstm_shorten_text($wpsstm_tracklist_url);?>
+                    </a>
                     <?php
                 }
-                ?>
-            </p>
-            <?php
-                //original link
-                if ($wpsstm_tracklist->tracklist_type == 'live'){
-
-                    $wpsstm_tracklist_url = ($wpsstm_tracklist->website_url) ? $wpsstm_tracklist->website_url : $wpsstm_tracklist->feed_url;
-                    
-                    if ($wpsstm_tracklist_url){
-                        ?>
-                        <p>
-                            <a class="wpsstm-live-tracklist-link" target="_blank" href="<?php echo $wpsstm_tracklist_url;?>">
-                                <i class="fa fa-link" aria-hidden="true"></i> 
-                                <?php echo wpsstm_shorten_text($wpsstm_tracklist_url);?>
-                            </a>
-                        </p>
-
-                        <?php
-                    }
 
 
-                }
+            }
 
-                //actions
-                if ( $actions = $wpsstm_tracklist->get_tracklist_actions() ){
-                    $list = get_actions_list($actions,'tracklist');
-                    echo $list;
-                }
-            ?>
-        </div>
+            //actions
+            if ( $actions = $wpsstm_tracklist->get_tracklist_actions() ){
+                $list = get_actions_list($actions,'tracklist');
+                echo $list;
+            }
+        ?>
     </div>
     <?php
     /*
