@@ -157,6 +157,11 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= XXX =
+* fixed OnlineRadioBox service
+* fixed bugfix XSPF export
+* track sources JS/CSS improvements
+
 = 2.6.1 =
 * BuddyPress - improved queue track/ love tracklist activities
 * Radio.fr - new service

@@ -9,9 +9,9 @@ ul.wpsstm-actions-list{
     line-height: 2.2em;
     font-family: sans-serif;
     
+    text-align:center;
+    
     .wpsstm-action{
-        margin:auto;
-        text-align:center;
         display:inline-block;
         a{
             @extend .wpsstm-no-underline;

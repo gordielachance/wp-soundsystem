@@ -4,7 +4,8 @@ wpsstm-source{
         @extend .wpsstm-can-click;
     }
     .wpsstm-source-actions{
-        margin-left:.5em;
+        margin:0;
+        padding:0;
         > *{
             display:inline-block;
         }
@@ -14,12 +15,14 @@ wpsstm-source{
 .wpsstm-track-sources-list{
     font-size:.8em;
     position:relative;
+    padding-left:1em;
+    line-height:2em;
     @include flex-grow(0);
     @include transition-property(margin-bottom);
     @include transition-duration(.2s);
+    
 
     &.active{
-        margin-bottom:.5em!important;
         wpsstm-source{
             .wpsstm-source-actions{
                 .wpsstm-action{
@@ -39,39 +42,33 @@ wpsstm-source{
         padding: 0 .75em;
         box-sizing: border-box;
 
-        > *{
-
-            &.wpsstm-source-actions{
-                padding-right: .5em;
-                @include display-flex();
-                @include flex-shrink(0);
-
-                .wpsstm-source-action{
-
-                    a{
-                        &:before{
-                            margin-right:0;
-                        }
-                        > span{
-                            display:none;
-                        }
-                    }
-                    &.wpsstm-source-action-trash a:before{
-                        content: "\f1f8";//.fa-trash;
-                    }
-                    &.wpsstm-source-action-move a:before{
-                        content: "\f07d";//.fa-arrows-v;
-                    }
-                    &.wpsstm-source-action-edit-backend a:before{
-                        content:"\f084";//.fa-key;
-                    }
-                }
+        .wpsstm-source-title{ //source text
+            @extend .wpsstm-ellipsis;
+            &:before{
+                @extend .wpsstm-icon;
             }
+        }
+        
+        .wpsstm-source-title, .wpsstm-source-icon{
+            @extend .wpsstm-can-click;
+        }
+        
+        .wpsstm-source-icon{
+            display:inline-block;
+            width: 1.5em;
+            @extend .wpsstm-icon;
+        }
+        
+        &.source-loading .wpsstm-source-icon{
+            @extend .wpsstm-loading-icon;
+        }
+        
+        &:not(.source-playing) .wpsstm-source-icon:before{
+            content:"\f04b"; //.fa-play
+        }
 
-            &.wpsstm-source-title{ //source text
-                @extend .wpsstm-ellipsis;
-                @extend .wpsstm-can-click;
-            }
+        &.source-playing .wpsstm-source-icon:before{
+            content:"\f04c"; //.fa-pause;
         }
 
         &.source-error .wpsstm-source-icon{
@@ -82,13 +79,39 @@ wpsstm-source{
                 text-decoration: line-through;
             }
         }
+        
+        .wpsstm-source-actions{
+            margin:0;
+            padding-right: .5em;
+            @include display-flex();
+            @include flex-shrink(0);
+
+            .wpsstm-source-action{
+                margin:auto!important;
+
+                a{
+                    &:before{
+                        margin-right:0;
+                    }
+                    > span{
+                        display:none;
+                    }
+                }
+                &.wpsstm-source-action-trash a:before{
+                    content: "\f1f8";//.fa-trash;
+                }
+                &.wpsstm-source-action-move a:before{
+                    content: "\f07d";//.fa-arrows-v;
+                }
+                &.wpsstm-source-action-edit-backend a:before{
+                    content:"\f084";//.fa-key;
+                }
+            }
+        }
+        
         &.source-active{
             @include display-flex();
             font-weight: bold;
-        }
-
-        .wpsstm-source-title:before{
-            @extend .wpsstm-icon;
         }
 
         .wpsstm-source-action-provider a:before{
@@ -101,14 +124,6 @@ wpsstm-source{
         &[data-wpsstm-source-type="video/youtube"] .wpsstm-source-action-provider a:before{
             content:"\f167";//fa-youtube
         }
-
-        &.source-loading{
-            .wpsstm-source-action-provider a{
-                 @extend .wpsstm-loading-icon;
-            }
-        }
-
-
     }
 }
 
