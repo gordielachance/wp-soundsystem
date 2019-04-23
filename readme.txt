@@ -72,7 +72,7 @@ It will also fire new *BuddyPress activity* items.
 
 = Contribute =
 
-WP Soundsystem is dev friendly. 
+WP Soundsystem is dev friendly, and has been designed to be extendable.
 Wanna give a hand as developer ? Check the [Github](https://github.com/gordielachance/wp-soundsystem) repo.
 
 = WP SoundSystem API =
