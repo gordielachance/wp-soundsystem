@@ -33,7 +33,7 @@ Audio links can be linked to your tracks with the *Tracks Links* metabox.
 
 = Tracks Links =
 
-You can attach links any track; including links that can stream audio (Youtube, Soundcloud, audio files...) directly to our player!
+You can attach a bunch of links to any track; including links that can stream audio (Youtube, Soundcloud, audio files...) directly to our player!
 
 = Autolink (requires an API key) =
 
