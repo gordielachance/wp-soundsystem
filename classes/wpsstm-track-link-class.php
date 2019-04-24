@@ -126,11 +126,11 @@ class WPSSTM_Track_Link{
         $this->permalink_url = trim($this->permalink_url);
         
         if (!$this->permalink_url){
-            return new WP_Error( 'wpsstm_souce_missing_url', __('Unable to validate link: missing URL','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_url', __('Unable to validate link: missing URL','wpsstm') );
         }
         
         if ( !filter_var($this->permalink_url, FILTER_VALIDATE_URL) ){
-            return new WP_Error( 'wpsstm_souce_missing_valid_url', __('Unable to validate link: bad URL','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_valid_url', __('Unable to validate link: bad URL','wpsstm') );
         }
 
         $this->title = trim($this->title);
@@ -143,7 +143,17 @@ class WPSSTM_Track_Link{
         if ( is_wp_error($validated) ) return $validated;
         
         if (!$this->track->post_id){
-            return new WP_Error( 'wpsstm_souce_missing_post_id', __('Unable to validate link: missing track ID','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __('Unable to validate link: missing track ID','wpsstm') );
+        }
+        
+        //exclude some hosts
+        if ( $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ){
+            foreach($excluded_hosts as $host){
+                if (strpos($this->permalink_url,$host) !== false) {
+                    return new WP_Error( 'wpsstm_excluded_host', __('Unable to validate link: host excluded (see plugin options)','wpsstm') );
+                }
+            }
+
         }
         
         //check for duplicates

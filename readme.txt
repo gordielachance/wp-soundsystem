@@ -156,6 +156,9 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= XXX =
+* New track links setting 'Exclude hosts'
+
 = 2.6.3 =
 * "Sources" renamed to "Track Links" (post type, some metas, some filters renamed)
 * Fixed toggle playable track link

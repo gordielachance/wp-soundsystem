@@ -102,13 +102,14 @@ class WP_SoundSystem {
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'ajax_load_tracklists'              => true,
-            'autolink'                        => true,
-            'limit_autolinks'                 => 5,
+            'autolink'                          => true,
+            'limit_autolinks'                   => 5,
             'importer_enabled'                  => true,
             'radios_enabled'                    => true,
             'registration_notice'               => true,
             'wpsstmapi_token'                   => null,
             'details_engine'                    => array('musicbrainz'),
+            'excluded_track_link_hosts'         => array(),
         );
         
         $db_option = get_option( $this->meta_name_options);

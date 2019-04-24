@@ -76,7 +76,34 @@ class WPSSTM_Settings {
         */
 
         $new_input['player_enabled'] = isset($input['player_enabled']);
+        
+        
+        /*Track Links
+        */
         $new_input['autolink'] = isset($input['autolink']);
+        
+        if ( isset($input['excluded_track_link_hosts']) ){
+            $domains = explode(',',$input['excluded_track_link_hosts']);
+            $domains = array_filter(array_unique($domains));
+            $new_input['excluded_track_link_hosts'] = $domains;
+        }
+
+        //delete links from excluded domains
+        if( isset( $input['delete_excluded_track_link_hosts'] ) ){
+            $query_args = array(
+                'post_type'         => wpsstm()->post_type_track_link,
+                'posts_per_page'    => -1,
+                'excluded_hosts'  => 1,
+                'fields' => 'ids'
+                
+            );
+            $matches = new WP_Query($query_args);
+            
+            foreach((array)$matches->posts as $post_id){
+                wp_delete_post( $post_id );
+            }
+
+        }
 
         /*
         Importer
@@ -189,6 +216,15 @@ class WPSSTM_Settings {
             'track_links_settings'
         );
 
+        add_settings_field(
+            'excluded_track_link_hosts', 
+            __('Exclude hosts','wpsstm'), 
+            array( $this, 'exclude_hosts_callback' ), 
+            'wpsstm-settings-page', 
+            'track_links_settings'
+        );
+
+        
         /*
         Tracklist Importer
         */
@@ -357,6 +393,38 @@ class WPSSTM_Settings {
         
         //display errors
         settings_errors('autolink');
+
+    }
+    
+    function exclude_hosts_callback(){
+        $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts');
+
+        printf(
+            '<p><label>%s</label><input type="text" name="%s[excluded_track_link_hosts]" class="wpsstm-fullwidth" placeholder="%s" value="%s" /></p>',
+            __("Ignore the track links belonging to those hosts (comma-separated):","wpsstm"),
+            wpsstm()->meta_name_options,
+            __('eg. yandex.ru,itunes.apple.com','wpsstm'),
+            implode(',',$excluded_hosts)
+        );
+        
+        if ($excluded_hosts){
+
+            $query_args = array(
+                'post_type'         => wpsstm()->post_type_track_link,
+                'posts_per_page'    => -1,
+                'excluded_hosts'  => 1,
+                
+            );
+            $matches = new WP_Query($query_args);
+            
+            if ($matches->post_count){
+                printf(
+                    '<p><input type="checkbox" name="%s[delete_excluded_track_link_hosts]" value="on" /><label>%s</label></p>',
+                    wpsstm()->meta_name_options,
+                    sprintf(__("Delete the %s existing track links from the database","wpsstm"),$matches->post_count)
+                );
+            }
+        }
 
     }
 

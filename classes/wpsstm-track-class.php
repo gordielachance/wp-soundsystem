@@ -627,13 +627,19 @@ class WPSSTM_Track{
         
         $args = wp_parse_args((array)$args,$default_args);
         $args = wp_parse_args($required_args,$args);
+        
         return new WP_Query($args);
     }
     
     function populate_links(){
 
         if ($this->post_id){
-            $query = $this->query_links(array('fields'=>'ids'));
+            $args = array(
+                'fields' =>             'ids',
+                'excluded_hosts' =>     -1, //exclude hosts defined in the options
+            );
+            $query = $this->query_links($args);
+
             $link_ids = $query->posts;
             $this->add_links($link_ids);
         }else{

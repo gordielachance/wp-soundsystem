@@ -9,6 +9,8 @@ class WPSSTM_Core_Track_Links{
         //initialize global (blank) $wpsstm_link so plugin never breaks when calling it.
         $wpsstm_link = new WPSSTM_Track_Link();
         
+        add_filter( 'query_vars', array($this,'add_query_vars_track_link') );
+        
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_track_links' ));
 
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_links_submenu' ) );
@@ -25,14 +27,13 @@ class WPSSTM_Core_Track_Links{
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track_link), array(__class__,'link_columns_content'), 10, 2 );
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(wpsstm(),'register_community_view') );
-        
-        add_filter( 'wpsstm_autolink_filtered', array( $this, 'autolinks_cleanup' ) );
-        
+
         /*
         QUERIES
         */
         add_action( 'the_post', array($this,'the_track_link'),10,2);
         add_action( 'current_screen',  array($this, 'the_single_backend_link'));
+        add_filter( 'pre_get_posts', array($this,'filter_excluded_hosts') );
         add_filter( 'pre_get_posts', array($this,'filter_backend_links_by_track_id') );
         
         /*
@@ -146,6 +147,11 @@ class WPSSTM_Core_Track_Links{
         register_post_type( wpsstm()->post_type_track_link, $args );
     }
     
+    function add_query_vars_track_link($qvars){
+        $vars[] = 'excluded_hosts';
+        return $qvars;
+    }
+    
     /*
     Register the global $wpsstm_link obj (hooked on 'the_post' action)
     */
@@ -184,6 +190,52 @@ class WPSSTM_Core_Track_Links{
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
         
+    }
+    
+    /*
+    If a list of excluded domains exists,
+    Show only (1) or exclude (-1) those domains from the links query.
+    */
+    
+    function filter_excluded_hosts($query){
+        if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return $query;
+        if ( !$value = $query->get('excluded_hosts') ) return $query;
+
+        if ( $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ){
+
+            if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
+            
+            $relation = null;
+            $operator = null;
+            $domains_meta_query = array();
+            switch($value){
+                case '1': //include
+                    $operator = 'LIKE';
+                    $relation = 'OR';
+                break;
+                case '-1': //exclude
+                    $operator = 'NOT LIKE';
+                    $relation = 'AND';
+                break;
+            }
+            
+            if($operator){
+                foreach($excluded_hosts as $domain){
+
+                    $domains_meta_query[] = array(
+                        'key'     =>    self::$link_url_metakey,
+                        'value'   =>    $domain,
+                        'compare' =>    $operator,
+                    );
+                }
+                
+                $domains_meta_query['relation'] = $relation;
+                $meta_query[] = $domains_meta_query;
+                $query->set( 'meta_query',$meta_query);
+            }
+            
+        }
+        return $query;
     }
 
     /*
@@ -549,51 +601,6 @@ class WPSSTM_Core_Track_Links{
 
         return true;
         
-    }
-    
-    /*
-    Remove some of the links before saving them as metas
-    */
-    public function autolinks_cleanup($links){
-
-        foreach((array)$links as $key=>$link){
-            $permalink = $link->permalink_url;
-            
-            if (strpos($permalink, 'spotify.com') !== false) { //we already store the spotify ID, no need to store this URL.
-                unset($links[$key]);
-            }
-            
-            if (strpos($permalink, 'itunes.apple.com') !== false) {
-                unset($links[$key]);
-            }
-            
-            if (strpos($permalink, 'music.youtube') !== false) {
-                unset($links[$key]);
-            }
-            
-            if (strpos($permalink, 'pandora.com') !== false) {
-                unset($links[$key]);
-            }
-            
-            if (strpos($permalink, 'play.google.com') !== false) {
-                unset($links[$key]);
-            }
-            
-            if (strpos($permalink, 'tidal.com') !== false) {
-                unset($links[$key]);
-            }
-            
-            if (strpos($permalink, 'napster.com') !== false) {
-                unset($links[$key]);
-            }
-            
-            if (strpos($permalink, 'yandex.ru') !== false) {
-                unset($links[$key]);
-            }
-            
-        }
-
-        return $links;
     }
 }
 
