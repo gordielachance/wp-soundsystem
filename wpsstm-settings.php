@@ -170,13 +170,23 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', 
             'player_settings'
         );
+        
+        /*
+        Track links
+        */
+        add_settings_section(
+            'track_links_settings', // ID
+            __('Track Links','wpsstm'), // Title
+            array( $this, 'section_desc_empty' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
 
         add_settings_field(
             'autolink', 
             __('Autolink','wpsstm'), 
             array( $this, 'autolink_callback' ), 
             'wpsstm-settings-page', 
-            'player_settings'
+            'track_links_settings'
         );
 
         /*
@@ -326,7 +336,7 @@ class WPSSTM_Settings {
             '<input type="checkbox" name="%s[autolink]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $enabled, true, false ),
-            __("If no link is set for a track, try to find an online link automatically.","wpsstm")
+            __("Try to get track links automatically if none have been set.","wpsstm")
         );
         
         /*
