@@ -59,10 +59,6 @@ class WPSSTM_Settings {
         if( isset( $input['trash-temporary-tracklists'] ) ){
             WPSSTM_Core_Tracklists::trash_temporary_tracklists();
         }
-        
-        if( isset( $input['trash-unplayable-links'] ) ){
-            //TO FIX
-        }
 
         /*
         Community user
@@ -298,15 +294,7 @@ class WPSSTM_Settings {
                 'wpsstm-settings-page', // Page
                 'settings_system'//section
             );
-            
-            add_settings_field(
-                'trash_unplayable_links', 
-                __('Trash unplayable links','wpsstm'), 
-                array( $this, 'trash_unplayable_links_callback' ), 
-                'wpsstm-settings-page', // Page
-                'settings_system'//section
-            );
-            
+
         }
     }
     
@@ -614,19 +602,7 @@ class WPSSTM_Settings {
             $desc
         );
     }
-    
-    function trash_unplayable_links_callback(){
-        $count = 0;
-        $desc = sprintf(__("Delete %d unplayable links that have been created with the community user.","wpsstm"),$count);
-        printf(
-            '<input type="checkbox" name="%s[trash-unplayable-links]" value="on" %s disabled="disabled" /> %s',
-            wpsstm()->meta_name_options,
-             disabled($count,0,false),
-            $desc
-        );
-    }
 
-    
 	function settings_page() {
         ?>
         <div class="wrap">
