@@ -132,8 +132,9 @@ class WpsstmTrack extends HTMLElement{
         populate existing links
         */
         var trackLinks = $(track).find('wpsstm-track-link');
+        var playableTrackLinks = trackLinks.filter('.wpsstm-playable-link');
 
-        if (!trackLinks.length && track.did_links_request){
+        if (!playableTrackLinks.length && track.did_links_request){
             $(track).addClass('track-error');
         }
 
@@ -147,32 +148,24 @@ class WpsstmTrack extends HTMLElement{
         $(track).attr('data-wpsstm-links-count',trackLinks.length);
         linkCountEl.text(trackLinks.length);
 
-        //manage single link
-        
-        trackLinks.each(function() {
-            var links_container = $(this);
-            var links_list_el = links_container.find('.wpsstm-track-links-list');
+        // sort track links
+        var links_container = $(this);
+        var links_list_el = links_container.find('.wpsstm-track-links-list');
 
-            // sort track links
-            links_list_el.sortable({
-                axis: "y",
-                items : "[data-wpsstm-link-id]",
-                handle: '.wpsstm-track-link-action-move a',
-                update: function(event, ui) {
+        links_list_el.sortable({
+            axis: "y",
+            items : "wpsstm-track-link",
+            handle: '.wpsstm-track-link-action-move a',
+            update: function(event, ui) {
 
-                    var linkOrder = links_list_el.sortable('toArray', {
-                        attribute: 'data-wpsstm-link-id'
-                    });
+                var linkOrder = links_list_el.sortable('toArray', {
+                    attribute: 'data-wpsstm-link-id'
+                });
 
-                    var reordered = track.update_links_order(linkOrder); //TOUFIX bad logic
+                var reordered = track.update_links_order(linkOrder); //TOUFIX bad logic
 
-                }
-            });
-
+            }
         });
-        
-        
-        
 
         //track popups within iframe
         $(track).on('click', 'a.wpsstm-track-popup,li.wpsstm-track-popup>a', function(e) {
@@ -574,7 +567,7 @@ class WpsstmTrack extends HTMLElement{
 
     }
 
-    static update_links_order(link_ids){
+    update_links_order(link_ids){
         
         var track = this;
         var track_instances = track.get_instances();
@@ -595,7 +588,7 @@ class WpsstmTrack extends HTMLElement{
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                track_instances.addClass('track-loading');
+                track_instances.addClass('track-reloading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -613,7 +606,7 @@ class WpsstmTrack extends HTMLElement{
         })
 
         ajax.always(function() {
-            track_instances.removeClass('track-loading');
+            track_instances.removeClass('track-reloading');
         });
         
         
