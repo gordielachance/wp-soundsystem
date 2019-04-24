@@ -92,7 +92,7 @@ class WpsstmLink extends HTMLElement{
         self.post_id =          Number($(self).attr('data-wpsstm-link-id'));
         self.src =              $(self).attr('data-wpsstm-stream-src');
         self.type =             $(self).attr('data-wpsstm-stream-type');
-        self.can_play =         ( Boolean(self.type) && Boolean(self.src) );
+        self.can_play =         $(self).hasClass('wpsstm-playable-link');
         self.duration =         undefined;
 
         //delete link

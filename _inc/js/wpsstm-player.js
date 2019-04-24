@@ -433,12 +433,13 @@ class WpsstmPlayer extends HTMLElement{
         
         var allTracks = $(player).find('.player-queue wpsstm-track');
         var requestedTrack = $(player).find('.player-queue wpsstm-track').get(track_idx);
+        var requestedLink = $(requestedTrack).find('wpsstm-track-link').get(link_idx);
         var requestedTrackInstances = requestedTrack.get_instances();
 
         if (player.current_track){
 
             //reclick
-            if ( player.current_track == requestedTrack ){
+            if ( ( player.current_track === requestedTrack ) && ( player.current_link === requestedLink) ){
 
                 requestedTrack.debug('reclick');
                 var isPlaying = ( requestedTrack.getAttribute("trackstatus") == 'playing' );

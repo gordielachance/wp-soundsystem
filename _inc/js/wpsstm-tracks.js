@@ -277,7 +277,7 @@ class WpsstmTrack extends HTMLElement{
         }
         
         success.always(function() {
-            var links = $(track).find('wpsstm-track-link');
+            var links = $(track).find('wpsstm-track-link.wpsstm-playable-link');
             track.can_play = (links.length > 0);    
         });
 
@@ -700,11 +700,12 @@ class WpsstmTrack extends HTMLElement{
         /*
         This function will loop until a promise is resolved
         */
-        var links = $(track).find('wpsstm-track-link.wpsstm-playable-link');
+        var links = $(track).find('wpsstm-track-link');
 
         if (links.length){
+            
             var links_after = links.slice(link_idx); //including this one
-            var links_before = links.slice(0,link_idx - 1);
+            var links_before = links.slice(0,link_idx);
 
             //which one should we play?
             var links_reordered = $.merge(links_after,links_before);
@@ -713,6 +714,7 @@ class WpsstmTrack extends HTMLElement{
             });
 
         }
+        
 
         if (!links_playable.length){
             success.reject("no playable links to iterate");
