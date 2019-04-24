@@ -33,13 +33,12 @@ Audio links can be linked to your tracks with the *Tracks Links* metabox.
 
 = Tracks Links =
 
-You can link several audio links to any track.  
-It can be a the path of an audio file or even music services links like Youtube, or Soundcloud!
+You can attach links any track; including links that can stream audio (Youtube, Soundcloud, audio files...) directly to our player!
 
 = Autolink (requires an API key) =
 
-If you don't link audio links to your track manually, you can enable our *autolink* module.  
-It will search for remote links and attach them to your tracks. 
+If you don't attach links to your track manually, you can enable our *autolink* module.  
+It will search for remote links and attach them to your tracks automatically.
 
 = Radios =
 
@@ -157,7 +156,12 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= XXX =
+= 2.6.3 =
+* "Sources" renamed to "Track Links" (post type, some metas, some filters renamed)
+* Fixed toggle playable track link
+* Fixed sort track links
+
+= 2.6.2 =
 * fixed OnlineRadioBox service
 * fixed bugfix XSPF export
 * track links JS/CSS improvements
