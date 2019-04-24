@@ -5,8 +5,8 @@ class WPSSTM_Player{
     var $options = array();
 
     function __construct() {
-        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ) );
-        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ) );
+        add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ), 5 );
+        add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_player_scripts_styles' ), 5 );
         add_action( 'wp_footer', array($this,'bottom_player'));
         add_action( 'admin_footer', array($this,'bottom_player'));
 
