@@ -106,7 +106,6 @@ wpsstm-track-link{
         
         &.link-active{
             @include display-flex();
-            font-weight: bold;
         }
 
         .wpsstm-track-link-action-provider a:before{
