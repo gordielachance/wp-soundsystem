@@ -315,6 +315,7 @@ class WPSSTM_Track_Link{
     }
     
     function is_playable_link(){
+        if ( !wpsstm()->get_options('player_enabled') ) return;
         return (bool)$this->get_link_mimetype();
     }
     
