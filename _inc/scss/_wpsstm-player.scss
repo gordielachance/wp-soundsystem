@@ -43,32 +43,28 @@ wpsstm-player{
             margin-top:auto;
             .wpsstm-player-action{
 
-                a{
-                    span{
-                        display:none;
-                    }
+                span{
+                    display:none;
                 }
                 
                 &.wpsstm-player-action-queue{
-                    a{
-                        &:before{
-                            content: "\f078";//.chevron-down;
-                        }
-                        &.active:before{
-                            content: "\f077";//.fa-chevron-up;
-                        }
+                    &:before{
+                        content: "\f078";//.chevron-down;
+                    }
+                    &.active:before{
+                        content: "\f077";//.fa-chevron-up;
                     }
                 }
 
                 &.wpsstm-player-action-scrobbler{
                     @include opacity(.25);
-                    a:before{
+                    &:before{
                         content:"\f202"; //.fa-lastfm
                     }
-                    &.lastfm-loading a{
+                    &.lastfm-loading{
                         @extend .wpsstm-loading-icon;
                     }
-                    &.scrobbler-error a:before{
+                    &.scrobbler-error:before{
                         content:"\f071"; //.fa-exclamation-triangle;
                     }
                     &.active{

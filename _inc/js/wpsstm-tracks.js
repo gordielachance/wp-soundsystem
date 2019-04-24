@@ -138,7 +138,7 @@ class WpsstmTrack extends HTMLElement{
             $(track).addClass('track-error');
         }
 
-        var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links a');
+        var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
         var linkCountEl = toggleLinksEl.find('.wpsstm-links-count');
         if ( !linkCountEl.length ){ //create item
             linkCountEl = $('<span class="wpsstm-links-count"></span>');
@@ -155,7 +155,7 @@ class WpsstmTrack extends HTMLElement{
         links_list_el.sortable({
             axis: "y",
             items : "wpsstm-track-link",
-            handle: '.wpsstm-track-link-action-move a',
+            handle: '.wpsstm-track-link-action-move',
             update: function(event, ui) {
 
                 var linkOrder = links_list_el.sortable('toArray', {
@@ -206,32 +206,30 @@ class WpsstmTrack extends HTMLElement{
         });
 
         //toggle favorite
-        $(track).on('click','.wpsstm-track-action-favorite a,.wpsstm-track-action-unfavorite a', function(e) {
+        $(track).on('click','.wpsstm-track-action-favorite,.wpsstm-track-action-unfavorite', function(e) {
 
             e.preventDefault();
-
-            var action_el = $(this).parents('.wpsstm-track-action');
-            var do_love = action_el.hasClass('action-favorite');
+            var do_love = $(this).hasClass('action-favorite');
             
             track.toggle_favorite(do_love);        
 
         });
 
         //dequeue
-        $(track).on('click','.wpsstm-track-action-dequeue a', function(e) {
+        $(track).on('click','.wpsstm-track-action-dequeue', function(e) {
             e.preventDefault();
             track.dequeue_track();
         });
 
         //delete
-        $(track).on('click','.wpsstm-track-action-trash a', function(e) {
+        $(track).on('click','.wpsstm-track-action-trash', function(e) {
             e.preventDefault();
             track.trash_track();
         });
 
         //links
 
-        var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links a');
+        var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
 
         toggleLinksEl.click(function(e) {
             e.preventDefault();
@@ -439,9 +437,9 @@ class WpsstmTrack extends HTMLElement{
         var track_instances = track.get_instances();
 
         if (do_love){
-            var link_el = track_instances.find('.wpsstm-track-action-favorite a');
+            var link_el = track_instances.find('.wpsstm-track-action-favorite');
         }else{
-            var link_el = track_instances.find('.wpsstm-track-action-unfavorite a');
+            var link_el = track_instances.find('.wpsstm-track-action-unfavorite');
         }
 
         var ajax_data = {
@@ -490,7 +488,7 @@ class WpsstmTrack extends HTMLElement{
     dequeue_track(){
         var track = this;
         var track_instances = track.get_instances();
-        var link_el = track_instances.find('.wpsstm-track-action-dequeue a');
+        var link_el = track_instances.find('.wpsstm-track-action-dequeue');
         
         var ajax_data = {
             action:         'wpsstm_subtrack_dequeue',
@@ -531,7 +529,7 @@ class WpsstmTrack extends HTMLElement{
         
         var track = this;
         var track_instances = track.get_instances();
-        var link_el = track_instances.find('.wpsstm-track-action-trash a');
+        var link_el = track_instances.find('.wpsstm-track-action-trash');
 
         var ajax_data = {
             action:     'wpsstm_track_trash',

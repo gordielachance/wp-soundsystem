@@ -96,7 +96,7 @@ class WpsstmLink extends HTMLElement{
         self.duration =         undefined;
 
         //delete link
-        $(self).on('click', '.wpsstm-track-link-action-trash a', function(e) {
+        $(self).on('click', '.wpsstm-track-link-action-trash', function(e) {
             e.preventDefault();
             self.trash_link();
         });
@@ -122,7 +122,7 @@ class WpsstmLink extends HTMLElement{
     
     trash_link(){
         var self = this;
-        var action_link = $(self).find('.wpsstm-track-link-action-trash a');
+        var action_link = $(self).find('.wpsstm-track-link-action-trash');
 
         var ajax_data = {
             action:         'wpsstm_trash_link',

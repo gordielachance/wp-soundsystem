@@ -102,14 +102,12 @@ wpsstm-track{
     .wpsstm-track-actions{
         display:none;
         margin-left: auto;
-        li.wpsstm-action{
-            display:inline;
-            padding:0 .1em;
+        .wpsstm-action{
             @extend .wpsstm-action-icon;
         }
     }
 
-    .wpsstm-track-actions,.wpsstm-track-links{
+    .wpsstm-track-links{
         ul{
             list-style: none;
             padding:0;
@@ -146,7 +144,7 @@ wpsstm-track{
     }
 
     &:hover,&.track-active{
-        ul.wpsstm-track-actions{
+        .wpsstm-track-actions{
             @include display-flex();
             @include flex-shrink(0);
         }
@@ -191,7 +189,7 @@ wpsstm-track{
 }
 
 .wpsstm-track-actions{
-    a{
+    .wpsstm-action{
         @include opacity(.8);
         &:hover{
             @include opacity(1);
@@ -200,50 +198,46 @@ wpsstm-track{
 
 }
 .wpsstm-track-action{
-    a{
-        span{
-            display:none;
-        }
+    span{
+        display:none;
     }
 
-    &.wpsstm-track-action-share a:before{
+    &.wpsstm-track-action-share:before{
         content:"\f1e0";//.fa-share-alt;
     }
-    &.wpsstm-track-action-trash a:before{
+    &.wpsstm-track-action-trash:before{
         content: "\f1f8";//.fa-trash;
     }
-    &.wpsstm-track-action-dequeue a:before{
+    &.wpsstm-track-action-dequeue:before{
         content: "\f127";//.fa-chain-broken;
     }
-    &.wpsstm-track-action-links a:before{
+    &.wpsstm-track-action-links:before{
         content: "\f0c2";//.fa-cloud;
     }
-    &.wpsstm-track-action-move a:before{
+    &.wpsstm-track-action-move:before{
         content: "\f07d";//.fa-arrows-v;
     }
-    &.wpsstm-track-action-toggle-tracklists a:before{
+    &.wpsstm-track-action-toggle-tracklists:before{
         content: "\f03a";//.fa-list;
     }
-    &.wpsstm-track-action-edit a:before{
+    &.wpsstm-track-action-edit:before{
         content: "\f040";//.fa-pencil;
     }
-    &.wpsstm-track-action-edit-backend a:before{
+    &.wpsstm-track-action-edit-backend:before{
         content:"\f084";//.fa-key;
     }
-    &.wpsstm-track-action-favorite a:before{
+    &.wpsstm-track-action-favorite:before{
         content: "\f08a";//.fa-heart-o;
     }
     &.wpsstm-track-action-toggle-links{
-        a{
-            .wpsstm-links-count{
-                display:inherit;
-            }
-            &:before{
-                content: "\f078";//.chevron-down;
-            }
-            &.active:before{
-                content: "\f077";//.fa-chevron-up;
-            }
+        .wpsstm-links-count{
+            display:inline;
+        }
+        &:before{
+            content: "\f078";//.chevron-down;
+        }
+        &.active:before{
+            content: "\f077";//.fa-chevron-up;
         }
         .wpsstm-links-count{
             font-weight: bold;

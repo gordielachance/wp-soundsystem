@@ -101,8 +101,6 @@ function wpsstm_get_blank_action(){
         'desc' =>           null,
         'href' =>           '#',
         'classes' =>        array(),
-        'link_before' =>    null,
-        'link_after' =>     null,
         'has_cap' =>        true,
         'target' =>         null,
     );
@@ -123,26 +121,20 @@ function get_actions_list($actions,$prefix){
         $classes[] = sprintf('wpsstm-%s-action-%s',$prefix,$slug);
         $classes = array_unique($classes);
 
-        $action_attr = array(
-            'class'     => implode(" ",$classes),
-        );
-
         $link_attr = array(
-            'title' =>                  ($action['desc']) ?$action['desc'] : $action['text'],
-            'href' =>                   $action['href'],
-            'target' =>                 $action['target'],
+            'title' =>      ($action['desc']) ?$action['desc'] : $action['text'],
+            'href' =>       $action['href'],
+            'target' =>     $action['target'],
+            'class' =>      implode(" ",$classes),
         );
         $link_attr = array_filter($link_attr);
         
         $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$action['text']);
-        $link = $action['link_before'].$link.$action['link_after'];
-        
-        $list_item = sprintf('<li %s>%s</li>',wpsstm_get_html_attr($action_attr),$link);
-        $track_actions_list[] = $list_item;
+        $track_actions_list[] = $link;
     }
 
     if ( !empty($track_actions_list) ){
-        return sprintf('<ul class="wpsstm-%s-actions wpsstm-actions-list">%s</ul>',$prefix,implode("\n",$track_actions_list));
+        return sprintf('<div class="wpsstm-%s-actions wpsstm-actions-list">%s</div>',$prefix,implode("\n",$track_actions_list));
     }
 }
 

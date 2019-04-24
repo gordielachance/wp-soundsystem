@@ -84,21 +84,20 @@ wpsstm-track-link{
             .wpsstm-track-link-action{
                 margin:auto!important;
 
-                a{
-                    &:before{
-                        margin-right:0;
-                    }
-                    > span{
-                        display:none;
-                    }
+                &:before{
+                    margin-right:0;
                 }
-                &.wpsstm-track-link-action-trash a:before{
+                > span{
+                    display:none;
+                }
+                
+                &.wpsstm-track-link-action-trash:before{
                     content: "\f1f8";//.fa-trash;
                 }
-                &.wpsstm-track-link-action-move a:before{
+                &.wpsstm-track-link-action-move:before{
                     content: "\f07d";//.fa-arrows-v;
                 }
-                &.wpsstm-track-link-action-edit-backend a:before{
+                &.wpsstm-track-link-action-edit-backend:before{
                     content:"\f084";//.fa-key;
                 }
             }
@@ -108,14 +107,14 @@ wpsstm-track-link{
             @include display-flex();
         }
 
-        .wpsstm-track-link-action-provider a:before{
+        .wpsstm-track-link-action-provider:before{
             content:"\f0c1";//fa-link
         }
 
-        &[data-wpsstm-stream-type="video/soundcloud"] .wpsstm-track-link-action-provider a:before{
+        &[data-wpsstm-stream-type="video/soundcloud"] .wpsstm-track-link-action-provider:before{
             content:"\f1be";//fa-soundcloud
         }
-        &[data-wpsstm-stream-type="video/youtube"] .wpsstm-track-link-action-provider a:before{
+        &[data-wpsstm-stream-type="video/youtube"] .wpsstm-track-link-action-provider:before{
             content:"\f167";//fa-youtube
         }
     }

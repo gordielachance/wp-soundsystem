@@ -2,7 +2,7 @@
 @import "compass/typography/text/ellipsis";
 @import "_wpsstm-shared";
 
-ul.wpsstm-actions-list{
+.wpsstm-actions-list{
     margin:0;
     padding:0;
     list-style: none;
@@ -13,28 +13,23 @@ ul.wpsstm-actions-list{
     
     .wpsstm-action{
         display:inline-block;
-        a{
-            @extend .wpsstm-no-underline;
-            @extend .wpsstm-icon;
-            &.action-loading{
-                @extend .wpsstm-loading-icon;
-                @extend .wpsstm-freeze;
-            }
-            &.action-error:before{
-                content:"\f071"; //.fa-exclamation-triangle;
-            }
+        margin-right:.5em;
+        @extend .wpsstm-no-underline;
+        @extend .wpsstm-icon;
+        &.action-loading{
+            @extend .wpsstm-loading-icon;
+            @extend .wpsstm-freeze;
         }
-        a:before{
-            margin-right:.5em;
+        &.action-error:before{
+            content:"\f071"; //.fa-exclamation-triangle;
         }
-        
-        &.action-favorite a:before,
-        &.action-unfavorite:hover a:before
+        &.action-favorite:before,
+        &.action-unfavorite:hover:before
         {
             content: "\f08a";//.fa-heart-o;
         }
-        &.action-unfavorite a:before,
-        &.action-favorite:hover a:before
+        &.action-unfavorite:before,
+        &.action-favorite:hover:before
         {
             content: "\f004";//.fa-heart;
         }

@@ -103,7 +103,7 @@ class WpsstmPlayer extends HTMLElement{
         });
 
         //toggle queue
-        $(player).find('.wpsstm-player-action-queue a').click(function(e) {
+        $(player).find('.wpsstm-player-action-queue').click(function(e) {
             e.preventDefault();
             $(this).toggleClass('active');
             $(player).find('.player-queue').toggleClass('active');

@@ -180,37 +180,31 @@ wpsstm-tracklist{
 .wpsstm-tracklist-actions{
 
     .wpsstm-tracklist-action{
-        &.wpsstm-tracklist-action-refresh a:before,
-        &.wpsstm-tracklist-action-import a:before{
+        &.wpsstm-tracklist-action-refresh:before,
+        &.wpsstm-tracklist-action-import:before{
             content:"\f021";//.fa-refresh;
         }
-        &.wpsstm-tracklist-action-share a:before{
+        &.wpsstm-tracklist-action-share:before{
             content:"\f1e0";//.fa-share-alt;
         }
-        &.wpsstm-tracklist-action-export a:before{
+        &.wpsstm-tracklist-action-export:before{
             content:"\f019";//.fa-download;
         }
 
-        &.wpsstm-tracklist-action-new-subtrack{
-             a:before{
-                 content:"\f055";//.fa-plus-circle;
-            }
+        &.wpsstm-tracklist-action-new-subtrack:before{
+            content:"\f055";//.fa-plus-circle;
         }
-        &.wpsstm-tracklist-action-live,
-        &.wpsstm-tracklist-action-static{
-            a:before{
-                content:"\f09e";//.fa-rss;
-            }
-            &.wpsstm-tracklist-action-live{
-                a:before{
-                    @include opacity(.25);
-                }
-            }
+        &.wpsstm-tracklist-action-live:before,
+        &.wpsstm-tracklist-action-static:before{
+            content:"\f09e";//.fa-rss;
         }
-        &.wpsstm-tracklist-action-edit-backend a:before{
+        &.wpsstm-tracklist-action-live:before{
+            @include opacity(.25);
+        }
+        &.wpsstm-tracklist-action-edit-backend:before{
             content:"\f084";//.fa-key;
         }
-        &.wpsstm-tracklist-action-trash a:before{
+        &.wpsstm-tracklist-action-trash:before{
             content: "\f1f8";//.fa-trash;
         }
     }
@@ -246,10 +240,8 @@ ul.tracklist-list{
                 @include flex-shrink(0);
                 text-align:right;
                 visibility:hidden;
-                ul{
-                    li{
-                        @extend .wpsstm-action-icon;
-                    }
+                .wpsstm-action{
+                    @extend .wpsstm-action-icon;
                 }
             }
         }
