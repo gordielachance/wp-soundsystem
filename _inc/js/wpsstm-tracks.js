@@ -700,7 +700,7 @@ class WpsstmTrack extends HTMLElement{
         /*
         This function will loop until a promise is resolved
         */
-        var links = $(track).find('wpsstm-track-link');
+        var links = $(track).find('wpsstm-track-link.wpsstm-playable-link');
 
         if (links.length){
             var links_after = links.slice(link_idx); //including this one

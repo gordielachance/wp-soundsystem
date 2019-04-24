@@ -1,7 +1,7 @@
 var $ = jQuery.noConflict();
 
 //play link
-$(document).on('click', '.wpsstm-link-icon,.wpsstm-link-title', function(e) {
+$(document).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link.wpsstm-playable-link .wpsstm-link-title', function(e) {
     e.preventDefault();
     var link = this.closest('wpsstm-track-link');
     var track = this.closest('wpsstm-track');
@@ -90,14 +90,10 @@ class WpsstmLink extends HTMLElement{
 
         self.index =            Number($(self).attr('data-wpsstm-link-idx'));
         self.post_id =          Number($(self).attr('data-wpsstm-link-id'));
-        self.src =              $(self).attr('data-wpsstm-link-src');
-        self.type =             $(self).attr('data-wpsstm-link-type');
+        self.src =              $(self).attr('data-wpsstm-stream-src');
+        self.type =             $(self).attr('data-wpsstm-stream-type');
         self.can_play =         ( Boolean(self.type) && Boolean(self.src) );
         self.duration =         undefined;
-
-        if (!this.can_play){
-            $(this).addClass('link-error');
-        }
 
         //delete link
         $(self).on('click', '.wpsstm-track-link-action-trash a', function(e) {

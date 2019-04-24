@@ -16,7 +16,7 @@ class WPSSTM_Souncloud{
         $this->options = wp_parse_args(get_option( self::$soundcloud_options_meta_name),$options_default);
         
         add_filter('wpsstm_get_link_mimetype',array($this,'get_soundcloud_link_type'),10,2);
-        add_filter('wpsstm_get_link_stream_url',array($this,'get_soundcloud_stream_url'),10,2);
+        add_filter('wpsstm_get_stream_url',array($this,'get_soundcloud_stream_url'),10,2);
         if ( $this->get_options('client_id') ){
             add_filter('wpsstm_wizard_service_links',array($this,'register_soundcloud_service_links'), 7);
             add_filter('wpsstm_remote_presets',array($this,'register_soundcloud_preset'));

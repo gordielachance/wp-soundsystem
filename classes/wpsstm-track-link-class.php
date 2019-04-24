@@ -219,26 +219,31 @@ class WPSSTM_Track_Link{
     function get_single_link_attributes(){
         
         $attr = array(
-            'data-wpsstm-link-id' =>              $this->post_id,
-            'data-wpsstm-link-domain' =>          wpsstm_get_url_domain($this->permalink_url),
-            'data-wpsstm-link-idx' =>             $this->track->current_link,
-            'data-wpsstm-link-src' =>             $this->get_stream_url(),
-            'data-wpsstm-link-type' =>            $this->get_link_mimetype(),
-            'data-wpsstm-community-link' =>       (int)wpsstm_is_community_post($this->post_id),
-            'class' =>                              implode( ' ',$this->get_link_class() ),
+            'data-wpsstm-link-id' =>            $this->post_id,
+            'data-wpsstm-link-domain' =>        wpsstm_get_url_domain($this->permalink_url),
+            'data-wpsstm-link-idx' =>           $this->track->current_link,
+            'data-wpsstm-community-link' =>     (int)wpsstm_is_community_post($this->post_id),
+            'class' =>                          implode( ' ',$this->get_link_class() ),
         );
+        
+        if ( $this->is_playable_link() ){
+            $attr_stream = array(
+                'data-wpsstm-stream-src' =>         $this->get_stream_url(),
+                'data-wpsstm-stream-type' =>        $this->get_link_mimetype(),
+            );
+            $attr = array_merge($attr,$attr_stream);
+        }
+        
         return $attr;
     }
     
     function get_link_class(){
-        $classes = array('wpsstm-link');
+        $classes = array(
+            'wpsstm-link',
+            $this->is_playable_link() ? 'wpsstm-playable-link' : null
+        );
         $classes = apply_filters('wpsstm_link_classes',$classes,$this);
         return array_filter(array_unique($classes));
-    }
-    
-    function get_stream_url(){
-        if ($this->stream_url) return $this->stream_url;
-        return $this->stream_url = apply_filters('wpsstm_get_link_stream_url',$this->permalink_url,$this);
     }
     
     function get_link_action_url($action = null){
@@ -257,7 +262,7 @@ class WPSSTM_Track_Link{
         return $url;
     }
     
-    function get_link_links($context = null){
+    function get_link_actions($context = null){
         $actions = array();
         
         $link_type_obj = get_post_type_object(wpsstm()->post_type_track_link);
@@ -296,15 +301,36 @@ class WPSSTM_Track_Link{
             );
         }
 
+        if ( $this->is_playable_link() ){
+            $actions['play'] = array(
+                'text' =>       __('Play', 'wpsstm'),
+                'href' =>       '#',
+            );
+            ?>
+            <?php
+        }
+        
+
         return apply_filters('wpsstm_link_actions',$actions,$context);
+    }
+    
+    function is_playable_link(){
+        return (bool)$this->get_link_mimetype();
+    }
+    
+    function get_stream_url(){
+        if ($this->stream_url) return $this->stream_url;
+        return $this->stream_url = apply_filters('wpsstm_get_stream_url',$this->permalink_url,$this);
     }
 
     function get_link_mimetype(){
-        if ($this->mime_type !== null) return $this->mime_type; //already populated
+        if ( !$stream_url = $this->get_stream_url() ) return;
+        if ( $this->mime_type !== null ) return $this->mime_type; //already populated
         $mime = false;
         
         //audio file
-        $filetype = wp_check_filetype($this->permalink_url);
+        //TOUFIX TOUCHECK maybe this is slowing down the page rendering; and we should check this with ajax
+        $filetype = wp_check_filetype($stream_url);
         if ( $ext = $filetype['ext'] ){
             $audio_extensions = wp_get_audio_extensions();
             if ( in_array($ext,$audio_extensions) ){

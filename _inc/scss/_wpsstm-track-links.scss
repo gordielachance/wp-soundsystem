@@ -49,34 +49,29 @@ wpsstm-track-link{
             }
         }
         
-        .wpsstm-link-title, .wpsstm-link-icon{
+        .wpsstm-track-link-action-play{
             @extend .wpsstm-can-click;
         }
         
-        .wpsstm-link-icon{
-            display:inline-block;
-            width: 1.5em;
+        .wpsstm-track-link-action-play{
             @extend .wpsstm-icon;
         }
         
-        &.link-loading .wpsstm-link-icon{
+        &.link-loading .wpsstm-track-link-action-play{
             @extend .wpsstm-loading-icon;
         }
         
-        &:not(.link-playing) .wpsstm-link-icon:before{
+        &:not(.link-playing) .wpsstm-track-link-action-play:before{
             content:"\f04b"; //.fa-play
         }
 
-        &.link-playing .wpsstm-link-icon:before{
+        &.link-playing .wpsstm-track-link-action-play:before{
             content:"\f04c"; //.fa-pause;
         }
 
-        &.link-error .wpsstm-link-icon{
+        &.link-error .wpsstm-track-link-action-play{
             &:before{
                 content:"\f071"; //.fa-exclamation-triangle
-            }
-            label{
-                text-decoration: line-through;
             }
         }
         
@@ -118,10 +113,10 @@ wpsstm-track-link{
             content:"\f0c1";//fa-link
         }
 
-        &[data-wpsstm-link-type="video/soundcloud"] .wpsstm-track-link-action-provider a:before{
+        &[data-wpsstm-stream-type="video/soundcloud"] .wpsstm-track-link-action-provider a:before{
             content:"\f1be";//fa-soundcloud
         }
-        &[data-wpsstm-link-type="video/youtube"] .wpsstm-track-link-action-provider a:before{
+        &[data-wpsstm-stream-type="video/youtube"] .wpsstm-track-link-action-provider a:before{
             content:"\f167";//fa-youtube
         }
     }

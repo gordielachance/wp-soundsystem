@@ -1,9 +1,8 @@
 <?php
 
 class WPSSTM_Core_Track_Links{
-    static $link_url_metakey = '_wpsstm_link_url';
-    static $autolink_time_metakey = '_wpsstm_autolink_time'; //to store the musicbrainz datas
-
+    static $link_url_metakey = '_wpsstm_source_url';
+    static $autolink_time_metakey = '_wpsstm_autosource_time'; //to store the musicbrainz datas
     function __construct() {
         global $wpsstm_link;
 
@@ -300,12 +299,8 @@ class WPSSTM_Core_Track_Links{
         $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
         ?>
-
         <p>
-            <?php _e('Add links to this track.  It could be a local audio file or a link to a music service.','wpsstm');?>
-        </p>
-        <p>
-            <?php _e("If no links are set and that the 'Autolink' setting is enabled, We'll try to find playable links automatically when the tracklist is played.",'wpsstm');?>
+            <?php _e("If the player and the 'Autolink' setting are enabled, we'll try to find playable links automatically when the tracklist starts.",'wpsstm');?>
         </p>
 
         <?php
