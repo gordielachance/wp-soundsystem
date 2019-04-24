@@ -1,8 +1,8 @@
 <?php
 
 class WPSSTM_Core_Track_Links{
-    static $link_url_metakey = '_wpsstm_source_url';
-    static $autolink_time_metakey = '_wpsstm_autosource_time'; //to store the musicbrainz datas
+    static $link_url_metakey = '_wpsstm_link_url';
+    static $autolink_time_metakey = '_wpsstm_autolink_time'; //to store the musicbrainz datas
     function __construct() {
         global $wpsstm_link;
 

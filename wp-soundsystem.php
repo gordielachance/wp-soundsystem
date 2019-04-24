@@ -53,7 +53,7 @@ class WP_SoundSystem {
     public $post_type_album = 'wpsstm_release';
     public $post_type_artist = 'wpsstm_artist';
     public $post_type_track = 'wpsstm_track';
-    public $post_type_track_link = 'wpsstm_source';
+    public $post_type_track_link = 'wpsstm_track_link';
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     
@@ -361,10 +361,10 @@ class WP_SoundSystem {
                 }
             }
             
-            if ($current_version < 203){
+            if ($current_version < 204){
                 
                 //rename post type
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '' WHERE post_type = '%s'",$this->post_type_track_link,'wpsstm_source' );
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE post_type = '%s'",$this->post_type_track_link,'wpsstm_source' );
                 $result = $wpdb->get_results ( $querystr );
                 
                 //rename _wpsstm_source_url metas
