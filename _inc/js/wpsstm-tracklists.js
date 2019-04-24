@@ -325,7 +325,7 @@ class WpsstmTracklist extends HTMLElement{
 
         }else{
             tracklist.isExpired = true;
-            tracklist.addClass('tracklist-expired');
+            $(tracklist).addClass('tracklist-expired');
         }
         
         if (remaining_sec < 0){
