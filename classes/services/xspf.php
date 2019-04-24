@@ -18,7 +18,7 @@ class WPSSTM_XSPF{
                 'track_artist'      => array('path'=>'creator'),
                 'track_title'       => array('path'=>'title'),
                 'track_album'       => array('path'=>'album'),
-                'track_source_urls' => array('path'=>'location'),
+                'track_link_urls'   => array('path'=>'location'),
                 'track_image'       => array('path'=>'image')
             );
         }

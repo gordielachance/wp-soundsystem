@@ -1,11 +1,11 @@
 var $ = jQuery.noConflict();
 
-//play source
-$(document).on('click', '.wpsstm-source-icon,.wpsstm-source-title', function(e) {
+//play link
+$(document).on('click', '.wpsstm-link-icon,.wpsstm-link-title', function(e) {
     e.preventDefault();
-    var source = this.closest('wpsstm-source');
+    var link = this.closest('wpsstm-track-link');
     var track = this.closest('wpsstm-track');
-    var sourceIdx = Array.from(source.parentNode.children).indexOf(source);
+    var linkIdx = Array.from(link.parentNode.children).indexOf(link);
     
     if (track.queueNode){ //page track, get the queue track
         track = track.queueNode;
@@ -15,18 +15,18 @@ $(document).on('click', '.wpsstm-source-icon,.wpsstm-source-title', function(e) 
     
     player = track.closest('wpsstm-player');
 
-    //toggle tracklist sources
+    //toggle tracklist links
     if ( !$(track).hasClass('track-playing') ){
-        var list = $(track).find('.wpsstm-track-sources-list');
+        var list = $(track).find('.wpsstm-track-links-list');
         $( list ).removeClass('active');
     }
 
 
-    player.play_queue(trackIdx,sourceIdx);
+    player.play_queue(trackIdx,linkIdx);
 
 });
 
-class WpsstmSource extends HTMLElement{
+class WpsstmLink extends HTMLElement{
     constructor() {
         super(); //required to be first
         
@@ -43,7 +43,7 @@ class WpsstmSource extends HTMLElement{
         });
     }
     connectedCallback(){
-        //console.log("SOURCE CONNECTED!");
+        //console.log("LINK CONNECTED!");
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
         */
@@ -74,13 +74,13 @@ class WpsstmSource extends HTMLElement{
     ///
     
     debug(msg){
-        var debug = {message:msg,source:this};
+        var debug = {message:msg,link:this};
         wpsstm_debug(debug);
     }
     
     get_instances(){
         var self = this;
-        return $(document).find('wpsstm-source[data-wpsstm-source-id="'+self.post_id+'"]');
+        return $(document).find('wpsstm-track-link[data-wpsstm-link-id="'+self.post_id+'"]');
     }
     
     render(){
@@ -88,21 +88,21 @@ class WpsstmSource extends HTMLElement{
         
         self.track =            self.closest('wpsstm-track');
 
-        self.index =            Number($(self).attr('data-wpsstm-source-idx'));
-        self.post_id =          Number($(self).attr('data-wpsstm-source-id'));
-        self.src =              $(self).attr('data-wpsstm-source-src');
-        self.type =             $(self).attr('data-wpsstm-source-type');
+        self.index =            Number($(self).attr('data-wpsstm-link-idx'));
+        self.post_id =          Number($(self).attr('data-wpsstm-link-id'));
+        self.src =              $(self).attr('data-wpsstm-link-src');
+        self.type =             $(self).attr('data-wpsstm-link-type');
         self.can_play =         ( Boolean(self.type) && Boolean(self.src) );
         self.duration =         undefined;
 
         if (!this.can_play){
-            $(this).addClass('source-error');
+            $(this).addClass('link-error');
         }
 
-        //delete source
-        $(self).on('click', '.wpsstm-source-action-trash a', function(e) {
+        //delete link
+        $(self).on('click', '.wpsstm-track-link-action-trash a', function(e) {
             e.preventDefault();
-            self.trash_source();
+            self.trash_link();
         });
 
     }
@@ -124,16 +124,16 @@ class WpsstmSource extends HTMLElement{
         return filtered;
     }
     
-    trash_source(){
+    trash_link(){
         var self = this;
-        var source_action_links = $(self).find('.wpsstm-source-action-trash a');
+        var action_link = $(self).find('.wpsstm-track-link-action-trash a');
 
         var ajax_data = {
-            action:         'wpsstm_trash_source',
+            action:         'wpsstm_trash_link',
             post_id:        self.post_id
         };
 
-        source_action_links.addClass('action-loading');
+        action_link.addClass('action-loading');
 
         var ajax_request = $.ajax({
 
@@ -148,9 +148,9 @@ class WpsstmSource extends HTMLElement{
 
                 self.can_play = false;
 
-                //skip current source as it was playibg
-                if ( $(self).hasClass('source-playing') ){
-                    self.debug('source was playing, skip it !');
+                //skip current link as it was playibg
+                if ( $(self).hasClass('link-playing') ){
+                    self.debug('link was playing, skip it !');
                     self.debug(self);
                 }
 
@@ -158,54 +158,54 @@ class WpsstmSource extends HTMLElement{
                 $(self).remove();
 
             }else{
-                source_action_links.addClass('action-error');
+                action_link.addClass('action-error');
                 console.log(data);
             }
         });
 
         ajax_request.fail(function(jqXHR, textStatus, errorThrown) {
-            source_action_links.addClass('action-error');
+            action_link.addClass('action-error');
         })
 
         ajax_request.always(function(data, textStatus, jqXHR) {
-            source_action_links.removeClass('action-loading');
+            action_link.removeClass('action-loading');
         })
     }
 
-    play_source(){
-        var source = this;
+    play_link(){
+        var link = this;
         var track = this.closest('wpsstm-track');
-        var track_instances = source.track.get_instances();
-        var source_instances = source.get_instances();
+        var track_instances = link.track.get_instances();
+        var link_instances = link.get_instances();
         var tracks_container = track_instances.parents('.tracks-container');
         var player = this.closest('wpsstm-player');
         var success = $.Deferred();
 
         ///
-        source_instances.addClass('source-active source-loading');
+        link_instances.addClass('link-active link-loading');
         //
-        player.current_source = source;
-        source.debug("play source: " + source.src);
-        source.setAttribute('requestSourcePlay',true);
+        player.current_link = link;
+        link.debug("play link: " + link.src);
+        link.setAttribute('requestLinkPlay',true);
 
         /*
         register new events
         */
         
         $(player.current_media).off(); //remove old events
-        $(document).trigger( "wpsstmSourceInit", [source] );
+        $(document).trigger( "wpsstmLinkInit", [link] );
 
         $(player.current_media).on('loadeddata', function() {
-            $(document).trigger( "wpsstmSourceLoaded",[player,source] ); //custom event
-            player.debug('source loaded');
-            source.duration = player.current_media.duration;
+            $(document).trigger( "wpsstmLinkLoaded",[player,link] ); //custom event
+            player.debug('link loaded');
+            link.duration = player.current_media.duration;
             player.current_media.play();
         });
 
         $(player.current_media).on('error', function(error) {
             track_instances.addClass('track-error');
-            source.can_play = false;
-            source_instances.removeClass('source-active').addClass('source-error');
+            link.can_play = false;
+            link_instances.removeClass('link-active').addClass('link-error');
             success.reject(error);
         });
 
@@ -214,7 +214,7 @@ class WpsstmSource extends HTMLElement{
             tracks_container.addClass('tracks-container-playing tracks-container-has-played');
             track_instances.removeClass('track-error').addClass('track-playing track-has-played');
             track.setAttribute('trackstatus','playing');
-            source_instances.removeClass('source-error').addClass('source-playing source-has-played');
+            link_instances.removeClass('link-error').addClass('link-playing link-has-played');
             success.resolve();
         });
 
@@ -225,7 +225,7 @@ class WpsstmSource extends HTMLElement{
             tracks_container.removeClass('tracks-container-playing');
             track.setAttribute('trackstatus','paused');
             track_instances.removeClass('track-playing');
-            source_instances.removeClass('source-playing');
+            link_instances.removeClass('link-playing');
         });
 
         $(player.current_media).on('ended', function() {
@@ -235,26 +235,26 @@ class WpsstmSource extends HTMLElement{
             $(player).removeClass('player-playing');
             tracks_container.removeClass('tracks-container-playing');
             track.removeAttribute('trackstatus');
-            source_instances.removeClass('source-playing source-active');
+            link_instances.removeClass('link-playing link-active');
 
             //Play next song if any
             player.next_track_jump();
         });
         
         success.always(function(data, textStatus, jqXHR) {
-            source_instances.removeClass('source-loading');
+            link_instances.removeClass('link-loading');
         })
         success.done(function(v) {
             player.tracksHistory.push(track);
-            source.can_play = true;
+            link.can_play = true;
             //TOUFIX ajax --> +1 track play; user now playing...
         })
         success.fail(function() {
-            source.can_play = false;
+            link.can_play = false;
         })
 
         ////
-        player.current_media.setSrc(source.src);
+        player.current_media.setSrc(link.src);
         player.current_media.load();
         
         ////
@@ -265,16 +265,16 @@ class WpsstmSource extends HTMLElement{
 
 }
 
-window.customElements.define('wpsstm-source', WpsstmSource);
+window.customElements.define('wpsstm-track-link', WpsstmLink);
 
 /*
 metabox
 */
-//new source container
-$( ".postbox#wpsstm-metabox-sources #wpsstm-add-source-url" ).click(function(e) {
+//new link container
+$( ".postbox#wpsstm-metabox-track-links #wpsstm-add-link-url" ).click(function(e) {
     e.preventDefault();
     var container = $(this).parents('.postbox');
-    var first_input_block = container.find('#wpsstm-new_track-sources').parent().first();
+    var first_input_block = container.find('#wpsstm-new_track-links').parent().first();
     var cloned = first_input_block.clone().insertBefore(container);
     cloned.find('input[type="text"]').val("");
     cloned.insertBefore(first_input_block);

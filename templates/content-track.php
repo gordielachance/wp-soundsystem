@@ -38,8 +38,8 @@ $wpsstm_track->local_track_lookup(); //check for this track in the database (if 
         ?>
     </div>
     <?php
-    //track sources
-    wpsstm_locate_template( 'content-sources.php', true, false );
+    //track links
+    wpsstm_locate_template( 'content-track-links.php', true, false );
 
     
     ?>

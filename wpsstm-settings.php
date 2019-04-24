@@ -60,7 +60,7 @@ class WPSSTM_Settings {
             WPSSTM_Core_Tracklists::trash_temporary_tracklists();
         }
         
-        if( isset( $input['trash-unplayable-sources'] ) ){
+        if( isset( $input['trash-unplayable-links'] ) ){
             //TO FIX
         }
 
@@ -80,7 +80,7 @@ class WPSSTM_Settings {
         */
 
         $new_input['player_enabled'] = isset($input['player_enabled']);
-        $new_input['autosource'] = isset($input['autosource']);
+        $new_input['autolink'] = isset($input['autolink']);
 
         /*
         Importer
@@ -176,9 +176,9 @@ class WPSSTM_Settings {
         );
 
         add_settings_field(
-            'autosource', 
-            __('Autosource','wpsstm'), 
-            array( $this, 'autosource_callback' ), 
+            'autolink', 
+            __('Autolink','wpsstm'), 
+            array( $this, 'autolink_callback' ), 
             'wpsstm-settings-page', 
             'player_settings'
         );
@@ -300,9 +300,9 @@ class WPSSTM_Settings {
             );
             
             add_settings_field(
-                'trash_unplayable_sources', 
-                __('Trash unplayable sources','wpsstm'), 
-                array( $this, 'trash_unplayable_sources_callback' ), 
+                'trash_unplayable_links', 
+                __('Trash unplayable links','wpsstm'), 
+                array( $this, 'trash_unplayable_links_callback' ), 
                 'wpsstm-settings-page', // Page
                 'settings_system'//section
             );
@@ -326,19 +326,19 @@ class WPSSTM_Settings {
         );
     }
 
-    function autosource_callback(){
+    function autolink_callback(){
         
-        $enabled = wpsstm()->get_options('autosource');
+        $enabled = wpsstm()->get_options('autolink');
 
         /*
         form
         */
         
         printf(
-            '<input type="checkbox" name="%s[autosource]" value="on" %s /> %s',
+            '<input type="checkbox" name="%s[autolink]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $enabled, true, false ),
-            __("If no source is set for a track, try to find an online source automatically.","wpsstm")
+            __("If no link is set for a track, try to find an online link automatically.","wpsstm")
         );
         
         /*
@@ -348,23 +348,23 @@ class WPSSTM_Settings {
         //register errors
         if ( $enabled ){
         
-            //autosource
-            $can = WPSSTM_Core_Sources::can_autosource();
+            //autolink
+            $can = WPSSTM_Core_Track_Links::can_autolink();
 
             if ( is_wp_error($can) ){
-                add_settings_error('autosource',$can->get_error_code(),$can->get_error_message(),'inline');
+                add_settings_error('autolink',$can->get_error_code(),$can->get_error_message(),'inline');
             }
             
         }
         
         //display errors
-        settings_errors('autosource');
+        settings_errors('autolink');
 
     }
 
     function section_community_user_desc(){
         $desc = array();
-        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features; like autosource and tracklist importer.","wpsstm");
+        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features; like autolink and tracklist importer.","wpsstm");
 
         //wrap
         $desc = array_map(
@@ -381,7 +381,7 @@ class WPSSTM_Settings {
     function section_wpsstmapi_desc(){
         
         $features = array(
-            sprintf(__('Automatically search and save track sources online with the %s.','wpsstm'),sprintf('<strong>%s</strong>',__('autosource module','wpsstm'))),
+            sprintf(__('Automatically search and save track links online with the %s.','wpsstm'),sprintf('<strong>%s</strong>',__('autolink module','wpsstm'))),
             sprintf(__('Import tracklists from popular music services like Spotify (and almost any website where a tracklist is visible) with the %s.','wpsstm'),sprintf('<strong>%s</strong>',__('Tracklist Importer metabox','wpsstm'))),
             sprintf(__('Enable the %s - remote tracklists that are automatically refreshing every X minutes.','wpsstm'),sprintf('<strong>%s</strong>',__('Radios post type','wpsstm'))),
         );
@@ -477,7 +477,7 @@ class WPSSTM_Settings {
         //register errors
         if ( $enabled ){
         
-            //autosource
+            //autolink
             $can = wpsstm()->can_importer();
             if ( is_wp_error($can) ){
                 add_settings_error('importer',$can->get_error_code(),$can->get_error_message(),'inline');
@@ -508,7 +508,7 @@ class WPSSTM_Settings {
         //register errors
         if ( $enabled ){
         
-            //autosource
+            //autolink
             $can = wpsstm()->can_radios();
             if ( is_wp_error($can) ){
                 add_settings_error('radios',$can->get_error_code(),$can->get_error_message(),'inline');
@@ -615,11 +615,11 @@ class WPSSTM_Settings {
         );
     }
     
-    function trash_unplayable_sources_callback(){
+    function trash_unplayable_links_callback(){
         $count = 0;
-        $desc = sprintf(__("Delete %d unplayable sources that have been created with the community user.","wpsstm"),$count);
+        $desc = sprintf(__("Delete %d unplayable links that have been created with the community user.","wpsstm"),$count);
         printf(
-            '<input type="checkbox" name="%s[trash-unplayable-sources]" value="on" %s disabled="disabled" /> %s',
+            '<input type="checkbox" name="%s[trash-unplayable-links]" value="on" %s disabled="disabled" /> %s',
             wpsstm()->meta_name_options,
              disabled($count,0,false),
             $desc

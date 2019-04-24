@@ -109,7 +109,7 @@ wpsstm-track{
         }
     }
 
-    .wpsstm-track-actions,.wpsstm-track-sources{
+    .wpsstm-track-actions,.wpsstm-track-links{
         ul{
             list-style: none;
             padding:0;
@@ -152,9 +152,9 @@ wpsstm-track{
         }
     }
 
-    &[data-wpsstm-sources-count="0"]{
+    &[data-wpsstm-links-count="0"]{
         @include opacity(.25);
-        .wpsstm-track-sources{
+        .wpsstm-track-links{
             display:none!important;
         }
     } 
@@ -183,7 +183,7 @@ wpsstm-track{
     }
     
     &.track-reloading,
-    &.track-sources-loading{
+    &.track-links-loading{
         @extend .wpsstm-freeze;
         @include striped-bg();
     }
@@ -215,7 +215,7 @@ wpsstm-track{
     &.wpsstm-track-action-dequeue a:before{
         content: "\f127";//.fa-chain-broken;
     }
-    &.wpsstm-track-action-sources a:before{
+    &.wpsstm-track-action-links a:before{
         content: "\f0c2";//.fa-cloud;
     }
     &.wpsstm-track-action-move a:before{
@@ -233,9 +233,9 @@ wpsstm-track{
     &.wpsstm-track-action-favorite a:before{
         content: "\f08a";//.fa-heart-o;
     }
-    &.wpsstm-track-action-toggle-sources{
+    &.wpsstm-track-action-toggle-links{
         a{
-            .wpsstm-sources-count{
+            .wpsstm-links-count{
                 display:inherit;
             }
             &:before{
@@ -245,7 +245,7 @@ wpsstm-track{
                 content: "\f077";//.fa-chevron-up;
             }
         }
-        .wpsstm-sources-count{
+        .wpsstm-links-count{
             font-weight: bold;
             font-size:.8em;
         }

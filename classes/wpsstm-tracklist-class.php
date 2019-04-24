@@ -44,10 +44,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         options
         */
         
-        $can_autosource = ( WPSSTM_Core_Sources::can_autosource() === true);
+        $can_autolink = ( WPSSTM_Core_Track_Links::can_autolink() === true);
         
         $this->default_options = array(
-            'autosource'                => ( wpsstm()->get_options('autosource') && $can_autosource ),
+            'autolink'                => ( wpsstm()->get_options('autolink') && $can_autolink ),
             'cache_min'          => 15, //toufix broken if within the default options of WPSSTM_Remote_Tracklist
         );
 
@@ -173,7 +173,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             WPSSTM_Core_Tracks::$artist_metakey     => $this->artist,
             WPSSTM_Core_Tracks::$title_metakey      => $this->title,
             WPSSTM_Core_Tracks::$album_metakey      => $this->album,
-            //sources is more specific, will be saved below
+            //links are more specific, will be saved below
         );
         */
 

@@ -23,8 +23,8 @@ define("WPSSTM_TRACKS_SLUG", "tracks");
 define("WPSSTM_TRACK_SLUG", "track");
 define("WPSSTM_SUBTRACKS_SLUG", "subtracks");
 define("WPSSTM_SUBTRACK_SLUG", "subtrack");
-define("WPSSTM_SOURCES_SLUG", "sources");
-define("WPSSTM_SOURCE_SLUG", "source");
+define("WPSSTM_LINKS_SLUG", "links");
+define("WPSSTM_LINK_SLUG", "link");
 
 define("WPSSTM_NEW_ITEM_SLUG", "new");
 define("WPSSTM_MANAGER_SLUG", "manager");
@@ -53,7 +53,7 @@ class WP_SoundSystem {
     public $post_type_album = 'wpsstm_release';
     public $post_type_artist = 'wpsstm_artist';
     public $post_type_track = 'wpsstm_track';
-    public $post_type_source = 'wpsstm_source';
+    public $post_type_track_link = 'wpsstm_source';
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     
@@ -102,8 +102,8 @@ class WP_SoundSystem {
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'ajax_load_tracklists'              => true,
-            'autosource'                        => true,
-            'limit_autosources'                 => 5,
+            'autolink'                        => true,
+            'limit_autolinks'                 => 5,
             'importer_enabled'                  => true,
             'radios_enabled'                    => true,
             'registration_notice'               => true,
@@ -126,7 +126,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-artists.php';
         require $this->plugin_dir . 'wpsstm-core-albums.php';
         require $this->plugin_dir . 'wpsstm-core-tracks.php';
-        require $this->plugin_dir . 'wpsstm-core-sources.php';
+        require $this->plugin_dir . 'wpsstm-core-track-links.php';
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'wpsstm-core-user.php';
@@ -141,7 +141,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
-        require $this->plugin_dir . 'classes/wpsstm-source-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-track-link-class.php';
         require $this->plugin_dir . 'classes/wpsstm-player-class.php';
         require $this->plugin_dir . 'classes/wpsstm-remote-datas.php';
         
@@ -267,7 +267,7 @@ class WP_SoundSystem {
             
             if($current_version < 151){ //rename old source URL metakeys
 
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", WPSSTM_Core_Sources::$source_url_metakey, '_wpsstm_source' );
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", WPSSTM_Core_Track_Links::$link_url_metakey, '_wpsstm_source' );
 
                 $result = $wpdb->get_results ( $querystr );
                 
@@ -359,6 +359,22 @@ class WP_SoundSystem {
                     
                     
                 }
+            }
+            
+            if ($current_version < 203){
+                
+                //rename post type
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '' WHERE post_type = '%s'",$this->post_type_track_link,'wpsstm_source' );
+                $result = $wpdb->get_results ( $querystr );
+                
+                //rename _wpsstm_source_url metas
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",WPSSTM_Core_Track_Links::$link_url_metakey, '_wpsstm_source_url' );
+                $result = $wpdb->get_results ( $querystr );
+                
+                //rename _wpsstm_autosource_time metas
+                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",WPSSTM_Core_Track_Links::$autolink_time_metakey, '_wpsstm_autosource_time' );
+                $result = $wpdb->get_results ( $querystr );
+                
             }
 
         }
@@ -499,7 +515,7 @@ class WP_SoundSystem {
             wpsstm()->post_type_artist,
             wpsstm()->post_type_album,
             wpsstm()->post_type_track,
-            wpsstm()->post_type_source,
+            wpsstm()->post_type_track_link,
             wpsstm()->post_type_playlist,
             wpsstm()->post_type_live_playlist,
         );
@@ -594,7 +610,7 @@ class WP_SoundSystem {
             'edit_tracks'       => array('contributor','author','editor','administrator'),
             'create_tracks'     => array('contributor','author','editor','administrator'),
             
-            //tracks & tracks sources
+            //tracks & tracks links
             'manage_tracks'     => array('editor','administrator'),
             'edit_tracks'       => array('contributor','author','editor','administrator'),
             'create_tracks'     => array('contributor','author','editor','administrator'),

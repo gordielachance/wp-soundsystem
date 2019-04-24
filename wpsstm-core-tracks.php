@@ -73,8 +73,8 @@ class WPSSTM_Core_Tracks{
         add_action('wp_ajax_wpsstm_track_html', array($this,'ajax_track_html'));
         add_action('wp_ajax_nopriv_wpsstm_track_html', array($this,'ajax_track_html'));
         
-        add_action('wp_ajax_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
-        add_action('wp_ajax_nopriv_wpsstm_track_autosource', array($this,'ajax_track_autosource'));
+        add_action('wp_ajax_wpsstm_track_autolink', array($this,'ajax_track_autolink'));
+        add_action('wp_ajax_nopriv_wpsstm_track_autolink', array($this,'ajax_track_autolink'));
 
         add_action('wp_ajax_nopriv_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
         add_action('wp_ajax_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
@@ -83,16 +83,16 @@ class WPSSTM_Core_Tracks{
         add_action('wp_ajax_wpsstm_subtrack_dequeue', array($this,'ajax_subtrack_dequeue'));
         add_action('wp_ajax_wpsstm_track_trash', array($this,'ajax_track_trash'));
 
-        //add_action('wp', array($this,'test_autosource_ajax') );
+        //add_action('wp', array($this,'test_autolink_ajax') );
 
-        add_action('wp_ajax_wpsstm_update_track_sources_order', array($this,'ajax_update_sources_order'));
+        add_action('wp_ajax_wpsstm_update_track_links_order', array($this,'ajax_update_track_links_order'));
 
         
         /*
         DB relationships
         */
         add_action( 'save_post', array($this,'set_subtrack_post_id'), 6);
-        add_action( 'wp_trash_post', array($this,'trash_track_sources') );
+        add_action( 'wp_trash_post', array($this,'trash_track_links') );
         add_action( 'before_delete_post', array($this,'unlink_subtrack_post_id') );
     }
     
@@ -372,7 +372,7 @@ class WPSSTM_Core_Tracks{
     }
 
     function register_tracks_scripts_styles(){
-        wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','wpsstm-functions','jquery-ui-tabs','wpsstm-sources'),wpsstm()->version, true );
+        wp_register_script( 'wpsstm-tracks', wpsstm()->plugin_url . '_inc/js/wpsstm-tracks.js', array('jquery','wpsstm-functions','jquery-ui-tabs','wpsstm-links'),wpsstm()->version, true );
         
     }
 
@@ -382,7 +382,7 @@ class WPSSTM_Core_Tracks{
         $before = array();
         $after = array();
         
-        $after['sources'] = __('Sources','wpsstm');
+        $after['track-links'] = __('Links','wpsstm');
         $after['track-playlists'] = __('Playlists','wpsstm');
         $after['track-favoritedby'] = __('Favorited','wpsstm');
         
@@ -414,21 +414,21 @@ class WPSSTM_Core_Tracks{
                 }
                 echo $output;
             break;
-            case 'sources':
+            case 'track-links':
                 
                 $published_str = $pending_str = null;
 
-                $sources_published_query = $wpsstm_track->query_sources();
-                $sources_pending_query = $wpsstm_track->query_sources(array('post_status'=>'pending'));
+                $links_published_query = $wpsstm_track->query_links();
+                $links_pending_query = $wpsstm_track->query_links(array('post_status'=>'pending'));
 
                 $url = admin_url('edit.php');
-                $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$wpsstm_track->post_id,'post_status'=>'publish'),$url );
-                $published_str = sprintf('<a href="%s">%d</a>',$url,$sources_published_query->post_count);
+                $url = add_query_arg( array('post_type'=>wpsstm()->post_type_track_link,'post_parent'=>$wpsstm_track->post_id,'post_status'=>'publish'),$url );
+                $published_str = sprintf('<a href="%s">%d</a>',$url,$links_published_query->post_count);
                 
-                if ($sources_pending_query->post_count){
+                if ($links_pending_query->post_count){
                     $url = admin_url('edit.php');
-                    $url = add_query_arg( array('post_type'=>wpsstm()->post_type_source,'post_parent'=>$wpsstm_track->post_id,'post_status'=>'pending'),$url );
-                    $pending_link = sprintf('<a href="%s">%d</a>',$url,$sources_pending_query->post_count);
+                    $url = add_query_arg( array('post_type'=>wpsstm()->post_type_track_link,'post_parent'=>$wpsstm_track->post_id,'post_status'=>'pending'),$url );
+                    $pending_link = sprintf('<a href="%s">%d</a>',$url,$links_pending_query->post_count);
                     $pending_str = sprintf('<small> +%s</small>',$pending_link);
                 }
                 
@@ -992,7 +992,7 @@ class WPSSTM_Core_Tracks{
 
     }
     
-    function ajax_update_sources_order(){
+    function ajax_update_track_links_order(){
         $ajax_data = wp_unslash($_POST);
         
         $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
@@ -1005,8 +1005,8 @@ class WPSSTM_Core_Tracks{
             'track'     => $track->to_array(),
         );
         
-        $source_ids = isset($ajax_data['source_ids']) ? $ajax_data['source_ids'] : null;
-        $success = $track->update_sources_order($source_ids);
+        $link_ids = isset($ajax_data['link_ids']) ? $ajax_data['link_ids'] : null;
+        $success = $track->update_links_order($link_ids);
 
         if ( is_wp_error($success) ){
             $result['message'] = $success->get_error_message();
@@ -1041,7 +1041,7 @@ class WPSSTM_Core_Tracks{
 
     }
 
-    function ajax_track_autosource(){
+    function ajax_track_autolink(){
 
         $ajax_data = wp_unslash($_POST);
 
@@ -1056,16 +1056,16 @@ class WPSSTM_Core_Tracks{
             'success'       => false,
         );
    
-        //autosource
+        //autolink
         $new_ids = array();
         
-        $new_ids = $track->autosource();
+        $new_ids = $track->autolink();
 
         if ( is_wp_error($new_ids) ){
             $result['error_code'] = $new_ids->get_error_code();
             $result['message'] = $new_ids->get_error_message();
         }else{
-            $result['source_ids'] = $new_ids;
+            $result['link_ids'] = $new_ids;
             $result['success'] = true;
         }
         
@@ -1194,7 +1194,7 @@ class WPSSTM_Core_Tracks{
         wp_send_json( $result );
     }
     
-    function test_autosource_ajax(){
+    function test_autolink_ajax(){
         
         if ( is_admin() ) return;
     
@@ -1202,35 +1202,35 @@ class WPSSTM_Core_Tracks{
             'track' => array('artist'=>'U2','title'=>'Sunday Bloody Sunday')
         );
         
-        wpsstm()->debug_log($_POST,'testing autosource AJAX');
+        wpsstm()->debug_log($_POST,'testing autolink AJAX');
         
-        $this->ajax_track_autosource();
+        $this->ajax_track_autolink();
     }
 
-    function trash_track_sources($post_id){
+    function trash_track_links($post_id){
         
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
         
-        //get all sources
+        //get all links
         $track = new WPSSTM_Track($post_id);
         
-        $source_args = array(
+        $link_args = array(
             'posts_per_page' => -1,
             'fields'  =>        'ids',
             'post_status'=>     'any',
         );
         
-        $sources_query = $track->query_sources($source_args);
+        $links_query = $track->query_links($link_args);
         $trashed = 0;
         
-        foreach($sources_query->posts as $source_id){
-            if ( $success = wp_trash_post($source_id) ){
+        foreach($links_query->posts as $link_id){
+            if ( $success = wp_trash_post($link_id) ){
                 $trashed ++;
             }
         }
 
         if ($trashed){
-            $track->track_log( json_encode(array('post_id'=>$post_id,'sources'=>$sources_query->post_count,'trashed'=>$trashed)),"WPSSTM_Post_Tracklist::trash_track_sources()");
+            $track->track_log( json_encode(array('post_id'=>$post_id,'links'=>$links_query->post_count,'trashed'=>$trashed)),"WPSSTM_Post_Tracklist::trash_track_links()");
         }
 
     }

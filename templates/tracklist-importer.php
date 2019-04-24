@@ -97,7 +97,7 @@ $wpsstm_tracklist->populate_preset();
                 <li><a href="#wpsstm-importer-single-track-title"><?php _e('Title','wpsstm');?></a></li>
                 <li><a href="#wpsstm-importer-single-track-album"><?php _e('Album','wpsstm');?></a></li>
                 <li><a href="#wpsstm-importer-single-track-image"><?php _e('Image','wpsstm');?></a></li>
-                <li><a href="#wpsstm-importer-single-track-sources"><?php _e('Sources','wpsstm');?></a></li>
+                <li><a href="#wpsstm-importer-single-track-links"><?php _e('Tracks Links','wpsstm');?></a></li>
             </ul>
             <div id="wpsstm-importer-single-track-artist" class="wpsstm-importer-row">
                 <h4 class="wpsstm-importer-row-label"><?php _e('Artist Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
@@ -115,9 +115,9 @@ $wpsstm_tracklist->populate_preset();
                 <h4 class="wpsstm-importer-row-label"><?php _e('Image Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
                 <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_image');?></div>
             </div>
-            <div id="wpsstm-importer-single-track-sources" class="wpsstm-importer-row">
-                <h4 class="wpsstm-importer-row-label"><?php _e('Source URLs Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
-                <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_source_urls');?></div>
+            <div id="wpsstm-importer-single-track-links" class="wpsstm-importer-row">
+                <h4 class="wpsstm-importer-row-label"><?php _e('Track Link URLs Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+                <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_link_urls');?></div>
             </div>
         </div>
     </div>
@@ -136,7 +136,7 @@ $wpsstm_tracklist->populate_preset();
 
                 $desc[] = __('If set, posts will be created for each track when the remote playlist is retrieved.','wpsstm');
                 $desc[] = __("They will be flushed after the cache time has expired; if the track does not belong to another playlist or user's likes.",'wpsstm');
-                $desc[] = __("This can be useful if you have a lot of traffic - there will be less remote requests ans track sources will be searched only once.",'wpsstm');
+                $desc[] = __("This can be useful if you have a lot of traffic - there will be less remote requests ans track links will be searched only once.",'wpsstm');
                 $desc = implode("<br/>",$desc);
 
                 printf(
@@ -210,7 +210,7 @@ $wpsstm_tracklist->populate_preset();
                 <h4 class="wpsstm-importer-row-label"><?php _e('Tracklist','wpsstm');?></h4>
                 <div class="wpsstm-importer-row-content">
                     <?php
-                    WPSSTM_Core_Importer::feedback_source_content_callback();
+                    WPSSTM_Core_Importer::feedback_link_content_callback();
                     ?>
                 </div>
             </div>

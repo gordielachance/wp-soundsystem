@@ -1,6 +1,6 @@
 <?php
 
-///TO FIX use last.fm API instead of scraping ? Only downside is that we don't get the youbube sources with that.
+///TO FIX use last.fm API instead of scraping ? Only downside is that we don't get the youbube links with that.
 //TO FIX should have a way to deconnect (delete meta & transient) last.fm, since for now if the user revoke the access on his last.fm profile, there is now way to get the auth link again.
 
 use LastFmApi\Api\AuthApi;
@@ -980,11 +980,11 @@ abstract class WPSSTM_LastFM_URL_Preset extends WPSSTM_Remote_Tracklist{
         
         $this->preset_options = array(
             'selectors' => array(
-                'tracks'           => array('path'=>'table.chartlist tbody tr'),
-                'track_artist'     => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
-                'track_title'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
-                'track_image'      => array('path'=>'img.cover-art','attr'=>'src'),
-                'track_source_urls' => array('path'=>'a[data-youtube-url]','attr'=>'href'),
+                'tracks'            => array('path'=>'table.chartlist tbody tr'),
+                'track_artist'      => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap .chartlist-artists a'),
+                'track_title'       => array('path'=>'td.chartlist-name .chartlist-ellipsis-wrap > a'),
+                'track_image'       => array('path'=>'img.cover-art','attr'=>'src'),
+                'track_link_urls'   => array('path'=>'a[data-youtube-url]','attr'=>'href'),
             )
         );
         
@@ -1085,7 +1085,7 @@ abstract class WPSSTM_LastFM_Station_Preset extends WPSSTM_Remote_Tracklist{
                 'tracks'            => array('path'=>'>playlist'),
                 'track_artist'      => array('path'=>'artists > name'),
                 'track_title'       => array('path'=>'playlist > name'),
-                'track_source_urls' => array('path'=>'playlinks url'),
+                'track_link_urls' => array('path'=>'playlinks url'),
             )
         );
         

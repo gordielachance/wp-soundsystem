@@ -16,7 +16,7 @@ class WPSSTM_Remote_Tracklist{
             'track_artist'      => array('path'=>null,'regex'=>null,'attr'=>null),
             'track_title'       => array('path'=>null,'regex'=>null,'attr'=>null),
             'track_album'       => array('path'=>null,'regex'=>null,'attr'=>null),
-            'track_source_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
+            'track_link_urls' => array('path'=>null,'regex'=>null,'attr'=>null),
             'track_image'       => array('path'=>null,'regex'=>null,'attr'=>null),
         ),
         'tracks_order'              => 'desc',
@@ -483,7 +483,7 @@ class WPSSTM_Remote_Tracklist{
                 'title'         => $this->get_track_title($single_track_node),
                 'album'         => $this->get_track_album($single_track_node),
                 'image_url'     => $this->get_track_image($single_track_node),
-                'source_urls'   => $this->get_track_source_urls($single_track_node),
+                'link_urls'   => $this->get_track_link_urls($single_track_node),
             );
 
             $tracks_arr[] = array_filter($args);
@@ -518,17 +518,17 @@ class WPSSTM_Remote_Tracklist{
         return $image;
     }
     
-    protected function get_track_source_urls($track_node){
-        $selectors = $this->get_selectors( array('track_source_urls'));
-        $source_urls = $this->parse_node($track_node,$selectors,false);
+    protected function get_track_link_urls($track_node){
+        $selectors = $this->get_selectors( array('track_link_urls'));
+        $link_urls = $this->parse_node($track_node,$selectors,false);
 
-        foreach ((array)$source_urls as $key=>$url){
+        foreach ((array)$link_urls as $key=>$url){
             if (filter_var((string)$url, FILTER_VALIDATE_URL) === false) {
-                unset($source_urls[$key]);
+                unset($link_urls[$key]);
             }
         }
 
-        return $source_urls;
+        return $link_urls;
         
     }
 

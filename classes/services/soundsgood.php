@@ -34,7 +34,7 @@ class WPSSTM_Soundsgood_Api_Preset extends WPSSTM_Remote_Tracklist{
                 'tracks'            => array('path'=>'root > element'),
                 'track_artist'      => array('path'=>'artist'),
                 'track_title'       => array('path'=>'title'),
-                'track_source_urls' => array('path'=>'sources permalink')
+                'track_link_urls'   => array('path'=>'sources permalink')
             )
         );
         

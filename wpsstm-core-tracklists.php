@@ -74,7 +74,7 @@ class WPSSTM_Core_Tracklists{
     function register_tracklists_scripts_styles(){
 
         //JS
-        wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','wpsstm-functions','wpsstm-tracks','wpsstm-sources','jquery-ui-sortable','jquery-ui-dialog'),wpsstm()->version, true );
+        wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','wpsstm-functions','wpsstm-tracks','wpsstm-links','jquery-ui-sortable','jquery-ui-dialog'),wpsstm()->version, true );
 
 
         //JS
@@ -93,7 +93,7 @@ class WPSSTM_Core_Tracklists{
         
         if ( ( $screen->base == 'post' ) && in_array($screen->post_type,wpsstm()->tracklist_post_types)  ){
             $post_id = isset($_GET['post']) ? $_GET['post'] : null;
-            //set global $wpsstm_source
+            //set global $wpsstm_link
             $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
         }
     }

@@ -247,10 +247,10 @@ class WPSSTM_Core_Importer{
                             '<code>a.album-art img</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
                         );
                     break;
-                    case 'track_source_urls':
+                    case 'track_link_urls':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
-                            '<code>audio source</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
+                            '<code>audio link</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
                         );
                     break;
             }
@@ -472,7 +472,7 @@ class WPSSTM_Core_Importer{
 
     }
 
-    static function feedback_source_content_callback(){
+    static function feedback_link_content_callback(){
         global $wpsstm_tracklist;
 
         $output = "—";

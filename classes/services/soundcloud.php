@@ -15,8 +15,8 @@ class WPSSTM_Souncloud{
         
         $this->options = wp_parse_args(get_option( self::$soundcloud_options_meta_name),$options_default);
         
-        add_filter('wpsstm_get_source_mimetype',array($this,'get_soundcloud_source_type'),10,2);
-        add_filter('wpsstm_get_source_stream_url',array($this,'get_soundcloud_stream_url'),10,2);
+        add_filter('wpsstm_get_link_mimetype',array($this,'get_soundcloud_link_type'),10,2);
+        add_filter('wpsstm_get_link_stream_url',array($this,'get_soundcloud_stream_url'),10,2);
         if ( $this->get_options('client_id') ){
             add_filter('wpsstm_wizard_service_links',array($this,'register_soundcloud_service_links'), 7);
             add_filter('wpsstm_remote_presets',array($this,'register_soundcloud_preset'));
@@ -115,8 +115,8 @@ class WPSSTM_Souncloud{
         return $links;
     }
 
-    public function get_soundcloud_source_type($type,WPSSTM_Source $source){
-        if ( $this->get_sc_track_id($source->permalink_url) ){
+    public function get_soundcloud_link_type($type,WPSSTM_Track_Link $link){
+        if ( $this->get_sc_track_id($link->permalink_url) ){
             $type = self::$mimetype;
         }
         return $type;
@@ -164,7 +164,7 @@ class WPSSTM_Souncloud{
 
     }
     
-    public function get_soundcloud_stream_url($url,WPSSTM_Source $source){
+    public function get_soundcloud_stream_url($url,WPSSTM_Track_Link $link){
 
         $client_id = $this->get_options('client_id');
         $sc_track_id = $this->get_sc_track_id($url);
@@ -203,7 +203,7 @@ class WPSSTM_Souncloud{
     Get the ID of a Soundcloud track URL (eg. https://soundcloud.com/phasescachees/jai-toujours-reve-detre-un-gangster-feat-hippocampe-fou)
     Requires a Soundcloud Client ID.
     Store result in a transient to speed up page load.
-    //TO FIX IMPORTANT slows down the website on page load.  Rather should run when source is saved ?
+    //TO FIX IMPORTANT slows down the website on page load.  Rather should run when link is saved ?
     */
     
     private function request_sc_track_id($url){

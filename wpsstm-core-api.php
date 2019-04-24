@@ -9,7 +9,7 @@ class WPSSTM_Core_API {
     public static $auth_transient_name = 'wpsstmapi_is_auth';
 
     function __construct(){
-        add_filter( 'wpsstm_autosource_input',array($this,'api_track_autosource'), 5, 2 );
+        add_filter( 'wpsstm_autolink_input',array($this,'api_track_autolink'), 5, 2 );
     }
     
     /*
@@ -114,7 +114,7 @@ class WPSSTM_Core_API {
 
     }
     
-    function api_track_autosource($sources_auto,$track){
+    function api_track_autolink($links_auto,$track){
         
         if ($this->can_wpsstmapi() === true){
 
@@ -131,12 +131,12 @@ class WPSSTM_Core_API {
                 return new WP_Error( 'missing_spotify_id',__( 'Missing Spotify ID.', 'wpsstmapi' ));
             }
 
-            $api_url = sprintf('track/autosource/spotify/%s',$music_id);
-            $sources_auto = WPSSTM_Core_API::api_request($api_url);
-            if ( is_wp_error($sources_auto) ) return $sources_auto;
+            $api_url = sprintf('track/autolink/spotify/%s',$music_id);
+            $links_auto = WPSSTM_Core_API::api_request($api_url);
+            if ( is_wp_error($links_auto) ) return $links_auto;
 
         }
-        return $sources_auto;
+        return $links_auto;
     }
 
 }

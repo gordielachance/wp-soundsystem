@@ -5,11 +5,11 @@ class WPSSTM_Youtube{
     static $mimetype = 'video/youtube';
     
     function __construct(){
-        add_filter('wpsstm_get_source_mimetype',array(__class__,'get_youtube_source_type'),10,2);
+        add_filter('wpsstm_get_link_mimetype',array(__class__,'get_youtube_link_type'),10,2);
     }
 
-    public static function get_youtube_source_type($type,WPSSTM_Source $source){
-        if ( self::get_youtube_id($source->permalink_url) ){
+    public static function get_youtube_link_type($type,WPSSTM_Track_Link $link){
+        if ( self::get_youtube_id($link->permalink_url) ){
             $type = self::$mimetype;
         }
         return $type;

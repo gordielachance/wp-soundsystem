@@ -1,13 +1,13 @@
 === WP SoundSystem ===
 Contributors: grosbouff
 Donate link: https://api.spiff-radio.org?p=31
-Tags: music,audio player,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks,sources
+Tags: music,audio player,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks
 Requires at least: 4.9
 Tested up to: 5.1.1
 Stable tag: trunk
 License: GPLv2 or later
 
-WP Soundsystem is a complete solution to manage a music library within WordPress.  Use it to build or import playlists, manage tracks and audio sources, albums, artists, and play them with our audio player.
+WP Soundsystem is a complete solution to manage a music library within WordPress.  Use it to build or import playlists, manage tracks and audio links, albums, artists, and play them with our audio player.
 
 == Description ==
 
@@ -15,9 +15,9 @@ WP Soundsystem is a complete solution to manage a music library within WordPress
 
 *WP Soundsystem* is a complete solution to manage a music library within WordPress.
 
-Use it to build or import playlists, manage tracks and audio sources, albums, artists, and play them with our audio player.
+Use it to build or import playlists, manage tracks and audio links, albums, artists, and play them with our audio player.
 
-Several new post types will be available : Playlists, Radios, Artists, Albums, Tracks and Sources.
+Several new post types will be available : Playlists, Radios, Artists, Albums, Tracks and Tracks Links.
 
 [See it working on Spiff Radio](https://www.spiff-radio.org/)
 
@@ -29,17 +29,17 @@ Add or remove tracks on the fly, reorder them, favorite a track or a tracklist, 
 = Tracks =
 
 When editing a track, you can query details from music services like [MusicBrainz](https://musicbrainz.org/) (The Open Music Encyclopedia) or Spotify. 
-Audio sources can be linked to your tracks with the *Track Sources* metabox.
+Audio links can be linked to your tracks with the *Tracks Links* metabox.
 
-= Sources =
+= Tracks Links =
 
-You can link several audio sources to any track.  
+You can link several audio links to any track.  
 It can be a the path of an audio file or even music services links like Youtube, or Soundcloud!
 
-= Autosource (requires an API key) =
+= Autolink (requires an API key) =
 
-If you don't link audio sources to your track manually, you can enable our *autosource* module.  
-It will search for remote sources and attach them to your tracks. 
+If you don't link audio links to your track manually, you can enable our *autolink* module.  
+It will search for remote links and attach them to your tracks. 
 
 = Radios =
 
@@ -80,7 +80,7 @@ Wanna give a hand as developer ? Check the [Github](https://github.com/gordielac
 Get more out of this plugin by [registering an API key](https://api.spiff-radio.org/?p=10); which will enable
 
 * the Tracklist Importer
-* the Autosource module
+* the Autolink module
 * the Radios post type
 
 Those are optionals, but are nice features to a solid plugin.
@@ -142,7 +142,7 @@ echo $track->get_track_html();
 
 = What is the community user ? =
 
-The community user is a Wordpress user you need to create, and that will be assigned as author to the content created automatically by the plugin, for instance imported tracks or sources.
+The community user is a Wordpress user you need to create, and that will be assigned as author to the content created automatically by the plugin, for instance imported tracks or links.
 
 == Screenshots ==
 
@@ -150,7 +150,7 @@ The community user is a Wordpress user you need to create, and that will be assi
 2. Radio (live) tracklist
 3. Plugin settings page & menu
 4. Tracklist Importer metabox
-5. Track Sources metabox
+5. Tracks Links metabox
 6. Tracklists manager popup (when favoriting a track)
 7. Frontend Tracklist Importer
 8. Music menu on a BuddyPress profile
@@ -160,7 +160,7 @@ The community user is a Wordpress user you need to create, and that will be assi
 = XXX =
 * fixed OnlineRadioBox service
 * fixed bugfix XSPF export
-* track sources JS/CSS improvements
+* track links JS/CSS improvements
 
 = 2.6.1 =
 * BuddyPress - improved queue track/ love tracklist activities
@@ -176,10 +176,10 @@ The community user is a Wordpress user you need to create, and that will be assi
 * improved importer and its settings
 * improved shortcodes
 * importer debug GUI
-* bugfix populate sources/autosources
+* bugfix populate links/autolinks
 * fix files dependencies when no API key
 * Last.fm : fix url encoding / fix regexes / fix importer / scrobbler disabled by default
-* abord autosource if 'wpsstm_autosource_input' returns an error
+* abord autolink if 'wpsstm_autolink_input' returns an error
 * + various bug fixes
 
 = 2.5.3 =

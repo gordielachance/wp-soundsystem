@@ -14,11 +14,11 @@ class WPSSTM_Track{
     public $image_url;
     public $location;
     
-    var $source;
-    public $sources = null; //set 'null' so we can check later (by setting it to false) it has been populated
-    var $current_source = -1;
-    var $source_count = 0;
-    var $in_source_loop = false;
+    var $link;
+    public $links = null; //set 'null' so we can check later (by setting it to false) it has been populated
+    var $current_link = -1;
+    var $link_count = 0;
+    var $in_link_loop = false;
     
     var $tracklist;
     
@@ -28,7 +28,7 @@ class WPSSTM_Track{
     public $subtrack_time = null;
     public $from_tracklist = null;
     
-    public $did_autosource = null;
+    public $did_autolink = null;
     
     public $notices = array();
     
@@ -65,7 +65,7 @@ class WPSSTM_Track{
         $this->album            = wpsstm_get_post_album($this->post_id);
         $this->image_url        = wpsstm_get_post_image_url($this->post_id);
         $this->duration         = wpsstm_get_post_length($this->post_id);
-        $this->did_autosource   = $this->autosource_check();
+        $this->did_autolink   = $this->autolink_check();
         
     }
     
@@ -110,17 +110,17 @@ class WPSSTM_Track{
                 case 'tracklist_id';
                     $this->tracklist = new WPSSTM_Post_Tracklist($value);
                 break;
-                case 'source_urls':
+                case 'link_urls':
                     
-                    $sources = array();
-                    foreach((array)$value as $source_url){
-                        $source = array(
-                            'permalink_url' => $source_url,
+                    $links = array();
+                    foreach((array)$value as $link_url){
+                        $link = array(
+                            'permalink_url' => $link_url,
                         );
-                        $sources[] = $source;
+                        $links[] = $link;
                     }
                     
-                    $this->add_sources($sources);
+                    $this->add_links($links);
                 break;
                 case 'album';
                    if ($value == '_') continue;
@@ -606,7 +606,7 @@ class WPSSTM_Track{
         return $list;
     }
     
-    function query_sources($args=null){
+    function query_links($args=null){
         $default_args = array(
             'post_status'       => 'publish',
             'posts_per_page'    => -1,
@@ -615,11 +615,11 @@ class WPSSTM_Track{
         );
 
         $required_args = array(
-            'post_type'     => wpsstm()->post_type_source,
+            'post_type'     => wpsstm()->post_type_track_link,
             'post_parent'   => $this->post_id,
         );
         
-        //we need a parent track or it will return all sources; so force return nothing
+        //we need a parent track or it will return all links; so force return nothing
         if(!$this->post_id){
             $required_args['post__in'] = array(0);
         }
@@ -630,66 +630,66 @@ class WPSSTM_Track{
         return new WP_Query($args);
     }
     
-    function populate_sources(){
+    function populate_links(){
 
         if ($this->post_id){
-            $query = $this->query_sources(array('fields'=>'ids'));
-            $source_ids = $query->posts;
-            $this->add_sources($source_ids);
+            $query = $this->query_links(array('fields'=>'ids'));
+            $link_ids = $query->posts;
+            $this->add_links($link_ids);
         }else{
-            $this->add_sources($this->sources); //so we're sure the sources count is set
+            $this->add_links($this->links); //so we're sure the links count is set
         }
         
         return true;
         
     }
     
-    private function autosource_check(){
+    private function autolink_check(){
 
         /*
-        Check if a track has been autosourced recently
+        Check if a track has been autolinkd recently
         */
         
-        if ($this->did_autosource === null){
-            $last_autosourced  = get_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, true );
-            if (!$last_autosourced) return false;
+        if ($this->did_autolink === null){
+            $last_autolinkd  = get_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, true );
+            if (!$last_autolinkd) return false;
 
             $now = current_time( 'timestamp' );
-            $seconds = $now - $last_autosourced;
+            $seconds = $now - $last_autolinkd;
             $hours = $seconds / HOUR_IN_SECONDS;
 
-            $this->did_autosource = ($hours < 48);
+            $this->did_autolink = ($hours < 48);
         }
 
-        return $this->did_autosource;
+        return $this->did_autolink;
  
     }
 
     /*
-    Retrieve autosources for a track
+    Retrieve autolinks for a track
     */
     
-    function autosource(){
+    function autolink(){
 
-        $new_sources = array();
-        $sources_auto = array();
+        $new_links = array();
+        $links_auto = array();
 
-        if ( !wpsstm()->get_options('autosource') ){
-            return new WP_Error( 'wpsstm_autosource_disabled', __("Track autosource is disabled.",'wpsstm') );
+        if ( !wpsstm()->get_options('autolink') ){
+            return new WP_Error( 'wpsstm_autolink_disabled', __("Track autolink is disabled.",'wpsstm') );
         }
         
-        if ( $this->did_autosource ) {
-            return new WP_Error( 'wpsstm_autosource_disabled', __("Track has already been autosourced recently.",'wpsstm') );
+        if ( $this->did_autolink ) {
+            return new WP_Error( 'wpsstm_autolink_disabled', __("Track has already been autolinkd recently.",'wpsstm') );
         }
         
-        $can_autosource = WPSSTM_Core_Sources::can_autosource();
-        if ( $can_autosource !== true ) return $can_autosource;
+        $can_autolink = WPSSTM_Core_Track_Links::can_autolink();
+        if ( $can_autolink !== true ) return $can_autolink;
 
         $valid = $this->validate_track();
         if ( is_wp_error($valid) ) return $valid;
         
         /*
-        Create community post if track does not exists yet, since we need to store some datas, including the autosource time.
+        Create community post if track does not exists yet, since we need to store some datas, including the autolink time.
         */
         if(!$this->post_id){
 
@@ -708,80 +708,80 @@ class WPSSTM_Track{
         }
         
         /*
-        Hook filter here to add autosources (array)
+        Hook filter here to add autolinks (array)
         */
 
-        $sources_auto = apply_filters('wpsstm_autosource_input',$sources_auto,$this);
-        if ( is_wp_error($sources_auto) ) return $sources_auto;
+        $links_auto = apply_filters('wpsstm_autolink_input',$links_auto,$this);
+        if ( is_wp_error($links_auto) ) return $links_auto;
         
         /*
-        save autosourced time so we won't query autosources again too soon
+        save autolinkd time so we won't query autolinks again too soon
         */
         $now = current_time('timestamp');
-        update_post_meta( $this->post_id, WPSSTM_Core_Sources::$autosource_time_metakey, $now );
-        $this->did_autosource = true;
+        update_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, $now );
+        $this->did_autolink = true;
 
-        foreach((array)$sources_auto as $key=>$args){
+        foreach((array)$links_auto as $key=>$args){
             
-            $source = new WPSSTM_Source();
-            $source->from_array( $args );
+            $link = new WPSSTM_Track_Link();
+            $link->from_array( $args );
             
-            $source->track = $this;
-            $source->is_community = true;
+            $link->track = $this;
+            $link->is_community = true;
             
             //validate
-            $valid_source = $source->validate_source();
-            if ( is_wp_error($valid_source) ){
-                    $code = $valid_source->get_error_code();
-                    $error_msg = $valid_source->get_error_message($code);
-                    $source->source_log($error_msg,__('Autosource rejected','wpsstm'));
+            $valid_link = $link->validate_link();
+            if ( is_wp_error($valid_link) ){
+                    $code = $valid_link->get_error_code();
+                    $error_msg = $valid_link->get_error_message($code);
+                    $link->link_log($error_msg,__('Autolink rejected','wpsstm'));
                     continue;
             }
 
-            $new_sources[] = $source;
+            $new_links[] = $link;
 
         }
 
         /*
-        Hook filter here to ignore some of the sources
+        Hook filter here to ignore some of the links
         */
 
-        $new_sources = apply_filters('wpsstm_autosource_filtered',$new_sources,$this);
+        $new_links = apply_filters('wpsstm_autolink_filtered',$new_links,$this);
 
-        //limit autosource results
-        $limit_autosources = (int)wpsstm()->get_options('limit_autosources');
-        $new_sources = array_slice($new_sources, 0, $limit_autosources);
-        $new_sources = apply_filters('wpsstm_track_autosources',$new_sources);
+        //limit autolink results
+        $limit_autolinks = (int)wpsstm()->get_options('limit_autolinks');
+        $new_links = array_slice($new_links, 0, $limit_autolinks);
+        $new_links = apply_filters('wpsstm_track_autolinks',$new_links);
 
-        $this->add_sources($new_sources);
-        $new_ids = $this->save_new_sources();
+        $this->add_links($new_links);
+        $new_ids = $this->save_new_links();
         
-        $this->track_log(array('track_id'=>$this->post_id,'sources_found'=>$this->source_count,'sources_saved'=>count($new_ids)),'autosource results');
+        $this->track_log(array('track_id'=>$this->post_id,'links_found'=>$this->link_count,'links_saved'=>count($new_ids)),'autolink results');
         
         return $new_ids;
 
     }
     
-    public function save_new_sources(){
+    public function save_new_links(){
 
         if ( !$this->post_id ){
-            return new WP_Error( 'wpsstm_track_no_id', __('Unable to store source: track ID missing.','wpsstm') );
+            return new WP_Error( 'wpsstm_track_no_id', __('Unable to store link: track ID missing.','wpsstm') );
         }
 
-        //insert sources
+        //insert links
         $inserted = array();
-        foreach((array)$this->sources as $source){
+        foreach((array)$this->links as $link){
 
-            if ($source->post_id) continue;
-            $source_id = $source->save_source();
+            if ($link->post_id) continue;
+            $link_id = $link->save_link();
 
-            if ( is_wp_error($source_id) ){
-                $code = $source_id->get_error_code();
-                $error_msg = $source_id->get_error_message($code);
-                $source->source_log( $error_msg,"store autosources - error while saving source");
+            if ( is_wp_error($link_id) ){
+                $code = $link_id->get_error_code();
+                $error_msg = $link_id->get_error_message($code);
+                $link->link_log( $error_msg,"store autolinks - error while saving link");
                 continue;
             }else{
-                $inserted[] = $source_id;
+                $inserted[] = $link_id;
             }
 
         }
@@ -974,8 +974,8 @@ class WPSSTM_Track{
             );
         }
         
-        $actions['toggle-sources'] = array(
-            'text' =>      __('Sources'),
+        $actions['toggle-links'] = array(
+            'text' =>      __('Tracks Links'),
             'href' =>       '#',
         );
 
@@ -994,7 +994,7 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
-            'data-wpsstm-sources-count' =>      $this->source_count,
+            'data-wpsstm-links-count' =>      $this->link_count,
         );
 
         return wpsstm_get_html_attr($attr);
@@ -1006,7 +1006,7 @@ class WPSSTM_Track{
             'wpsstm-track',
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
             is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
-            $this->did_autosource  ? 'did-track-autosource' : null,
+            $this->did_autolink  ? 'did-track-autolink' : null,
 
         );
 
@@ -1015,77 +1015,77 @@ class WPSSTM_Track{
     }
     
     /*
-    $input_sources = array of sources objects or array of source IDs
+    $input_links = array of links objects or array of link IDs
     */
     
-    function add_sources($input_sources){
+    function add_links($input_links){
 
-        $add_sources = array();
-        if(!$input_sources) return;
+        $add_links = array();
+        if(!$input_links) return;
 
         
-        foreach ((array)$input_sources as $source){
+        foreach ((array)$input_links as $link){
 
-            if ( is_a($source, 'WPSSTM_Source') ){
-                $source_obj = $source;
+            if ( is_a($link, 'WPSSTM_Track_Link') ){
+                $link_obj = $link;
             }else{
-                if ( is_array($source) ){
-                    $source_args = $source;
-                    $source_obj = new WPSSTM_Source(null);
-                    $source_obj->from_array($source_args);
-                }else{ //source ID
-                    $source_id = $source;
+                if ( is_array($link) ){
+                    $link_args = $link;
+                    $link_obj = new WPSSTM_Track_Link(null);
+                    $link_obj->from_array($link_args);
+                }else{ //link ID
+                    $link_id = $link;
                     //TO FIX check for int ?
-                    $source_obj = new WPSSTM_Source($source_id);
+                    $link_obj = new WPSSTM_Track_Link($link_id);
                 }
             }
 
-            $valid = $source_obj->validate_source();
+            $valid = $link_obj->validate_link();
 
             if ( is_wp_error($valid) ){
                 $code = $valid->get_error_code();
                 $error_msg = $valid->get_error_message($code);
-                $source_obj->source_log(array('error'=>$error_msg,'source'=>$source_obj),"Unable to add source");
+                $link_obj->link_log(array('error'=>$error_msg,'link'=>$link_obj),"Unable to add link");
                 continue;
             }
 
-            $source_obj->track = $this;
-            $add_sources[] = $source_obj;
+            $link_obj->track = $this;
+            $add_links[] = $link_obj;
             
         }
 
-        //allow users to alter the input sources.
-        $add_sources = apply_filters('wpsstm_sources_input',$add_sources,$this);
+        //allow users to alter the input links.
+        $add_links = apply_filters('wpsstm_links_input',$add_links,$this);
 
-        $this->sources = array_merge((array)$this->sources,(array)$add_sources);
-        $this->source_count = count($this->sources);
+        $this->links = array_merge((array)$this->links,(array)$add_links);
+        $this->link_count = count($this->links);
 
-        return $this->sources;
+        return $this->links;
     }
     
     /**
-	 * Set up the next source and iterate current source index.
-	 * @return WP_Post Next source.
+	 * Set up the next link and iterate current link index.
+	 * @return WP_Post Next link.
 	 */
-	public function next_source() {
+	public function next_link() {
 
-		$this->current_source++;
+		$this->current_link++;
 
-		$this->source = $this->sources[$this->current_source];
-		return $this->source;
+		$this->link = $this->links[$this->current_link];
+		return $this->link;
 	}
 
 	/**
-	 * Sets up the current source.
-	 * Retrieves the next source, sets up the source, sets the 'in the loop'
+	 * Sets up the current link.
+	 * Retrieves the next link, sets up the link, sets the 'in the loop'
 	 * property to true.
-	 * @global WP_Post $wpsstm_source
+	 * @global WP_Post $wpsstm_link
 	 */
-	public function the_source() {
-		global $wpsstm_source;
-		$this->in_source_loop = true;
+	public function the_track_link() {
+		global $wpsstm_link;
+		$this->in_link_loop = true;
 
-		if ( $this->current_source == -1 ) // loop has just started
+		if ( $this->current_link == -1 ) // loop has just started
 			/**
 			 * Fires once the loop is started.
 			 *
@@ -1093,21 +1093,21 @@ class WPSSTM_Track{
 			 *
 			 * @param WP_Query &$this The WP_Query instance (passed by reference).
 			 */
-			do_action_ref_array( 'wpsstm_sources_loop_start', array( &$this ) );
+			do_action_ref_array( 'wpsstm_links_loop_start', array( &$this ) );
 
-		$wpsstm_source = $this->next_source();
-		//$this->setup_sourcedata( $wpsstm_source );
+		$wpsstm_link = $this->next_link();
+		//$this->setup_linkdata( $wpsstm_link );
 	}
 
 	/**
-	 * Determines whether there are more sources available in the loop.
-	 * Calls the {@see 'wpsstm_sources_loop_end'} action when the loop is complete.
-	 * @return bool True if sources are available, false if end of loop.
+	 * Determines whether there are more links available in the loop.
+	 * Calls the {@see 'wpsstm_links_loop_end'} action when the loop is complete.
+	 * @return bool True if links are available, false if end of loop.
 	 */
-	public function have_sources() {
-		if ( $this->current_source + 1 < $this->source_count ) {
+	public function have_links() {
+		if ( $this->current_link + 1 < $this->link_count ) {
 			return true;
-		} elseif ( $this->current_source + 1 == $this->source_count && $this->source_count > 0 ) {
+		} elseif ( $this->current_link + 1 == $this->link_count && $this->link_count > 0 ) {
 			/**
 			 * Fires once the loop has ended.
 			 *
@@ -1115,61 +1115,61 @@ class WPSSTM_Track{
 			 *
 			 * @param WP_Query &$this The WP_Query instance (passed by reference).
 			 */
-			do_action_ref_array( 'wpsstm_sources_loop_end', array( &$this ) );
+			do_action_ref_array( 'wpsstm_links_loop_end', array( &$this ) );
 			// Do some cleaning up after the loop
-			$this->rewind_sources();
+			$this->rewind_links();
 		}
 
-		$this->in_source_loop = false;
+		$this->in_link_loop = false;
 		return false;
 	}
 
 	/**
-	 * Rewind the sources and reset source index.
+	 * Rewind the links and reset link index.
 	 * @access public
 	 */
-	public function rewind_sources() {
-		$this->current_source = -1;
-		if ( $this->source_count > 0 ) {
-			$this->source = $this->sources[0];
+	public function rewind_links() {
+		$this->current_link = -1;
+		if ( $this->link_count > 0 ) {
+			$this->link = $this->links[0];
 		}
 	}
     
-    function user_can_reorder_sources(){
+    function user_can_reorder_links(){
         $track_type_obj = get_post_type_object(wpsstm()->post_type_track);
         $required_cap = $track_type_obj->cap->edit_posts;
         $can_edit_track = current_user_can($required_cap,$this->post_id);
 
-        $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
-        $can_edit_sources = current_user_can($source_type_obj->cap->edit_posts);
+        $link_type_obj = get_post_type_object(wpsstm()->post_type_track_link);
+        $can_edit_links = current_user_can($link_type_obj->cap->edit_posts);
         
-        return ($can_edit_track && $can_edit_sources);
+        return ($can_edit_track && $can_edit_links);
     }
     
-    function get_backend_sources_url(){
-        $sources_url = admin_url('edit.php');
-        $sources_url = add_query_arg( 
+    function get_backend_links_url(){
+        $links_url = admin_url('edit.php');
+        $links_url = add_query_arg( 
             array(
-                'post_type'     => wpsstm()->post_type_source,
+                'post_type'     => wpsstm()->post_type_track_link,
                 'post_parent'   => $this->post_id,
                 //'post_status' => 'publish'
-            ),$sources_url 
+            ),$links_url 
         );
-        return $sources_url;
+        return $links_url;
     }
 
-    function update_sources_order($source_ids){
+    function update_links_order($link_ids){
         global $wpdb;
         
         if (!$this->post_id){
             return new WP_Error( 'wpsstm_missing_post_id', __("Missing track ID.",'wpsstm') );
         }
 
-        if ( !$this->user_can_reorder_sources() ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to reorder sources.",'wpsstm') );
+        if ( !$this->user_can_reorder_links() ){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to reorder links.",'wpsstm') );
         }
 
-        foreach((array)$source_ids as $order=>$post_id){
+        foreach((array)$link_ids as $order=>$post_id){
             
             $wpdb->update( 
                 $wpdb->posts, //table

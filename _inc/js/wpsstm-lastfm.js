@@ -190,10 +190,10 @@ $(document).on( "wpsstmPlayerInit", function( event,player ) {
     });
 });
 
-$(document).on( "wpsstmSourceInit", function( event, source ) {
+$(document).on( "wpsstmLinkInit", function( event, link ) {
 
-    var track = source.closest('wpsstm-track');
-    var player = source.closest('wpsstm-player');
+    var track = link.closest('wpsstm-track');
+    var player = link.closest('wpsstm-player');
     var scrobble_icon =         $(player).find('.wpsstm-player-action-scrobbler');
     var scrobbler_enabled =     scrobble_icon.hasClass('active');
 
@@ -214,7 +214,7 @@ $(document).on( "wpsstmSourceInit", function( event, source ) {
     }
 
     var ScrobbleTrack = function() {
-        if ( source.duration < 30) return;
+        if ( link.duration < 30) return;
 
         if (scrobbler_enabled){
 

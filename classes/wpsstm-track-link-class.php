@@ -1,15 +1,15 @@
 <?php
-class WPSSTM_Source{
+class WPSSTM_Track_Link{
     var $post_id;
     
     var $index = null;
     
-    var $title; //source title (as they might appear on Youtube or Soundcloud, for example; when there is no artist + track title)
+    var $title; //link title (as they might appear on Youtube or Soundcloud, for example; when there is no artist + track title)
     var $title_artist; //if available, the artist name
     var $title_track; //if available, the track name
     
-    var $is_community; //TRUE if source was populated automatically
-    var $permalink_url; //source link
+    var $is_community; //TRUE if link was populated automatically
+    var $permalink_url; //link URL
     var $stream_url;
     var $download_url;
     var $mime_type;
@@ -19,24 +19,24 @@ class WPSSTM_Source{
     function __construct($post_id = null){
 
         //has track ID
-        if ( $source_id = intval($post_id) ) {
-            $this->post_id = $source_id;
-            $this->populate_source_post();
+        if ( $link_id = intval($post_id) ) {
+            $this->post_id = $link_id;
+            $this->populate_link_post();
         }
 
         $this->track = new WPSSTM_Track(); //default
 
     }
     
-    function populate_source_post(){
+    function populate_link_post(){
 
-        if ( !$this->post_id || ( get_post_type($this->post_id) != wpsstm()->post_type_source ) ){
-            $this->source_log('Invalid source post');
+        if ( !$this->post_id || ( get_post_type($this->post_id) != wpsstm()->post_type_track_link ) ){
+            $this->link_log('Invalid post');
             return;
         }
         
         $this->title = get_the_title($this->post_id);
-        $this->permalink_url = get_post_meta($this->post_id,WPSSTM_Core_Sources::$source_url_metakey,true);
+        $this->permalink_url = get_post_meta($this->post_id,WPSSTM_Core_Track_Links::$link_url_metakey,true);
         $this->index = get_post_field('menu_order', $this->post_id);
         if ( $track_id = wp_get_post_parent_id( $this->post_id ) ){
             $this->track = new WPSSTM_Track($track_id);
@@ -70,17 +70,17 @@ class WPSSTM_Source{
   
         }
 
-        //source
+        //link
         if ( $this->post_id ){
-            $this->populate_source_post();
+            $this->populate_link_post();
         }
         
     }
 
     /*
-    Get the sources that have the same URL or track informations than the current one
+    Get the links that have the same URL or track informations than the current one
     */
-    function get_source_duplicates_ids($args=null){
+    private function get_link_duplicates_ids($args=null){
 
         /*
         $query_meta_trackinfo = array(
@@ -102,14 +102,14 @@ class WPSSTM_Source{
         $args = wp_parse_args((array)$args,$default);
 
         $required = array(
-            'post__not_in'      => ($this->post_id) ? array($this->post_id) : null, //exclude current source
+            'post__not_in'      => ($this->post_id) ? array($this->post_id) : null, //exclude current link
             'post_parent'       => $this->track->post_id,
-            'post_type'         => array(wpsstm()->post_type_source),
+            'post_type'         => array(wpsstm()->post_type_track_link),
 
             'meta_query'        => array(
-                //by source URL
-                'source_url' => array(
-                    'key'     => WPSSTM_Core_Sources::$source_url_metakey,
+                //by link URL
+                array(
+                    'key'     => WPSSTM_Core_Track_Links::$link_url_metakey,
                     'value'   => $this->permalink_url
                 )
             )
@@ -121,42 +121,42 @@ class WPSSTM_Source{
         return $query->posts;
     }
     
-    function validate_source(){
+    function validate_link(){
         
         $this->permalink_url = trim($this->permalink_url);
         
         if (!$this->permalink_url){
-            return new WP_Error( 'wpsstm_souce_missing_url', __('Unable to validate source: missing URL','wpsstm') );
+            return new WP_Error( 'wpsstm_souce_missing_url', __('Unable to validate link: missing URL','wpsstm') );
         }
         
         if ( !filter_var($this->permalink_url, FILTER_VALIDATE_URL) ){
-            return new WP_Error( 'wpsstm_souce_missing_valid_url', __('Unable to validate source: bad URL','wpsstm') );
+            return new WP_Error( 'wpsstm_souce_missing_valid_url', __('Unable to validate link: bad URL','wpsstm') );
         }
 
         $this->title = trim($this->title);
     }
 
-    function save_source(){
+    function save_link(){
         
-        $validated = $this->validate_source();
+        $validated = $this->validate_link();
 
         if ( is_wp_error($validated) ) return $validated;
         
         if (!$this->track->post_id){
-            return new WP_Error( 'wpsstm_souce_missing_post_id', __('Unable to validate source: missing track ID','wpsstm') );
+            return new WP_Error( 'wpsstm_souce_missing_post_id', __('Unable to validate link: missing track ID','wpsstm') );
         }
         
         //check for duplicates
-        $duplicates = $this->get_source_duplicates_ids();
+        $duplicates = $this->get_link_duplicates_ids();
         if ( !empty($duplicates) ){
-            $source_id = $duplicates[0];
-            $this->post_id = $source_id;
-            //$this->source_log($source_id,'This source already exists, do not create it');
+            $link_id = $duplicates[0];
+            $this->post_id = $link_id;
+            //$this->link_log($link_id,'This link already exists, do not create it');
         }else{
             $post_author = ($this->is_community) ? wpsstm()->get_options('community_user_id') : get_current_user_id();
 
             //capability check
-            $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
+            $post_type_obj = get_post_type_object(wpsstm()->post_type_track_link);
             $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
             if ( !user_can($post_author,$required_cap) ){
@@ -170,10 +170,10 @@ class WPSSTM_Source{
 
             $required_args = array(
                 'post_title' =>     $this->title,
-                'post_type' =>      wpsstm()->post_type_source,
+                'post_type' =>      wpsstm()->post_type_track_link,
                 'post_parent' =>    $this->track->post_id,
                 'meta_input' =>     array(
-                    WPSSTM_Core_Sources::$source_url_metakey => $this->permalink_url
+                    WPSSTM_Core_Track_Links::$link_url_metakey => $this->permalink_url
                 )
             );
 
@@ -188,9 +188,9 @@ class WPSSTM_Source{
             if ( is_wp_error($success) ) return $success;
             $this->post_id = $success;
 
-            $this->source_log(
+            $this->link_log(
                 json_encode(array('args'=>$args,'post_id'=>$this->post_id)),
-                "WPSSTM_Source::save_source()
+                "WPSSTM_Track_Link::save_link()
             ");
         }
         
@@ -199,49 +199,49 @@ class WPSSTM_Source{
     
 
     
-    function trash_source(){
+    function trash_link(){
         
         if (!$this->post_id){
-            return new WP_Error( 'wpsstm_missing_post_id', __("Missing source ID.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_post_id', __("Missing link ID.",'wpsstm') );
         }
         
         //capability check
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_source);
-        $can_delete_source = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_track_link);
+        $can_delete_link = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
 
-        if (!$can_delete_source){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this source.",'wpsstm') );
+        if (!$can_delete_link){
+            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this link.",'wpsstm') );
         }
         
         return wp_trash_post( $this->post_id );
     }
 
-    function get_single_source_attributes(){
+    function get_single_link_attributes(){
         
         $attr = array(
-            'data-wpsstm-source-id' =>              $this->post_id,
-            'data-wpsstm-source-domain' =>          wpsstm_get_url_domain($this->permalink_url),
-            'data-wpsstm-source-idx' =>             $this->track->current_source,
-            'data-wpsstm-source-src' =>             $this->get_stream_url(),
-            'data-wpsstm-source-type' =>            $this->get_source_mimetype(),
-            'data-wpsstm-community-source' =>       (int)wpsstm_is_community_post($this->post_id),
-            'class' =>                              implode( ' ',$this->get_source_class() ),
+            'data-wpsstm-link-id' =>              $this->post_id,
+            'data-wpsstm-link-domain' =>          wpsstm_get_url_domain($this->permalink_url),
+            'data-wpsstm-link-idx' =>             $this->track->current_link,
+            'data-wpsstm-link-src' =>             $this->get_stream_url(),
+            'data-wpsstm-link-type' =>            $this->get_link_mimetype(),
+            'data-wpsstm-community-link' =>       (int)wpsstm_is_community_post($this->post_id),
+            'class' =>                              implode( ' ',$this->get_link_class() ),
         );
         return $attr;
     }
     
-    function get_source_class(){
-        $classes = array('wpsstm-source');
-        $classes = apply_filters('wpsstm_source_classes',$classes,$this);
+    function get_link_class(){
+        $classes = array('wpsstm-link');
+        $classes = apply_filters('wpsstm_link_classes',$classes,$this);
         return array_filter(array_unique($classes));
     }
     
     function get_stream_url(){
         if ($this->stream_url) return $this->stream_url;
-        return $this->stream_url = apply_filters('wpsstm_get_source_stream_url',$this->permalink_url,$this);
+        return $this->stream_url = apply_filters('wpsstm_get_link_stream_url',$this->permalink_url,$this);
     }
     
-    function get_source_action_url($action = null){
+    function get_link_action_url($action = null){
         
         $url = null;
         
@@ -257,15 +257,15 @@ class WPSSTM_Source{
         return $url;
     }
     
-    function get_source_links($context = null){
+    function get_link_links($context = null){
         $actions = array();
         
-        $source_type_obj = get_post_type_object(wpsstm()->post_type_source);
+        $link_type_obj = get_post_type_object(wpsstm()->post_type_track_link);
 
         //caps
-        $can_edit_source = current_user_can($source_type_obj->cap->edit_post,$this->post_id);
-        $can_delete_source = current_user_can($source_type_obj->cap->delete_post,$this->post_id);
-        $can_reorder_sources = $this->track->user_can_reorder_sources();
+        $can_edit_link = current_user_can($link_type_obj->cap->edit_post,$this->post_id);
+        $can_delete_link = current_user_can($link_type_obj->cap->delete_post,$this->post_id);
+        $can_reorder_links = $this->track->user_can_reorder_links();
         
         $actions['provider'] = array(
             'text' =>       wpsstm_get_url_domain($this->permalink_url),
@@ -273,22 +273,22 @@ class WPSSTM_Source{
             'target' =>     '_blank',
         );
 
-        if ($can_delete_source){
+        if ($can_delete_link){
             $actions['trash'] = array(
                 'text' =>       __('Trash'),
-                'desc' =>       __('Trash this source','wpsstm'),
-                'href' =>       $this->get_source_action_url('trash'),
+                'desc' =>       __('Trash this link','wpsstm'),
+                'href' =>       $this->get_link_action_url('trash'),
             );
         }
 
-        if ( $can_reorder_sources ){
+        if ( $can_reorder_links ){
             $actions['move'] = array(
                 'text' =>       __('Move', 'wpsstm'),
-                'desc' =>       __('Change source position','wpsstm'),
+                'desc' =>       __('Change link position','wpsstm'),
             );
         }
         
-        if ( $can_edit_source ){
+        if ( $can_edit_link ){
             $actions['edit-backend'] = array(
                 'text' =>      __('Edit'),
                 'classes' =>    array('wpsstm-advanced-action'),
@@ -296,10 +296,10 @@ class WPSSTM_Source{
             );
         }
 
-        return apply_filters('wpsstm_source_actions',$actions,$context);
+        return apply_filters('wpsstm_link_actions',$actions,$context);
     }
 
-    function get_source_mimetype(){
+    function get_link_mimetype(){
         if ($this->mime_type !== null) return $this->mime_type; //already populated
         $mime = false;
         
@@ -312,11 +312,11 @@ class WPSSTM_Source{
             }
         }
 
-        $this->mime_type = apply_filters('wpsstm_get_source_mimetype',$mime,$this);
+        $this->mime_type = apply_filters('wpsstm_get_link_mimetype',$mime,$this);
         return $this->mime_type;
     }
     
-    function get_source_title(){
+    function get_link_title(){
         $title = $this->title;
         if (!$title){
             $title = wpsstm_get_url_domain($this->permalink_url);
@@ -324,17 +324,17 @@ class WPSSTM_Source{
         return $title;
     }
 
-    function get_source_icon(){
+    function get_link_icon(){
         if ($this->icon !== null) return $this->icon;
         $icon = '<i class="fa fa-file-audio-o" aria-hidden="true"></i>';
-        $this->icon = apply_filters('wpsstm_get_source_icon',$icon,$this);
+        $this->icon = apply_filters('wpsstm_get_link_icon',$icon,$this);
         return $this->icon;
     }
     
-    function source_log($data,$title = null){
+    function link_log($data,$title = null){
         
         if ($this->post_id){
-            $title = sprintf('[source:%s] ',$this->post_id) . $title;
+            $title = sprintf('[link:%s] ',$this->post_id) . $title;
         }
 
         $this->track->track_log($data,$title);

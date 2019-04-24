@@ -6,7 +6,7 @@ class WpsstmPlayer extends HTMLElement{
         
         this.shuffle_el =               undefined;
         this.loop_el =                  undefined;
-        this.current_source =           undefined;
+        this.current_link =             undefined;
         this.current_track =            undefined;
         this.is_shuffle =               ( localStorage.getItem("wpsstm-player-shuffle") == 'true' );
         this.can_repeat =               ( ( localStorage.getItem("wpsstm-player-loop") == 'true' ) || !localStorage.getItem("wpsstm-player-loop") );
@@ -215,7 +215,7 @@ class WpsstmPlayer extends HTMLElement{
 
         $(window).bind('beforeunload', function(){
 
-            if (player.current_source && !player.current_media.paused){
+            if (player.current_link && !player.current_media.paused){
                 return wpsstmPlayer.leave_page_text;
             }
 
@@ -428,7 +428,7 @@ class WpsstmPlayer extends HTMLElement{
 
     }
     
-    play_queue(track_idx,source_idx){
+    play_queue(track_idx,link_idx){
         var player = this;
         
         var allTracks = $(player).find('.player-queue wpsstm-track');
@@ -460,14 +460,14 @@ class WpsstmPlayer extends HTMLElement{
         requestedTrack.debug('request track');
         requestedTrack.setAttribute('trackstatus','request');
 
-        var success = requestedTrack.maybe_load_sources();
+        var success = requestedTrack.maybe_load_links();
 
         success.then(
             function (newTrack) { //success
 
                 //check that it still the same track that is requested
                 if (player.current_track !== newTrack) return;                
-                newTrack.play_track(source_idx);
+                newTrack.play_track(link_idx);
 
             }, function (error) { //error
                 requestedTrack.debug('unable to play track, skipping...');
