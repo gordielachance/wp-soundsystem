@@ -42,7 +42,7 @@ class WPSSTM_Player{
         //TO FIX load only if player is loaded (see hook wpsstm_load_player ) ?
 
         //CSS
-        wp_enqueue_style('wp-mediaelement');
+        wp_enqueue_style( 'wpsstm-player', wpsstm()->plugin_url . '_inc/css/wpsstm-player.css',array('font-awesome','wp-mediaelement'),wpsstm()->version );
 
         //JS
         wp_enqueue_script( 'wpsstm-player', wpsstm()->plugin_url . '_inc/js/wpsstm-player.js', array('wp-mediaelement','wpsstm-functions'),wpsstm()->version, true);
