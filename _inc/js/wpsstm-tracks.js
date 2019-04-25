@@ -13,14 +13,12 @@ $(document).on('click','.wpsstm-track-action-play', function(e) {
     
     player = track.closest('wpsstm-player');
     trackIdx = Array.from(track.parentNode.children).indexOf(track);
-    
-    var linkIdx = 0;
-    
+
     var links = $(track).find('wpsstm-track-link');
-    activeLink = links.filter('.link-active').get(0);
-    if (activeLink){
-        linkIdx = links.index( activeLink );
-    }
+    var activeLink = links.filter('.link-active').get(0);
+    var linkIdx = links.index( activeLink );
+    linkIdx = (linkIdx > 0) ? linkIdx : 0;
+    
     player.play_queue(trackIdx,linkIdx);
 
 });

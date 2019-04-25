@@ -267,15 +267,10 @@ class WpsstmPlayer extends HTMLElement{
         //container play icon
         $(container).on('click', '.wpsstm-tracks-container-icon', function(e) {
 
-            var trackIdx;
-            var container = this.closest('.tracks-container');
-            var allTracks = $(container).find('wpsstm-track');
-
-            if (player.current_track){
-                trackIdx = allTracks.index( $(player.current_track) );
-            }else{
-                trackIdx = 0;
-            }
+            var tracks = $(player).find('wpsstm-track');
+            var activeTrack = tracks.filter('.track-active').get(0);
+            var trackIdx = tracks.index( activeTrack );
+            trackIdx = (trackIdx > 0) ? trackIdx : 0;
 
             player.play_queue(trackIdx);
         });
@@ -431,6 +426,8 @@ class WpsstmPlayer extends HTMLElement{
     play_queue(track_idx,link_idx){
         var player = this;
         
+        track_idx = (typeof track_idx !== 'undefined') ? track_idx : 0;
+        link_idx = (typeof link_idx !== 'undefined') ? link_idx : 0;
         var allTracks = $(player).find('.player-queue wpsstm-track');
         var requestedTrack = $(player).find('.player-queue wpsstm-track').get(track_idx);
         var requestedLink = $(requestedTrack).find('wpsstm-track-link').get(link_idx);
