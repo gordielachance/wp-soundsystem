@@ -14,6 +14,15 @@ $notice = $wpsstm_tracklist->importer_notice();
 <wpsstm-tracklist class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php $wpsstm_tracklist->html_metas();?>
     <div class="tracklist-header tracklist-wpsstm_live_playlist top">
+        <div class="wpsstm-tracklist-image" itemprop="image">
+            <div><!--for square ratio-->
+                <?php
+                if ( has_post_thumbnail($wpsstm_tracklist->post_id) ) { 
+                    echo get_the_post_thumbnail( $wpsstm_tracklist->post_id, 'post-thumbnail' );
+                }
+                ?>
+            </div>
+        </div>
         <h3 class="wpsstm-tracklist-title" itemprop="name" title="<?php echo $wpsstm_tracklist->title;?>">
             <i class="wpsstm-tracks-container-icon wpsstm-icon"></i>
             <a target="_parent" href="<?php echo get_permalink($wpsstm_tracklist->post_id);?>"><?php echo $wpsstm_tracklist->title;?></a>
@@ -28,7 +37,6 @@ $notice = $wpsstm_tracklist->importer_notice();
                 }
                 ?>
         </h3>
-
         <p class="wpsstm-tracklist-time">
             <?php
             //updated

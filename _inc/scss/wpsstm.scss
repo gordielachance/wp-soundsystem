@@ -11,10 +11,8 @@
     text-align:center;
 }
 .wpsstm-action{
-    display:inline-block;
-    margin: 0 .25em;
-    @extend .wpsstm-no-underline;
     @extend .wpsstm-icon;
+    @extend .wpsstm-no-underline;
     &.action-loading{
         @extend .wpsstm-loading-icon;
         @extend .wpsstm-freeze;
