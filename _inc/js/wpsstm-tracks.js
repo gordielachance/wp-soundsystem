@@ -1,7 +1,7 @@
 var $ = jQuery.noConflict();
 
 //play/pause track button
-$(document).on('click','.wpsstm-track-play-bt', function(e) {
+$(document).on('click','.wpsstm-track-action-play', function(e) {
     e.preventDefault();
     var track = this.closest('wpsstm-track');
     var player;

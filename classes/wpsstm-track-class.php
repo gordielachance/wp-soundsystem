@@ -877,6 +877,14 @@ class WPSSTM_Track{
 
         $can_move_subtrack =        ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
         $can_dequeue_track =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
+        
+        //play
+        if ( wpsstm()->get_options('player_enabled') ){
+            $actions['play'] = array(
+                'text' =>      __('Play Track','wpsstm'),
+                'href' =>       '#',
+            );
+        }
 
         //share
         /*
