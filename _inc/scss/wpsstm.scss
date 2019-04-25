@@ -167,11 +167,11 @@ a.toggle-children-link, .toggle-children-link a{
 /*popups*/
 .wpsstm-dialog{
     z-index:11;
-    background:rgba(255,255,255,.8);
+    background:rgba(255,255,255,.98);
     border:1px solid #F7F7F7;
     
     position:relative;
-    
+
     .wpsstm-dialog-loader{
         @extend .wpsstm-loading-icon;
     }
@@ -182,10 +182,7 @@ a.toggle-children-link, .toggle-children-link a{
     }
 
     .ui-dialog-content{
-        
-        #wpsstm-popup-iframe{
-            background-color: white;
-        }
+
         .wpsstm-dialog-loader{
             font-size:3em;
         }
@@ -196,10 +193,6 @@ a.toggle-children-link, .toggle-children-link a{
         }
         .wpsstm-dialog-loader{
             display:none;
-        }
-        #wpsstm-popup-iframe{
-            width: 100%;
-            height: 100%;
         }
 
     }
