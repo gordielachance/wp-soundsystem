@@ -131,7 +131,7 @@ class WPSSTM_Core_API {
                 return new WP_Error( 'missing_spotify_id',__( 'Missing Spotify ID.', 'wpsstmapi' ));
             }
 
-            $api_url = sprintf('track/autosource/spotify/%s',$music_id);
+            $api_url = sprintf('track/autolink/spotify/%s',$music_id);
             $links_auto = WPSSTM_Core_API::api_request($api_url);
             if ( is_wp_error($links_auto) ) return $links_auto;
 
