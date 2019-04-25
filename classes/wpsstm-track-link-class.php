@@ -334,7 +334,7 @@ class WPSSTM_Track_Link{
         return $this->stream_url = apply_filters('wpsstm_get_stream_url',$this->permalink_url,$this);
     }
 
-    function get_link_mimetype(){
+    private function get_link_mimetype(){
         if ( !$stream_url = $this->get_stream_url() ) return;
         if ( $this->mime_type !== null ) return $this->mime_type; //already populated
         $mime = false;
