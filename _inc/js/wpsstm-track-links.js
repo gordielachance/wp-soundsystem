@@ -1,31 +1,5 @@
 var $ = jQuery.noConflict();
 
-//play link
-$(document).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link.wpsstm-playable-link .wpsstm-link-title', function(e) {
-    e.preventDefault();
-    var link = this.closest('wpsstm-track-link');
-    var track = this.closest('wpsstm-track');
-    var linkIdx = Array.from(link.parentNode.children).indexOf(link);
-    
-    if (track.queueNode){ //page track, get the queue track
-        track = track.queueNode;
-    }
-    
-    var trackIdx = Array.from(track.parentNode.children).indexOf(track);
-    
-    player = track.closest('wpsstm-player');
-
-    //toggle tracklist links
-    if ( !$(track).hasClass('track-playing') ){
-        var list = $(track).find('.wpsstm-track-links-list');
-        $( list ).removeClass('active');
-    }
-
-
-    player.play_queue(trackIdx,linkIdx);
-
-});
-
 class WpsstmLink extends HTMLElement{
     constructor() {
         super(); //required to be first
@@ -99,6 +73,31 @@ class WpsstmLink extends HTMLElement{
         $(self).on('click', '.wpsstm-track-link-action-trash', function(e) {
             e.preventDefault();
             self.trash_link();
+        });
+        
+        //play link
+        $(self).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link.wpsstm-playable-link .wpsstm-link-title', function(e) {
+            e.preventDefault();
+            var link = this.closest('wpsstm-track-link');
+            var track = this.closest('wpsstm-track');
+            var linkIdx = Array.from(link.parentNode.children).indexOf(link);
+
+            if (track.queueNode){ //page track, get the queue track
+                track = track.queueNode;
+            }
+
+            var trackIdx = Array.from(track.parentNode.children).indexOf(track);
+
+            var player = track.closest('wpsstm-player');
+
+            //toggle tracklist links
+            if ( !$(track).hasClass('track-playing') ){
+                var list = $(track).find('.wpsstm-track-links-list');
+                $( list ).removeClass('active');
+            }
+
+            player.play_queue(trackIdx,linkIdx);
+
         });
 
     }

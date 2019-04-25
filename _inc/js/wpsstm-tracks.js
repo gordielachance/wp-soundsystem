@@ -13,7 +13,15 @@ $(document).on('click','.wpsstm-track-action-play', function(e) {
     
     player = track.closest('wpsstm-player');
     trackIdx = Array.from(track.parentNode.children).indexOf(track);
-    player.play_queue(trackIdx);
+    
+    var linkIdx = 0;
+    
+    var links = $(track).find('wpsstm-track-link');
+    activeLink = links.filter('.link-active').get(0);
+    if (activeLink){
+        linkIdx = links.index( activeLink );
+    }
+    player.play_queue(trackIdx,linkIdx);
 
 });
 
@@ -750,7 +758,7 @@ class WpsstmTrack extends HTMLElement{
 
         if (player && player.current_link){
             player.current_media.pause();
-            track_instances.find('wpsstm-track-link').removeClass('link-playing');
+            track_instances.find('wpsstm-track-link').removeClass('link-playing link-active');
         }
 
     }
