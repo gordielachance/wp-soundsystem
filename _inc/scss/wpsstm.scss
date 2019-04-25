@@ -8,33 +8,30 @@
     list-style: none;
     line-height: 2.2em;
     font-family: sans-serif;
-    
     text-align:center;
-    
-    .wpsstm-action{
-        display:inline-block;
-        margin-right:.5em;
-        @extend .wpsstm-no-underline;
-        @extend .wpsstm-icon;
-        &.action-loading{
-            @extend .wpsstm-loading-icon;
-            @extend .wpsstm-freeze;
-        }
-        &.action-error:before{
-            content:"\f071"; //.fa-exclamation-triangle;
-        }
-        &.action-favorite:before,
-        &.action-unfavorite:hover:before
-        {
-            content: "\f08a";//.fa-heart-o;
-        }
-        &.action-unfavorite:before,
-        &.action-favorite:hover:before
-        {
-            content: "\f004";//.fa-heart;
-        }
+}
+.wpsstm-action{
+    display:inline-block;
+    margin: 0 .25em;
+    @extend .wpsstm-no-underline;
+    @extend .wpsstm-icon;
+    &.action-loading{
+        @extend .wpsstm-loading-icon;
+        @extend .wpsstm-freeze;
     }
-    
+    &.action-error:before{
+        content:"\f071"; //.fa-exclamation-triangle;
+    }
+    &.action-favorite:before,
+    &.action-unfavorite:hover:before
+    {
+        content: "\f08a";//.fa-heart-o;
+    }
+    &.action-unfavorite:before,
+    &.action-favorite:hover:before
+    {
+        content: "\f004";//.fa-heart;
+    }
 }
 
 .wpsstm-notice {

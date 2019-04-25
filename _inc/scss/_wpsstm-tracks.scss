@@ -101,6 +101,10 @@ wpsstm-track{
         }
     }
     
+    .wpsstm-track-action-play{
+        margin:0;
+    }
+    
     &:not(.track-playing) .wpsstm-track-action-play:before{
         content:"\f04b"; //.fa-play
     }
