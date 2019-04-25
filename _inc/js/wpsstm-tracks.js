@@ -237,7 +237,10 @@ class WpsstmTrack extends HTMLElement{
             $(this).toggleClass('active');
             $(this).parents('.wpsstm-track').find('.wpsstm-track-links-list').toggleClass('active');
         });
-
+        
+        //move play button at the beginning of the row
+        var playLinkEl = $(track).find('.wpsstm-track-action-play');
+        playLinkEl.parents('.wpsstm-track').find('.wpsstm-track-pre').prepend(playLinkEl);
     }
 
     get_instances(){
