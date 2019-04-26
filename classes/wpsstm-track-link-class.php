@@ -150,7 +150,7 @@ class WPSSTM_Track_Link{
         if ( $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ){
             foreach($excluded_hosts as $host){
                 if (strpos($this->permalink_url,$host) !== false) {
-                    return new WP_Error( 'wpsstm_excluded_host', __('Unable to validate link: host excluded (see plugin options)','wpsstm') );
+                    return new WP_Error( 'wpsstm_excluded_host', __('Host excluded (see plugin options)','wpsstm'), array('permalink'=>$this->permalink_url,'excluded_host'=>$host) );
                 }
             }
 

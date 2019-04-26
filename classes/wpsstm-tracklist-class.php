@@ -640,14 +640,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         redirect URL
         Hook to filter bangs, etc.
         */
-        $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url);
+        $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url,$this);
 
         /*
         Build presets.
         The default preset, WPSSTM_Remote_Tracklist, should be hooked with the lowest priority
         */
         $presets = array();
-        $presets = apply_filters('wpsstm_remote_presets',$presets);
+        $presets = apply_filters('wpsstm_remote_presets',$presets,$this);
 
         /*
         Select a preset based on the tracklist URL, or use the default preset
