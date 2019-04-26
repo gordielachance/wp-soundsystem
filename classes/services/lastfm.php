@@ -376,6 +376,40 @@ class WPSSTM_LastFM{
         return $basic_auth;
 
     }
+    
+    public function get_loved_tracks_count($username){
+        
+        $transient_name = sprintf('wpsstm_lastfm_%s_loved_count',$username);
+        $username = 'grosbouff';
+        $limit = 50;
+        
+        if ( false === ( $tracks_count = get_transient($transient_name ) ) ) {
+
+            $args = array(
+                'method' =>     'user.getlovedtracks',
+                'user' =>       $username,
+                'api_key' =>    $this->get_options('client_id'),
+                'format' =>     'json'
+            );
+
+            $api_url = add_query_arg($args,'http://ws.audioscrobbler.com/2.0');
+
+            $response = wp_remote_post( $api_url );
+            if ( is_wp_error($response) ) return $response;
+
+            $body = wp_remote_retrieve_body($response);
+            $body = json_decode($body,true);
+            $tracks_count = null;
+            if ( $count_str =  wpsstm_get_array_value(array('lovedtracks','@attr','total'),$body) ){
+                $tracks_count = (int)$count_str;
+            }
+
+            set_transient( $transient_name, $tracks_count, 1 * DAY_IN_SECONDS );
+        }
+
+        return $tracks_count;
+        
+    }
 
     public function search_artists($input){
         $auth = $this->get_basic_api_auth();
