@@ -175,13 +175,19 @@ class WpsstmLink extends HTMLElement{
         var tracks_container = track_instances.parents('.tracks-container');
         var player = this.closest('wpsstm-player');
         var success = $.Deferred();
+        
+        if(link.can_play === false){
+            success.reject('cannot play this link');
+            return success.promise();
+        }
 
         ///
         link_instances.addClass('link-active link-loading');
         //
-        player.current_link = link;
+        
         link.debug("play link: " + link.src);
         link.setAttribute('requestLinkPlay',true);
+        player.current_link = link;
 
         /*
         register new events
