@@ -48,7 +48,7 @@ class WPSSTM_Core_Tracklists{
 
         //post content
         add_filter( 'the_title', array($this, 'filter_tracklist_empty_title'), 10, 2 );
-        add_filter( 'the_content', array($this,'content_append_tracklist_table') );
+        add_filter( 'the_content', array($this,'content_append_tracklist_html') );
         
         //tracklist shortcode
         add_shortcode( 'wpsstm-tracklist',  array($this, 'shortcode_tracklist'));
@@ -244,7 +244,7 @@ class WPSSTM_Core_Tracklists{
         return $title;
     }
 
-    function content_append_tracklist_table($content){
+    function content_append_tracklist_html($content){
         global $post;
         global $wpsstm_tracklist;
 
