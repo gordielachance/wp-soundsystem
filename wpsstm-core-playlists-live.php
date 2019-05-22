@@ -11,10 +11,6 @@ class WPSSTM_Core_Live_Playlists{
         
             wpsstm()->tracklist_post_types[] = 'wpsstm_live_playlist';
 
-            add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array('WPSSTM_Core_Tracklists','tracks_count_column_register') );
-            add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array('WPSSTM_Core_Tracklists','favorited_tracklist_column_register') );
-            add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array('WPSSTM_Core_Tracklists','tracklists_columns_content') );
-
             add_action( 'wpsstm_init_post_types', array($this,'register_post_type_live_playlist' ));
             add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
 

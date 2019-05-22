@@ -19,10 +19,6 @@ class WPSSTM_Core_Albums{
         
         add_filter( 'the_title', array($this, 'the_album_post_title'), 9, 2 );
         
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array('WPSSTM_Core_Tracklists','tracks_count_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array('WPSSTM_Core_Tracklists','favorited_tracklist_column_register') );
-        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array('WPSSTM_Core_Tracklists','tracklists_columns_content') );
-        
     }
 
     function metabox_album_register(){
