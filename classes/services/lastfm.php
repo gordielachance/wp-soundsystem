@@ -592,33 +592,16 @@ class WPSSTM_LastFM{
             $track->from_array($ajax_data['track']);
             $result['track'] = $track->to_array();
 
-            //check that the new submission has not been sent just before
-            $last_scrobble_meta_key = 'wpsstm_last_scrobble';
-            $track_arr = $track->to_array();
-            $last_scrobble = get_user_meta($community_user_id, $last_scrobble_meta_key, true);
-            
-            if ( $last_scrobble == $track_arr ){
-                
-                $result['message'] = 'This track has already been scrobbled by the bot: ' . json_encode($track_arr,JSON_UNESCAPED_UNICODE); 
-                
-            }else{
+            $community_user = new WPSSTM_LastFM_User($community_user_id);
+            $success = $community_user->scrobble_lastfm_track($track,$start_timestamp);
 
-                $community_user = new WPSSTM_LastFM_User($community_user_id);
-                $success = $community_user->scrobble_lastfm_track($track,$start_timestamp);
-
-                if ( $success ){
-                    if ( is_wp_error($success) ){
-                        $code = $success->get_error_code();
-                        $result['message'] = $success->get_error_message($code); 
-                    }else{
-                        $result['success'] = true;
-                        
-                        //update last bot scrobble
-                        update_user_meta( $community_user_id, $last_scrobble_meta_key, $track_arr );
-                        
-                    }
+            if ( $success ){
+                if ( is_wp_error($success) ){
+                    $code = $success->get_error_code();
+                    $result['message'] = $success->get_error_message($code); 
+                }else{
+                    $result['success'] = true;
                 }
-                
             }
 
         }
