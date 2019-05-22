@@ -6,22 +6,27 @@ class WPSSTM_Core_Live_Playlists{
     public $presets;
 
     function __construct() {
-        
-        if ( ( wpsstm()->can_radios() === true ) && wpsstm()->get_options('radios_enabled') ){
-        
+
+        /*
+        Even if we don't have the API key enabling radios, we still want to register the radios post type :
+        If, for example, we HAD an API key but that it has expired; and that we don't register the radios post type, accessing those posts will return a 404 error, which is confusing:
+        Better register the post type and fire a tracklist notice to say that it cannot be refreshed because API key is invalid.
+        */
+
+        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_live_playlist' ));
+
+        if ( wpsstm()->can_radios() === true ){
+            
             wpsstm()->tracklist_post_types[] = 'wpsstm_live_playlist';
+            add_filter( 'pre_get_posts', array($this,'pre_get_tracklist_by_pulse') );
+            add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
+            add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
 
-            add_action( 'wpsstm_init_post_types', array($this,'register_post_type_live_playlist' ));
             add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
-
             add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
 
-            add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
-
-            add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
-            
-            add_filter( 'pre_get_posts', array($this,'pre_get_tracklist_by_pulse') );
-            
+        }else{
+            add_filter( 'the_content', array( $this, 'content_cannot_radios_notice' ) );
         }
 
     }
@@ -197,10 +202,26 @@ class WPSSTM_Core_Live_Playlists{
 
         return $query;
     }
+    
+    function content_cannot_radios_notice($content){
+        global $post;
+        
+        $can = wpsstm()->can_radios();
+        
+        if ( is_wp_error($can) ){
+            $notice = $can->get_error_message();
+            $notice = sprintf('<p class="wpsstm-notice">%s</p>',$notice);
+            $content.= $notice;
+        }
+
+        return $content;
+        
+    }
 
 }
 
 function wpsstm_live_playlists_init(){
+    if ( !wpsstm()->get_options('radios_enabled') ) return;
     new WPSSTM_Core_Live_Playlists();
 }
 
