@@ -456,15 +456,18 @@ class WPSSTM_Track{
             return new WP_Error( 'wpsstm_missing_bool', __("Missing valid bool.",'wpsstm') );
         }
         
-        if ( !get_current_user_id() ){
+        if ( !$user_id = get_current_user_id() ){
             return new WP_Error( 'wpsstm_missing_user_id', __("Missing user ID.",'wpsstm') );
         }
 
-        if (!$tracklist_id = wpsstm()->user->favorites_id){
-            return new WP_Error( 'wpsstm_missing_favorites_tracklist', __("Missing favorites tracklist ID.",'wpsstm') );
+        //create user favorite tracklist
+        if ( !$tracklist_id = WPSSTM_Core_User::get_user_favorites_id($user_id) ){
+            remove_action('wpsstm_love_tracklist', array('WPSSTM_Core_BuddyPress','love_tracklist_activity') ); //no BP activity at tracklist creation / TOUFIX TOUCHECK
+            $tracklist_id = WPSSTM_Core_User::create_user_favorites_tracklist($user_id);
+            if ( is_wp_error($tracklist_id) ){
+                return new WP_Error( 'wpsstm_missing_favorites_tracklist', __("Missing favorites tracklist ID.",'wpsstm') );
+            }
         }
-        
-        ///
         
         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
 
@@ -872,8 +875,8 @@ class WPSSTM_Track{
         $can_edit_track =           ( $this->post_id && current_user_can($track_type_obj->cap->edit_post,$this->post_id) );
         $can_delete_track =         ( $this->post_id && current_user_can($track_type_obj->cap->delete_posts) );
         
-        $can_favorite_track =       ( wpsstm()->user->can_subtracks && wpsstm()->user->favorites_id);
-        $can_playlists_manager =    ( wpsstm()->user->can_subtracks );
+        $can_favorite_track =       ( WPSSTM_Core_User::can_manage_static_tracklists() );
+        $can_playlists_manager =    ( WPSSTM_Core_User::can_manage_static_tracklists() );
 
         $can_move_subtrack =        ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
         $can_dequeue_track =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );

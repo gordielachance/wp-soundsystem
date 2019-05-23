@@ -2,30 +2,8 @@
 
 class WPSSTM_Core_User{
 
-    var $user_id;
-    var $favorites_id;
-    var $can_subtracks;
-    
     static $favorites_tracklist_usermeta_key = 'wpsstm_favorites_tracklist_id';
     static $loved_tracklist_meta_key = 'wpsstm_user_favorite';
-
-    function __construct($user_id = null){
-        if (!$user_id) $user_id = get_current_user_id();
-
-        if ($user_id){
-            $this->user_id = $user_id;
-            $this->can_subtracks = $this->can_manage_static_tracklists();
-            $this->favorites_id = self::get_user_favorites_id($this->user_id);
-            
-            //create the favorites tracklist if it does not exists
-            if (!$this->favorites_id){
-                $favorites_id = self::create_user_favorites_tracklist($this->user_id);
-                if ( !is_wp_error($favorites_id) ){
-                    $this->favorites_id = $favorites_id;
-                }
-            }
-        }
-    }
 
     /*
     Get the ID of the favorites tracklist for a user, or create it and store option
@@ -51,7 +29,7 @@ class WPSSTM_Core_User{
     /*
     create new tracklist
     */
-    private static function create_user_favorites_tracklist($user_id = null){
+    public static function create_user_favorites_tracklist($user_id = null){
         
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
@@ -88,13 +66,16 @@ class WPSSTM_Core_User{
         return $love_id;
     }
     
-    private function can_manage_static_tracklists(){
+    public static function can_manage_static_tracklists($user_id = null){
+        
+        if (!$user_id) $user_id = get_current_user_id();
+        if (!$user_id) return;
 
         $can = false;
         $post_types = wpsstm()->static_tracklist_post_types;
         foreach ($post_types as $post_type){
             if ( !$post_type_obj = get_post_type_object($post_type) ) continue;
-            $can = user_can( $this->user_id, $post_type_obj->cap->edit_posts);
+            $can = user_can( $user_id, $post_type_obj->cap->edit_posts);
             if ( $can ) break;
         }
 
@@ -102,9 +83,3 @@ class WPSSTM_Core_User{
     }
 
 }
-
-function wpsstm_user_init(){
-    wpsstm()->user = new WPSSTM_Core_User();
-}
-
-add_action('init','wpsstm_user_init'); //when user is ready

@@ -859,7 +859,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             do_action('wpsstm_queue_track',$track,$this->post_id);
             
             //favorites ?
-            if ( $this->post_id == wpsstm()->user->favorites_id ){
+            if ( $this->post_id == WPSSTM_Core_User::get_user_favorites_id() ){
                 do_action('wpsstm_love_track',$track,true);
             }
         }
@@ -893,7 +893,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         do_action('wpsstm_dequeue_track',$track,$this->post_id);
 
         //favorites ?
-        if ( $this->post_id == wpsstm()->user->favorites_id ){
+        if ( $this->post_id == WPSSTM_Core_User::get_user_favorites_id() ){
             do_action('wpsstm_love_track',$track,false);
         }
 
