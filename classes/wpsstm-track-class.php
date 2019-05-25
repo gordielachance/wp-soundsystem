@@ -875,8 +875,8 @@ class WPSSTM_Track{
         $can_edit_track =           ( $this->post_id && current_user_can($track_type_obj->cap->edit_post,$this->post_id) );
         $can_delete_track =         ( $this->post_id && current_user_can($track_type_obj->cap->delete_posts) );
         
-        $can_favorite_track =       ( WPSSTM_Core_User::can_manage_static_tracklists() );
-        $can_playlists_manager =    ( WPSSTM_Core_User::can_manage_static_tracklists() );
+        $can_favorite_track =       ( WPSSTM_Core_User::can_manage_playlists() );
+        $can_playlists_manager =    ( WPSSTM_Core_User::can_manage_playlists() );
 
         $can_move_subtrack =        ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
         $can_dequeue_track =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );

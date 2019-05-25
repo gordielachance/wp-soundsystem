@@ -66,7 +66,7 @@ class WPSSTM_Core_User{
         return $love_id;
     }
     
-    public static function can_manage_static_tracklists($user_id = null){
+    public static function can_manage_playlists($user_id = null){
         
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
