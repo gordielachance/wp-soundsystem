@@ -15,7 +15,7 @@ class WPSSTM_Core_Live_Playlists{
 
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_live_playlist' ));
 
-        if ( wpsstm()->can_radios() === true ){
+        if ( wpsstm()->can_importer() === true ){
             
             wpsstm()->tracklist_post_types[] = 'wpsstm_live_playlist';
             add_filter( 'pre_get_posts', array($this,'pre_get_tracklist_by_pulse') );
@@ -207,7 +207,7 @@ class WPSSTM_Core_Live_Playlists{
         global $post;
 
         if ( get_post_type() !== wpsstm()->post_type_live_playlist ) return $content;
-        $can = wpsstm()->can_radios();
+        $can = wpsstm()->can_importer();
         
         if ( is_wp_error($can) ){
             $notice = $can->get_error_message();

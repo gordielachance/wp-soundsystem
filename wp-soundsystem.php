@@ -710,10 +710,6 @@ class WP_SoundSystem {
         return true;
         
     }
-    
-    public function can_radios(){
-        return $this->can_importer();
-    }
 
     public function can_frontend_importer(){
         $page_id = $this->get_options('frontend_scraper_page_id');
