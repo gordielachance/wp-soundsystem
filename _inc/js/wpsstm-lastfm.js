@@ -169,7 +169,7 @@ $(document).on( "wpsstmPlayerInit", function( event,player ) {
     var scrobble_icon =         $(player).find('.wpsstm-player-action-scrobbler');
 
     //click toggle scrobbling
-    scrobble_icon.find('a').click(function(e) {
+    scrobble_icon.click(function(e) {
         e.preventDefault();
         
         scrobble_icon.addClass('lastfm-loading');
