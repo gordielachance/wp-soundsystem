@@ -205,7 +205,8 @@ class WPSSTM_Core_Live_Playlists{
     
     function content_cannot_radios_notice($content){
         global $post;
-        
+
+        if ( get_post_type() !== wpsstm()->post_type_live_playlist ) return $content;
         $can = wpsstm()->can_radios();
         
         if ( is_wp_error($can) ){
