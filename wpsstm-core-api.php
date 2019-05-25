@@ -21,19 +21,13 @@ class WPSSTM_Core_API {
     */
 
     public static function can_wpsstmapi(){
-        if ( !$token = wpsstm()->get_options('wpsstmapi_token') ){
-            $link_el = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstm'));
-            return new WP_Error('wpsstmapi_token_required',sprintf(__("An API key required.  Get one %s !",'wpsstm'),$link_el));
-        }
         
-        $is_auth = self::check_auth();
-        if ( is_wp_error($is_auth) ) return $is_auth;
-        
-        if (!$is_auth){
-            return new WP_Error('wpsstmapi_no_auth',__("This requires a valid WPSSTM API key.",'wpsstm'));
-        }
-        
-        return true;
+        $token = wpsstm()->get_options('wpsstmapi_token');
+        $auth = self::check_auth();
+
+        if ( $token && $auth && !is_wp_error($auth) ) return true;
+
+        return new WP_Error('wpsstmapi_required',__("A valid WPSSTM API key is required.",'wpsstm'));
         
     }
     
