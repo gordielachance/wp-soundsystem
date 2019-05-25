@@ -7,13 +7,13 @@ Tested up to: 5.2.1
 Stable tag: trunk
 License: GPLv2 or later
 
-WP Soundsystem is a complete solution to manage a music library within WordPress.  Use it to build or import playlists, manage tracks and audio links, albums, artists, and play them with our audio player.
+WP SoundSystem is a complete solution to manage a music library within WordPress.  Use it to build or import playlists, manage tracks and audio links, albums, artists, and play them with our audio player.
 
 == Description ==
 
 *If you are updating the plugin from < version 2.5, please BACKUP your database first, as many, many things have been updated.*
 
-*WP Soundsystem* is a complete solution to manage a music library within WordPress.
+*WP SoundSystem* is a complete solution to manage a music library within WordPress.
 
 Use it to build or import playlists, manage tracks and audio links, albums, artists, and play them with our audio player.
 
@@ -71,7 +71,7 @@ It will also fire new *BuddyPress activity* items.
 
 = Contribute =
 
-WP Soundsystem is dev friendly, and has been designed to be extendable.
+WP SoundSystem is dev friendly, and has been designed to be extendable.
 Wanna give a hand as developer ? Check the [Github](https://github.com/gordielachance/wp-soundsystem) repo.
 
 = WP SoundSystem API =
