@@ -438,17 +438,28 @@ class WPSSTM_Settings {
     }
     
     function playlists_manager_callback(){
+        global $wp_roles;
+        
         $enabled = wpsstm()->get_options('playlists_manager');
         
-        $matching_roles = null;
+        $matching_roles = array();
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
+        $required_cap = $post_type_obj->cap->edit_posts;
         
         $help = array();
         $help[]= __("If enabled, you have to give your users the capability to create new playlists.","wpsstm");
         
+        
+        foreach($wp_roles->roles as $role_arr){
+            if ( wpsstm_get_array_value(array('capabilities',$required_cap),$role_arr) ){
+                $matching_roles[] = $role_arr['name'];
+            }
+        }
+        
         if ($matching_roles){
-            $help[]= sprintf(__("Currently, those roles have this capability: %s.","wpsstm"),'<strong>' . $matching_roles . '</strong>');
+            $help[]= sprintf(__("Those roles have the required capability: %s.","wpsstm"),'<em>' . implode(',',$matching_roles) . '</em>');
         }else{
-            $help[]= sprintf(__("Currently, no roles have this capability.","wpsstm"),'<strong>' . $matching_roles . '</strong>');
+            $help[]= __("Currently, no roles have this capability.","wpsstm");
         }
 
         printf(
