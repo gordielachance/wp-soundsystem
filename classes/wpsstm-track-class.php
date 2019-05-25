@@ -390,7 +390,7 @@ class WPSSTM_Track{
         $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
         if ( !user_can($user_id,$required_cap) ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to create a new track.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to create a new track.",'wpsstm') );
         }
         
         //album
@@ -490,7 +490,7 @@ class WPSSTM_Track{
         $can_delete_track = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
 
         if ( !$can_delete_track ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this track.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to delete this track.",'wpsstm') );
         }
         
         $success = wp_trash_post($this->post_id);
@@ -865,6 +865,7 @@ class WPSSTM_Track{
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
         $tracklist_post_type_obj =  $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
         $can_edit_tracklist =       ( $tracklist_post_type_obj && current_user_can($tracklist_post_type_obj->cap->edit_post,$tracklist_id) );
+        $can_manage_playlists =     WPSSTM_Core_User::can_manage_playlists();
         
         /*
         Track
@@ -874,9 +875,6 @@ class WPSSTM_Track{
         $can_create_track =         current_user_can($track_type_obj->cap->edit_posts);
         $can_edit_track =           ( $this->post_id && current_user_can($track_type_obj->cap->edit_post,$this->post_id) );
         $can_delete_track =         ( $this->post_id && current_user_can($track_type_obj->cap->delete_posts) );
-        
-        $can_favorite_track =       ( WPSSTM_Core_User::can_manage_playlists() );
-        $can_playlists_manager =    ( WPSSTM_Core_User::can_manage_playlists() );
 
         $can_move_subtrack =        ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
         $can_dequeue_track =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
@@ -899,31 +897,44 @@ class WPSSTM_Track{
         */
 
         //favorite
-        if ($can_favorite_track){
+        if ( wpsstm()->get_options('playlists_manager') ){
             
-            $actions['favorite'] = array(
-                'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('favorite'),
-                'desc' =>       __('Add track to favorites','wpsstm'),
-                'classes' =>    array('action-favorite'),
-            );
+            if ( get_current_user_id() ){
+                
+                if ( $can_manage_playlists ){
+                    $actions['favorite'] = array(
+                        'text' =>      __('Favorite','wpsstm'),
+                        'href' =>       $this->get_track_action_url('favorite'),
+                        'desc' =>       __('Add track to favorites','wpsstm'),
+                        'classes' =>    array('action-favorite'),
+                    );
 
-            $actions['unfavorite'] = array(
-                'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_track_action_url('unfavorite'),
-                'desc' =>       __('Remove track from favorites','wpsstm'),
-                'classes' =>    array('action-unfavorite'),
-            );
-
-        }else{
-            if ( !get_current_user_id() ){ //call to action
+                    $actions['unfavorite'] = array(
+                        'text' =>      __('Favorite','wpsstm'),
+                        'href' =>       $this->get_track_action_url('unfavorite'),
+                        'desc' =>       __('Remove track from favorites','wpsstm'),
+                        'classes' =>    array('action-unfavorite'),
+                    );
+                }else{
+                    $actions['favorite'] = array(
+                        'text' =>      __('Favorite','wpsstm'),
+                        'href' =>       '#',
+                        'desc' =>       __("Missing required capability.",'wpsstm'),
+                        'classes' =>    array('action-favorite','wpsstm-disabled-action','wpsstm-tooltip'),
+                    );
+                }
+                
+            }else{
+                
                 $actions['favorite'] = array(
                     'text' =>      __('Favorite','wpsstm'),
                     'href' =>       '#',
                     'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                    'classes' =>    array('action-favorite','wpsstm-tooltip','wpsstm-requires-login'),
+                    'classes' =>    array('action-favorite','wpsstm-disabled-action','wpsstm-tooltip'),
                 );
+                
             }
+
         }
 
         /*
@@ -948,21 +959,35 @@ class WPSSTM_Track{
         }
         
         //playlists manager
-        if ($can_playlists_manager){
-            $actions['toggle-tracklists'] = array(
-                'text' =>      __('Playlists manager','wpsstm'),
-                'href' =>       $this->get_track_action_url('manage'),
-                'classes' =>    array('wpsstm-track-popup'),
-            );
-        }else{
-            if ( !get_current_user_id() ){ //call to action
+        if ( wpsstm()->get_options('playlists_manager') ){
+            
+            if ( get_current_user_id() ){
+            
+                if ( $can_manage_playlists ){ 
+                    $actions['toggle-tracklists'] = array(
+                        'text' =>      __('Playlists manager','wpsstm'),
+                        'href' =>       $this->get_track_action_url('manage'),
+                        'classes' =>    array('wpsstm-track-popup'),
+                    );
+                }else{
+                    $actions['toggle-tracklists'] = array(
+                        'text' =>      __('Favorite','wpsstm'),
+                        'href' =>       '#',
+                        'desc' =>       __("Missing required capability.",'wpsstm'),
+                        'classes' =>    array('wpsstm-disabled-action','wpsstm-tooltip'),
+                    );
+                }
+            }else{
                 $actions['toggle-tracklists'] = array(
                     'text' =>      __('Playlists manager','wpsstm'),
                     'href' =>       '#',
                     'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                    'classes' =>    array('wpsstm-tooltip','wpsstm-requires-login'),
+                    'classes' =>    array('wpsstm-disabled-action','wpsstm-tooltip'),
                 );
             }
+
+        }else{
+
         }
 
         //delete track
@@ -1183,7 +1208,7 @@ class WPSSTM_Track{
         }
 
         if ( !$this->user_can_reorder_links() ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to reorder links.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to reorder links.",'wpsstm') );
         }
 
         foreach((array)$link_ids as $order=>$post_id){

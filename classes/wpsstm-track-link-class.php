@@ -220,7 +220,7 @@ class WPSSTM_Track_Link{
         $can_delete_link = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
 
         if (!$can_delete_link){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this link.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to delete this link.",'wpsstm') );
         }
         
         return wp_trash_post( $this->post_id );

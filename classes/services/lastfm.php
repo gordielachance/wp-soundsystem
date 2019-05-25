@@ -629,7 +629,7 @@ class WPSSTM_LastFM{
                 'text' =>       __('Last.fm scrobble', 'wpsstm'),
                 'href' =>       '#',
                 'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                'classes' =>    array('wpsstm-tooltip','wpsstm-requires-login'),
+                'classes' =>    array('wpsstm-tooltip'),
             );
         }
 

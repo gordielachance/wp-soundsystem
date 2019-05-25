@@ -10,6 +10,7 @@ class WPSSTM_Settings {
 		add_action( 'admin_menu', array( $this, 'create_admin_menu' ), 8 );
         add_action( 'admin_init', array( $this, 'settings_init' ), 5 );
         add_action( 'admin_init', array( $this, 'system_settings_init' ), 15 );
+        add_action( 'admin_notices', array( $this, 'api_key_notice' ) );
 	}
 
     function create_admin_menu(){
@@ -78,7 +79,8 @@ class WPSSTM_Settings {
         $new_input['player_enabled'] = isset($input['player_enabled']);
         
         
-        /*Track Links
+        /*
+        Track Links
         */
         $new_input['autolink'] = isset($input['autolink']);
         
@@ -111,11 +113,6 @@ class WPSSTM_Settings {
         
         $new_input['importer_enabled'] = isset($input['importer_enabled']);
         $new_input['radios_enabled'] = isset($input['radios_enabled']);
-
-
-        /*
-        Live playlists
-        */
 
         //scraper wizard page ID
         if ( isset ($input['frontend_scraper_page_id']) && ctype_digit($input['frontend_scraper_page_id']) ){
@@ -161,6 +158,34 @@ class WPSSTM_Settings {
             wpsstm()->meta_name_options, // Option name
             array( $this, 'settings_sanitize' ) // Sanitize
          );
+        
+        /*
+        WPSSTM API
+        */
+        add_settings_section(
+            'wpsstmapi_settings', // ID
+            'WP SoundSystem API', // Title
+            array( $this, 'section_desc_empty' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+
+        $register_api_link = sprintf('<small>  <a href="%s" target="_blank">%s</a></small>',WPSSTM_API_REGISTER_URL,__('Get one','wpsstm'));
+        
+        add_settings_field(
+            'wpsstmapi_token', 
+            __('API Token','wpsstm') . $register_api_link,
+            array( $this, 'wpsstmapi_apisecret_callback' ), 
+            'wpsstm-settings-page', 
+            'wpsstmapi_settings'
+        );
+        
+        add_settings_field(
+            'details_engine', 
+            __('Music Details','wpsstm'), 
+            array( $this, 'details_engine_callback' ), 
+            'wpsstm-settings-page', 
+            'wpsstmapi_settings'
+        );
 
         /*
         Community user
@@ -192,39 +217,12 @@ class WPSSTM_Settings {
         
         add_settings_field(
             'player_enabled', 
-            __('Enabled','wpsstm'), 
+            __('Audio Player','wpsstm'), 
             array( $this, 'player_enabled_callback' ), 
             'wpsstm-settings-page', 
             'player_settings'
         );
-        
-        /*
-        Track links
-        */
-        add_settings_section(
-            'track_links_settings', // ID
-            __('Track Links','wpsstm'), // Title
-            array( $this, 'section_desc_empty' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
 
-        add_settings_field(
-            'autolink', 
-            __('Autolink','wpsstm'), 
-            array( $this, 'autolink_callback' ), 
-            'wpsstm-settings-page', 
-            'track_links_settings'
-        );
-
-        add_settings_field(
-            'excluded_track_link_hosts', 
-            __('Exclude hosts','wpsstm'), 
-            array( $this, 'exclude_hosts_callback' ), 
-            'wpsstm-settings-page', 
-            'track_links_settings'
-        );
-
-        
         /*
         Tracklist Importer
         */
@@ -238,16 +236,8 @@ class WPSSTM_Settings {
         
         add_settings_field(
             'importer_enabled', 
-            __('Enabled','wpsstm'), 
+            __('Tracklist Importer','wpsstm'), 
             array( $this, 'importer_enabled_callback' ), 
-            'wpsstm-settings-page', 
-            'tracklist_importer'
-        );
-        
-        add_settings_field(
-            'radios_enabled', 
-            __('Radios Post Type','wpsstm'), 
-            array( $this, 'radios_enabled_callback' ), 
             'wpsstm-settings-page', 
             'tracklist_importer'
         );
@@ -259,13 +249,77 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', 
             'tracklist_importer'
         );
+        
+        /*
+        Radios
+        */
+
+        add_settings_section(
+            'radio_settings', // ID
+            __('Radios','wpsstm'), // Title
+            array( $this, 'section_radios_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'radios_enabled', 
+            __('Radios post type','wpsstm'), 
+            array( $this, 'radios_enabled_callback' ), 
+            'wpsstm-settings-page', 
+            'radio_settings'
+        );
+        
+        /*
+        Tracks
+        */
+
+        add_settings_section(
+            'track_settings', // ID
+            __('Tracks','wpsstm'), // Title
+            array( $this, 'section_desc_empty' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'autolink', 
+            __('Autolink','wpsstm'), 
+            array( $this, 'autolink_callback' ), 
+            'wpsstm-settings-page', 
+            'track_settings'
+        );
+        
+        add_settings_field(
+            'playlists_manager', 
+            __('Enable Playlists Manager','wpsstm'), 
+            array( $this, 'playlists_manager_callback' ), 
+            'wpsstm-settings-page', 
+            'track_settings'
+        );
+        
+        /*
+        Track links
+        */
+        add_settings_section(
+            'track_link_settings', // ID
+            __('Track Links','wpsstm'), // Title
+            array( $this, 'section_desc_empty' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'excluded_track_link_hosts', 
+            __('Exclude hosts','wpsstm'), 
+            array( $this, 'exclude_hosts_callback' ), 
+            'wpsstm-settings-page', 
+            'track_link_settings'
+        );
 
         /*
         Styling
         */
         add_settings_section(
             'settings_styling', // ID
-            __('Styling','wpsstm'), // Title
+            __('Display','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
         );
@@ -277,33 +331,6 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', 
             'settings_styling'
         );
-        
-        /*
-        WPSSTM API
-        */
-        add_settings_section(
-            'wpsstmapi_settings', // ID
-            'WP SoundSystem API', // Title
-            array( $this, 'section_wpsstmapi_desc' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
-        
-        add_settings_field(
-            'wpsstmapi_token', 
-            __('API','wpsstm'), 
-            array( $this, 'wpsstmapi_apisecret_callback' ), 
-            'wpsstm-settings-page', 
-            'wpsstmapi_settings'
-        );
-        
-        add_settings_field(
-            'details_engine', 
-            __('Music Details','wpsstm'), 
-            array( $this, 'details_engine_callback' ), 
-            'wpsstm-settings-page', 
-            'wpsstmapi_settings'
-        );
-
 
     }
     
@@ -342,6 +369,17 @@ class WPSSTM_Settings {
             );
 
         }
+        
+        if ( wpsstm()->get_options('excluded_track_link_hosts') ){
+            add_settings_field(
+                'trash_excluded_track_link_hosts', 
+                __('Filter tracks links','wpsstm'), 
+                array( $this, 'trash_excluded_track_link_hosts_callback' ), 
+                'wpsstm-settings-page', // Page
+                'settings_system'//section
+            );
+        }
+        
     }
     
     public static function section_desc_empty(){
@@ -363,16 +401,19 @@ class WPSSTM_Settings {
     function autolink_callback(){
         
         $enabled = wpsstm()->get_options('autolink');
+        $can = WPSSTM_Core_API::can_wpsstmapi();
+        $readonly = is_wp_error($can);
 
         /*
         form
         */
         
         printf(
-            '<input type="checkbox" name="%s[autolink]" value="on" %s /> %s',
+            '<input type="checkbox" name="%s[autolink]" value="on" %s %s /> %s',
             wpsstm()->meta_name_options,
             checked( $enabled, true, false ),
-            __("Try to get track links automatically if none have been set.","wpsstm")
+            wpsstm_readonly( $readonly,true, false ),
+            __("Try to get track links (stream URLs, ...) automatically if none have been set.","wpsstm")
         );
         
         /*
@@ -396,6 +437,30 @@ class WPSSTM_Settings {
 
     }
     
+    function playlists_manager_callback(){
+        $enabled = wpsstm()->get_options('playlists_manager');
+        
+        $matching_roles = null;
+        
+        $help = array();
+        $help[]= __("If enabled, you have to give your users the capability to create new playlists.","wpsstm");
+        
+        if ($matching_roles){
+            $help[]= sprintf(__("Currently, those roles have this capability: %s.","wpsstm"),'<strong>' . $matching_roles . '</strong>');
+        }else{
+            $help[]= sprintf(__("Currently, no roles have this capability.","wpsstm"),'<strong>' . $matching_roles . '</strong>');
+        }
+
+        printf(
+            '<input type="checkbox" name="%s[autolink]" value="on" %s /><label>%s</label><br/><small>%s</small>',
+            wpsstm()->meta_name_options,
+            checked( $enabled, true, false ),
+            __("Users can favorite tracks and queue them to custom playlists.","wpsstm"),
+            implode('  ',$help)
+        );
+        
+    }
+    
     function exclude_hosts_callback(){
         $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts');
 
@@ -406,25 +471,6 @@ class WPSSTM_Settings {
             __('eg. yandex.ru,itunes.apple.com','wpsstm'),
             implode(',',$excluded_hosts)
         );
-        
-        if ($excluded_hosts){
-
-            $query_args = array(
-                'post_type'         => wpsstm()->post_type_track_link,
-                'posts_per_page'    => -1,
-                'excluded_hosts'  => 1,
-                
-            );
-            $matches = new WP_Query($query_args);
-            
-            if ($matches->post_count){
-                printf(
-                    '<p><input type="checkbox" name="%s[delete_excluded_track_link_hosts]" value="on" /><label>%s</label></p>',
-                    wpsstm()->meta_name_options,
-                    sprintf(__("Delete the %s existing track links from the database","wpsstm"),$matches->post_count)
-                );
-            }
-        }
 
     }
 
@@ -443,40 +489,7 @@ class WPSSTM_Settings {
         echo implode("\n",$desc);
 
     }
-    
-    function section_wpsstmapi_desc(){
-        
-        $features = array(
-            sprintf(__('Automatically search and save track links online with the %s.','wpsstm'),sprintf('<strong>%s</strong>',__('autolink module','wpsstm'))),
-            sprintf(__('Import tracklists from popular music services like Spotify (and almost any website where a tracklist is visible) with the %s.','wpsstm'),sprintf('<strong>%s</strong>',__('Tracklist Importer metabox','wpsstm'))),
-            sprintf(__('Enable the %s - remote tracklists that are automatically refreshing every X minutes.','wpsstm'),sprintf('<strong>%s</strong>',__('Radios post type','wpsstm'))),
-        );
-        
-        //wrap
-        $features = array_map(
-           function ($el) {
-              return "<li>{$el}</li>";
-           },
-           $features
-        );
-        
-        
-        $desc[] = __('Get more out of this plugin by registering an API key!','wppsm');
-        $desc[] = sprintf('<ul>%s</ul>',implode("\n",$features));
-        $desc[] = __("That's also a nice way to support the work done - hundred of hours - for this free plugin, and to ensure its durability.  Thanks for your help !",'wppsm');
-        
-        //wrap
-        $desc = array_map(
-           function ($el) {
-              return "<p>{$el}</p>";
-           },
-           $desc
-        );
-        
-        echo sprintf('<div id="wpsstm-api-promo">%s</div>',implode("\n",$desc));
-        
-    }
-    
+
     function details_engine_callback(){
         $enabled_services = wpsstm()->get_options('details_engine');
         $available_engines = wpsstm()->get_available_detail_engines();
@@ -500,18 +513,29 @@ class WPSSTM_Settings {
         //client secret
         $client_secret = wpsstm()->get_options('wpsstmapi_token');
         printf(
-            '<p><label>%s</label> <input type="text" name="%s[wpsstmapi_token]" value="%s" /></p>',
-            __('API Token:','wpsstm'),
+            '<p><input type="text" name="%s[wpsstmapi_token]" value="%s" class="wpsstm-fullwidth" /></p>',
             wpsstm()->meta_name_options,
             $client_secret
         );
-
-        printf('<p><a href="%s" target="_blank">%s</a> !</p>',WPSSTM_API_REGISTER_URL,__('Get an API key now','wpsstm'));
     }
 
     function section_importer_desc(){
         $desc[] = __('This module adds a new metabox to import tracks from various services like Spotify, or any webpage where a tracklist is displayed.','wppsm');
-        $desc[] = __('It also enables a new post type, "Radios", which are self-updating tracklists based on a remote URL.','wppsm');
+        
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+        
+        echo implode("\n",$desc);
+        
+    }
+    
+    function section_radios_desc(){
+        $desc[] = __('Radios are how we call live playlists.  Those are automatically synced with remote datas, like a web page or a Spotify playlist.','wppsm');
         
         //wrap
         $desc = array_map(
@@ -526,13 +550,16 @@ class WPSSTM_Settings {
     }
     
     function importer_enabled_callback(){
-        $enabled = wpsstm()->get_options('importer_enabled');
         $desc = '';
+        $enabled = wpsstm()->get_options('importer_enabled');
+        $can = wpsstm()->can_importer();
+        $readonly = is_wp_error($can);
         
         printf(
-            '<input type="checkbox" name="%s[importer_enabled]" value="on" %s /> %s',
+            '<input type="checkbox" name="%s[importer_enabled]" value="on" %s %s /> %s',
             wpsstm()->meta_name_options,
             checked( $enabled,true, false ),
+            wpsstm_readonly( $readonly,true, false ),
             $desc
         );
         
@@ -557,30 +584,31 @@ class WPSSTM_Settings {
     }
     
     function radios_enabled_callback(){
-        $enabled = wpsstm()->get_options('radios_enabled');
+        
         $desc = '';
+        $enabled = wpsstm()->get_options('radios_enabled');
         
-        printf(
-            '<input type="checkbox" name="%s[radios_enabled]" value="on" %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $enabled,true, false ),
-            $desc
-        );
-        
-        /*
-        errors
-        */
+        $can = wpsstm()->can_importer();
+        $readonly = is_wp_error($can);
         
         //register errors
         if ( $enabled ){
         
             //autolink
-            $can = wpsstm()->can_radios();
+            
             if ( is_wp_error($can) ){
                 add_settings_error('radios',$can->get_error_code(),$can->get_error_message(),'inline');
             }
             
         }
+
+        printf(
+            '<input type="checkbox" name="%s[radios_enabled]" value="on" %s %s /> %s',
+            wpsstm()->meta_name_options,
+            checked( $enabled,true, false ),
+            wpsstm_readonly( $readonly,true, false ),
+            $desc
+        );
         
         //display errors
         settings_errors('radios');
@@ -589,6 +617,8 @@ class WPSSTM_Settings {
     
     function frontend_importer_callback(){
         $option = (int)wpsstm()->get_options('frontend_scraper_page_id');
+        $can = wpsstm()->can_frontend_importer();
+        $readonly = is_wp_error($can);
 
         $help = array();
         $help[]= __("ID of the page used to display the frontend Tracklist Importer.","wpsstm");
@@ -596,21 +626,16 @@ class WPSSTM_Settings {
         $help = sprintf("<small>%s</small>",implode('  ',$help));
         
         printf(
-            '<input type="number" name="%s[frontend_scraper_page_id]" size="4" min="0" value="%s" /><br/>%s',
+            '<input type="number" name="%s[frontend_scraper_page_id]" size="4" min="0" value="%s" %s /><br/>%s',
             wpsstm()->meta_name_options,
             $option,
+            wpsstm_readonly( $readonly,true, false ),
             $help
         );
         
         //register errors
-        if ( $option ){
-
-            //can wizard
-            $can = wpsstm()->can_frontend_importer();
-            if ( is_wp_error($can) ){
-                add_settings_error('frontend_wizard',$can->get_error_code(),$can->get_error_message(),'inline');
-            }
-            
+        if ( $option && is_wp_error($can) ){
+            add_settings_error('frontend_wizard',$can->get_error_code(),$can->get_error_message(),'inline');
         }
         
         //display errors
@@ -620,12 +645,14 @@ class WPSSTM_Settings {
 
     function registration_notice_callback(){
         $option = wpsstm()->get_options('registration_notice');
+        $readonly = !get_option( 'users_can_register' );
 
         printf(
-            '<input type="checkbox" name="%s[registration_notice]" value="on" %s /> %s',
+            '<input type="checkbox" name="%s[registration_notice]" value="on" %s %s /> %s',
             wpsstm()->meta_name_options,
             checked( $option,true, false ),
-            __("Display a registration notice for non-logged users.","wpsstm")
+            wpsstm_readonly( $readonly,true, false ),
+            __("Invite non-logged users to login or register by displaying a frontend notice.","wpsstm")
         );
     }
     
@@ -653,7 +680,7 @@ class WPSSTM_Settings {
     
     function reset_options_callback(){
         printf(
-            '<input type="checkbox" name="%s[reset_options]" value="on"/> %s',
+            '<input type="checkbox" name="%s[reset_options]" value="on"/><label>%s</label>',
             wpsstm()->meta_name_options,
             __("Reset options to their default values.","wpsstm")
         );
@@ -663,7 +690,7 @@ class WPSSTM_Settings {
         $count = count(WPSSTM_Core_Tracklists::get_temporary_tracklists_ids());
         $desc = sprintf(__("Delete %d tracklists that were created with the community user.","wpsstm"),$count);
         printf(
-            '<input type="checkbox" name="%s[trash-temporary-tracklists]" value="on" %s /> %s',
+            '<input type="checkbox" name="%s[trash-temporary-tracklists]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
             disabled($count,0,false),
             $desc
@@ -674,11 +701,29 @@ class WPSSTM_Settings {
         $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
         $desc = sprintf(__("Delete %d tracks that do not belong to any tracklists and have been created with the community user.","wpsstm"),$count);
         printf(
-            '<input type="checkbox" name="%s[trash-orphan-tracks]" value="on" %s /> %s',
+            '<input type="checkbox" name="%s[trash-orphan-tracks]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
-             disabled($count,0,false),
+            disabled($count,0,false),
             $desc
         );
+    }
+    
+    function trash_excluded_track_link_hosts_callback(){
+            $query_args = array(
+                'post_type'         => wpsstm()->post_type_track_link,
+                'posts_per_page'    => -1,
+                'excluded_hosts'  => 1,
+
+            );
+            $matches = new WP_Query($query_args);
+            $count = $matches->post_count;
+
+            printf(
+                '<p><input type="checkbox" name="%s[delete_excluded_track_link_hosts]" value="on" %s /><label>%s</label></p>',
+                wpsstm()->meta_name_options,
+                disabled($count,0,false),
+                sprintf(__("Delete the %s track links matching the excluded hosts list.","wpsstm"),$count)
+            );
     }
 
 	function settings_page() {
@@ -705,6 +750,30 @@ class WPSSTM_Settings {
         </div>
         <?php
 	}
+    
+    function api_key_notice(){
+        if ( !wpsstm()->is_admin_page() ) return;
+        
+        $can = WPSSTM_Core_API::can_wpsstmapi();
+        $is_auth = !is_wp_error($can);
+        if ($is_auth) return;
+
+        $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('Get an API key','wpsstm'));
+
+        $desc[] = sprintf(__('%s and unlock powerful features : Tracklists Importer, Radios post type, Autolink tracks...','wppsm'),$link);
+
+        $desc[] = __("First and foremost, it is a nice way to support this  plugin, and to ensure its durability.  Thanks for your help !",'wppsm');
+        
+        //wrap
+        $desc = array_map(
+           function ($el) {
+              return "<p>{$el}</p>";
+           },
+           $desc
+        );
+        
+        printf('<div class="notice notice-success is-dismissible">%s</div>',implode("\n",$desc));
+    }
 
 }
 

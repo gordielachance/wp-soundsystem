@@ -155,12 +155,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
         if ( !current_user_can($required_cap) ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to create a new playlist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to create a new playlist.",'wpsstm') );
         }
         
         $validated = $this->validate_playlist();
         if ( !$validated ){
-            return new WP_Error( 'wpsstm_missing_cap', __('Error while validating the playlist.','wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __('Error while validating the playlist.','wpsstm') );
         }elseif( is_wp_error($validated) ){
             return $validated;
         }
@@ -280,7 +280,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $tracklist_obj = get_post_type_object($post_type);
         if ( !in_array($post_type,wpsstm()->tracklist_post_types) ) return false;
         if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         */
 
@@ -372,7 +372,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 'text' =>      __('Favorite','wpsstm'),
                 'href' =>       '#',
                 'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                'classes' =>    array('action-favorite','wpsstm-tooltip','wpsstm-requires-login'),
+                'classes' =>    array('action-favorite','wpsstm-tooltip'),
             );
         }
 
@@ -476,7 +476,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         
         if ( !$can_edit_post ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
 
 
@@ -515,7 +515,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //capability check
         if ( !$this->user_can_toggle_playlist_type() ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
         //community (TOUFIX just for live ?)
@@ -548,7 +548,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $can_trash_tracklist = current_user_can($post_type_obj->cap->delete_post,$this->post_id);
 
         if ( !$can_trash_tracklist ){
-            return new WP_Error( 'wpsstm_missing_cap', __("You don't have the capability required to delete this tracklist.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to delete this tracklist.",'wpsstm') );
         }
 
         $success = wp_trash_post($this->post_id);
@@ -849,6 +849,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function queue_track(WPSSTM_Track $track){
+        
+        if ( !$this->user_can_edit_tracklist() ){
+            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to queue this track.",'wpsstm') );
+        }
+        
         //unset some subtracks vars or subtrack will be moved instead of added
         $new_track = clone $track;
         $new_track->subtrack_id = null;
@@ -885,7 +890,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $success = $subtrack->unlink_subtrack();
 
             if ( is_wp_error($success) ){
-                $track->track_log($subtrack->to_array(),"Error while unqueuing subtrack" ); 
+                $track->track_log($subtrack->to_array(),"Error while unqueuing subtrack" );
             }
 
         }
@@ -910,6 +915,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
+        //NO capability check here, should be done upstream, because we should be able to use this function automatically (eg. live tracklist update)
+        
         $valid = $this->validate_subtrack($track);
         if ( is_wp_error( $valid ) ) return $valid;
         
@@ -917,8 +924,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if (!$track->post_id){
             $track->local_track_lookup();
         }
-        
-        //TOUFIX should we check for a capabiliy here ?
         
         $track_data = array();
 

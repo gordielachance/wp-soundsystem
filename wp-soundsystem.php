@@ -110,6 +110,7 @@ class WP_SoundSystem {
             'wpsstmapi_token'                   => null,
             'details_engine'                    => array('musicbrainz'),
             'excluded_track_link_hosts'         => array(),
+            'playlists_manager'                 => true,
         );
         
         $db_option = get_option( $this->meta_name_options);
