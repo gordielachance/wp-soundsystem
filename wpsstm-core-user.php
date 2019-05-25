@@ -71,15 +71,9 @@ class WPSSTM_Core_User{
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
 
-        $can = false;
-        $post_types = wpsstm()->static_tracklist_post_types;
-        foreach ($post_types as $post_type){
-            if ( !$post_type_obj = get_post_type_object($post_type) ) continue;
-            $can = user_can( $user_id, $post_type_obj->cap->edit_posts);
-            if ( $can ) break;
-        }
+        $post_type_obj = get_post_type_object(wpsstm()->post_type_playlist);
+        return user_can( $user_id, $post_type_obj->cap->edit_posts);
 
-        return $can;
     }
 
 }
