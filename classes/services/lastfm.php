@@ -243,14 +243,14 @@ class WPSSTM_LastFM{
     function scrobble_along_callback(){
 
         $enabled = ( $this->can_scrobble_along() === true );
-        
+
         /*
         form
         */
 
         $help = array();
         $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble it along with the community user.","wpsstm");
-        $help[]= sprintf('<small>%s</small>',__("To enable this option, you have to login with the community user, activate the scrobbler and follow the instructions.","wpsstm"));
+        $help[]= sprintf('<br/><small>%s</small>',__("To enable this option, you have to login with the community user, activate the scrobbler and follow the instructions.","wpsstm"));
         
         $el = sprintf(
             '<input type="checkbox" value="on" disabled="disabled" %s /> %s',
@@ -653,6 +653,7 @@ class WPSSTM_LastFM{
         }
 
         $community_user = new WPSSTM_LastFM_User($community_user_id);
+
         return ( $community_user->is_user_connected() === true);
     }
 
@@ -732,7 +733,7 @@ class WPSSTM_LastFM_User{
         
         $can_api = $wpsstm_lastfm->can_lastfm_api();
         if ( !$can_api ) return false;
-        
+
         $enabled = get_user_option( self::$lastfm_user_scrobbler_enabled_meta_name, $this->user_id );
 
         return $enabled;

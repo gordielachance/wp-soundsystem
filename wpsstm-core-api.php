@@ -30,7 +30,7 @@ class WPSSTM_Core_API {
         if ( is_wp_error($is_auth) ) return $is_auth;
         
         if (!$is_auth){
-            return new WP_Error('wpsstmapi_no_auth',__("Unable to authentificate WPSSTM API user.",'wpsstm'));
+            return new WP_Error('wpsstmapi_no_auth',__("This requires a valid WPSSTM API key.",'wpsstm'));
         }
         
         return true;
