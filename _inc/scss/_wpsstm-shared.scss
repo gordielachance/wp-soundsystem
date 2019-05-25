@@ -72,6 +72,9 @@ input{
     &.wpsstm-fullwidth{
         width:100%;
     }
+    &[type='checkbox'][readonly]{
+        @extend .wpsstm-freeze;
+    }
 }
 
 .wpsstm-no-underline{
