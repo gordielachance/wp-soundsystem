@@ -38,7 +38,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '204';
+    public $db_version = '205';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -182,7 +182,6 @@ class WP_SoundSystem {
         add_action( 'init', array($this,'init_rewrite'), 5);
         add_action( 'init', array($this,'save_music_details_engines'));
         add_action( 'admin_init', array($this,'load_textdomain'));
-        
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
@@ -325,6 +324,10 @@ class WP_SoundSystem {
                 $result = $wpdb->get_results ( $querystr );
                 
             }
+            
+            if ($current_version < 205){
+                $this->migrate_old_subtracks();
+            }
 
         }
         
@@ -353,15 +356,61 @@ class WP_SoundSystem {
             tracklist_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             from_tracklist bigint(20) UNSIGNED NULL,
             track_order int(11) NOT NULL DEFAULT '0',
-            artist longtext NOT NULL,
-            title longtext NOT NULL,
-            album longtext NULL,
             time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY  (ID)
         ) $charset_collate;";
 
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
         return dbDelta( $sql );
+    }
+
+    /*
+    Before DB 205, we were sometimes storing track artist+title+album in the subtracks table to avoid creating a track post each time.
+    But that logic is no good, so change that.
+    We can delete this upgrade routine after some months.
+    */
+    function migrate_old_subtracks(){
+        global $wpdb;
+        
+        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+        $querystr = $wpdb->prepare( "SELECT * FROM `$subtracks_table` WHERE track_id = %s",'0' );
+        $rows = $wpdb->get_results($querystr);
+
+        foreach((array)$rows as $row){
+            
+            $track = new WPSSTM_Track();
+            $track->subtrack_id = $row->ID;
+            $track->artist = $row->artist;
+            $track->title = $row->title;
+            $track->album = $row->album;
+            
+            $valid = $track->validate_track();
+            
+            if ( is_wp_error( $valid ) ){
+                
+                $rowquerystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID = '%s'",$row->ID );
+                $result = $wpdb->get_results ( $rowquerystr );
+                
+            }else{
+                
+                $post_id = $track->insert_community_track();
+                
+                if ( !is_wp_error($post_id) ){
+                    
+                    $rowquerystr = $wpdb->prepare( "UPDATE `$subtracks_table` SET track_id = '%s' WHERE ID = '%s'",$post_id, $row->ID );
+                    $result = $wpdb->get_results ( $rowquerystr );
+
+                }
+
+            }
+
+        }
+        
+        //now that the tracks are fixed, alter table
+        $wpdb->query("ALTER TABLE `$subtracks_table` DROP artist");
+        $wpdb->query("ALTER TABLE `$subtracks_table` DROP title");
+        $wpdb->query("ALTER TABLE `$subtracks_table` DROP album");
+
     }
 
     function get_options($keys = null){
