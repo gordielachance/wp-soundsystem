@@ -136,6 +136,7 @@ class WPSSTM_Core_Tracks{
         //TOUFIX should we 404 ?
     }
     
+    //TOUFIX needed ?
     function handle_track_action(){
         global $wpsstm_track;
         global $wp_query;
@@ -149,15 +150,6 @@ class WPSSTM_Core_Tracks{
 
         switch($action){
 
-            case 'create': //create community track
-
-                $post_id = $wpsstm_track->insert_community_track();	
-                
-                if ( !is_wp_error($post_id) ){
-                    $redirect_url = get_edit_post_link($post_id);
-                }
-
-            break;
         }
 
         /*
