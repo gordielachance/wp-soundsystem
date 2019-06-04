@@ -759,39 +759,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return true;
 
     }
-
-    function seconds_before_refresh(){
-
-        if ($this->tracklist_type != 'live') return false;
-        
-        $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
-        if(!$updated_time) return 0;//never imported
-
-        if (!$this->cache_min) return 0; //no delay
-
-        $expiration_time = $updated_time + ($this->cache_min * MINUTE_IN_SECONDS);
-        $now = current_time( 'timestamp', true );
-
-        return $expiration_time - $now;
-    }
-
-    function get_human_next_refresh_time(){
-        
-        if ($this->tracklist_type != 'live') return false;
-
-        $cache_seconds = $this->cache_min ? $this->cache_min * MINUTE_IN_SECONDS : false;
-
-        if ( !$cache_seconds ) return false;
-        
-        $time_refreshed = $this->updated_time;
-        $next_refresh = $time_refreshed + $cache_seconds;
-        $now = current_time( 'timestamp', true );
-        
-        $is_future = ( ($next_refresh - $now) > 0 );
-        if (!$is_future) return false;
-        
-        return human_time_diff( $now, $next_refresh );
-    }
     
     /*
     Clear the stored subtracks and add the new ones
@@ -839,6 +806,39 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         return true;
         
+    }
+
+    function seconds_before_refresh(){
+
+        if ($this->tracklist_type != 'live') return false;
+        
+        $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+        if(!$updated_time) return 0;//never imported
+
+        if (!$this->cache_min) return 0; //no delay
+
+        $expiration_time = $updated_time + ($this->cache_min * MINUTE_IN_SECONDS);
+        $now = current_time( 'timestamp', true );
+
+        return $expiration_time - $now;
+    }
+
+    function get_human_next_refresh_time(){
+        
+        if ($this->tracklist_type != 'live') return false;
+
+        $cache_seconds = $this->cache_min ? $this->cache_min * MINUTE_IN_SECONDS : false;
+
+        if ( !$cache_seconds ) return false;
+        
+        $time_refreshed = $this->updated_time;
+        $next_refresh = $time_refreshed + $cache_seconds;
+        $now = current_time( 'timestamp', true );
+        
+        $is_future = ( ($next_refresh - $now) > 0 );
+        if (!$is_future) return false;
+        
+        return human_time_diff( $now, $next_refresh );
     }
     
     function validate_subtrack(WPSSTM_Track $track){
