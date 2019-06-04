@@ -78,15 +78,10 @@ class WPSSTM_Track{
         if (!$subtrack) return new WP_Error( 'wpsstm_invalid_subtrack_entry', __("This is not a valid subtrack entry.",'wpsstm') );
 
         //track
-        if ($track_id = $subtrack->track_id){
-            $success = $this->populate_track_post($track_id);
-            if ( is_wp_error($success) ) return $success;
-        }else{
-            $this->title =  $subtrack->title;
-            $this->artist = $subtrack->artist;
-            $this->album =  $subtrack->album;
-        }
-        
+        $track_id = $subtrack->track_id;
+        $success = $this->populate_track_post($track_id);
+        if ( is_wp_error($success) ) return $success;
+
         //tracklist
         if ($tracklist_id = $subtrack->tracklist_id){
             $this->tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
@@ -145,7 +140,7 @@ class WPSSTM_Track{
     Query tracks (IDs) that have the same artist + title (+album if set)
     */
     
-    function get_track_duplicates(){
+    private function get_track_duplicates(){
         
         $valid = $this->validate_track();
         if ( is_wp_error($valid) ) return $valid;
@@ -173,16 +168,18 @@ class WPSSTM_Track{
     Get the post ID for this track if it already exists in the database; and populate its data
     */
     
-    function local_track_lookup(){
+    public function local_track_lookup(){
         if ( $this->post_id ) return;
-        if ( $this->validate_track() !== true ) return;
-
-        if ( $duplicates = $this->get_track_duplicates() ){
+        
+        $duplicates = $this->get_track_duplicates();
+        if ( is_wp_error($duplicates) ) return $duplicates;
+        
+        if ( !empty($duplicates) ){
             $this->post_id = $duplicates[0];
-            //$this->track_log( json_encode($this->to_array(),JSON_UNESCAPED_UNICODE),'Track found in the local database');
+            return $this->post_id;
         }
         
-        return $this->post_id;
+        return false;
 
     }
 
@@ -369,28 +366,39 @@ class WPSSTM_Track{
 
     }
 
-    function save_track_post($args = null){
+    public function insert_community_track($args = null){
         
         $valid = $this->validate_track();
         if ( is_wp_error( $valid ) ) return $valid;
+        
+        //user ID
+        if ( !$user_id = wpsstm()->get_options('community_user_id') ){
+            return new WP_Error( 'wpsstm_missing_community_user', __("Missing community user.",'wpsstm'));
+        }
         
         $post_id = null;
 
         $args_default = array(
             'post_status'   => 'publish',
-            'post_author'   => get_current_user_id(),
+            'post_author'   => $user_id,
         );
         
         $args = (!$args) ? $args_default : wp_parse_args($args,$args_default);
-        
-        $user_id = $args['post_author'];
-        
+
         //capability check
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
-        $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
+        
+        /*
+        TOUFIX
+        By doing this, we cannot call this function before the init hook.  Use hardcoded cap instead, at least until this function is no more called in the plugin upgrade routine.
+        
+        $post_type_obj =    get_post_type_object(wpsstm()->post_type_track);
+        $required_cap =     $post_type_obj->cap->create_posts;
+        */
+        $required_cap = 'create_tracks';
+        
 
         if ( !user_can($user_id,$required_cap) ){
-            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to create a new track.",'wpsstm') );
+            return new WP_Error( 'wpsstm_missing_capability', __("Missing track creation capability.",'wpsstm') );
         }
         
         //album
@@ -419,21 +427,7 @@ class WPSSTM_Track{
         );
         
         $args = wp_parse_args($required_args,$args);
-
-        //check if this track already exists
-        if (!$this->post_id){
-            $this->local_track_lookup();
-        }
-        
-        if (!$this->post_id){
-
-            $post_id = wp_insert_post( $args, true );
-            
-        }else{ //is a track update
-            
-            $args['ID'] = $this->post_id;
-            $post_id = wp_update_post( $args, true );
-        }
+        $post_id = wp_insert_post( $args, true );
         
         if ( is_wp_error($post_id) ){
             $error_msg = $post_id->get_error_message();
@@ -541,18 +535,7 @@ class WPSSTM_Track{
         //check we have enough informations on this track
         if ( $this->validate_track() !== true) return false;
 
-        if ($this->post_id){
-            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
-            
-        }else{
-            $albumstr = ($this->album) ? sprintf("AND album = '%s'",$this->album) : null;
-            if ($this->album){
-                $querystr . '';
-            }
-            
-            $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE artist = '%s' AND title = '%s' %s", $this->artist,$this->title,$albumstr);
-            
-        }
+        $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
         
         if($tracklist_id){
             $querystr.= $wpdb->prepare( " AND tracklist_id = %d",$tracklist_id);
@@ -577,11 +560,7 @@ class WPSSTM_Track{
         
         $querystr = sprintf( "SELECT posts.post_author FROM $wpdb->posts posts INNER JOIN %s AS subtracks ON (subtracks.tracklist_id = posts.ID)  WHERE subtracks.tracklist_id IN(%s)", $subtracks_table, $ids_str);
 
-        if ($this->post_id){
-            $querystr = $wpdb->prepare( $querystr ." AND subtracks.track_id = %d",$this->post_id );
-        }else{
-            $querystr = $wpdb->prepare( $querystr ." AND artist = '%s' AND title = '%s' AND album = '%s'",$this->artist,$this->title,$this->album );
-        }
+        $querystr = $wpdb->prepare( $querystr ." AND subtracks.track_id = %d",$this->post_id );
 
         return $wpdb->get_col( $querystr);
     }
@@ -702,11 +681,7 @@ class WPSSTM_Track{
         */
         if(!$this->post_id){
 
-            $tracks_args = array( //as community tracks	
-                'post_author'   => wpsstm()->get_options('community_user_id')
-            );	
-
-            $success = $this->save_track_post($tracks_args);
+            $success = $this->insert_community_track();
 
             if ( is_wp_error($success) ){
                 $error_msg = $success->get_error_message();
