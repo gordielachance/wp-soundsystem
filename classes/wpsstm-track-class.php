@@ -366,7 +366,7 @@ class WPSSTM_Track{
 
     }
 
-    function insert_community_track($args = null){
+    public function insert_community_track($args = null){
         
         $valid = $this->validate_track();
         if ( is_wp_error( $valid ) ) return $valid;
@@ -386,8 +386,16 @@ class WPSSTM_Track{
         $args = (!$args) ? $args_default : wp_parse_args($args,$args_default);
 
         //capability check
-        $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
-        $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
+        
+        /*
+        TOUFIX
+        By doing this, we cannot call this function before the init hook.  Use hardcoded cap instead, at least until this function is no more called in the plugin upgrade routine.
+        
+        $post_type_obj =    get_post_type_object(wpsstm()->post_type_track);
+        $required_cap =     $post_type_obj->cap->create_posts;
+        */
+        $required_cap = 'create_tracks';
+        
 
         if ( !user_can($user_id,$required_cap) ){
             return new WP_Error( 'wpsstm_missing_capability', __("Missing track creation capability.",'wpsstm') );
