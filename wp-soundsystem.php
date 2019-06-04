@@ -267,59 +267,6 @@ class WP_SoundSystem {
 
         }else{
             
-            if($current_version < 151){ //rename old source URL metakeys
-
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'", WPSSTM_Core_Track_Links::$link_url_metakey, '_wpsstm_source' );
-
-                $result = $wpdb->get_results ( $querystr );
-                
-            }
-            
-            if($current_version < 154){ //delete artist/album/track post title (we don't use them anymore)
-
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_title = '' WHERE post_type = '%s' OR post_type = '%s' OR post_type = '%s' ", $this->post_type_album,$this->post_type_artist,$this->post_type_track );
-
-                $result = $wpdb->get_results ( $querystr );
-                
-            }
-
-            if ($current_version < 155){
-                $this->setup_subtracks_table();
-                $this->migrate_subtracks();
-            }
-            
-            if ($current_version < 156){
-                
-                //delete source provider slug metakey, now computed dynamically
-                $querystr = $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE meta_key = '%s'", '_wpsstm_source_provider' );
-                $result = $wpdb->get_results ( $querystr );
-                
-                //delete source stream URL metakey, now computed dynamically
-                $querystr = $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE meta_key = '%s'", '_wpsstm_source_stream' );
-                $result = $wpdb->get_results ( $querystr );
-                
-            }
-            
-            //tracks seconds > milliseconds
-            if ($current_version < 157){
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s', meta_value = meta_value * 1000 WHERE meta_key = '%s'", WPSSTM_Core_Tracks::$length_metakey, '_wpsstm_length' );
-
-                $result = $wpdb->get_results ( $querystr );
-            }
-            
-            if ($current_version < 158){
-                //update subtracks table
-                $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
-                $wpdb->query("ALTER TABLE $subtracks_table ADD artist longtext NOT NULL");
-                $wpdb->query("ALTER TABLE $subtracks_table ADD title longtext NOT NULL");
-                $wpdb->query("ALTER TABLE $subtracks_table ADD album longtext NULL");
-            }
-            if ($current_version < 160){
-                $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
-                $wpdb->query("ALTER TABLE $subtracks_table ADD time datetime NOT NULL DEFAULT '0000-00-00 00:00:00'");
-                $wpdb->query("ALTER TABLE $subtracks_table ADD from_tracklist bigint(20) UNSIGNED NULL");
-            }
-            
             if ($current_version < 201){
                 //
                 $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_musicbrainz_id', '_wpsstm_mbid' );
@@ -416,40 +363,7 @@ class WP_SoundSystem {
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
         return dbDelta( $sql );
     }
-    
-    /*
-    Migrate old subtracks (stored in tracklist posts metas) to the new subtracks table
-    Can be removed after a few months once the plugin has been updated.
-    */
-    function migrate_subtracks(){
-        global $wpdb;
-        
-        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
-        
-        //get all subtracks metas
-        $querystr = $wpdb->prepare( "SELECT * FROM $wpdb->postmeta WHERE meta_key = '%s' OR meta_key = '%s'", 'wpsstm_subtrack_ids','wpsstm_live_subtrack_ids' );
-        $metas = $wpdb->get_results ( $querystr );
 
-        foreach($metas as $meta){
-            $subtrack_ids = maybe_unserialize( $meta->meta_value );
-            $subtrack_pos = 0;
-            foreach((array)$subtrack_ids as $subtrack_id){
-                $wpdb->insert($subtracks_table, array(
-                    'track_id' =>       $subtrack_id,
-                    'tracklist_id' =>   $meta->post_id,
-                    'track_order' =>    $subtrack_pos
-                ));
-                
-                //delete subtracks metas
-                $querystr = $wpdb->prepare( "DELETE FROM $wpdb->postmeta WHERE meta_id = '%s'", $meta->meta_id );
-                $wpdb->get_results ( $querystr );
-                
-                $subtrack_pos++;
-            }
-        }
-    }
-    
-    
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
