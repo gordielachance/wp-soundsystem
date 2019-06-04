@@ -801,7 +801,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        //TOUFIX TOUCHECK capability check
+        //NO capability check here, should be done upstream, because we should be able to use this function automatically (eg. live tracklist update)
         
         //delete actual subtracks
         $this->tracklist_log('delete current tracklist subtracks'); 
@@ -813,9 +813,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $errors = array();
         $no_updates = 0;
         $saved = 0;
-        foreach((array)$this->tracks as $index=>$track){
-            $track->position = $index + 1;
-            $success = $this->save_subtrack($track);
+        foreach((array)$this->tracks as $index=>$new_track){
+            $new_track->position = $index + 1;
+            $success = $this->save_subtrack($new_track);
             
             //populate subtrack ID
             if( is_wp_error($success) ){
@@ -911,7 +911,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     I mean when we have playlists with hundreds of subtracks to save...
     */
     
-    function save_subtrack(WPSSTM_Track $track){
+    private function save_subtrack(WPSSTM_Track $track){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
@@ -919,26 +919,23 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $valid = $this->validate_subtrack($track);
         if ( is_wp_error( $valid ) ) return $valid;
-        
+
         //check for a track ID
         if (!$track->post_id){
             $track->local_track_lookup();
         }
         
-        $track_data = array();
-
-        //basic data
-        if($track->post_id){
-            $track_data = array(
-                'track_id' =>   $track->post_id
-            );
-        }else{
-            $track_data = array(
-                'artist' =>   $track->artist,
-                'title' =>   $track->title,
-                'album' =>   $track->album
-            );
+        if (!$track->post_id){
+            $track->insert_community_track();
         }
+
+        if (!$track->post_id){
+            return new WP_Error( 'wpsstm_missing_track_id', __('Missing track ID.','wpsstm') );
+        }
+
+        $track_data = array(
+            'track_id' =>   $track->post_id
+        );
 
         //new subtrack
         if (!$track->subtrack_id){
