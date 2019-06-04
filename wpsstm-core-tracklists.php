@@ -572,6 +572,7 @@ class WPSSTM_Core_Tracklists{
     
     /*
     Delete the tracklist related entries from the subtracks table when a tracklist post is deleted.
+    //TOUFIX TOUCHECK is this a duplicate of to the function delete_subtrack_tracklist_id() ?
     */
     
     function delete_tracklist_subtracks($post_id){
