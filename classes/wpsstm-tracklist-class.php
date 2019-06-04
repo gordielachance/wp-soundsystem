@@ -729,10 +729,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
         
-        //capability check
-        $can = wpsstm()->is_community_user_ready();
-        if ( is_wp_error($can) ) return $can;
-        
         $this->tracklist_log('SET LIVE DATAS'); 
 
         //save subtracks
@@ -768,7 +764,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        //NO capability check here, should be done upstream, because we should be able to use this function automatically (eg. live tracklist update)
+        //capability check
+        $can = wpsstm()->is_community_user_ready();
+        if ( is_wp_error($can) ) return $can;
         
         //delete actual subtracks
         $this->tracklist_log('delete current tracklist subtracks'); 
