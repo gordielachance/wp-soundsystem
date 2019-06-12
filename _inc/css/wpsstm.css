@@ -1087,8 +1087,8 @@ wpsstm-track-link .wpsstm-track-link-actions > * {
 wpsstm-track .wpsstm-track-links-list:not(.active) {
   display: none;
 }
-/* line 129, ../scss/_wpsstm-track-links.scss */
-wpsstm-track .wpsstm-track-link-actions > *:not(.wpsstm-track-link-action-provider) {
+/* line 128, ../scss/_wpsstm-track-links.scss */
+wpsstm-track .wpsstm-track-links-list:not(.active) .wpsstm-track-link-actions > *:not(.wpsstm-track-link-action-provider) {
   display: none;
 }
 

@@ -156,13 +156,17 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= XXX =
+* radios : improved how they are updated
+* improved REDDIT service
+
 = 2.6.8 =
 * Improved settings page
 * Improved WPSSTM_Core_User logic
 * Register Radios post type even if no API key set; but filter post content to display a notice (avoids a 404 error)
 * Create user favorite tracks playlist only when he tries to favorite a track for the first time
-* Various improvements & bugfixes
 * Do not store track data within the subtracks table, always create a track post (fixes issues #88)
+* Various improvements & bugfixes
 
 = 2.6.5 =
 * New track links setting 'Exclude hosts'

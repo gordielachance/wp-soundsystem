@@ -1010,7 +1010,7 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
-            'data-wpsstm-links-count' =>      $this->link_count,
+            'data-wpsstm-links-count' =>        $this->link_count,
         );
 
         return wpsstm_get_html_attr($attr);
