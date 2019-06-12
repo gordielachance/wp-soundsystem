@@ -3,10 +3,6 @@
 global $wpsstm_track;
 $wpsstm_track->populate_links();
 
-if ( !wpsstm()->get_options('ajax_load_tracklists') && !$wpsstm_track->have_links() ){
-    $wpsstm_track->autolink();
-}
-
 if ( $wpsstm_track->have_links() ) { ?>
     <div class="wpsstm-track-links-list">
         <?php

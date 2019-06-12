@@ -65,7 +65,7 @@ class WPSSTM_Track{
         $this->album            = wpsstm_get_post_album($this->post_id);
         $this->image_url        = wpsstm_get_post_image_url($this->post_id);
         $this->duration         = wpsstm_get_post_length($this->post_id);
-        $this->did_autolink   = $this->autolink_check();
+        $this->did_autolink     = $this->autolink_check();
         
     }
     
@@ -412,7 +412,7 @@ class WPSSTM_Track{
             WPSSTM_Core_Tracks::$album_metakey          => $this->album,
             WPSSTM_Core_Tracks::$image_url_metakey      => $this->image_url,
         );
-        
+
         //swap metas
         if ( isset($args['meta_input']) ){
             $meta_input = wp_parse_args($args['meta_input'],$meta_input);
@@ -433,11 +433,14 @@ class WPSSTM_Track{
             $error_msg = $post_id->get_error_message();
             $this->track_log($error_msg, "Error while saving track details" ); 
             return $post_id;
-        } 
-
+        }
+        
         //repopulate datas
         $this->populate_track_post($post_id);
-        
+
+        //save track links from parser if any
+        $new_ids = $this->save_new_links();
+
         $this->track_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "Saved track details" ); 
 
         return $this->post_id;
@@ -627,6 +630,17 @@ class WPSSTM_Track{
         }else{
             $this->add_links($this->links); //so we're sure the links count is set
         }
+
+        $do_autolink = ( 
+            !$this->have_links() && ( 
+                ( wpsstm()->get_options('ajax_autolinks') && wp_doing_ajax() ) || 
+                ( !wpsstm()->get_options('ajax_autolinks') && !wp_doing_ajax() ) 
+            ) 
+        );
+
+        if ( $do_autolink ){
+            $this->autolink();
+        }
         
         return true;
         
@@ -670,6 +684,8 @@ class WPSSTM_Track{
             return new WP_Error( 'wpsstm_autolink_disabled', __("Track has already been autolinkd recently.",'wpsstm') );
         }
         
+        $this->track_log("start autolink...");
+        
         $can_autolink = WPSSTM_Core_Track_Links::can_autolink();
         if ( $can_autolink !== true ) return $can_autolink;
 
@@ -699,7 +715,7 @@ class WPSSTM_Track{
         if ( is_wp_error($links_auto) ) return $links_auto;
         
         /*
-        save autolinkd time so we won't query autolinks again too soon
+        save autolink time so we won't query autolinks again too soon
         */
         $now = current_time('timestamp');
         update_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, $now );
@@ -712,15 +728,6 @@ class WPSSTM_Track{
             
             $link->track = $this;
             $link->is_community = true;
-            
-            //validate
-            $valid_link = $link->validate_link();
-            if ( is_wp_error($valid_link) ){
-                    $code = $valid_link->get_error_code();
-                    $error_msg = $valid_link->get_error_message($code);
-                    $link->link_log($error_msg,__('Autolink rejected','wpsstm'));
-                    continue;
-            }
 
             $new_links[] = $link;
 
@@ -751,6 +758,7 @@ class WPSSTM_Track{
         if ( !$this->post_id ){
             return new WP_Error( 'wpsstm_track_no_id', __('Unable to store link: track ID missing.','wpsstm') );
         }
+        
 
         //insert links
         $inserted = array();
@@ -769,8 +777,8 @@ class WPSSTM_Track{
             }
 
         }
-        
-        return count($inserted);
+
+        return $inserted;
     }
 
     function get_track_url(){
