@@ -29,10 +29,10 @@ class WPSSTM_Reddit_Api_Preset extends WPSSTM_Remote_Tracklist{
             'selectors' => array(
                 //in JSON
                 'tracks'            => array('path'=>'>data >children'),
-                'track_artist'      => array('path'=>'title','regex'=> '(?:(?:.*), +by +(.*))|(?:(.*)(?: +[-|–|—]+ +)(?:.*))'),
-                'track_title'       => array('path'=>'title','regex'=>'(?:(.*), +by +(?:.*))|(?:(?:.*)(?: +[-|–|—]+ +)(.*))' ),
-                //'track_image'     => array('path'=>'img.cover-art','attr'=>'src'),
-                'track_link_urls'   => array('path'=>'url'),
+                'track_artist'      => array('path'=>'>data >title','regex'=> '(?:(?:.*), +by +(.*))|(?:(.*)(?: +[-|–|—]+ +)(?:.*))'),
+                'track_title'       => array('path'=>'>data >title','regex'=>'(?:(.*), +by +(?:.*))|(?:(?:.*)(?: +[-|–|—]+ +)(.*))' ),
+                'track_image'       => array('path'=>'>data >thumbnail'),
+                'track_link_urls'   => array('path'=>'>data >url'),
             )
         );
         
