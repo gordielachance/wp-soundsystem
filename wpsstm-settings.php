@@ -102,7 +102,7 @@ class WPSSTM_Settings {
             $matches = new WP_Query($query_args);
             
             foreach((array)$matches->posts as $post_id){
-                wp_delete_post( $post_id );
+                wp_trash_post( $post_id );
             }
 
         }
