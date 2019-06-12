@@ -681,12 +681,12 @@ class WPSSTM_Track{
         */
         if(!$this->post_id){
 
-            $success = $this->insert_community_track();
+            $track_id = $this->insert_community_track();
 
-            if ( is_wp_error($success) ){
-                $error_msg = $success->get_error_message();
+            if ( is_wp_error($track_id) ){
+                $error_msg = $track_id->get_error_message();
                 $this->track_log($error_msg,'Error while creating community track');
-                return $success;
+                return $track_id;
             }
 
         }

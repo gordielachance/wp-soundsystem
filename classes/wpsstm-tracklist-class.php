@@ -924,7 +924,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         
         if (!$track->post_id){
-            $track->insert_community_track();
+            $track_id = $track->insert_community_track();
+            
+            if ( is_wp_error($track_id) ){
+                return $track_id;
+            }
+            
         }
 
         if (!$track->post_id){

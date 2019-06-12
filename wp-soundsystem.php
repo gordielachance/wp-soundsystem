@@ -393,11 +393,11 @@ class WP_SoundSystem {
                 
             }else{
                 
-                $post_id = $track->insert_community_track();
+                $track_id = $track->insert_community_track();
                 
-                if ( !is_wp_error($post_id) ){
+                if ( !is_wp_error($track_id) ){
                     
-                    $rowquerystr = $wpdb->prepare( "UPDATE `$subtracks_table` SET track_id = '%s' WHERE ID = '%s'",$post_id, $row->ID );
+                    $rowquerystr = $wpdb->prepare( "UPDATE `$subtracks_table` SET track_id = '%s' WHERE ID = '%s'",$track_id, $row->ID );
                     $result = $wpdb->get_results ( $rowquerystr );
 
                 }
