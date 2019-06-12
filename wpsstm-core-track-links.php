@@ -551,13 +551,16 @@ class WPSSTM_Core_Track_Links{
     function ajax_trash_link(){
         $ajax_data = wp_unslash($_POST);
         
+        $post_id = wpsstm_get_array_value(array('post_id'),$ajax_data);
+        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast ajax string to int
+        
         $result = array(
             'input'     => $ajax_data,
             'message'   => null,
             'success'   => false
         );
 
-        $link = new WPSSTM_Track_Link($ajax_data['post_id']);
+        $link = new WPSSTM_Track_Link($post_id);
         $success = $link->trash_link();
         
         if ( is_wp_error($success) ){

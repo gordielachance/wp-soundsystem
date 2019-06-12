@@ -40,15 +40,15 @@ class WPSSTM_Track{
         $this->tracklist = new WPSSTM_Post_Tracklist();
 
         //has track ID
-        if ( $track_id = intval($post_id) ) {
-            $this->populate_track_post($track_id);
+        if ( is_int($post_id) ) {
+            $this->populate_track_post($post_id);
         }
         
         if ($tracklist){
             if ( is_a($tracklist,'WPSSTM_Post_Tracklist') ){
                 $this->tracklist = $tracklist;
-            }elseif( $tracklist_id = intval($tracklist) ){
-                $this->tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+            }elseif( is_int($tracklist) ){
+                $this->tracklist = new WPSSTM_Post_Tracklist($tracklist);
             }
         }
 
@@ -312,7 +312,6 @@ class WPSSTM_Track{
         $old_pos = $this->position;
         $tracklist_id = $this->tracklist->post_id;
         $tracks_count = $this->tracklist->get_subtracks_count();
-        $new_pos = intval($new_pos);
         
         if ( !$this->subtrack_id ){
             return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );

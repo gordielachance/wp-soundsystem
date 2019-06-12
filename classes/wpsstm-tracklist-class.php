@@ -54,8 +54,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->set_tracklist_pagination($pagination_args);
 
         //has tracklist ID
-        if ( $tracklist_id = intval($post_id) ) {
-            $this->post_id = $tracklist_id;
+        if ( is_int($post_id) ) {
+            $this->post_id = $post_id;
             $this->populate_tracklist_post();
         }
     }
@@ -1078,6 +1078,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         return $output;
     }
+    
+    /*
+    TOUFIX this should be linked to a Wordpress query (exclude trashed posts, etc.), and allow query args ?
+    */
     
     function get_subtracks_count(){
         global $wpdb;

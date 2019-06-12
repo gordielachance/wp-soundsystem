@@ -111,6 +111,8 @@ class WPSSTM_Core_Tracklists{
 
         $ajax_data = wp_unslash($_POST);
         $post_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
+        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast ajax string to int
+        
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
         $tracklist->is_expired = ($tracklist->tracklist_type == 'live' ); //force refresh, but only for live tracklists
         $html = $tracklist->get_tracklist_html();
@@ -163,6 +165,8 @@ class WPSSTM_Core_Tracklists{
         $ajax_data = wp_unslash($_POST);
         
         $tracklist_id = wpsstm_get_array_value('tracklist_id',$ajax_data);
+        $tracklist_id = filter_var($tracklist_id, FILTER_VALIDATE_INT); //cast ajax string to int
+        
         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
 
         $track = new WPSSTM_Track();

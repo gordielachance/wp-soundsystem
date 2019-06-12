@@ -19,8 +19,8 @@ class WPSSTM_Track_Link{
     function __construct($post_id = null){
 
         //has track ID
-        if ( $link_id = intval($post_id) ) {
-            $this->post_id = $link_id;
+        if ( is_int($post_id) ) {
+            $this->post_id = $post_id;
             $this->populate_link_post();
         }
 

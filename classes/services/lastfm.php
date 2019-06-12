@@ -549,8 +549,10 @@ class WPSSTM_LastFM{
             'message'   => null,
             'success'   => false,
         );
+
+        $start_timestamp = wpsstm_get_array_value(array('playback_start'),$ajax_data);
+        $start_timestamp = $result['playback_start'] = filter_var($start_timestamp, FILTER_VALIDATE_INT); //cast ajax string to int
         
-        $start_timestamp = $result['playback_start'] = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
         
         $track = new WPSSTM_Track();
         $track->from_array($ajax_data['track']);
@@ -585,8 +587,10 @@ class WPSSTM_LastFM{
         );
         
         if ( $community_user_id ){
-
-            $start_timestamp = $result['playback_start'] = ( isset($ajax_data['playback_start']) ) ? $ajax_data['playback_start'] : null;
+            
+            $start_timestamp = wpsstm_get_array_value(array('playback_start'),$ajax_data);
+            $start_timestamp = $result['playback_start'] = filter_var($start_timestamp, FILTER_VALIDATE_INT); //cast ajax string to int
+            
             
             $track = new WPSSTM_Track();
             $track->from_array($ajax_data['track']);

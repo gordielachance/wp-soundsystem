@@ -981,8 +981,10 @@ class WPSSTM_Core_Tracks{
     
     function ajax_update_track_links_order(){
         $ajax_data = wp_unslash($_POST);
+
+        $track_id = wpsstm_get_array_value(array('track_id'),$ajax_data);
+        $track_id = filter_var($track_id, FILTER_VALIDATE_INT); //cast ajax string to int
         
-        $track_id = isset($ajax_data['track_id']) ? $ajax_data['track_id'] : null;
         $track = new WPSSTM_Track($track_id);
         
         $result = array(
@@ -1009,6 +1011,8 @@ class WPSSTM_Core_Tracks{
 
         $ajax_data = wp_unslash($_POST);
         $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
+        $subtrack_id = filter_var($subtrack_id, FILTER_VALIDATE_INT); //cast ajax string to int
+
         $track = new WPSSTM_Track();
         $track->populate_subtrack($subtrack_id);
 
@@ -1133,8 +1137,12 @@ class WPSSTM_Core_Tracks{
             'input'     => $ajax_data
         );
         
-        $result['subtrack_id'] = $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
+        $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
+        $subtrack_id = filter_var($subtrack_id, FILTER_VALIDATE_INT); //cast ajax string to int
+        $result['subtrack_id'] = $subtrack_id;
+        
         $new_pos = wpsstm_get_array_value('new_pos',$ajax_data);
+        $new_pos = filter_var($new_pos, FILTER_VALIDATE_INT); //cast ajax string to int
         $result['new_pos'] = $new_pos;
         
         $track = new WPSSTM_Track();
