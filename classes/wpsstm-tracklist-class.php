@@ -682,6 +682,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         );
 
         if ( $refresh_now ){
+            
+            $this->tracklist_log("refresh radio...");
 
             $this->populate_preset();
             $tracks = $this->preset->populate_remote_tracks();
@@ -1115,7 +1117,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if (!$this->feed_url) return;
 
 
-        $refresh_el = sprintf('<a class="wpsstm-reload-bt" href="#">%s</a>',__('Resfresh'));
+        $refresh_el = sprintf('<a class="wpsstm-reload-bt" href="%s">%s</a>',$this->get_tracklist_action_url('refresh'),__('Refresh'));
         $not_found .= sprintf("  %s ?",$refresh_el);
 
         $this->add_notice('empty-tracklist', $not_found );
