@@ -101,25 +101,47 @@ class WPSSTM_Reddit_Api_Preset extends WPSSTM_Remote_Tracklist{
         
         return $title;
     }
-    
-    /*
-    TOUFIX Keep only reddit posts that have a media
-    */
-    /*
+
     protected function get_track_nodes($body_node){
 
         $selector = $this->get_selectors( array('tracks','path') );
         $post_nodes = qp( $body_node, null, self::$querypath_options )->find($selector);
-        //var_dump($post_nodes->length);
+        
+        ////printf('<br/>count before:%s<br/>',$post_nodes->length);
 
         foreach($post_nodes as $key=>$node) {
+            $title = qp( $node, null, self::$querypath_options )->find('title')->innerHTML();
             $media = qp( $node, null, self::$querypath_options )->find('media')->innerHTML();
-            if (!$media) unset($post_nodes[$key]);
+            $tag = qp( $node, null, self::$querypath_options )->find('link_flair_text')->innerHTML();
+            $tag = strtolower($tag);
+
+            /*
+            remove nodes that have not been flagged as media by reddit.
+            This is kind arbitrary but well, that's a way to do it.
+            */
+            if (!$media){
+                ////printf('no media for post#%s: %s<br/>',$key,$title);
+                $node->remove();
+                continue;
+            }
+            
+            /*
+            remove nodes that have the playlist tag (used eg. on /r/jazznoir)
+            */
+            if ($tag === 'playlist'){
+                $node->remove();
+                continue;
+            }
+            
         }
-        //var_dump($post_nodes->length);
+        
+        //update selection
+        $post_nodes = qp( $body_node, null, self::$querypath_options )->find($selector);
+        ////printf('<br/>count after:%s<br/>',$post_nodes->length);
+
         return $post_nodes;
     }
-    */
+
 
     protected function filter_string($str){
         
