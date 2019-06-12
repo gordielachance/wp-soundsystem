@@ -67,7 +67,7 @@ class WPSSTM_Core_Tracklists{
         /*
         DB relationships
         */
-        add_action( 'before_delete_post', array($this,'delete_subtrack_tracklist_id') );
+        add_action( 'before_delete_post', array($this,'unset_from_tracklist_id') );
         add_action( 'delete_post', array($this,'delete_tracklist_subtracks') );
 
     }
@@ -557,7 +557,7 @@ class WPSSTM_Core_Tracklists{
     Unset tracklist occurences out of the subtracks table when it is deleted
     */
     
-    function delete_subtrack_tracklist_id($post_id){
+    function unset_from_tracklist_id($post_id){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
@@ -572,26 +572,17 @@ class WPSSTM_Core_Tracklists{
     
     /*
     Delete the tracklist related entries from the subtracks table when a tracklist post is deleted.
-    //TOUFIX TOUCHECK is this a duplicate of to the function delete_subtrack_tracklist_id() ?
     */
     
     function delete_tracklist_subtracks($post_id){
         global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
         if ( !in_array(get_post_type($post_id),wpsstm()->tracklist_post_types) ) return;
 
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        $success = $wpdb->delete( 
+        return $wpdb->delete( 
             $subtracks_table, //table
             array('tracklist_id'=>$post_id) //where
-        );
-        
-        //pinned from... ID
-        $success = $wpdb->update( 
-            $subtracks_table, //table
-            array('from_tracklist'=>''), //data
-            array('from_tracklist'=>$post_id) //where
         );
         
     }
