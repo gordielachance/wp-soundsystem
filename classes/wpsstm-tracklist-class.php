@@ -681,8 +681,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->is_expired ){
 
             $this->populate_preset();
-            $success =       $this->preset->populate_remote_tracks();
             
+            $success = $this->preset->populate_remote_tracks();
             $tracks = $this->preset->tracks;
             
             // if post title is empty, use the remote title
@@ -705,7 +705,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 $this->add_notice($success->get_error_code(), $success->get_error_message() );                
             }else{
                 $this->add_tracks($tracks);
-                $updated = $this->set_live_datas($this->preset);
+                $updated = $this->update_live_playlist($this->preset);
             }
 
         }else{
@@ -722,7 +722,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     Update WP post and eventually update subtracks.
     */
     
-    function set_live_datas(WPSSTM_Remote_Tracklist $datas){
+    private function update_live_playlist(WPSSTM_Remote_Tracklist $datas){
 
         if (!$this->post_id){
             $this->tracklist_log('wpsstm_missing_post_id','Set live datas error' );
@@ -733,7 +733,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //save subtracks
         if ($this->tracks){
-            $success = $this->update_subtracks();
+            $success = $this->update_live_subtracks();
             if( is_wp_error($success) ) return $success;
         }
                
@@ -760,7 +760,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     Clear the stored subtracks and add the new ones
     */
 
-    protected function update_subtracks(){
+    private function update_live_subtracks(){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
@@ -1173,7 +1173,7 @@ class WPSSTM_Tracklist{
         return $new_tracks;
     }
 
-    protected function validate_tracks($tracks){
+    private function validate_tracks($tracks){
 
         $valid_tracks = $rejected_tracks = array();
         $error_codes = array();
