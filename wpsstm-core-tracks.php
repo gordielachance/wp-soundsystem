@@ -92,6 +92,7 @@ class WPSSTM_Core_Tracks{
         DB relationships
         */
         add_action( 'wp_trash_post', array($this,'trash_track_links') );
+        add_action( 'wp_trash_post', array($this,'trash_subtracks') );
     }
     
     /*
@@ -1219,6 +1220,20 @@ class WPSSTM_Core_Tracks{
             $track->track_log( json_encode(array('post_id'=>$post_id,'links'=>$links_query->post_count,'trashed'=>$trashed)),"WPSSTM_Post_Tracklist::trash_track_links()");
         }
 
+    }
+    
+    /*
+    Unset track occurences out of the subtracks table when it is trashed
+    */
+    
+    function trash_subtracks($post_id){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
+        $rowquerystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE track_id = '%s'",$post_id );
+        
+        return $wpdb->get_results ( $rowquerystr );
     }
 
     /*
