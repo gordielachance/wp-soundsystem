@@ -101,7 +101,6 @@ class WP_SoundSystem {
             'frontend_scraper_page_id'          => null,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
-            'ajax_load_tracklists'              => true,
             'autolink'                          => true,
             'limit_autolinks'                   => 5,
             'importer_enabled'                  => true,
@@ -111,6 +110,8 @@ class WP_SoundSystem {
             'details_engine'                    => array('musicbrainz'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
+            'ajax_tracks'                       => false,
+            'ajax_autolinks'                    => true,
         );
         
         $db_option = get_option( $this->meta_name_options);

@@ -225,11 +225,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $old_tracklist = $wpsstm_tracklist; //store temp
         $wpsstm_tracklist = $this;
 
-        if ( wpsstm()->get_options('ajax_load_tracklists') && !wp_doing_ajax() ){
-            $this->tracklist_log("force is_expired to FALSE (we'll rely on ajax to refresh the tracklist)");
-            $this->is_expired = false;
-        }
-
         ob_start();
         wpsstm_locate_template( 'content-tracklist.php', true, false );
         $content = ob_get_clean();
@@ -678,8 +673,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
  
         $tracks = array();
         $refresh_delay = $this->get_human_next_refresh_time();
+        
+        $refresh_now = ( 
+            $this->is_expired && ( 
+                ( wpsstm()->get_options('ajax_tracks') && wp_doing_ajax() ) || 
+                ( !wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() ) 
+            ) 
+        );
 
-        if ( $this->is_expired ){
+        if ( $refresh_now ){
 
             $this->populate_preset();
             $tracks = $this->preset->populate_remote_tracks();
