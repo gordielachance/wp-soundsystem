@@ -65,7 +65,7 @@ $('wpsstm-tracklist,.wpsstm-standalone-track').each(function(index,tracklist) {
 
     tracklist.setAttribute('id','wpsstm-tracklist-'+index);
 
-    if (tracklist.isExpired){
+    if (tracklist.hasAttribute('data-ajax-tracks') && tracklist.isExpired){
         tracklist.reload_tracklist();
     }else{
 

@@ -126,14 +126,14 @@ class WpsstmTracklist extends HTMLElement{
         /*
         Refresh
         */
-        var refresh_bt = $(tracklist).find(".wpsstm-reload-bt");
+        var refresh_bt = $(tracklist).filter('[data-ajax-tracks]').find(".wpsstm-reload-bt");
         refresh_bt.click(function(e) {
             e.preventDefault();
             tracklist.debug("clicked 'refresh' bt");
             tracklist.reload_tracklist();
         });
         
-        $(tracklist).on( "wpsstmTracklistLoop", function( event,player ) {
+        $(tracklist).filter('[data-ajax-tracks]').on( "wpsstmTracklistLoop", function( event,player ) {
             tracklist.debug("tracklist loop");
             if (tracklist.isExpired){
                 tracklist.reload_tracklist(true);

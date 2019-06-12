@@ -623,6 +623,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'itemtype' =>                           "http://schema.org/MusicPlaylist",
             'data-wpsstm-tracklist-id' =>           $this->post_id,
             'data-wpsstm-domain' =>                 wpsstm_get_url_domain( $this->feed_url ),
+            'data-ajax-tracks' =>                   wpsstm()->get_options('ajax_tracks'),
+            'data-ajax-autolinks' =>                wpsstm()->get_options('ajax_autolinks'),
         );
 
         $values_attr = array_merge($values_defaults,(array)$values_attr);
