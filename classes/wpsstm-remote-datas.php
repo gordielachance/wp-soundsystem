@@ -123,7 +123,7 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     
     }
     
-    private function get_remote_page_tracks(){
+    protected function get_remote_page_tracks(){
 
         require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
         
