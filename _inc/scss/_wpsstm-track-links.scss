@@ -123,11 +123,11 @@ wpsstm-track-link{
 wpsstm-track{
     .wpsstm-track-links-list:not(.active){
         display:none;
-    }
-    .wpsstm-track-link-actions{
-        > *{
-            &:not(.wpsstm-track-link-action-provider){
-                display:none;
+        .wpsstm-track-link-actions{
+            > *{
+                &:not(.wpsstm-track-link-action-provider){
+                    display:none;
+                }
             }
         }
     }
