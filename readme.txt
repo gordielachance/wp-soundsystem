@@ -156,7 +156,7 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= XXX =
+= 2.6.9 =
 * radios : improved how they are updated
 * improved REDDIT service
 
