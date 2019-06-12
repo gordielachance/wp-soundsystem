@@ -673,71 +673,78 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function populate_subtracks(){
         global $wpdb;
         
-        //avoid populating the subtracks several times (eg. Jetpack populates the content several times)
+        //avoid populating the subtracks several times (eg. Jetpack populates the content several times) TOUFIX TOUCHECK ?
         if ($this->track_count !== null) return;
  
+        $tracks = array();
         $refresh_delay = $this->get_human_next_refresh_time();
 
         if ( $this->is_expired ){
 
             $this->populate_preset();
-            
-            $success = $this->preset->populate_remote_tracks();
-            $tracks = $this->preset->tracks;
-            
-            // if post title is empty, use the remote title
-            $remote_title = $this->preset->title;
+            $tracks = $this->preset->populate_remote_tracks();
 
-            if (!$this->title && $remote_title){
-                $this->title = $remote_title;
-            }
-            
-            //time updated
-            $this->updated_time = current_time( 'timestamp', true );
-
-            //if remote author exists, use it
-            $remote_author = $this->preset->author;
-            $this->author = ($remote_author) ? $remote_author : $this->author;
-            
-            // handle remote errors
-            if ( is_wp_error($success) ){
-                //TOUFIX THIS IS A WIZARD NOTICE, should be stored elsewhere so it is shown only on the backend.
-                $this->add_notice($success->get_error_code(), $success->get_error_message() );                
+            if ( !is_wp_error($tracks) ){
+                $updated = $this->update_radio_data();
             }else{
-                $this->add_tracks($tracks);
-                $updated = $this->update_live_playlist($this->preset);
+                //TOUFIX THIS IS A WIZARD NOTICE, should be stored elsewhere so it is shown only on the backend.
+                $this->add_notice($tracks->get_error_code(), $tracks->get_error_message() );
             }
 
-        }else{
-            $tracks = $this->get_static_subtracks();
-            $this->add_tracks($tracks);
         }
         
-        $this->tracklist_log(array('tracks_populated'=>$this->track_count,'is_expired'=>$this->is_expired,'refresh_delay'=>$refresh_delay),'Populated subtracks');
+        $tracks = $this->get_static_subtracks();
 
-        return true;
+        if ( !is_wp_error($tracks) ){
+            $this->add_tracks($tracks);
+        }
+
+        $this->tracklist_log(
+            array(
+                'tracks_populated'=>$this->track_count,
+                'is_expired'=>$this->is_expired,
+                'refresh_delay'=>$refresh_delay
+            ),'Populated subtracks'
+        );
+
     }
+
     
     /*
     Update WP post and eventually update subtracks.
     */
     
-    private function update_live_playlist(WPSSTM_Remote_Tracklist $datas){
+    private function update_radio_data(){
 
         if (!$this->post_id){
             $this->tracklist_log('wpsstm_missing_post_id','Set live datas error' );
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
         
-        $this->tracklist_log('SET LIVE DATAS'); 
+        $this->tracklist_log('starts updating live playlist...'); 
 
-        //save subtracks
-        if ($this->tracks){
-            $success = $this->update_live_subtracks();
+        /*
+        subtracks
+        */
+        
+        if ($tracks = $this->preset->tracks){
+            $success = $this->set_radio_subtracks($tracks);
             if( is_wp_error($success) ) return $success;
         }
                
-        //update tracklist
+        /*
+        metas
+        */
+
+        // if post title is empty, use the remote title
+        $this->title = ($this->title) ? $this->title : $this->preset->get_remote_title();
+
+        //if remote author exists, use it
+        $remote_author = $this->preset->get_remote_author();
+        $this->author = ( $remote_author ) ? $remote_author : $this->author;
+
+        //time updated
+        $this->updated_time = current_time( 'timestamp', true );
 
         $meta_input = array(
             self::$remote_title_meta_name =>  $this->preset->title,
@@ -760,7 +767,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     Clear the stored subtracks and add the new ones
     */
 
-    private function update_live_subtracks(){
+    private function set_radio_subtracks($tracks){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
@@ -773,12 +780,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE tracklist_id = %d", $this->post_id );
         $success = $wpdb->get_results ( $querystr );
-        
 
         $errors = array();
         $no_updates = 0;
         $saved = 0;
-        foreach((array)$this->tracks as $index=>$new_track){
+        foreach((array)$tracks as $index=>$new_track){
+
             $new_track->position = $index + 1;
             $success = $this->save_subtrack($new_track);
             

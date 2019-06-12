@@ -2,7 +2,7 @@
 
 use \ForceUTF8\Encoding;
 
-class WPSSTM_Remote_Tracklist{
+class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
     
     //url request
     var $url = null; //url requested
@@ -50,10 +50,6 @@ class WPSSTM_Remote_Tracklist{
     public $response_body = null;
     public $body_node = null;
     public $track_nodes = array();
-    
-    public $tracks = array();
-    public $title;
-    public $author;
 
     public function __construct($url = null,$options = array() ) {
         $this->url = trim($url);
@@ -107,24 +103,12 @@ class WPSSTM_Remote_Tracklist{
     
     */
     
-    function populate_remote_tracks(){
-        
-        $success = true;
-        
+    public function populate_remote_tracks(){
+
         while ( $this->request_pagination['current_page'] < $this->request_pagination['total_pages'] ){
             
             $page_tracks = $this->get_remote_page_tracks();
-
-            if ( is_wp_error($page_tracks) ){
-                $success = $page_tracks;
-                break;
-            }
-            
-            //first page
-            if ($this->request_pagination['current_page'] == 0){
-                $this->title = $this->get_remote_title();
-                $this->author = $this->get_remote_author();
-            }
+            if ( is_wp_error($page_tracks) ) return $page_tracks;
             
             $this->tracks = array_merge($this->tracks,(array)$page_tracks);
             $this->request_pagination['current_page']++;
@@ -135,13 +119,15 @@ class WPSSTM_Remote_Tracklist{
             $this->tracks = array_reverse($this->tracks);
         }
         
-        return $success;
+        return $this->tracks;
     
     }
     
     private function get_remote_page_tracks(){
 
         require_once(wpsstm()->plugin_dir . '_inc/php/class-array2xml.php');
+        
+        $tracks = array();
         
         /*
         init request data
@@ -193,7 +179,14 @@ class WPSSTM_Remote_Tracklist{
         if ( is_wp_error($track_nodes) ) return $track_nodes;
             
         //tracks
-        $tracks = $this->parse_track_nodes();
+        $raw_tracks = $this->parse_track_nodes();
+        
+        foreach((array)$raw_tracks as $raw_track){
+            $track = new WPSSTM_Track();
+            $track->from_array($raw_track);
+            $tracks[] = $track; 
+        }
+        
         $this->remote_log(count($tracks),'found tracks' );
         return $tracks;
 
@@ -425,7 +418,7 @@ class WPSSTM_Remote_Tracklist{
     Get the title tag of the page as playlist title.  Could be overriden in presets.
     */
     
-    protected function get_remote_title(){
+    public function get_remote_title(){
         $title = null;
         
         if ( $selector_title = $this->get_selectors( array('tracklist_title') ) ){
@@ -438,7 +431,7 @@ class WPSSTM_Remote_Tracklist{
     Get the playlist author.  Could be overriden in presets.
     */
     
-    protected function get_remote_author(){
+    public function get_remote_author(){
         $author = null;
         return $author;
     }
