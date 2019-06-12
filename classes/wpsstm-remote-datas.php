@@ -187,6 +187,8 @@ class WPSSTM_Remote_Tracklist extends WPSSTM_Tracklist{
             $tracks[] = $track; 
         }
         
+        $tracks = apply_filters('wpsstm_remote_tracks_input',$tracks,$this);
+        
         $this->remote_log(count($tracks),'found tracks' );
         return $tracks;
 

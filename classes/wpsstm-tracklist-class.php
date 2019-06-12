@@ -732,12 +732,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         /*
         subtracks
         */
-        
-        if ($tracks = $this->preset->tracks){
-            $success = $this->set_radio_subtracks($tracks);
-            if( is_wp_error($success) ) return $success;
-        }
-               
+        $success = $this->set_radio_subtracks();
+        if( is_wp_error($success) ) return $success;
+   
         /*
         metas
         */
@@ -773,7 +770,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     Clear the stored subtracks and add the new ones
     */
 
-    private function set_radio_subtracks($tracks){
+    private function set_radio_subtracks(){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
@@ -790,6 +787,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $errors = array();
         $no_updates = 0;
         $saved = 0;
+        
+        $tracks = $this->preset->tracks;
+        $tracks = apply_filters('wpsstm_radio_tracks_input',$tracks,$this);
+        
         foreach((array)$tracks as $index=>$new_track){
 
             $new_track->position = $index + 1;
@@ -1202,7 +1203,6 @@ class WPSSTM_Tracklist{
             $add_tracks[] = $track;
         }
 
-        $add_tracks = apply_filters('wpsstm_input_tracks',$add_tracks,$this);
         $new_tracks = $this->validate_tracks($add_tracks);
         
         $this->tracks = array_merge($this->tracks,$new_tracks);
