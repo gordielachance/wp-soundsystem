@@ -111,7 +111,7 @@ class WP_SoundSystem {
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
             'ajax_tracks'                       => true,
-            'ajax_autolinks'                    => true,
+            'ajax_autolink'                     => true,
         );
         
         $db_option = get_option( $this->meta_name_options);

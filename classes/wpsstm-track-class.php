@@ -170,7 +170,7 @@ class WPSSTM_Track{
     
     public function local_track_lookup(){
         if ( $this->post_id ) return;
-        
+
         $duplicates = $this->get_track_duplicates();
         if ( is_wp_error($duplicates) ) return $duplicates;
         
@@ -343,23 +343,26 @@ class WPSSTM_Track{
             $result = $wpdb->get_results ( $querystr );
         }
         
-        //update this subtrack
-        if ( !is_wp_error($result) ){
-            
-            $result = $wpdb->update( 
-                $subtracks_table, //table
-                array('track_order'=>$new_pos), //data
-                array('ID'=>$this->subtrack_id) //where
-            );
-            
+        if ( is_wp_error($result) ) return $result;
+ 
+        /*
+        https://developer.wordpress.org/reference/classes/wpdb/update/
+        returns false if errors, or the number of rows affected if successful.
+        */
+
+        $result = $wpdb->update( 
+            $subtracks_table, //table
+            array('track_order'=>$new_pos), //data
+            array('ID'=>$this->subtrack_id) //where
+        );
+
+        if ( !$result ){
+            $message = __('Error while moving subtrack.','wpsstm');
+            return new WP_Error( 'wpsstm_subtrack_position_failed', $message );
         }
 
-        if ( is_wp_error($result) ){
-            $this->track_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$result->get_error_message(),'new_position'=>$new_pos,'old_position'=>$old_pos),"error moving subtrack");
-        }else{
-            $this->position = $new_pos;
-            $this->track_log(array('subtrack_id'=>$this->subtrack_id,'new_position'=>$new_pos,'old_position'=>$old_pos),"moved subtrack");
-        }
+        $this->position = $new_pos;
+        $this->track_log(array('subtrack_id'=>$this->subtrack_id,'new_position'=>$new_pos,'old_position'=>$old_pos),"moved subtrack");
         
         return $result;
 
@@ -440,7 +443,7 @@ class WPSSTM_Track{
         //save track links from parser if any
         $new_ids = $this->save_new_links();
 
-        $this->track_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "Saved track details" ); 
+        $this->track_log( array('post_id'=>$this->post_id,'links'=>count($new_ids),'track'=>json_encode($this->to_array())), "Saved track details" ); 
 
         return $this->post_id;
         
@@ -630,17 +633,6 @@ class WPSSTM_Track{
             $this->add_links($this->links); //so we're sure the links count is set
         }
 
-        $do_autolink = ( 
-            !$this->have_links() && ( 
-                ( wpsstm()->get_options('ajax_autolinks') && wp_doing_ajax() ) || 
-                ( !wpsstm()->get_options('ajax_autolinks') && !wp_doing_ajax() ) 
-            ) 
-        );
-
-        if ( $do_autolink ){
-            $this->autolink();
-        }
-        
         return true;
         
     }
@@ -761,19 +753,14 @@ class WPSSTM_Track{
 
         //insert links
         $inserted = array();
+
         foreach((array)$this->links as $link){
 
             if ($link->post_id) continue;
             $link_id = $link->save_link();
 
-            if ( is_wp_error($link_id) ){
-                $code = $link_id->get_error_code();
-                $error_msg = $link_id->get_error_message($code);
-                $link->link_log( $error_msg,"store autolinks - error while saving link");
-                continue;
-            }else{
-                $inserted[] = $link_id;
-            }
+            if ( is_wp_error($link_id) ) continue;
+            $inserted[] = $link_id;
 
         }
 

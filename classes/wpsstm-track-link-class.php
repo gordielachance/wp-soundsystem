@@ -161,7 +161,8 @@ class WPSSTM_Track_Link{
         if ( !empty($duplicates) ){
             $link_id = $duplicates[0];
             $this->post_id = $link_id;
-            //$this->link_log($link_id,'This link already exists, do not create it');
+            $this->link_log($link_id,'This link already exists, do not create it');
+            return $this->post_id;
         }else{
             $post_author = ($this->is_community) ? wpsstm()->get_options('community_user_id') : get_current_user_id();
 
@@ -197,14 +198,9 @@ class WPSSTM_Track_Link{
 
             if ( is_wp_error($success) ) return $success;
             $this->post_id = $success;
+            return $this->post_id;
 
-            $this->link_log(
-                json_encode(array('args'=>$args,'post_id'=>$this->post_id)),
-                "WPSSTM_Track_Link::save_link()
-            ");
         }
-        
-        return $this->post_id;
     }
     
 

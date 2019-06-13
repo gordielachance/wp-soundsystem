@@ -1,6 +1,11 @@
 <?php
 global $wpsstm_tracklist;
+
+$wpsstm_tracklist = new WPSSTM_Post_Tracklist(get_the_ID());
 $wpsstm_tracklist->populate_preset();
+
+$load_tracklist = isset($_GET['wpsstm_load_tracklist']);
+
 ?>
 <div id="wpsstm-importer">
     <ul id="wpsstm-importer-tabs">
@@ -155,14 +160,24 @@ $wpsstm_tracklist->populate_preset();
         <div class="wpsstm-importer-section-label">
             <h3><?php _e('Output','wpsstm');?></h3>
         </div>
-        <div class="wpsstm-importer-row">
         <?php
-            $importer_tracklist = new WPSSTM_Post_Tracklist(get_the_ID());
-            $importer_tracklist->populate_subtracks();
-            $output = $importer_tracklist->get_tracklist_html();
+            
+            if (!$load_tracklist && $wpsstm_tracklist->is_expired){
+                
+                $wpsstm_tracklist->is_expired = false;
+                
+                $url = get_edit_post_link();
+                $url = add_query_arg(array('wpsstm_load_tracklist'=>true),$url) . '#wpsstm-importer-step-debug';
+                $link = sprintf('<a href="%s">%s</a>',$url,__('Reload tracklist','wpsstm'));
+                $notice = sprintf(__('Autorefresh is disabled here.  %s ?','wpsstm'),$link);
+                echo wpsstm_get_notice($notice);
+            
+            }
+
+            $output = $wpsstm_tracklist->get_tracklist_html();
             echo $output;
+            
         ?>
-        </div>
     </div>
     <!--debug-->
     <div id="wpsstm-importer-step-debug" class="wpsstm-importer-section wpsstm-importer-section-advanced">
@@ -170,22 +185,21 @@ $wpsstm_tracklist->populate_preset();
             <h3><?php _e('Tracklist Debug','wpsstm');?></h3>
         </div>
         <?php
-        
-        $is_debug = isset($_GET['wpsstm_tracklist_debug']);
 
-        if (!$is_debug){
+        if (!$load_tracklist){
             
             $url = get_edit_post_link();
-            $url = add_query_arg(array('wpsstm_tracklist_debug'=>true),$url) . '#wpsstm-importer-step-debug';
+            $url = add_query_arg(array('wpsstm_load_tracklist'=>true),$url) . '#wpsstm-importer-step-debug';
             $link = sprintf('<a href="%s">%s</a>',$url,__('Reload tracklist','wpsstm'));
             $notice = sprintf(__('%s to display the feedback','wpsstm'),$link);
             echo wpsstm_get_notice($notice);
 
         }else{
-            //force reload
+            
             $wpsstm_tracklist->is_expired = true;
             $wpsstm_tracklist->populate_subtracks();
-            
+
+
             ?>
             <!--preset-->
              <div class="wpsstm-importer-row">

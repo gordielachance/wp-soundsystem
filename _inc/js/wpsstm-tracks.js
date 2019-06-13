@@ -266,7 +266,7 @@ class WpsstmTrack extends HTMLElement{
 
         var track = this;
         var success = $.Deferred();
-        var can_autolink = true; //TOUFIX should be from localized var
+        var can_autolink = track.tracklist.hasAttribute('data-ajax-autolink');
         var links = $(track).find('wpsstm-track-link');
 
         if ( (links.length > 0) || ( !can_autolink ) || ( track.did_links_request ) ){

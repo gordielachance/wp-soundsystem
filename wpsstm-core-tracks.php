@@ -286,6 +286,8 @@ class WPSSTM_Core_Tracks{
         global $wpsstm_track;
         if ( is_404() ) return $template;
         if ( !is_single() ) return $template;
+        $post_type = get_query_var( 'post_type' );
+        if ($post_type !== wpsstm()->post_type_track ) return $template;
 
         if ( !$wpsstm_track->subtrack_id && !$wpsstm_track->post_id ) return $template;
 
@@ -1188,7 +1190,7 @@ class WPSSTM_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result );
     }
-    
+
     function test_autolink_ajax(){
         
         if ( is_admin() ) return;
