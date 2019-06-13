@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.6.9
+Version: 2.7.1
 License: GPL2
 */
 
@@ -34,11 +34,11 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '2.6.9';
+    public $version = '2.7.1';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '205';
+    public $db_version = '210';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -111,7 +111,7 @@ class WP_SoundSystem {
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
             'ajax_tracks'                       => true,
-            'ajax_autolinks'                    => true,
+            'ajax_autolink'                     => true,
         );
         
         $db_option = get_option( $this->meta_name_options);
@@ -175,7 +175,7 @@ class WP_SoundSystem {
         // activation, deactivation...
         register_activation_hook( $this->file, array( $this, 'activate_wpsstm'));
         register_deactivation_hook( $this->file, array( $this, 'deactivate_wpsstm'));
-        add_action( 'plugins_loaded', array($this, 'upgrade'));
+        
         add_action( 'plugins_loaded', array($this, 'startup_check_options'));
         
         //init
@@ -183,6 +183,8 @@ class WP_SoundSystem {
         add_action( 'init', array($this,'init_rewrite'), 5);
         add_action( 'init', array($this,'save_music_details_engines'));
         add_action( 'admin_init', array($this,'load_textdomain'));
+        
+        add_action( 'init', array($this, 'upgrade'), 9);
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
@@ -256,6 +258,7 @@ class WP_SoundSystem {
     }
 
     function upgrade(){
+
         global $wpdb;
 
         $current_version = get_option("_wpsstm-db_version");
@@ -266,7 +269,7 @@ class WP_SoundSystem {
             $this->setup_subtracks_table();
 
         }else{
-            
+
             if ($current_version < 201){
                 //
                 $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_musicbrainz_id', '_wpsstm_mbid' );
@@ -328,6 +331,67 @@ class WP_SoundSystem {
             
             if ($current_version < 205){
                 $this->migrate_old_subtracks();
+            }
+
+            if ($current_version < 210){
+                //TRACKS ARTIST - migrate meta to taxonomy
+                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_artist' );
+                $results = $wpdb->get_results ( $querystr );
+
+                foreach((array)$results as $meta){
+                    
+                    //TOUFIX TOUCHECK should this be here ?
+                    $post_type = get_post_type($meta->post_id);
+                    if ( $post_type !== wpsstm()->post_type_track ) continue;
+
+                    $success = wp_set_post_terms( $meta->post_id, $meta->meta_value, WPSSTM_Core_Tracks::$artist_taxonomy);
+
+                    if ( !is_wp_error($success) ){
+                        $success = delete_post_meta($meta->post_id,'_wpsstm_artist');
+                        
+                    }
+                    
+                }
+                
+                //TRACKS TITLE - migrate meta to taxonomy
+                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_track' );
+                $results = $wpdb->get_results ( $querystr );
+            
+                
+                foreach((array)$results as $meta){
+                    
+                    //TOUFIX TOUCHECK should this be here ?
+                    $post_type = get_post_type($meta->post_id);
+                    if ( $post_type !== wpsstm()->post_type_track ) continue;
+
+                    $success = wp_set_post_terms( $meta->post_id, $meta->meta_value, WPSSTM_Core_Tracks::$track_taxonomy);
+
+                    if ( !is_wp_error($success) ){
+                        delete_post_meta($meta->post_id,'_wpsstm_track');
+                        
+                    }
+                    
+                }
+                
+                //TRACKS ALBUM - migrate meta to taxonomy
+                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_release' );
+                $results = $wpdb->get_results ( $querystr );
+                
+                foreach((array)$results as $meta){
+                    
+                    //TOUFIX TOUCHECK should this be here ?
+                    $post_type = get_post_type($meta->post_id);
+                    if ( $post_type !== wpsstm()->post_type_track ) continue;
+
+                    $success = wp_set_post_terms( $meta->post_id, $meta->meta_value, WPSSTM_Core_Tracks::$album_taxonomy);
+
+                    if ( !is_wp_error($success) ){
+                        delete_post_meta($meta->post_id,'_wpsstm_release');
+                        
+                    }
+                    
+                }
+                
             }
 
         }

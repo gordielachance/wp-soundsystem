@@ -204,6 +204,8 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
         return WPSSTM_Core_API::api_request($api_url);
     }
     
+    
+    //TOUFIX URGENT since we use taxonomies instead of metas now, this should be fixed
     protected function get_fillable_details_map($post_id = null){
         $items = array();
         $post_type = get_post_type($post_id);

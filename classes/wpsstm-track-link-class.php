@@ -82,17 +82,6 @@ class WPSSTM_Track_Link{
     */
     private function get_link_duplicates_ids($args=null){
 
-        /*
-        $query_meta_trackinfo = array(
-            'relation' => 'AND',
-            WPSSTM_Core_Tracks::$artist_metakey    => $this->track->artist,
-            WPSSTM_Core_Tracks::$title_metakey      => $this->track->title,
-            WPSSTM_Core_Tracks::$album_metakey      => $this->track->album,
-        );
-        $query_meta_trackinfo = array_filter($query_meta_trackinfo);
-        */
-        
-        
         $default = array(
             'post_status'       => 'any',
             'posts_per_page'    => -1,
@@ -114,7 +103,7 @@ class WPSSTM_Track_Link{
                 )
             )
         );
-        
+
         $args = wp_parse_args($required,$args);
 
         $query = new WP_Query( $args );
@@ -161,7 +150,8 @@ class WPSSTM_Track_Link{
         if ( !empty($duplicates) ){
             $link_id = $duplicates[0];
             $this->post_id = $link_id;
-            //$this->link_log($link_id,'This link already exists, do not create it');
+            $this->link_log($link_id,'This link already exists, do not create it');
+            return $this->post_id;
         }else{
             $post_author = ($this->is_community) ? wpsstm()->get_options('community_user_id') : get_current_user_id();
 
@@ -197,14 +187,9 @@ class WPSSTM_Track_Link{
 
             if ( is_wp_error($success) ) return $success;
             $this->post_id = $success;
+            return $this->post_id;
 
-            $this->link_log(
-                json_encode(array('args'=>$args,'post_id'=>$this->post_id)),
-                "WPSSTM_Track_Link::save_link()
-            ");
         }
-        
-        return $this->post_id;
     }
     
 

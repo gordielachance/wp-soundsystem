@@ -381,7 +381,7 @@ class WPSSTM_Core_Importer{
         //settings have been updated, clear tracklist cache
         if ($db_settings != $wizard_data){
             wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','Save wizard' );
-            delete_post_meta($post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
+            $tracklist->remove_cache_timestamp();
         }
 
         if (!$wizard_data){

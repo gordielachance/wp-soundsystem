@@ -59,6 +59,7 @@ class WPSSTM_Track{
         if ( get_post_type($track_id) != wpsstm()->post_type_track ){
             return new WP_Error( 'wpsstm_invalid_track_entry', __("This is not a valid track entry.",'wpsstm') );
         }
+
         $this->post_id          = $track_id;
         $this->title            = wpsstm_get_post_track($this->post_id);
         $this->artist           = wpsstm_get_post_artist($this->post_id);
@@ -139,27 +140,47 @@ class WPSSTM_Track{
     /*
     Query tracks (IDs) that have the same artist + title (+album if set)
     */
-    
     private function get_track_duplicates(){
-        
+ 
         $valid = $this->validate_track();
         if ( is_wp_error($valid) ) return $valid;
-        
+
         $query_args = array(
             'post_type' =>      wpsstm()->post_type_track,
             'post_status' =>    'any',
             'posts_per_page'=>  -1,
             'fields' =>         'ids',
-            'lookup_artist' =>  $this->artist,
-            'lookup_track' =>   $this->title,
-            'lookup_album' =>   $this->album
+            'tax_query' =>      array(
+                'relation' => 'AND',
+                array(
+                    'taxonomy' => WPSSTM_Core_Tracks::$artist_taxonomy,
+                    'field'    => 'slug',
+                    'terms'    => $this->artist,
+                ),
+                array(
+                    'taxonomy' => WPSSTM_Core_Tracks::$track_taxonomy,
+                    'field'    => 'slug',
+                    'terms'    => $this->title,
+                )
+            )
         );
+        
+        /*
+        if($this->album){
+            $query_args['tax_query'][] = array(
+                    'taxonomy' => WPSSTM_Core_Tracks::$album_taxonomy,
+                    'field'    => 'slug',
+                    'terms'    => $this->album,
+                );
+        }
+        */
 
         if ($this->post_id){
             $query_args['post__not_in'] = array($this->post_id);
         }
 
-        $query = new WP_Query( $query_args );        
+        $query = new WP_Query( $query_args );
+
         return $query->posts;
 
     }
@@ -170,7 +191,7 @@ class WPSSTM_Track{
     
     public function local_track_lookup(){
         if ( $this->post_id ) return;
-        
+
         $duplicates = $this->get_track_duplicates();
         if ( is_wp_error($duplicates) ) return $duplicates;
         
@@ -343,23 +364,26 @@ class WPSSTM_Track{
             $result = $wpdb->get_results ( $querystr );
         }
         
-        //update this subtrack
-        if ( !is_wp_error($result) ){
-            
-            $result = $wpdb->update( 
-                $subtracks_table, //table
-                array('track_order'=>$new_pos), //data
-                array('ID'=>$this->subtrack_id) //where
-            );
-            
+        if ( is_wp_error($result) ) return $result;
+ 
+        /*
+        https://developer.wordpress.org/reference/classes/wpdb/update/
+        returns false if errors, or the number of rows affected if successful.
+        */
+
+        $result = $wpdb->update( 
+            $subtracks_table, //table
+            array('track_order'=>$new_pos), //data
+            array('ID'=>$this->subtrack_id) //where
+        );
+
+        if ( !$result ){
+            $message = __('Error while moving subtrack.','wpsstm');
+            return new WP_Error( 'wpsstm_subtrack_position_failed', $message );
         }
 
-        if ( is_wp_error($result) ){
-            $this->track_log(array('subtrack_id'=>$track->subtrack_id,'error'=>$result->get_error_message(),'new_position'=>$new_pos,'old_position'=>$old_pos),"error moving subtrack");
-        }else{
-            $this->position = $new_pos;
-            $this->track_log(array('subtrack_id'=>$this->subtrack_id,'new_position'=>$new_pos,'old_position'=>$old_pos),"moved subtrack");
-        }
+        $this->position = $new_pos;
+        $this->track_log(array('subtrack_id'=>$this->subtrack_id,'new_position'=>$new_pos,'old_position'=>$old_pos),"moved subtrack");
         
         return $result;
 
@@ -401,14 +425,11 @@ class WPSSTM_Track{
         }
         
         //album
-        if ($this->album != '_'){
+        if ($this->album === '_'){
             $this->album = null;
         }
         
         $meta_input = array(
-            WPSSTM_Core_Tracks::$artist_metakey         => $this->artist,
-            WPSSTM_Core_Tracks::$title_metakey          => $this->title,
-            WPSSTM_Core_Tracks::$album_metakey          => $this->album,
             WPSSTM_Core_Tracks::$image_url_metakey      => $this->image_url,
         );
 
@@ -434,13 +455,22 @@ class WPSSTM_Track{
             return $post_id;
         }
         
+        /*
+        taxonomies
+        */
+        
+        wp_set_post_terms( $post_id,$this->artist, WPSSTM_Core_Tracks::$artist_taxonomy );
+        wp_set_post_terms( $post_id,$this->title, WPSSTM_Core_Tracks::$track_taxonomy );
+        wp_set_post_terms( $post_id,$this->album, WPSSTM_Core_Tracks::$album_taxonomy );
+        
+        
         //repopulate datas
         $this->populate_track_post($post_id);
 
         //save track links from parser if any
         $new_ids = $this->save_new_links();
 
-        $this->track_log( array('post_id'=>$this->post_id,'args'=>json_encode($args)), "Saved track details" ); 
+        $this->track_log( array('post_id'=>$this->post_id,'links'=>count($new_ids),'track'=>json_encode($this->to_array())), "Saved track details" ); 
 
         return $this->post_id;
         
@@ -630,17 +660,6 @@ class WPSSTM_Track{
             $this->add_links($this->links); //so we're sure the links count is set
         }
 
-        $do_autolink = ( 
-            !$this->have_links() && ( 
-                ( wpsstm()->get_options('ajax_autolinks') && wp_doing_ajax() ) || 
-                ( !wpsstm()->get_options('ajax_autolinks') && !wp_doing_ajax() ) 
-            ) 
-        );
-
-        if ( $do_autolink ){
-            $this->autolink();
-        }
-        
         return true;
         
     }
@@ -761,19 +780,14 @@ class WPSSTM_Track{
 
         //insert links
         $inserted = array();
+
         foreach((array)$this->links as $link){
 
             if ($link->post_id) continue;
             $link_id = $link->save_link();
 
-            if ( is_wp_error($link_id) ){
-                $code = $link_id->get_error_code();
-                $error_msg = $link_id->get_error_message($code);
-                $link->link_log( $error_msg,"store autolinks - error while saving link");
-                continue;
-            }else{
-                $inserted[] = $link_id;
-            }
+            if ( is_wp_error($link_id) ) continue;
+            $inserted[] = $link_id;
 
         }
 

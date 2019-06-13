@@ -114,7 +114,8 @@ class WPSSTM_Core_Tracklists{
         $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast ajax string to int
         
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
-        $tracklist->is_expired = ($tracklist->tracklist_type == 'live' ); //force refresh, but only for live tracklists
+
+        $tracklist->remove_cache_timestamp();
         $html = $tracklist->get_tracklist_html();
 
         $result = array(
@@ -407,7 +408,7 @@ class WPSSTM_Core_Tracklists{
             break;
             case 'refresh':
                 //remove updated time
-                $success = delete_post_meta($wpsstm_tracklist->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
+                $success = $wpsstm_tracklist->remove_cache_timestamp();
             break;
             case 'get-autorship':
                 $success = $wpsstm_tracklist->get_autorship();

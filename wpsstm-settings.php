@@ -67,8 +67,12 @@ class WPSSTM_Settings {
 
         //user id
         if ( isset ($input['community_user_id']) && ctype_digit($input['community_user_id']) ){
-            if ( get_userdata( $input['community_user_id'] ) ){ //check user exists
-                $new_input['community_user_id'] = $input['community_user_id'];
+            
+            $user_id = $input['community_user_id'];
+            $userdata = get_userdata( $user_id );
+            
+            if ( $userdata ){ //check user exists
+                $new_input['community_user_id'] = $user_id;
             }
         }
 

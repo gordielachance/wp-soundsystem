@@ -1,5 +1,10 @@
 <?php
 
+/*
+//GET ORPHAN LINKS
+SELECT wp_posts.ID FROM wp_posts LEFT JOIN wp_posts AS parent ON wp_posts.post_parent = parent.ID WHERE wp_posts.post_type = 'wpsstm_track_link' AND ((wp_posts.post_status <> 'trash' AND wp_posts.post_status <> 'auto-draft')) AND parent.ID is NULL
+*/
+
 class WPSSTM_Core_Track_Links{
     static $link_url_metakey = '_wpsstm_link_url';
     static $autolink_time_metakey = '_wpsstm_autolink_time'; //to store the musicbrainz datas
@@ -11,7 +16,7 @@ class WPSSTM_Core_Track_Links{
         
         add_filter( 'query_vars', array($this,'add_query_vars_track_link') );
         
-        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_track_links' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_track_link_post_type' ));
 
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_links_submenu' ) );
         add_action( 'add_meta_boxes', array($this, 'metabox_link_register'));
@@ -44,7 +49,7 @@ class WPSSTM_Core_Track_Links{
         add_action('wp_ajax_wpsstm_trash_link', array($this,'ajax_trash_link'));
     }
 
-    function register_post_type_track_links() {
+    function register_track_link_post_type() {
 
         $labels = array(
             'name'                  => _x( 'Tracks Links', 'Tracks Links General Name', 'wpsstm' ),

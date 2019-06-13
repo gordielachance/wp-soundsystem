@@ -78,21 +78,30 @@ function wpsstm_get_post_artist($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$artist_metakey, true );
+    $terms_list = get_the_term_list( $post_id, WPSSTM_Core_Tracks::$artist_taxonomy , null, ',' );
+    if ( is_wp_error($terms_list) ) return false;
+    
+    return strip_tags($terms_list);
 }
 
 function wpsstm_get_post_track($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$title_metakey, true );
+    $terms_list = get_the_term_list( $post_id, WPSSTM_Core_Tracks::$track_taxonomy , null, ',' );
+    if ( is_wp_error($terms_list) ) return false;
+    
+    return strip_tags($terms_list);
 }
 
 function wpsstm_get_post_album($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$album_metakey, true );
+    $terms_list = get_the_term_list( $post_id, WPSSTM_Core_Tracks::$album_taxonomy , null, ',' );
+    if ( is_wp_error($terms_list) ) return false;
+    
+    return strip_tags($terms_list);
 }
 
 function wpsstm_get_blank_action(){

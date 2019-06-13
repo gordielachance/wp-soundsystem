@@ -114,7 +114,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
         }
         
-        if ( $this->tracklist_type == 'live' ){
+        if ( $this->tracklist_type === 'live' ){
             $seconds = $this->seconds_before_refresh();
             $this->is_expired = ( ($seconds !== false) && ($seconds <= 0) );
         }
@@ -166,18 +166,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         $post_playlist_id = null;
-        $meta_input = array();
         
-        /*
-        $meta_input = array(
-            WPSSTM_Core_Tracks::$artist_metakey     => $this->artist,
-            WPSSTM_Core_Tracks::$title_metakey      => $this->title,
-            WPSSTM_Core_Tracks::$album_metakey      => $this->album,
-            //links are more specific, will be saved below
-        );
-        */
-
+        $meta_input = array();
         $meta_input = array_filter($meta_input);
+        
         $post_playlist_args = array('meta_input' => $meta_input);
 
         if (!$this->post_id){ //not a playlist update
@@ -624,7 +616,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'data-wpsstm-tracklist-id' =>           $this->post_id,
             'data-wpsstm-domain' =>                 wpsstm_get_url_domain( $this->feed_url ),
             'data-ajax-tracks' =>                   wpsstm()->get_options('ajax_tracks'),
-            'data-ajax-autolinks' =>                wpsstm()->get_options('ajax_autolinks'),
+            'data-ajax-autolink' =>                 wpsstm()->get_options('ajax_autolink'),
         );
 
         $values_attr = array_merge($values_defaults,(array)$values_attr);
@@ -727,7 +719,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
         
-        $this->tracklist_log('starts updating live playlist...'); 
+        $this->tracklist_log('start updating live playlist...'); 
 
         /*
         subtracks
@@ -779,43 +771,38 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( is_wp_error($can) ) return $can;
         
         //delete actual subtracks
-        $this->tracklist_log('delete current tracklist subtracks'); 
+        $this->tracklist_log('delete current tracklist subtracks...'); 
         
         $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE tracklist_id = %d", $this->post_id );
         $success = $wpdb->get_results ( $querystr );
+        
+        $this->tracklist_log('..has deleted current tracklist subtracks');
+        
+        ////
+        
+        $this->tracklist_log('save subtracks...'); 
 
-        $errors = array();
-        $no_updates = 0;
-        $saved = 0;
-        
-        $tracks = $this->preset->tracks;
-        $tracks = apply_filters('wpsstm_radio_tracks_input',$tracks,$this);
-        
+        $error_msgs = array();
+        $saved_count = 0;
+
+        $tracks = apply_filters('wpsstm_radio_tracks_input',$this->preset->tracks,$this);
+
         foreach((array)$tracks as $index=>$new_track){
 
             $new_track->position = $index + 1;
-            $success = $this->save_subtrack($new_track);
+            $success = $this->add_subtrack($new_track);
             
             //populate subtrack ID
             if( is_wp_error($success) ){
-                $errors[] = $success;
+                $error_code = $success->get_error_code();
+                $error_msgs[] = sprintf('Failed saving subtrack #%s: %s',$index,$error_code);
             }else{
-                $saved++;
-                if ($success === false){ //no rows updated, but no errors either
-                    $no_updates++;
-                }
+                $saved_count++;
             }
         }
         
-        $this->tracklist_log(sprintf('%s subtracks saved',$saved)); 
-        
-        if($errors){
-            $this->tracklist_log(sprintf('%s errors occured when updating subtracks',count($errors))); 
-        }
-        if($no_updates){
-            $this->tracklist_log(sprintf('%s subtracks remained identical',count($errors))); 
-        }
-        
+        $this->tracklist_log(array('input'=>count($this->preset->tracks),'filtered'=>count($tracks),'errors'=>count($error_msgs),'error_msgs'=>$error_msgs),'...has saved subtracks'); 
+
         return true;
         
     }
@@ -833,6 +820,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $now = current_time( 'timestamp', true );
 
         return $expiration_time - $now;
+    }
+    
+    function remove_cache_timestamp(){
+        delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
+        $this->is_expired = true;
     }
 
     function get_human_next_refresh_time(){
@@ -870,7 +862,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $new_track = clone $track;
         $new_track->subtrack_id = null;
 
-        $success = $this->save_subtrack($new_track);
+        $success = $this->add_subtrack($new_track);
         
         if ( $success && !is_wp_error($success) ){
             do_action('wpsstm_queue_track',$track,$this->post_id);
@@ -923,10 +915,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     I mean when we have playlists with hundreds of subtracks to save...
     */
     
-    private function save_subtrack(WPSSTM_Track $track){
+    private function add_subtrack(WPSSTM_Track $track){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
+
         //NO capability check here, should be done upstream, because we should be able to use this function automatically (eg. live tracklist update)
         
         $valid = $this->validate_subtrack($track);
@@ -964,33 +956,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $track_data = array_merge($track_data,$subtrack_data);
         }
 
-        //is an update
-        if ($track->subtrack_id){
-            
-            $success = $wpdb->update( 
-                $subtracks_table, //table
-                $track_data, //data
-                array(
-                    'ID'=>$track->subtrack_id
-                )
-            );
-            
-            if ( is_wp_error($success) ){
-                $track->track_log($track->to_array(),"Error while updating subtrack" ); 
-            }
-        //is a new entry
-        }else{
-            $success = $wpdb->insert($subtracks_table,$track_data);
+        $success = $wpdb->insert($subtracks_table,$track_data);
+        if ( is_wp_error($success) ) return $success;
 
-            if ( !is_wp_error($success) ){ //we want to return the created subtrack ID
-                $track->subtrack_id = $wpdb->insert_id;
-                //$track->track_log($track->to_array(),"Subtrack inserted" ); 
-            }else{
-                $error_msg = $success->get_error_message();
-                $track->track_log(array('track'=>json_encode($track->to_array()),'error'=>$error_msg), "Error while saving subtrack" ); 
-            }
-        }
-        
+        $track->subtrack_id = $wpdb->insert_id;
         return $success;
 
     }

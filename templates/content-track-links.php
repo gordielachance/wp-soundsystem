@@ -3,6 +3,13 @@
 global $wpsstm_track;
 $wpsstm_track->populate_links();
 
+//should we autoload links when the template is displayed ?
+$init_autolink = ( !$wpsstm_track->have_links() && !wpsstm()->get_options('ajax_autolink') && !wp_doing_ajax() );
+
+if ( $init_autolink ){
+    $wpsstm_track->autolink();
+}
+
 if ( $wpsstm_track->have_links() ) { ?>
     <div class="wpsstm-track-links-list">
         <?php
