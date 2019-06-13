@@ -82,17 +82,6 @@ class WPSSTM_Track_Link{
     */
     private function get_link_duplicates_ids($args=null){
 
-        /*
-        $query_meta_trackinfo = array(
-            'relation' => 'AND',
-            WPSSTM_Core_Tracks::$artist_metakey    => $this->track->artist,
-            WPSSTM_Core_Tracks::$title_metakey      => $this->track->title,
-            WPSSTM_Core_Tracks::$album_metakey      => $this->track->album,
-        );
-        $query_meta_trackinfo = array_filter($query_meta_trackinfo);
-        */
-        
-        
         $default = array(
             'post_status'       => 'any',
             'posts_per_page'    => -1,
@@ -114,7 +103,7 @@ class WPSSTM_Track_Link{
                 )
             )
         );
-        
+
         $args = wp_parse_args($required,$args);
 
         $query = new WP_Query( $args );

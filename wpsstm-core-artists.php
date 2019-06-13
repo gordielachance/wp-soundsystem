@@ -1,9 +1,7 @@
 <?php
 
 class WPSSTM_Core_Artists{
-    
-    static $artist_taxonomy = 'wpsstm_artist';
-    
+
     function __construct(){
         add_action( 'wpsstm_init_post_types', array($this,'register_artist_post_type' ));
         add_action( 'wpsstm_init_post_types', array($this,'register_artist_taxonomy' ));
@@ -156,7 +154,7 @@ class WPSSTM_Core_Artists{
             'show_in_nav_menus'          => false,
             'show_tagcloud'              => false,
         );
-        register_taxonomy(self::$artist_taxonomy, array( 'wpsstm_track' ), $args );
+        register_taxonomy(WPSSTM_Core_Tracks::$artist_taxonomy, array( wpsstm()->post_type_track ), $args );
 
     }
     

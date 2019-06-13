@@ -9,6 +9,8 @@ class WPSSTM_Core_Albums{
         
         
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_album' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_album_taxonomy' ));
+        
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_albums_submenu' ) );
         
         add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
@@ -178,12 +180,49 @@ class WPSSTM_Core_Albums{
         register_post_type( wpsstm()->post_type_album, $args );
     }
     
+    function register_album_taxonomy(){
+
+        $labels = array(
+            'name'                       => _x( 'Track Albums', 'Taxonomy General Name', 'wpsstm' ),
+            'singular_name'              => _x( 'Track Album', 'Taxonomy Singular Name', 'wpsstm' ),
+            'menu_name'                  => __( 'Taxonomy', 'wpsstm' ),
+            'all_items'                  => __( 'All Items', 'wpsstm' ),
+            'parent_item'                => __( 'Parent Item', 'wpsstm' ),
+            'parent_item_colon'          => __( 'Parent Item:', 'wpsstm' ),
+            'new_item_name'              => __( 'New Item Name', 'wpsstm' ),
+            'add_new_item'               => __( 'Add New Item', 'wpsstm' ),
+            'edit_item'                  => __( 'Edit Item', 'wpsstm' ),
+            'update_item'                => __( 'Update Item', 'wpsstm' ),
+            'view_item'                  => __( 'View Item', 'wpsstm' ),
+            'separate_items_with_commas' => __( 'Separate items with commas', 'wpsstm' ),
+            'add_or_remove_items'        => __( 'Add or remove items', 'wpsstm' ),
+            'choose_from_most_used'      => __( 'Choose from the most used', 'wpsstm' ),
+            'popular_items'              => __( 'Popular Items', 'wpsstm' ),
+            'search_items'               => __( 'Search Items', 'wpsstm' ),
+            'not_found'                  => __( 'Not Found', 'wpsstm' ),
+            'no_terms'                   => __( 'No items', 'wpsstm' ),
+            'items_list'                 => __( 'Items list', 'wpsstm' ),
+            'items_list_navigation'      => __( 'Items list navigation', 'wpsstm' ),
+        );
+        $args = array(
+            'labels'                     => $labels,
+            'hierarchical'               => false,
+            'public'                     => true,
+            'show_ui'                    => true,
+            'show_admin_column'          => true,
+            'show_in_nav_menus'          => false,
+            'show_tagcloud'              => false,
+        );
+        register_taxonomy(WPSSTM_Core_Tracks::$album_taxonomy, array( wpsstm()->post_type_track ), $args );
+
+    }
+    
     function the_album_post_title($title,$post_id){
         //post type check
         $post_type = get_post_type($post_id);
         if ( $post_type !== wpsstm()->post_type_album ) return $title;
-        $title = get_post_meta( $post_id, WPSSTM_Core_Tracks::$album_metakey, true );
-        $artist = get_post_meta( $post_id, WPSSTM_Core_Tracks::$artist_metakey, true );
+        $title = wpsstm_get_post_track($post_id);
+        $artist = wpsstm_get_post_artist($post_id);
         
         return sprintf('"%s" - %s',$title,$artist);
     }

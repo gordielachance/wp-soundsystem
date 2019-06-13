@@ -142,10 +142,10 @@ class WPSSTM_Track{
     */
     //TOUFIX TOUREMOVE should be a private fn
     public function get_track_duplicates(){
-        
+ 
         $valid = $this->validate_track();
         if ( is_wp_error($valid) ) return $valid;
-        
+
         $query_args = array(
             'post_type' =>      wpsstm()->post_type_track,
             'post_status' =>    'any',
@@ -154,20 +154,34 @@ class WPSSTM_Track{
             'tax_query' =>      array(
                 'relation' => 'AND',
                 array(
-                    'taxonomy' => WPSSTM_Core_Artists::$artist_taxonomy,
+                    'taxonomy' => WPSSTM_Core_Tracks::$artist_taxonomy,
                     'field'    => 'slug',
                     'terms'    => $this->artist,
+                ),
+                array(
+                    'taxonomy' => WPSSTM_Core_Tracks::$track_taxonomy,
+                    'field'    => 'slug',
+                    'terms'    => $this->title,
                 )
-            ),
-            'lookup_track' =>   $this->title,
-            'lookup_album' =>   $this->album
+            )
         );
+        
+        /*
+        if($this->album){
+            $query_args['tax_query'][] = array(
+                    'taxonomy' => WPSSTM_Core_Tracks::$album_taxonomy,
+                    'field'    => 'slug',
+                    'terms'    => $this->album,
+                );
+        }
+        */
 
         if ($this->post_id){
             $query_args['post__not_in'] = array($this->post_id);
         }
 
-        $query = new WP_Query( $query_args );        
+        $query = new WP_Query( $query_args );
+
         return $query->posts;
 
     }
@@ -412,13 +426,11 @@ class WPSSTM_Track{
         }
         
         //album
-        if ($this->album != '_'){
+        if ($this->album === '_'){
             $this->album = null;
         }
         
         $meta_input = array(
-            WPSSTM_Core_Tracks::$title_metakey          => $this->title,
-            WPSSTM_Core_Tracks::$album_metakey          => $this->album,
             WPSSTM_Core_Tracks::$image_url_metakey      => $this->image_url,
         );
 
@@ -448,8 +460,9 @@ class WPSSTM_Track{
         taxonomies
         */
         
-        //artist
-        wp_set_post_terms( $post_id,$this->artist, WPSSTM_Core_Artists::$artist_taxonomy );
+        wp_set_post_terms( $post_id,$this->artist, WPSSTM_Core_Tracks::$artist_taxonomy );
+        wp_set_post_terms( $post_id,$this->title, WPSSTM_Core_Tracks::$track_taxonomy );
+        wp_set_post_terms( $post_id,$this->album, WPSSTM_Core_Tracks::$album_taxonomy );
         
         
         //repopulate datas
