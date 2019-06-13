@@ -140,8 +140,7 @@ class WPSSTM_Track{
     /*
     Query tracks (IDs) that have the same artist + title (+album if set)
     */
-    //TOUFIX TOUREMOVE should be a private fn
-    public function get_track_duplicates(){
+    private function get_track_duplicates(){
  
         $valid = $this->validate_track();
         if ( is_wp_error($valid) ) return $valid;

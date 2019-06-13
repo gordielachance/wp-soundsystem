@@ -110,7 +110,7 @@ class WP_SoundSystem {
             'details_engine'                    => array('musicbrainz'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
-            'ajax_tracks'                       => false,//TOUFIX TOUREMOVE
+            'ajax_tracks'                       => true,
             'ajax_autolink'                     => true,
         );
         

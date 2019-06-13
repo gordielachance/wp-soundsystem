@@ -1,5 +1,10 @@
 <?php
 
+/*
+//GET ORPHAN LINKS
+SELECT wp_posts.ID FROM wp_posts LEFT JOIN wp_posts AS parent ON wp_posts.post_parent = parent.ID WHERE wp_posts.post_type = 'wpsstm_track_link' AND ((wp_posts.post_status <> 'trash' AND wp_posts.post_status <> 'auto-draft')) AND parent.ID is NULL
+*/
+
 class WPSSTM_Core_Track_Links{
     static $link_url_metakey = '_wpsstm_link_url';
     static $autolink_time_metakey = '_wpsstm_autolink_time'; //to store the musicbrainz datas

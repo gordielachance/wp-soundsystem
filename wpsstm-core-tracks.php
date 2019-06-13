@@ -83,7 +83,6 @@ class WPSSTM_Core_Tracks{
         add_action('wp_ajax_wpsstm_track_trash', array($this,'ajax_track_trash'));
 
         //add_action('wp', array($this,'test_autolink_ajax') );
-        add_action('wp',array($this,'test_duplicates_query') ); //TOUFIX TOUCOMMENT
 
         add_action('wp_ajax_wpsstm_update_track_links_order', array($this,'ajax_update_track_links_order'));
 
@@ -1158,35 +1157,7 @@ class WPSSTM_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result );
     }
-    
-    function test_duplicates_query(){
-        global $wpdb;
-        if ( !isset($_REQUEST['test_duplicates']) ) return;
-        $track = new WPSSTM_Track();
-        $track->artist = 'The Style CAouncil';
-        $track->title = 'Long Hot Summer';
-        
-        $total_start = round(microtime(true) * 1000);
 
-        $i = 1;
-        $max = 10;
-        while ($i <= 10) {
-            $track_start = round(microtime(true) * 1000);
-            $tracks = $track->get_track_duplicates();
-            $track_end = round(microtime(true) * 1000);
-            $track_time = $track_end - $track_start;
-            echo sprintf('query took: %s <br/>',$track_time);
-            
-            $i++;
-        }
-        
-        $total_end = round(microtime(true) * 1000);
-        $total_time = $total_end - $total_start;
-        echo sprintf('<br/>%s queries took: %s <br/>',$max,$total_time);
-        
-        
-    }
-    
     function test_autolink_ajax(){
         
         if ( is_admin() ) return;
