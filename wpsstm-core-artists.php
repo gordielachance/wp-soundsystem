@@ -1,13 +1,16 @@
 <?php
+
 class WPSSTM_Core_Artists{
+    
+    static $artist_taxonomy = 'wpsstm_artist';
+    
     function __construct(){
-        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_artist' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_artist_post_type' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_artist_taxonomy' ));
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_artists_submenu' ) );
         
         add_action( 'add_meta_boxes', array($this, 'metabox_artist_register'));
-        
-        add_filter( 'the_title', array($this, 'the_artist_post_title'), 9, 2 );
     }
     
     //add custom admin submenu under WPSSTM
@@ -26,7 +29,7 @@ class WPSSTM_Core_Artists{
         
     }
 
-    function register_post_type_artist() {
+    function register_artist_post_type() {
         $labels = array(
             'name'                  => _x( 'Artists', 'Artists General Name', 'wpsstm' ),
             'singular_name'         => _x( 'Artist', 'Artist Singular Name', 'wpsstm' ),
@@ -120,6 +123,43 @@ class WPSSTM_Core_Artists{
         register_post_type( wpsstm()->post_type_artist, $args );
     }
     
+    function register_artist_taxonomy(){
+
+        $labels = array(
+            'name'                       => _x( 'Track Artists', 'Taxonomy General Name', 'wpsstm' ),
+            'singular_name'              => _x( 'Track Artist', 'Taxonomy Singular Name', 'wpsstm' ),
+            'menu_name'                  => __( 'Taxonomy', 'wpsstm' ),
+            'all_items'                  => __( 'All Items', 'wpsstm' ),
+            'parent_item'                => __( 'Parent Item', 'wpsstm' ),
+            'parent_item_colon'          => __( 'Parent Item:', 'wpsstm' ),
+            'new_item_name'              => __( 'New Item Name', 'wpsstm' ),
+            'add_new_item'               => __( 'Add New Item', 'wpsstm' ),
+            'edit_item'                  => __( 'Edit Item', 'wpsstm' ),
+            'update_item'                => __( 'Update Item', 'wpsstm' ),
+            'view_item'                  => __( 'View Item', 'wpsstm' ),
+            'separate_items_with_commas' => __( 'Separate items with commas', 'wpsstm' ),
+            'add_or_remove_items'        => __( 'Add or remove items', 'wpsstm' ),
+            'choose_from_most_used'      => __( 'Choose from the most used', 'wpsstm' ),
+            'popular_items'              => __( 'Popular Items', 'wpsstm' ),
+            'search_items'               => __( 'Search Items', 'wpsstm' ),
+            'not_found'                  => __( 'Not Found', 'wpsstm' ),
+            'no_terms'                   => __( 'No items', 'wpsstm' ),
+            'items_list'                 => __( 'Items list', 'wpsstm' ),
+            'items_list_navigation'      => __( 'Items list navigation', 'wpsstm' ),
+        );
+        $args = array(
+            'labels'                     => $labels,
+            'hierarchical'               => false,
+            'public'                     => true,
+            'show_ui'                    => true,
+            'show_admin_column'          => true,
+            'show_in_nav_menus'          => false,
+            'show_tagcloud'              => false,
+        );
+        register_taxonomy(self::$artist_taxonomy, array( 'wpsstm_track' ), $args );
+
+    }
+    
     function metabox_artist_register(){
 
         add_meta_box( 
@@ -132,12 +172,6 @@ class WPSSTM_Core_Artists{
         );
     }
 
-    function the_artist_post_title($title,$post_id){
-        //post type check
-        $post_type = get_post_type($post_id);
-        if ( $post_type !== wpsstm()->post_type_artist ) return $title;
-        return get_post_meta( $post_id, WPSSTM_Core_Tracks::$artist_metakey, true );
-    }
 }
 function wpsstm_artists_init(){
     new WPSSTM_Core_Artists();

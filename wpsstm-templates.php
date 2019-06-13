@@ -74,13 +74,6 @@ function wpsstm_get_post_length($post_id = null,$seconds = false){
     return ($seconds) ? $s : $ms;
 }
 
-function wpsstm_get_post_artist($post_id = null){
-    global $post;
-    if (!$post_id) $post_id = $post->ID;
-    
-    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$artist_metakey, true );
-}
-
 function wpsstm_get_post_track($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;

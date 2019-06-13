@@ -247,7 +247,9 @@ abstract class WPSSTM_Music_Data{
 
         settings_errors('wpsstm-music-entries');
         
-        $artist = wpsstm_get_post_artist($post->ID);
+        $artist_terms = wp_get_post_terms($post->ID, WPSSTM_Core_Artists::$artist_taxonomy );
+        $artist = implode(',',$artist_terms);
+
         $album = wpsstm_get_post_album($post->ID);
         $track = wpsstm_get_post_track($post->ID);
 
@@ -363,7 +365,10 @@ abstract class WPSSTM_Music_Data{
         $post_type = get_post_type($post_id);
         
         $music_id = $this->get_post_music_id($post_id);
-        $artist = wpsstm_get_post_artist($post_id);
+
+        $artist_terms = wp_get_post_terms($post_id, WPSSTM_Core_Artists::$artist_taxonomy );
+        $artist = implode(',',$artist_terms);
+        
         $track = wpsstm_get_post_track($post_id);
         $album = wpsstm_get_post_album($post_id);
         
@@ -418,7 +423,9 @@ abstract class WPSSTM_Music_Data{
         $post_type = get_post_type($post_id);
         if ( !in_array($post_type,$this->get_supported_post_types()) ) return false;
         
-        $artist = wpsstm_get_post_artist($post_id);
+        $artist_terms = wp_get_post_terms($post_id, WPSSTM_Core_Artists::$artist_taxonomy );
+        $artist = implode(',',$artist_terms);
+        
         $album = wpsstm_get_post_album($post_id);
         $track = wpsstm_get_post_track($post_id);
         

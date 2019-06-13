@@ -59,9 +59,12 @@ class WPSSTM_Track{
         if ( get_post_type($track_id) != wpsstm()->post_type_track ){
             return new WP_Error( 'wpsstm_invalid_track_entry', __("This is not a valid track entry.",'wpsstm') );
         }
+        
+        $artist_terms = wp_get_post_terms( $this->post_id, WPSSTM_Core_Artists::$artist_taxonomy );
+        
         $this->post_id          = $track_id;
         $this->title            = wpsstm_get_post_track($this->post_id);
-        $this->artist           = wpsstm_get_post_artist($this->post_id);
+        $this->artist           = implode(',',$artist_terms);
         $this->album            = wpsstm_get_post_album($this->post_id);
         $this->image_url        = wpsstm_get_post_image_url($this->post_id);
         $this->duration         = wpsstm_get_post_length($this->post_id);
@@ -139,8 +142,8 @@ class WPSSTM_Track{
     /*
     Query tracks (IDs) that have the same artist + title (+album if set)
     */
-    
-    private function get_track_duplicates(){
+    //TOUFIX TOUREMOVE should be a private fn
+    public function get_track_duplicates(){
         
         $valid = $this->validate_track();
         if ( is_wp_error($valid) ) return $valid;
@@ -150,7 +153,14 @@ class WPSSTM_Track{
             'post_status' =>    'any',
             'posts_per_page'=>  -1,
             'fields' =>         'ids',
-            'lookup_artist' =>  $this->artist,
+            'tax_query' =>      array(
+                'relation' => 'AND',
+                array(
+                    'taxonomy' => WPSSTM_Core_Artists::$artist_taxonomy,
+                    'field'    => 'slug',
+                    'terms'    => $this->artist,
+                )
+            ),
             'lookup_track' =>   $this->title,
             'lookup_album' =>   $this->album
         );
@@ -409,7 +419,6 @@ class WPSSTM_Track{
         }
         
         $meta_input = array(
-            WPSSTM_Core_Tracks::$artist_metakey         => $this->artist,
             WPSSTM_Core_Tracks::$title_metakey          => $this->title,
             WPSSTM_Core_Tracks::$album_metakey          => $this->album,
             WPSSTM_Core_Tracks::$image_url_metakey      => $this->image_url,
@@ -436,6 +445,14 @@ class WPSSTM_Track{
             $this->track_log($error_msg, "Error while saving track details" ); 
             return $post_id;
         }
+        
+        /*
+        taxonomies
+        */
+        
+        //artist
+        wp_set_post_terms( $post_id,$this->artist, WPSSTM_Core_Artists::$artist_taxonomy );
+        
         
         //repopulate datas
         $this->populate_track_post($post_id);

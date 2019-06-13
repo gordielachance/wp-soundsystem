@@ -14,7 +14,8 @@ class WPSSTM_Core_Tracks{
         //initialize global (blank) $wpsstm_track so plugin never breaks when calling it.
         $wpsstm_track = new WPSSTM_Track();
 
-        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_track' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_track_post_type' ));
+        
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
         add_action( 'parse_query', array($this,'populate_global_subtrack'));
         add_action( 'parse_query', array($this,'populate_global_track'));
@@ -47,7 +48,6 @@ class WPSSTM_Core_Tracks{
         /*
         QUERIES
         */
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_artist') );
         add_filter( 'pre_get_posts', array($this,'pre_get_tracks_by_title') );
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_by_album') );
         
@@ -84,6 +84,7 @@ class WPSSTM_Core_Tracks{
         add_action('wp_ajax_wpsstm_track_trash', array($this,'ajax_track_trash'));
 
         //add_action('wp', array($this,'test_autolink_ajax') );
+        add_action('wp',array($this,'test_duplicates_query') ); //TOUFIX TOUCOMMENT
 
         add_action('wp_ajax_wpsstm_update_track_links_order', array($this,'ajax_update_track_links_order'));
 
@@ -436,23 +437,6 @@ class WPSSTM_Core_Tracks{
             $wpsstm_track = new WPSSTM_Track( $post_id );
         }
     }
-    
-    function pre_get_posts_by_artist( $query ) {
-
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $query;
-        if ( !$artist = $query->get( 'lookup_artist' ) ) return $query;
-        if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
-
-        $meta_query[] = array(
-             'key'     => self::$artist_metakey,
-             'value'   => $artist,
-             'compare' => '='
-        );
-
-        $query->set( 'meta_query',$meta_query);
-
-        return $query;
-    }
 
     function pre_get_tracks_by_title( $query ) {
         
@@ -599,7 +583,7 @@ class WPSSTM_Core_Tracks{
 
     }    
 
-    function register_post_type_track() {
+    function register_track_post_type() {
 
         $labels = array(
             'name'                  => _x( 'Tracks', 'Tracks General Name', 'wpsstm' ),
@@ -704,7 +688,6 @@ class WPSSTM_Core_Tracks{
     }
     
     function add_query_vars_track( $qvars ) {
-        $qvars[] = 'lookup_artist';
         $qvars[] = 'lookup_album';
         $qvars[] = 'wpsstm_track_data';
         $qvars[] = 'lookup_track';
@@ -799,10 +782,13 @@ class WPSSTM_Core_Tracks{
         global $post;
         if (!$post) $post_id = $post->ID;
         
+        $terms = wp_get_post_terms( $post_id, WPSSTM_Core_Artists::$artist_taxonomy );
+        $terms_list = implode(',',$terms);
+
         $input_attr = array(
             'id' => 'wpsstm-artist',
             'name' => 'wpsstm_artist',
-            'value' => get_post_meta( $post_id, self::$artist_metakey, true ),
+            'value' => $terms_list,
             'icon' => '<i class="fa fa-user-o" aria-hidden="true"></i>',
             'label' => __("Artist",'wpsstm'),
             'placeholder' => __("Enter artist here",'wpsstm')
@@ -890,7 +876,7 @@ class WPSSTM_Core_Tracks{
             case wpsstm()->post_type_artist:
                 
                 //artist
-                self::save_meta_artist($post_id, $artist);
+                self::save_tax_artist($post_id, $artist);
                 
             break;
                 
@@ -898,7 +884,7 @@ class WPSSTM_Core_Tracks{
             case wpsstm()->post_type_album:
                 
                 //artist
-                self::save_meta_artist($post_id, $artist);
+                self::save_tax_artist($post_id, $artist);
                 //album
                 self::save_meta_album($post_id, $album);
                 
@@ -908,7 +894,7 @@ class WPSSTM_Core_Tracks{
             case wpsstm()->post_type_track:
                 
                 //artist
-                self::save_meta_artist($post_id, $artist);
+                self::save_tax_artist($post_id, $artist);
                 //album
                 self::save_meta_album($post_id, $album);
                 //title
@@ -930,13 +916,8 @@ class WPSSTM_Core_Tracks{
         }
     }
     
-    static function save_meta_artist($post_id, $value = null){
-        $value = trim($value);
-        if (!$value){
-            delete_post_meta( $post_id, self::$artist_metakey );
-        }else{
-            update_post_meta( $post_id, self::$artist_metakey, $value );
-        }
+    static function save_tax_artist($post_id, $value = null){
+        return wp_set_post_terms( $post_id,$value, WPSSTM_Core_Artists::$artist_taxonomy);
     }
     
     static function save_meta_album($post_id, $value = null){
@@ -1190,7 +1171,34 @@ class WPSSTM_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result );
     }
+    
+    function test_duplicates_query(){
+        if ( !isset($_REQUEST['test_duplicates']) ) return;
+        $track = new WPSSTM_Track();
+        $track->artist = 'Soul Generation';
+        $track->title = 'Super Fine';
+        
+        $total_start = round(microtime(true) * 1000);
 
+        $i = 1;
+        $max = 10;
+        while ($i <= 10) {
+            $track_start = round(microtime(true) * 1000);
+            $track->get_track_duplicates();
+            $track_end = round(microtime(true) * 1000);
+            $track_time = $track_end - $track_start;
+            echo sprintf('query took: %s <br/>',$track_time);
+            
+            $i++;
+        }
+        
+        $total_end = round(microtime(true) * 1000);
+        $total_time = $total_end - $total_start;
+        echo sprintf('<br/>%s queries took: %s <br/>',$max,$total_time);
+        
+        
+    }
+    
     function test_autolink_ajax(){
         
         if ( is_admin() ) return;

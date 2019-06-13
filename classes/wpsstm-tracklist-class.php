@@ -166,18 +166,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         $post_playlist_id = null;
-        $meta_input = array();
         
-        /*
-        $meta_input = array(
-            WPSSTM_Core_Tracks::$artist_metakey     => $this->artist,
-            WPSSTM_Core_Tracks::$title_metakey      => $this->title,
-            WPSSTM_Core_Tracks::$album_metakey      => $this->album,
-            //links are more specific, will be saved below
-        );
-        */
-
+        $meta_input = array();
         $meta_input = array_filter($meta_input);
+        
         $post_playlist_args = array('meta_input' => $meta_input);
 
         if (!$this->post_id){ //not a playlist update
