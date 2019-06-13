@@ -59,12 +59,10 @@ class WPSSTM_Track{
         if ( get_post_type($track_id) != wpsstm()->post_type_track ){
             return new WP_Error( 'wpsstm_invalid_track_entry', __("This is not a valid track entry.",'wpsstm') );
         }
-        
-        $artist_terms = wp_get_post_terms( $this->post_id, WPSSTM_Core_Artists::$artist_taxonomy );
-        
+
         $this->post_id          = $track_id;
         $this->title            = wpsstm_get_post_track($this->post_id);
-        $this->artist           = implode(',',$artist_terms);
+        $this->artist           = wpsstm_get_post_artist($this->post_id);
         $this->album            = wpsstm_get_post_album($this->post_id);
         $this->image_url        = wpsstm_get_post_image_url($this->post_id);
         $this->duration         = wpsstm_get_post_length($this->post_id);

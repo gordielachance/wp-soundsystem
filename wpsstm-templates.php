@@ -74,6 +74,14 @@ function wpsstm_get_post_length($post_id = null,$seconds = false){
     return ($seconds) ? $s : $ms;
 }
 
+function wpsstm_get_post_artist($post_id = null){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    
+    $terms_list = get_the_term_list( $post_id, WPSSTM_Core_Artists::$artist_taxonomy , null, ',' );
+    return strip_tags($terms_list);
+}
+
 function wpsstm_get_post_track($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;

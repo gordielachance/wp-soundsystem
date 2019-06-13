@@ -781,14 +781,11 @@ class WPSSTM_Core_Tracks{
     static function get_edit_artist_input($post_id = null){
         global $post;
         if (!$post) $post_id = $post->ID;
-        
-        $terms = wp_get_post_terms( $post_id, WPSSTM_Core_Artists::$artist_taxonomy );
-        $terms_list = implode(',',$terms);
 
         $input_attr = array(
             'id' => 'wpsstm-artist',
             'name' => 'wpsstm_artist',
-            'value' => $terms_list,
+            'value' => wpsstm_get_post_artist($post_id),
             'icon' => '<i class="fa fa-user-o" aria-hidden="true"></i>',
             'label' => __("Artist",'wpsstm'),
             'placeholder' => __("Enter artist here",'wpsstm')
