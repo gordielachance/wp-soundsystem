@@ -264,7 +264,7 @@ class WpsstmTrack extends HTMLElement{
         var success = $.Deferred();
         
         var tracklist = track.pageNode.closest('wpsstm-tracklist'); //TOFIX quite of hackish ?
-        var can_autolink = wpsstmL10n.ajax_autolink;
+        var can_autolink = (wpsstmL10n.autolink && wpsstmL10n.ajax_autolink);
 
         var links = $(track).find('wpsstm-track-link');
 
