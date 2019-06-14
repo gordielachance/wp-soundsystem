@@ -334,7 +334,7 @@ class WPSSTM_Core_Track_Links{
     function metabox_link_content( $post ){
         
         $link = new WPSSTM_Track_Link($post->ID);
-        
+
         ?>
         <p>
             <h2><?php _e('URL','wpsstm');?></h2>
@@ -616,7 +616,7 @@ class WPSSTM_Core_Track_Links{
     }
     
     /*
-    Flush community tracks
+    Flush orphan links (attached to no track)
     */
     static function trash_orphan_links(){
         
@@ -635,6 +635,31 @@ class WPSSTM_Core_Track_Links{
         }
 
         wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan links");
+
+        return $trashed;
+
+    }
+    
+    /*
+    Flush duplicate links (same post parent & URL)
+    */
+    static function trash_duplicate_links(){
+        
+        if ( !current_user_can('administrator') ){
+            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
+        }
+
+        $trashed = array();
+        
+        if ( $flushable_ids = self::get_duplicate_link_ids() ){
+
+            foreach( (array)$flushable_ids as $post_id ){
+                $success = wp_trash_post($post_id);
+                if ( !is_wp_error($success) ) $trashed[] = $post_id;
+            }
+        }
+
+        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted duplicate links");
 
         return $trashed;
 
@@ -666,6 +691,37 @@ class WPSSTM_Core_Track_Links{
         }
         
         return $trashed;
+    }
+    
+    /*
+    Get the duplicate links (by post parent and url)
+    https://wordpress.stackexchange.com/questions/340474/sql-query-that-returns-a-list-of-duplicate-posts-ids-comparing-their-post-paren
+    */
+    
+    static function get_duplicate_link_ids(){
+        global $wpdb;
+        
+        $duplicate_ids = array();
+        
+        $querystr = $wpdb->prepare( "
+        SELECT post_parent,url, GROUP_CONCAT(DISTINCT post_id SEPARATOR ',') as post_ids FROM (SELECT posts.ID AS post_id,posts.post_parent,metas.meta_value AS url 
+            FROM `$wpdb->posts` AS posts 
+            INNER JOIN `$wpdb->postmeta` AS metas ON ( posts.ID = metas.post_id )
+            WHERE `post_type`='wpsstm_track_link' 
+            AND metas.meta_key='%s' ORDER BY posts.ID ASC) as links
+            GROUP BY links.post_parent,links.url
+            having count(*) > 1",'_wpsstm_link_url');
+
+        $results = $wpdb->get_results ( $querystr );
+
+        foreach($results as $row){
+            $row_ids = explode(',',$row->post_ids);
+            array_shift($row_ids); //remove first one to keep only duplicates
+            $duplicate_ids = array_merge($duplicate_ids, $row_ids);
+            
+        }
+        
+        return $duplicate_ids;
     }
 }
 

@@ -61,6 +61,10 @@ class WPSSTM_Settings {
             WPSSTM_Core_Track_Links::trash_orphan_links();
         }
         
+        if( isset( $input['trash-duplicate-links'] ) ){
+            WPSSTM_Core_Track_Links::trash_duplicate_links();
+        }
+        
         if( isset( $input['trash-temporary-tracklists'] ) ){
             WPSSTM_Core_Tracklists::trash_temporary_tracklists();
         }
@@ -374,10 +378,18 @@ class WPSSTM_Settings {
             'settings_system'//section
         );
         
+        add_settings_field(
+            'trash_duplicate_links', 
+            __('Trash duplicate links','wpsstm'), 
+            array( $this, 'trash_duplicate_links_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings_system'//section
+        );
+        
         if ( wpsstm()->get_options('excluded_track_link_hosts') ){
             add_settings_field(
                 'trash_excluded_track_link_hosts', 
-                __('Filter tracks links','wpsstm'), 
+                __('Trash excluded hosts links','wpsstm'), 
                 array( $this, 'trash_excluded_track_link_hosts_callback' ), 
                 'wpsstm-settings-page', // Page
                 'settings_system'//section
@@ -703,7 +715,7 @@ class WPSSTM_Settings {
     
     function trash_temporary_tracklists_callback(){
         $count = count(WPSSTM_Core_Tracklists::get_temporary_tracklists_ids());
-        $desc = sprintf(__("Delete %d tracklists that were created with the community user.","wpsstm"),$count);
+        $desc = sprintf(__("Trash %d tracklists that were created with the community user.","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[trash-temporary-tracklists]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
@@ -714,7 +726,8 @@ class WPSSTM_Settings {
     
     function trash_orphan_tracks_callback(){
         $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
-        $desc = sprintf(__("Delete %d tracks that do not belong to any tracklists and have been created with the community user.","wpsstm"),$count);
+        $count = 0;
+        $desc = sprintf(__("Trash %d tracks that do not belong to any tracklists and have been created with the community user.","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[trash-orphan-tracks]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
@@ -725,9 +738,20 @@ class WPSSTM_Settings {
     
     function trash_orphan_links_callback(){
         $count = count(WPSSTM_Core_Track_Links::get_orphan_link_ids());
-        $desc = sprintf(__("Delete %d links that are not attached to a track post.","wpsstm"),$count);
+        $desc = sprintf(__("Trash %d links that are not attached to a track post.","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[trash-orphan-links]" value="on" %s /><label>%s</label>',
+            wpsstm()->meta_name_options,
+            disabled($count,0,false),
+            $desc
+        );
+    }
+    
+    function trash_duplicate_links_callback(){
+        $count = count(WPSSTM_Core_Track_Links::get_duplicate_link_ids());
+        $desc = sprintf(__("Trash %d duplicate links (same URL & parent post)","wpsstm"),$count);
+        printf(
+            '<input type="checkbox" name="%s[trash-duplicate-links]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
             disabled($count,0,false),
             $desc

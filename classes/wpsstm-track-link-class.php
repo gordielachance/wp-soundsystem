@@ -18,6 +18,8 @@ class WPSSTM_Track_Link{
 
     function __construct($post_id = null){
 
+        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
+
         //has track ID
         if ( is_int($post_id) ) {
             $this->post_id = $post_id;
@@ -31,8 +33,7 @@ class WPSSTM_Track_Link{
     function populate_link_post(){
 
         if ( !$this->post_id || ( get_post_type($this->post_id) != wpsstm()->post_type_track_link ) ){
-            $this->link_log('Invalid post');
-            return;
+            return new WP_Error( 'wpsstm_invalid_track_link', __('Not a valid track link','wpsstm') );
         }
         
         $this->title = get_the_title($this->post_id);
