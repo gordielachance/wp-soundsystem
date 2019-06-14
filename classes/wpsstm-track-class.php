@@ -34,6 +34,8 @@ class WPSSTM_Track{
     
     function __construct( $post_id = null, $tracklist = null ){
         
+        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
+        
         /*
         Tracklist
         */
@@ -47,7 +49,7 @@ class WPSSTM_Track{
         if ($tracklist){
             if ( is_a($tracklist,'WPSSTM_Post_Tracklist') ){
                 $this->tracklist = $tracklist;
-            }elseif( is_int($tracklist) ){
+            }else{
                 $this->tracklist = new WPSSTM_Post_Tracklist($tracklist);
             }
         }
@@ -331,8 +333,10 @@ class WPSSTM_Track{
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         $old_pos = $this->position;
+        $new_pos = filter_var($new_pos, FILTER_VALIDATE_INT); //cast to int
         $tracklist_id = $this->tracklist->post_id;
         $tracks_count = $this->tracklist->get_subtracks_count();
+        
         
         if ( !$this->subtrack_id ){
             return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );

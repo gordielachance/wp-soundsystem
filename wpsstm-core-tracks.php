@@ -128,8 +128,7 @@ class WPSSTM_Core_Tracks{
         $post_id = $query->get( 'p' );
         $post_type = $query->get( 'post_type' );
 
-        if( is_admin() ){
-            $screen = get_current_screen();
+        if( is_admin() && ( $screen = get_current_screen() ) ){
             if ( $screen->base = 'post' ){ //backend singe post edit
                 $post_type = $screen->post_type;
                 $post_id = wpsstm_get_array_value('post',$_GET);
@@ -960,8 +959,6 @@ class WPSSTM_Core_Tracks{
         $ajax_data = wp_unslash($_POST);
 
         $track_id = wpsstm_get_array_value(array('track_id'),$ajax_data);
-        $track_id = filter_var($track_id, FILTER_VALIDATE_INT); //cast ajax string to int
-        
         $track = new WPSSTM_Track($track_id);
         
         $result = array(
@@ -988,7 +985,6 @@ class WPSSTM_Core_Tracks{
 
         $ajax_data = wp_unslash($_POST);
         $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
-        $subtrack_id = filter_var($subtrack_id, FILTER_VALIDATE_INT); //cast ajax string to int
 
         $track = new WPSSTM_Track();
         $track->populate_subtrack($subtrack_id);
@@ -1047,7 +1043,7 @@ class WPSSTM_Core_Tracks{
     function ajax_track_toggle_favorite(){
         $ajax_data = wp_unslash($_POST);
         $do_love = wpsstm_get_array_value('do_love',$ajax_data);
-        $do_love = filter_var($do_love, FILTER_VALIDATE_BOOLEAN); //cast ajax string to bool
+        $do_love = filter_var($do_love, FILTER_VALIDATE_BOOLEAN); //cast to bool
 
         $track = new WPSSTM_Track();
         $track->from_array($ajax_data['track']);
@@ -1115,11 +1111,9 @@ class WPSSTM_Core_Tracks{
         );
         
         $subtrack_id = wpsstm_get_array_value(array('track','subtrack_id'),$ajax_data);
-        $subtrack_id = filter_var($subtrack_id, FILTER_VALIDATE_INT); //cast ajax string to int
         $result['subtrack_id'] = $subtrack_id;
         
         $new_pos = wpsstm_get_array_value('new_pos',$ajax_data);
-        $new_pos = filter_var($new_pos, FILTER_VALIDATE_INT); //cast ajax string to int
         $result['new_pos'] = $new_pos;
         
         $track = new WPSSTM_Track();

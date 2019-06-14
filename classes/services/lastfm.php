@@ -471,7 +471,7 @@ class WPSSTM_LastFM{
     function ajax_lastm_toggle_user_scrobbler(){
         $ajax_data = wp_unslash($_POST);
         $do_enable = wpsstm_get_array_value('do_enable',$ajax_data);
-        $do_enable = filter_var($do_enable, FILTER_VALIDATE_BOOLEAN); //cast ajax string to bool
+        $do_enable = filter_var($do_enable, FILTER_VALIDATE_BOOLEAN); //cast to bool
         
         $result = array(
             'input'     => $ajax_data,
@@ -550,9 +550,7 @@ class WPSSTM_LastFM{
             'success'   => false,
         );
 
-        $start_timestamp = wpsstm_get_array_value(array('playback_start'),$ajax_data);
-        $start_timestamp = $result['playback_start'] = filter_var($start_timestamp, FILTER_VALIDATE_INT); //cast ajax string to int
-        
+        $start_timestamp = $result['playback_start'] = wpsstm_get_array_value(array('playback_start'),$ajax_data);
         
         $track = new WPSSTM_Track();
         $track->from_array($ajax_data['track']);
@@ -588,8 +586,7 @@ class WPSSTM_LastFM{
         
         if ( $community_user_id ){
             
-            $start_timestamp = wpsstm_get_array_value(array('playback_start'),$ajax_data);
-            $start_timestamp = $result['playback_start'] = filter_var($start_timestamp, FILTER_VALIDATE_INT); //cast ajax string to int
+            $start_timestamp = $result['playback_start'] = wpsstm_get_array_value(array('playback_start'),$ajax_data);
             
             
             $track = new WPSSTM_Track();
@@ -960,11 +957,12 @@ class WPSSTM_LastFM_User{
     
     public function scrobble_lastfm_track(WPSSTM_Track $track, $timestamp){
         
+        $results = null;
+        $timestamp = filter_var($timestamp, FILTER_VALIDATE_INT);
+        
         $connected = $this->is_user_connected();
         if ( is_wp_error($connected) || !$connected ) return $connected;
 
-        $results = null;
-        
         //http://www.last.fm/api/show/track.scrobble
         
         $api_args = array(

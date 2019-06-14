@@ -35,6 +35,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function __construct($post_id = null ){
         
+        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
+        
         $pagination_args = array(
             'per_page'      => 0, //TO FIX default option
             'current_page'  => ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1
