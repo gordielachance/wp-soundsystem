@@ -562,7 +562,7 @@ class WPSSTM_Core_Track_Links{
         
         $querystr = $wpdb->prepare( "SELECT child.ID FROM `$wpdb->posts` AS child LEFT JOIN `$wpdb->posts` AS parent ON child.post_parent = parent.ID WHERE child.post_type = '%s' AND ((child.post_status <> 'trash' AND child.post_status <> 'auto-draft')) AND parent.ID is NULL", wpsstm()->post_type_track_link );
 
-        return $wpdb->get_row( $querystr);
+        return $wpdb->get_col( $querystr);
 
     }
     
