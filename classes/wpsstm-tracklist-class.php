@@ -330,11 +330,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         );
         
         //export
+        $dl_link = $this->get_tracklist_action_url('export');
+        $dl_link = add_query_arg(array('dl'=>true),$dl_link);
         $actions['export'] = array(
             'text' =>       __('Export', 'wpsstm'),
             'classes' =>    array('wpsstm-advanced-action'),
             'desc' =>       __('Export to XSPF', 'wpsstm'),
-            'href' =>       $this->get_tracklist_action_url('export'),
+            'href' =>       $dl_link,
             'target' =>     '_blank',
         );
         
