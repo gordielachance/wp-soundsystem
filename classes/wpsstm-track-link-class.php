@@ -150,8 +150,8 @@ class WPSSTM_Track_Link{
         $duplicates = $this->get_link_duplicates_ids();
         if ( !empty($duplicates) ){
             $link_id = $duplicates[0];
-            $this->post_id = $link_id;
             $this->link_log($link_id,'This link already exists, do not create it');
+            $this->post_id = $link_id;
             return $this->post_id;
         }else{
             $post_author = ($this->is_community) ? wpsstm()->get_options('community_user_id') : get_current_user_id();
