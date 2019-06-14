@@ -1215,6 +1215,8 @@ class WPSSTM_Core_Tracks{
 
     /*
     Get tracks that have been created by the community user and that do not belong to any playlists
+    //TOUFIX very slow query, freezes de settings page when there is a lot of tracks.
+    //store in transient ? Do in it two steps (query links - delete links) ?
     */
     static function get_orphan_track_ids(){
         global $wpdb;
@@ -1240,20 +1242,24 @@ class WPSSTM_Core_Tracks{
     Flush community tracks
     */
     static function trash_orphan_tracks(){
+        
+        if ( !current_user_can('administrator') ){
+            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
+        }
 
-        $flushed_ids = array();
+        $trashed = array();
         
         if ( $flushable_ids = self::get_orphan_track_ids() ){
 
             foreach( (array)$flushable_ids as $track_id ){
                 $success = wp_trash_post($track_id);
-                if ( !is_wp_error($success) ) $flushed_ids[] = $track_id;
+                if ( !is_wp_error($success) ) $trashed[] = $track_id;
             }
         }
 
-        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"Deleted orphan tracks");
+        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan tracks");
 
-        return $flushed_ids;
+        return $trashed;
 
     }
     

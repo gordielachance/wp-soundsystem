@@ -613,6 +613,10 @@ class WPSSTM_Core_Tracklists{
     Trash temporary tracklists
     */
     static function trash_temporary_tracklists(){
+        
+        if ( !current_user_can('administrator') ){
+            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
+        }
 
         $flushed_ids = array();
         
