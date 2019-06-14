@@ -27,7 +27,6 @@ class WpsstmTrack extends HTMLElement{
     constructor() {
         super(); //required to be first
         
-        this.tracklist =            undefined;
         this.position =             undefined;
         this.track_artist =         undefined;
         this.track_title =          undefined;
@@ -123,16 +122,13 @@ class WpsstmTrack extends HTMLElement{
         
         var track = this;
 
-        track.tracklist =            track.closest('wpsstm-tracklist');
-        track.position =             Number($(track).attr('data-wpsstm-subtrack-position')); //index in tracklist
-        track.track_artist =         $(track).find('[itemprop="byArtist"]').text();
-        track.track_title =          $(track).find('[itemprop="name"]').text();
-        track.track_album =          $(track).find('[itemprop="inAlbum"]').text();
-        track.post_id =              Number($(track).attr('data-wpsstm-track-id'));
-        track.subtrack_id =          Number($(track).attr('data-wpsstm-subtrack-id'));
-        track.did_links_request =  $(track).hasClass('did-track-autolink');
-
-        var player = track.closest('wpsstm-player');
+        track.position =            Number($(track).attr('data-wpsstm-subtrack-position')); //index in tracklist
+        track.track_artist =        $(track).find('[itemprop="byArtist"]').text();
+        track.track_title =         $(track).find('[itemprop="name"]').text();
+        track.track_album =         $(track).find('[itemprop="inAlbum"]').text();
+        track.post_id =             Number($(track).attr('data-wpsstm-track-id'));
+        track.subtrack_id =         Number($(track).attr('data-wpsstm-subtrack-id'));
+        track.did_links_request =   $(track).hasClass('did-track-autolink');
 
         /*
         populate existing links
@@ -266,13 +262,11 @@ class WpsstmTrack extends HTMLElement{
 
         var track = this;
         var success = $.Deferred();
-
-        //TOUFIX urgent !!! var can_autolink = track.tracklist.hasAttribute('data-ajax-autolink');
-        var can_autolink = true;
         
+        var tracklist = track.pageNode.closest('wpsstm-tracklist'); //TOFIX quite of hackish ?
+        var can_autolink = tracklist.hasAttribute('data-ajax-autolink');
+
         var links = $(track).find('wpsstm-track-link');
-        
-
 
         if ( (links.length > 0) || ( !can_autolink ) || ( track.did_links_request ) ){
             success.resolve(track);
@@ -524,7 +518,7 @@ class WpsstmTrack extends HTMLElement{
                     console.log(data);
                 }else{
                     track_instances.remove();
-                    track.tracklist.refresh_tracks_positions();
+                    track.closest('wpsstm-tracklist').refresh_tracks_positions();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -564,7 +558,7 @@ class WpsstmTrack extends HTMLElement{
                     console.log(data);
                 }else{
                     track_instances.remove();
-                    track.tracklist.refresh_tracks_positions();
+                    track.closest('wpsstm-tracklist').refresh_tracks_positions();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
