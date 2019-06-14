@@ -5,9 +5,13 @@ $wpsstm_tracklist->populate_subtracks();
 
 $tracklist = $wpsstm_tracklist;
 
-if ( isset($_REQUEST['download']) && ((bool)$_REQUEST['download'] == true) ){
+$is_download = wpsstm_get_array_value('dl',$_REQUEST);
+$is_download = filter_var($is_download, FILTER_VALIDATE_BOOLEAN);
+
+if ( $is_download ){
+    $now = current_time( 'timestamp', true );
     $filename = $post->post_name;
-    $filename = sprintf('%1$s.xspf',$filename);
+    $filename = sprintf('%s-%s.xspf',$filename,$now);
     header("Content-Type: application/xspf+xml");
     header('Content-disposition: attachment; filename="'.$filename.'"');
 }else{
