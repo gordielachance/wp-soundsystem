@@ -23,7 +23,13 @@ $wpsstm_track->local_track_lookup(); //check for this track in the database (if 
         <div class="wpsstm-track-info">
             <span class="wpsstm-track-artist" itemprop="byArtist" title="<?php echo $wpsstm_track->artist;?>"><?php echo $wpsstm_track->artist;?></span>
             <span class="wpsstm-track-title" itemprop="name" title="<?php echo $wpsstm_track->title;?>"><?php echo $wpsstm_track->title;?></span>
-            <span class="wpsstm-track-album" itemprop="inAlbum" title="<?php echo $wpsstm_track->album;?>"><?php echo $wpsstm_track->album;?></span>
+            <?php 
+            if ($wpsstm_track->album) {
+                ?>
+                <span class="wpsstm-track-album" itemprop="inAlbum" title="<?php echo $wpsstm_track->album;?>"><?php echo $wpsstm_track->album;?></span>
+                <?php
+            }
+            ?>
         </div>
         <?php 
 
