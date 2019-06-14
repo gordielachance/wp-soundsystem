@@ -123,10 +123,18 @@ class WPSSTM_Core_Tracks{
     function populate_global_track($query){
 
         global $wpsstm_track;
-        
+
+        $success = null;
         $post_id = $query->get( 'p' );
         $post_type = $query->get( 'post_type' );
-        $success = null;
+
+        if( is_admin() ){
+            $screen = get_current_screen();
+            if ( $screen->base = 'post' ){ //backend singe post edit
+                $post_type = $screen->post_type;
+                $post_id = wpsstm_get_array_value('post',$_GET);
+            }
+        }
         
         if ( !$post_id ) return;
         if ( $post_type != wpsstm()->post_type_track ) return;
