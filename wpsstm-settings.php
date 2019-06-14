@@ -57,6 +57,10 @@ class WPSSTM_Settings {
             WPSSTM_Core_Tracks::trash_orphan_tracks();
         }
         
+        if( isset( $input['trash-orphan-links'] ) ){
+            WPSSTM_Core_Track_Links::trash_orphan_links();
+        }
+        
         if( isset( $input['trash-temporary-tracklists'] ) ){
             WPSSTM_Core_Tracklists::trash_temporary_tracklists();
         }
@@ -96,19 +100,7 @@ class WPSSTM_Settings {
 
         //delete links from excluded domains
         if( isset( $input['delete_excluded_track_link_hosts'] ) ){
-            $query_args = array(
-                'post_type'         => wpsstm()->post_type_track_link,
-                'posts_per_page'    => -1,
-                'excluded_hosts'  => 1,
-                'fields' => 'ids'
-                
-            );
-            $matches = new WP_Query($query_args);
-            
-            foreach((array)$matches->posts as $post_id){
-                wp_trash_post( $post_id );
-            }
-
+            WPSSTM_Core_Track_Links::trash_excluded_hosts();
         }
 
         /*
@@ -373,6 +365,14 @@ class WPSSTM_Settings {
             );
 
         }
+        
+        add_settings_field(
+            'trash_orphan_links', 
+            __('Trash orphan links','wpsstm'), 
+            array( $this, 'trash_orphan_links_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings_system'//section
+        );
         
         if ( wpsstm()->get_options('excluded_track_link_hosts') ){
             add_settings_field(
@@ -717,6 +717,17 @@ class WPSSTM_Settings {
         $desc = sprintf(__("Delete %d tracks that do not belong to any tracklists and have been created with the community user.","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[trash-orphan-tracks]" value="on" %s /><label>%s</label>',
+            wpsstm()->meta_name_options,
+            disabled($count,0,false),
+            $desc
+        );
+    }
+    
+    function trash_orphan_links_callback(){
+        $count = count(WPSSTM_Core_Track_Links::get_orphan_link_ids());
+        $desc = sprintf(__("Delete %d links that are not attached to a track post.","wpsstm"),$count);
+        printf(
+            '<input type="checkbox" name="%s[trash-orphan-links]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
             disabled($count,0,false),
             $desc

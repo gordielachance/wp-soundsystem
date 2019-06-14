@@ -1,10 +1,5 @@
 <?php
 
-/*
-//GET ORPHAN LINKS
-SELECT wp_posts.ID FROM wp_posts LEFT JOIN wp_posts AS parent ON wp_posts.post_parent = parent.ID WHERE wp_posts.post_type = 'wpsstm_track_link' AND ((wp_posts.post_status <> 'trash' AND wp_posts.post_status <> 'auto-draft')) AND parent.ID is NULL
-*/
-
 class WPSSTM_Core_Track_Links{
     static $link_url_metakey = '_wpsstm_link_url';
     static $autolink_time_metakey = '_wpsstm_autolink_time'; //to store the musicbrainz datas
@@ -609,6 +604,68 @@ class WPSSTM_Core_Track_Links{
 
         return true;
         
+    }
+    
+    public static function get_orphan_link_ids(){
+        global $wpdb;
+        
+        $querystr = $wpdb->prepare( "SELECT child.ID FROM `$wpdb->posts` AS child LEFT JOIN `$wpdb->posts` AS parent ON child.post_parent = parent.ID WHERE child.post_type = '%s' AND ((child.post_status <> 'trash' AND child.post_status <> 'auto-draft')) AND parent.ID is NULL", wpsstm()->post_type_track_link );
+
+        return $wpdb->get_row( $querystr);
+
+    }
+    
+    /*
+    Flush community tracks
+    */
+    static function trash_orphan_links(){
+        
+        if ( !current_user_can('administrator') ){
+            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
+        }
+
+        $trashed = array();
+        
+        if ( $flushable_ids = self::get_orphan_link_ids() ){
+
+            foreach( (array)$flushable_ids as $post_id ){
+                $success = wp_trash_post($post_id);
+                if ( !is_wp_error($success) ) $trashed[] = $post_id;
+            }
+        }
+
+        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan links");
+
+        return $trashed;
+
+    }
+    
+    /*
+    Trash temporary tracklists
+    */
+    static function trash_excluded_hosts(){
+        
+        $trashed = array();
+        
+        if ( !current_user_can('administrator') ){
+            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
+        }
+
+        $query_args = array(
+            'post_type' =>          wpsstm()->post_type_track_link,
+            'posts_per_page' =>     -1,
+            'excluded_hosts' =>     1,
+            'fields' =>             'ids'
+        );
+        
+        $matches = new WP_Query($query_args);
+
+        foreach((array)$matches->posts as $post_id){
+            $success = wp_trash_post($track_id);
+            if ( !is_wp_error($success) ) $trashed[] = $track_id;
+        }
+        
+        return $trashed;
     }
 }
 
