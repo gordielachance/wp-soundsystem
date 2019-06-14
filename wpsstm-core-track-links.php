@@ -560,7 +560,7 @@ class WPSSTM_Core_Track_Links{
     public static function get_orphan_link_ids(){
         global $wpdb;
         
-        $querystr = $wpdb->prepare( "SELECT child.ID FROM `$wpdb->posts` AS child LEFT JOIN `$wpdb->posts` AS parent ON child.post_parent = parent.ID WHERE child.post_type = '%s' AND ((child.post_status <> 'trash' AND child.post_status <> 'auto-draft')) AND parent.ID is NULL", wpsstm()->post_type_track_link );
+        $querystr = $wpdb->prepare( "SELECT child.ID FROM `$wpdb->posts` AS child LEFT JOIN `$wpdb->posts` AS parent ON child.post_parent = parent.ID WHERE child.post_type = '%s' AND (child.post_status <> 'trash' AND child.post_status <> 'auto-draft') AND parent.ID is NULL", wpsstm()->post_type_track_link );
 
         return $wpdb->get_col( $querystr);
 
@@ -653,7 +653,8 @@ class WPSSTM_Core_Track_Links{
         SELECT post_parent,url, GROUP_CONCAT(DISTINCT post_id SEPARATOR ',') as post_ids FROM (SELECT posts.ID AS post_id,posts.post_parent,metas.meta_value AS url 
             FROM `$wpdb->posts` AS posts 
             INNER JOIN `$wpdb->postmeta` AS metas ON ( posts.ID = metas.post_id )
-            WHERE `post_type`='wpsstm_track_link' 
+            WHERE `post_type`='wpsstm_track_link'
+            AND (`post_status` <> 'trash' AND `post_status` <> 'auto-draft')
             AND metas.meta_key='%s' ORDER BY posts.ID ASC) as links
             GROUP BY links.post_parent,links.url
             having count(*) > 1",'_wpsstm_link_url');
