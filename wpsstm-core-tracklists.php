@@ -15,8 +15,8 @@ class WPSSTM_Core_Tracklists{
         //rewrite rules
         add_action( 'wpsstm_init_rewrite', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
-        add_action( 'wp', array($this,'populate_global_tracklist'), 1);
-        add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2); //TOUFIX needed but breaks notices
+        add_action( 'parse_query', array($this,'populate_global_tracklist') );
+        add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2);
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
         
         add_filter( 'template_include', array($this,'tracklist_template') );
@@ -111,7 +111,6 @@ class WPSSTM_Core_Tracklists{
 
         $ajax_data = wp_unslash($_POST);
         $post_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
-        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast ajax string to int
         
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
 
@@ -134,7 +133,7 @@ class WPSSTM_Core_Tracklists{
     function ajax_toggle_favorite(){
         $ajax_data = wp_unslash($_POST);
         $do_love = wpsstm_get_array_value('do_love',$ajax_data);
-        $do_love = filter_var($do_love, FILTER_VALIDATE_BOOLEAN); //cast ajax string to bool
+        $do_love = filter_var($do_love, FILTER_VALIDATE_BOOLEAN); //cast to bool
 
         $post_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
@@ -166,7 +165,6 @@ class WPSSTM_Core_Tracklists{
         $ajax_data = wp_unslash($_POST);
         
         $tracklist_id = wpsstm_get_array_value('tracklist_id',$ajax_data);
-        $tracklist_id = filter_var($tracklist_id, FILTER_VALIDATE_INT); //cast ajax string to int
         
         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
 
@@ -316,18 +314,24 @@ class WPSSTM_Core_Tracklists{
         }
     }
     
-    function populate_global_tracklist(){
+    function populate_global_tracklist($query){
         global $wpsstm_tracklist;
+
+        $success = null;
+        $post_id = $query->get( 'p' );
+        $post_type = $query->get( 'post_type' );
+
+        if( is_admin() && ( $screen = get_current_screen() ) ){
+            if ( $screen->base = 'post' ){ //backend singe post edit
+                $post_type = $screen->post_type;
+                $post_id = wpsstm_get_array_value('post',$_GET);
+            }
+        }
         
-        $post_id = get_query_var( 'p' );
-
-        if( $post_id && in_array( get_query_var( 'post_type' ) ,wpsstm()->tracklist_post_types) ){
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
-        }
-
-        if ( $tracklist_id = get_query_var( 'tracklist_id' ) ){
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-        }
+        if ( !$post_id ) return;
+        if ( !in_array( get_query_var( 'post_type' ) ,wpsstm()->tracklist_post_types) ) return;
+        
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
 
     }
     
