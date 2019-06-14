@@ -682,14 +682,21 @@ class WPSSTM_Core_Tracks{
             'items_list'                 => __( 'Items list', 'wpsstm' ),
             'items_list_navigation'      => __( 'Items list navigation', 'wpsstm' ),
         );
+        $capabilities = array(
+            'manage_terms'               => 'manage_tracks',
+            'edit_terms'                 => 'manage_tracks',
+            'delete_terms'               => 'manage_tracks',
+            'assign_terms'               => 'edit_tracks',
+        );
         $args = array(
             'labels'                     => $labels,
             'hierarchical'               => false,
-            'public'                     => true,
-            'show_ui'                    => true,
-            'show_admin_column'          => true,
+            'public'                     => false,
+            'show_ui'                    => false,
+            'show_admin_column'          => false,
             'show_in_nav_menus'          => false,
             'show_tagcloud'              => false,
+            'capabilities'               => $capabilities,
         );
         register_taxonomy(self::$track_taxonomy, array( wpsstm()->post_type_track ), $args );
 
