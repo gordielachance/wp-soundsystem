@@ -645,7 +645,7 @@ class WPSSTM_Track{
         
         $args = wp_parse_args((array)$args,$default_args);
         $args = wp_parse_args($required_args,$args);
-        
+
         return new WP_Query($args);
     }
     
@@ -654,7 +654,6 @@ class WPSSTM_Track{
         if ($this->post_id){
             $args = array(
                 'fields' =>             'ids',
-                'excluded_hosts' =>     -1, //exclude hosts defined in the options
             );
             $query = $this->query_links($args);
 

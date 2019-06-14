@@ -33,7 +33,6 @@ class WPSSTM_Core_Track_Links{
         */
         add_action( 'the_post', array($this,'the_track_link'),10,2);
         add_action( 'current_screen',  array($this, 'the_single_backend_link'));
-        add_filter( 'pre_get_posts', array($this,'filter_excluded_hosts') );
         add_filter( 'pre_get_posts', array($this,'filter_backend_links_by_track_id') );
         
         /*
@@ -148,7 +147,6 @@ class WPSSTM_Core_Track_Links{
     }
     
     function add_query_vars_track_link($qvars){
-        $vars[] = 'excluded_hosts';
         return $qvars;
     }
     
@@ -190,52 +188,6 @@ class WPSSTM_Core_Track_Links{
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
         
-    }
-    
-    /*
-    If a list of excluded domains exists,
-    Show only (1) or exclude (-1) those domains from the links query.
-    */
-    
-    function filter_excluded_hosts($query){
-        if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return $query;
-        if ( !$value = $query->get('excluded_hosts') ) return $query;
-
-        if ( $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ){
-
-            if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
-            
-            $relation = null;
-            $operator = null;
-            $domains_meta_query = array();
-            switch($value){
-                case '1': //include
-                    $operator = 'LIKE';
-                    $relation = 'OR';
-                break;
-                case '-1': //exclude
-                    $operator = 'NOT LIKE';
-                    $relation = 'AND';
-                break;
-            }
-            
-            if($operator){
-                foreach($excluded_hosts as $domain){
-
-                    $domains_meta_query[] = array(
-                        'key'     =>    self::$link_url_metakey,
-                        'value'   =>    $domain,
-                        'compare' =>    $operator,
-                    );
-                }
-                
-                $domains_meta_query['relation'] = $relation;
-                $meta_query[] = $domains_meta_query;
-                $query->set( 'meta_query',$meta_query);
-            }
-            
-        }
-        return $query;
     }
 
     /*
@@ -675,19 +627,14 @@ class WPSSTM_Core_Track_Links{
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
 
-        $query_args = array(
-            'post_type' =>          wpsstm()->post_type_track_link,
-            'posts_per_page' =>     -1,
-            'excluded_hosts' =>     1,
-            'fields' =>             'ids'
-        );
-        
-        $matches = new WP_Query($query_args);
-
-        foreach((array)$matches->posts as $post_id){
-            $success = wp_trash_post($track_id);
-            if ( !is_wp_error($success) ) $trashed[] = $track_id;
+        if ( $flushable_ids = WPSSTM_Core_Track_Links::get_excluded_host_link_ids() ){
+            foreach((array)$flushable_ids as $post_id){
+                $success = wp_trash_post($post_id);
+                if ( !is_wp_error($success) ) $trashed[] = $post_id;
+            }
         }
+
+        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted duplicate links");
         
         return $trashed;
     }
@@ -721,6 +668,25 @@ class WPSSTM_Core_Track_Links{
         }
         
         return $duplicate_ids;
+    }
+    
+    static function get_excluded_host_link_ids(){
+        global $wpdb;
+        
+        $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts');
+        if (!$excluded_hosts) return;
+
+        $exclude_query = array();
+        
+        foreach((array)$excluded_hosts as $domain){
+            $exclude_query[] = sprintf( "`meta_value` LIKE '%%%s%%'",$domain);
+        }
+
+        $querystr = $wpdb->prepare( "SELECT post_id FROM `$wpdb->postmeta` WHERE `meta_key` = '%s'",'_wpsstm_link_url');
+        $querystr .= ' AND ' . implode(' OR ',$exclude_query);
+
+        return $wpdb->get_col( $querystr );
+
     }
 }
 

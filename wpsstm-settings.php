@@ -726,7 +726,6 @@ class WPSSTM_Settings {
     
     function trash_orphan_tracks_callback(){
         $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
-        $count = 0;
         $desc = sprintf(__("Trash %d tracks that do not belong to any tracklists and have been created with the community user.","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[trash-orphan-tracks]" value="on" %s /><label>%s</label>',
@@ -759,14 +758,7 @@ class WPSSTM_Settings {
     }
     
     function trash_excluded_track_link_hosts_callback(){
-            $query_args = array(
-                'post_type'         => wpsstm()->post_type_track_link,
-                'posts_per_page'    => -1,
-                'excluded_hosts'  => 1,
-
-            );
-            $matches = new WP_Query($query_args);
-            $count = $matches->post_count;
+            $count = count( WPSSTM_Core_Track_Links::get_excluded_host_link_ids() );
 
             printf(
                 '<p><input type="checkbox" name="%s[delete_excluded_track_link_hosts]" value="on" %s /><label>%s</label></p>',
