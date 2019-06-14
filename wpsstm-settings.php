@@ -90,6 +90,11 @@ class WPSSTM_Settings {
 
         $new_input['player_enabled'] = isset($input['player_enabled']);
         
+        /*
+        Tracklists
+        */
+        $new_input['playlists_manager'] = isset($input['playlists_manager']);
+        
         
         /*
         Track Links
@@ -281,14 +286,6 @@ class WPSSTM_Settings {
         );
         
         add_settings_field(
-            'autolink', 
-            __('Autolink','wpsstm'), 
-            array( $this, 'autolink_callback' ), 
-            'wpsstm-settings-page', 
-            'track_settings'
-        );
-        
-        add_settings_field(
             'playlists_manager', 
             __('Enable Playlists Manager','wpsstm'), 
             array( $this, 'playlists_manager_callback' ), 
@@ -304,6 +301,14 @@ class WPSSTM_Settings {
             __('Track Links','wpsstm'), // Title
             array( $this, 'section_desc_empty' ), // Callback
             'wpsstm-settings-page' // Page
+        );
+        
+        add_settings_field(
+            'autolink', 
+            __('Autolink','wpsstm'), 
+            array( $this, 'autolink_callback' ), 
+            'wpsstm-settings-page', 
+            'track_link_settings'
         );
         
         add_settings_field(
@@ -417,6 +422,7 @@ class WPSSTM_Settings {
     function autolink_callback(){
         
         $enabled = wpsstm()->get_options('autolink');
+
         $can = WPSSTM_Core_API::can_wpsstmapi();
         $readonly = is_wp_error($can);
 
@@ -479,7 +485,7 @@ class WPSSTM_Settings {
         }
 
         printf(
-            '<input type="checkbox" name="%s[autolink]" value="on" %s /><label>%s</label><br/><small>%s</small>',
+            '<input type="checkbox" name="%s[playlists_manager]" value="on" %s /><label>%s</label><br/><small>%s</small>',
             wpsstm()->meta_name_options,
             checked( $enabled, true, false ),
             __("Users can favorite tracks and queue them to custom playlists.","wpsstm"),
