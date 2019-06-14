@@ -198,7 +198,7 @@ class WpsstmLink extends HTMLElement{
 
         $(player.current_media).on('loadeddata', function() {
             $(document).trigger( "wpsstmLinkLoaded",[player,link] ); //custom event
-            player.debug('link loaded');
+            player.debug('source loaded');
             link.duration = player.current_media.duration;
             player.current_media.play();
         });
