@@ -9,7 +9,6 @@ class WpsstmLink extends HTMLElement{
         this.post_id =          undefined;
         this.src =              undefined;
         this.type =             undefined;
-        this.duration =         undefined;
 
         // Setup a click listener on <wpsstm-tracklist> itself.
         this.addEventListener('click', e => {
@@ -42,7 +41,7 @@ class WpsstmLink extends HTMLElement{
     static get observedAttributes() {
         return ['linkplayable'];
     }
-    
+
     get playable() {
       return this.hasAttribute('linkplayable');
     }
@@ -78,7 +77,6 @@ class WpsstmLink extends HTMLElement{
         self.post_id =          Number($(self).attr('data-wpsstm-link-id'));
         self.src =              $(self).attr('data-wpsstm-stream-src');
         self.type =             $(self).attr('data-wpsstm-stream-type');
-        self.duration =         undefined;
 
         //delete link
         $(self).on('click', '.wpsstm-track-link-action-trash', function(e) {
@@ -205,12 +203,11 @@ class WpsstmLink extends HTMLElement{
         */
 
         $(player.current_media).off(); //remove old events
-        $(document).trigger( "wpsstmSourceInit", [link] );
+        $(document).trigger( "wpsstmSourceInit",[link] ); //custom event
 
         $(player.current_media).on('loadeddata', function() {
-            $(document).trigger( "wpsstmLinkLoaded",[player,link] ); //custom event
+            
             player.debug('source loaded');
-            link.duration = player.current_media.duration;
             player.current_media.play();
         });
 
@@ -226,7 +223,6 @@ class WpsstmLink extends HTMLElement{
             tracks_container.addClass('tracks-container-playing tracks-container-has-played');
             track_instances.removeClass('track-error').addClass('track-playing track-has-played');
             track.status = 'playing';
-            link_instances.playable = true;
             link_instances.addClass('link-playing link-has-played');
             success.resolve();
         });

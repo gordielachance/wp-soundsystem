@@ -214,7 +214,8 @@ $(document).on( "wpsstmSourceInit", function( event, link ) {
     }
 
     var ScrobbleTrack = function() {
-        if ( link.duration < 30) return;
+        var duration = player.current_media.duration;
+        if ( duration < 30) return;
 
         if (scrobbler_enabled){
 
