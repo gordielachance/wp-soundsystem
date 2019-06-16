@@ -156,10 +156,11 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= 2.7.1 =
+= 2.7.3 =
 * store artist,track & album metas as taxonomies instead of post metas; for performance issues (see https://wordpress.stackexchange.com/a/276315/70449 and https://wordpress.stackexchange.com/a/159012/70449)
 * trash orphan links option
 * trash duplicate links option
+* improved JS
 
 = 2.7.0 =
 * radios : improved how they are updated
