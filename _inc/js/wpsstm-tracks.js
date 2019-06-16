@@ -166,7 +166,7 @@ class WpsstmTrack extends HTMLElement{
         */
         var trackLinks = $(track).find('wpsstm-track-link');
         var playableTrackLinks = trackLinks.filter('[linkplayable]');
-        track.playable = (playableTrackLinks.length > 0);
+        track.playable = ( (playableTrackLinks.length > 0) || (!track.didautolink && wpsstmL10n.autolink) );
 
         var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
         
