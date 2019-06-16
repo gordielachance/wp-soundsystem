@@ -206,9 +206,9 @@ class WpsstmTracklist extends HTMLElement{
         if (pageNode){
             var queueNode = pageNode.queueNode;
             if (typeof autoplay === 'undefined'){
-                autoplay = ( queueNode.getAttribute("trackstatus") == 'playing' )
+                autoplay = ( queueNode.status == 'playing' )
             }
-            queueNode.removeAttribute('trackstatus');
+            queueNode.status = '';
         }
 
         tracklist.debug("reload tracklist... autoplay ?" + autoplay);

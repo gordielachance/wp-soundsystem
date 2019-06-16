@@ -649,7 +649,9 @@ class WPSSTM_Track{
         return new WP_Query($args);
     }
     
-    function populate_links(){
+    public function populate_links(){
+        
+        $this->links = array(); //reset
 
         if ($this->post_id){
             $args = array(
@@ -729,18 +731,17 @@ class WPSSTM_Track{
         }
         
         /*
-        Hook filter here to add autolinks (array)
-        */
-
-        $links_auto = apply_filters('wpsstm_autolink_input',$links_auto,$this);
-        if ( is_wp_error($links_auto) ) return $links_auto;
-        
-        /*
         save autolink time so we won't query autolinks again too soon
         */
         $now = current_time('timestamp');
         update_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, $now );
         $this->did_autolink = true;
+        
+        /*
+        Hook filter here to add autolinks (array)
+        */
+        $links_auto = apply_filters('wpsstm_autolink_input',$links_auto,$this);
+        if ( is_wp_error($links_auto) ) return $links_auto;
 
         foreach((array)$links_auto as $key=>$args){
             
@@ -767,6 +768,9 @@ class WPSSTM_Track{
 
         $this->add_links($new_links);
         $new_ids = $this->save_new_links();
+        
+        //repopulate links
+        $this->populate_links();
         
         $this->track_log(array('track_id'=>$this->post_id,'links_found'=>$this->link_count,'links_saved'=>count($new_ids)),'autolink results');
         
@@ -1027,7 +1031,7 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
-            'data-wpsstm-links-count' =>        $this->link_count,
+            'didautolink' =>                    $this->did_autolink,
         );
 
         return wpsstm_get_html_attr($attr);
@@ -1039,7 +1043,6 @@ class WPSSTM_Track{
             'wpsstm-track',
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
             is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
-            $this->did_autolink  ? 'did-track-autolink' : null,
 
         );
 

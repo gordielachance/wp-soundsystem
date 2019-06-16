@@ -517,9 +517,8 @@ class WP_SoundSystem {
             'debug'                 => (WP_DEBUG),
             'ajaxurl'               => admin_url( 'admin-ajax.php' ),
             'registration_notice'   => $this->get_registration_notice(),
-            'autolink'              => wpsstm()->get_options('autolink'),
             'ajax_tracks'           => wpsstm()->get_options('ajax_tracks'),
-            'ajax_autolink'         => wpsstm()->get_options('ajax_autolink'),
+            'autolink'              => ( wpsstm()->get_options('autolink') && wpsstm()->get_options('ajax_autolink') ), 
         );
 
         wp_localize_script( 'wpsstm-functions', 'wpsstmL10n', $datas );

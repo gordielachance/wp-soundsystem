@@ -2,7 +2,6 @@
 
 global $wpsstm_track;
 $wpsstm_track->local_track_lookup(); //check for this track in the database (if it has no ID) //TOUFIX TOUCHECK useful ?
-
 ?>
 <wpsstm-track <?php echo $wpsstm_track->get_track_attr();?>>
     <div class="wpsstm-track-row">

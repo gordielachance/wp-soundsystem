@@ -13,7 +13,7 @@ $( document ).ready(function() {
     //should we show it by default ?
     $('.wpsstm-importer-selector-advanced').each(function() {
         var advanced_block = $(this);
-        var inputs_filled = advanced_block.find('input').filter(function () {
+        var inputs_filled = advanced_block.find('input').filter(function (index) {
             return !!this.value;
         });
         if ( inputs_filled.length > 0 ){

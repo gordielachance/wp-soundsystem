@@ -328,7 +328,7 @@ class WpsstmPlayer extends HTMLElement{
 
         //which one should we play?
         tracks_playable = tracks_playable.filter(function (track) {
-            return (track.can_play !== false);
+            return ( track.playable );
         });
 
         
@@ -365,8 +365,8 @@ class WpsstmPlayer extends HTMLElement{
         }
 
         //which one should we play?
-        tracks_playable = tracks_playable.filter(function (track_obj) {
-            return (track_obj.can_play !== false);
+        tracks_playable = tracks_playable.filter(function (track) {
+            return ( track.playable );
         });
 
         
@@ -394,7 +394,7 @@ class WpsstmPlayer extends HTMLElement{
             player.play_queue(track_idx);
         }else{
             player.debug("no previous track");
-            player.current_track.removeAttribute('trackstatus');
+            player.current_track.status = '';
         }
     }
     
@@ -409,7 +409,7 @@ class WpsstmPlayer extends HTMLElement{
             player.play_queue(track_idx);
         }else{
             player.debug("no next track");
-            player.current_track.removeAttribute('trackstatus');
+            player.current_track.status = '';
         }
         
         /*
@@ -439,7 +439,7 @@ class WpsstmPlayer extends HTMLElement{
             if ( ( player.current_track === requestedTrack ) && ( player.current_link === requestedLink) ){
 
                 requestedTrack.debug('reclick');
-                var isPlaying = ( requestedTrack.getAttribute("trackstatus") == 'playing' );
+                var isPlaying = ( requestedTrack.status == 'playing' );
                 
                 requestedTrack.debug('is playing ? ' + isPlaying);
 
@@ -452,24 +452,43 @@ class WpsstmPlayer extends HTMLElement{
                 return;
             }
             
-            player.current_track.removeAttribute('trackstatus');
+            player.current_track.status = '';
         }
+        
+        /*
+        Eventually autolink track
+        */
 
         requestedTrack.debug('request track');
-        requestedTrack.setAttribute('trackstatus','request');
+        requestedTrack.status = 'request';
+        
+        var trackready = $.Deferred();
 
-        var success = requestedTrack.maybe_load_links();
+        if (!requestedTrack.playable && wpsstmL10n.autolink ){
+            if (!requestedTrack.didautolink){
+                trackready = requestedTrack.track_autolink();
+            }else{
+                trackready.reject("track already did autolink");
+            }
+        }else{
+            trackready.resolve(requestedTrack);
+        }
+        
+        /*
+        Track is now ready (or not, here I come)
+        */
 
-        success.then(
+        trackready.then(
             function (newTrack) { //success
-
                 //check that it still the same track that is requested
                 if (player.current_track !== newTrack) return;                
                 newTrack.play_track(link_idx);
 
             }, function (error) { //error
-                requestedTrack.debug('unable to play track, skipping...');
+                
+                requestedTrack.status = '';
                 player.next_track_jump();
+                return;
                 
             }
         );

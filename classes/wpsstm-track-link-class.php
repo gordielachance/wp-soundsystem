@@ -218,6 +218,7 @@ class WPSSTM_Track_Link{
             'data-wpsstm-link-idx' =>           $this->track->current_link,
             'data-wpsstm-community-link' =>     (int)wpsstm_is_community_post($this->post_id),
             'class' =>                          implode( ' ',$this->get_link_class() ),
+            'linkplayable' =>                   $this->is_playable_link(),
         );
         
         if ( $this->is_playable_link() ){
@@ -232,10 +233,7 @@ class WPSSTM_Track_Link{
     }
     
     function get_link_class(){
-        $classes = array(
-            'wpsstm-link',
-            $this->is_playable_link() ? 'wpsstm-playable-link' : null
-        );
+        $classes = array();
         $classes = apply_filters('wpsstm_link_classes',$classes,$this);
         return array_filter(array_unique($classes));
     }
