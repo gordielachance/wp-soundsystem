@@ -114,7 +114,7 @@ wpsstm-track{
     }
 
     &.track-error .wpsstm-track-action-play:before,
-    &:not([trackplayable]) .wpsstm-track-action-play:before,
+    &[didautolink]:not([trackplayable]) .wpsstm-track-action-play:before,
     {
         content:"\f071"; //.fa-exclamation-triangle;
     }

@@ -328,7 +328,7 @@ class WpsstmPlayer extends HTMLElement{
 
         //which one should we play?
         tracks_playable = tracks_playable.filter(function (track) {
-            return ( track.playable );
+            return ( track.playable || (!track.didautolink && wpsstmL10n.autolink) );
         });
 
         
@@ -366,7 +366,7 @@ class WpsstmPlayer extends HTMLElement{
 
         //which one should we play?
         tracks_playable = tracks_playable.filter(function (track) {
-            return ( track.playable );
+            return ( track.playable || (!track.didautolink && wpsstmL10n.autolink) );
         });
 
         
