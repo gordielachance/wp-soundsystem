@@ -190,10 +190,10 @@ $(document).on( "wpsstmPlayerInit", function( event,player ) {
     });
 });
 
-$(document).on( "wpsstmLinkInit", function( event, link ) {
+$(document).on( "wpsstmSourceInit", function( event, link ) {
 
-    var track = link.closest('wpsstm-track');
-    var player = link.closest('wpsstm-player');
+    var track =                 link.closest('wpsstm-track');
+    var player =                link.closest('wpsstm-player');
     var scrobble_icon =         $(player).find('.wpsstm-player-action-scrobbler');
     var scrobbler_enabled =     scrobble_icon.hasClass('active');
 

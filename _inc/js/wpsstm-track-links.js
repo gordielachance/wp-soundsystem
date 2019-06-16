@@ -203,9 +203,9 @@ class WpsstmLink extends HTMLElement{
         /*
         register new events
         */
-        
+
         $(player.current_media).off(); //remove old events
-        $(document).trigger( "wpsstmLinkInit", [link] );
+        $(document).trigger( "wpsstmSourceInit", [link] );
 
         $(player.current_media).on('loadeddata', function() {
             $(document).trigger( "wpsstmLinkLoaded",[player,link] ); //custom event

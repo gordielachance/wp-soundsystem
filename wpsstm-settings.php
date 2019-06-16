@@ -754,7 +754,7 @@ class WPSSTM_Settings {
     
     function trash_duplicate_links_callback(){
         $count = count(WPSSTM_Core_Track_Links::get_duplicate_link_ids());
-        $desc = sprintf(__("Trash %d duplicate links (same URL & parent post)","wpsstm"),$count);
+        $desc = sprintf(__("Trash %d duplicate links (same URL & parent post).","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[trash-duplicate-links]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
