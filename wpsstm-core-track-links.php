@@ -304,7 +304,7 @@ class WPSSTM_Core_Track_Links{
         $can_edit_track = current_user_can($track_type_obj->cap->edit_post,$wpsstm_track->post_id);
         ?>
         <p>
-            <?php _e("If the player and the 'Autolink' setting are enabled, we'll try to find playable links automatically when the tracklist starts.",'wpsstm');?>
+            <?php _e("If the player and the 'Autolink' setting are enabled, we'll try to find playable links automatically when the track is requested to play.",'wpsstm');?>
         </p>
 
         <?php
