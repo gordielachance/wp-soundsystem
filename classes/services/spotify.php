@@ -241,25 +241,23 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
     }
 
     function get_item_auto_id( $artist,$album = null,$track = null ){
-        
+
         $entries = $this->query_music_entries($artist,$album,$track);
         if ( is_wp_error($entries) || !$entries ) return $entries;
-        
-        $entry = wpsstm_get_array_value(array(0),$entries);
-        $id = wpsstm_get_array_value(array('id'),$entry);
-        
+
+        $id = wpsstm_get_array_value(array(0,'id'),$entries);
         return $id;
 
     }
     
-    protected function get_details_for_post($post_id){
-        
+    protected function get_music_data_for_post($post_id){
+
         if ( !$post_type = get_post_type($post_id) ) return false;
         
         if ( !$music_id = $this->get_post_music_id($post_id) ){
             return new WP_Error('wpsstm_missing_music_id',__("Missing music ID",'wpsstm'));
         }
-        
+
         //remote API type
         $endpoint = null;
         switch($post_type){
@@ -278,13 +276,14 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
         
         $api_url = sprintf('services/spotify/data/%s/%s',$endpoint,$music_id);
         $api_results = WPSSTM_Core_API::api_request($api_url);
+
         return $api_results;
     }
     
     protected function query_music_entries( $artist,$album = null,$track = null ){
 
         $artist = urlencode($artist);
-        $album = ($album) ? $album : '_';
+        $album = ($album === '_') ? null : $album;
         $album = urlencode($album);
         $track = urlencode($track);
         
@@ -300,18 +299,28 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
         return $api_results;
         
     }
-    
-    
-    protected function get_fillable_details_map($post_id = null){
-        $items = array();
-        $post_type = get_post_type($post_id);
-        
-        switch($post_type){
-            //TOUFIX
-        }
-        return $items;
-        
+
+    protected function artistdata_get_artist($data){
+        return wpsstm_get_array_value(array('name'), $data);
     }
+    protected function trackdata_get_artist($data){
+        return wpsstm_get_array_value(array('artists',0,'name'), $data);
+    }
+    protected function trackdata_get_track($data){
+        return wpsstm_get_array_value(array('name'), $data);
+    }
+    protected function trackdata_get_album($data){
+        return wpsstm_get_array_value(array('album','name'), $data);
+    }
+    protected function trackdata_get_length($data){
+        return wpsstm_get_array_value(array('duration_ms'), $data);
+    }
+    protected function albumdata_get_artist($data){
+        return wpsstm_get_array_value(array('artists',0,'name'), $data);
+    }
+    protected function albumdata_get_album($data){
+        return wpsstm_get_array_value(array('name'), $data);
+    }  
             
 }
 

@@ -175,7 +175,7 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
         return $music_id;
     }
     
-    protected function get_details_for_post($post_id){
+    protected function get_music_data_for_post($post_id){
         
         if ( !$post_type = get_post_type($post_id) ) return false;
         
@@ -203,63 +203,28 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
         $api_url = sprintf('services/musicbrainz/data/%s/%s',$endpoint,$music_id);
         return WPSSTM_Core_API::api_request($api_url);
     }
-    
-    
-    //TOUFIX URGENT since we use taxonomies instead of metas now, this should be fixed
-    protected function get_fillable_details_map($post_id = null){
-        $items = array();
-        $post_type = get_post_type($post_id);
-        
-        switch($post_type){
-            //artist
-            case wpsstm()->post_type_artist:
-                $items['artist'] = array(
-                    'name' =>       __('Artist','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Tracks::$artist_metakey,
-                    'mbpath' =>     array('name')
-                );
-            break;
-            //album
-            case wpsstm()->post_type_album:
-                $items['album'] = array(
-                    'name'=>        __('Album','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Tracks::$album_metakey,
-                    'mbpath' =>     array('title')
-                );
-                $items['album_artist'] = array(
-                    'name'=>__('Artist','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Tracks::$artist_metakey,
-                    'mbpath' =>     array('artist-credit',0,'name')
-                );
-            break;
-            //track
-            case wpsstm()->post_type_track:
-                $items['track'] = array(
-                    'name'=>        __('Title','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Tracks::$title_metakey,
-                    'mbpath' =>     array('title')
-                );
-                $items['track_artist'] = array(
-                    'name'=>__('Artist','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Tracks::$artist_metakey,
-                    'mbpath' =>     array('artist-credit',0,'name')
-                );
-                $items['track_album'] = array(
-                    'name'=>__('Album','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Tracks::$album_metakey,
-                    'mbpath' =>     array('releases',0,'title')
-                );
-                $items['track_length'] = array(
-                    'name'=>__('Length','wpsstm'),
-                    'metaname' =>   WPSSTM_Core_Tracks::$length_metakey,
-                    'mbpath' =>     array('length') 
-                );
-            break;
-        }
 
-        return $items;
+    protected function artistdata_get_artist($data){
+        return wpsstm_get_array_value(array('name'), $data);
     }
-     
+    protected function trackdata_get_artist($data){
+        return wpsstm_get_array_value(array('artist-credit',0,'name'), $data);
+    }
+    protected function trackdata_get_track($data){
+        return wpsstm_get_array_value(array('title'), $data);
+    }
+    protected function trackdata_get_album($data){
+        return wpsstm_get_array_value(array('releases',0,'title'), $data);
+    }
+    protected function trackdata_get_length($data){
+        return wpsstm_get_array_value(array('length'), $data);
+    }
+    protected function albumdata_get_artist($data){
+        return wpsstm_get_array_value(array('artist-credit',0,'name'), $data);
+    }
+    protected function albumdata_get_album($data){
+        return wpsstm_get_array_value(array('title'), $data);
+    }     
 }
 
 class WPSSTM_MB_Entries extends WPSSTM_Music_Entries {

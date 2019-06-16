@@ -57,7 +57,16 @@ abstract class WPSSTM_Music_Data{
     /**
     Get the correspondence between the item & the service datas
     **/
-    abstract protected function get_fillable_details_map();
+
+    abstract protected function artistdata_get_artist($data);
+    
+    abstract protected function trackdata_get_artist($data);
+    abstract protected function trackdata_get_track($data);
+    abstract protected function trackdata_get_album($data);
+    abstract protected function trackdata_get_length($data);
+    
+    abstract protected function albumdata_get_artist($data);
+    abstract protected function albumdata_get_album($data);
     
     public static function is_entries_switch(){
         return ( isset($_GET['list-music-items'])) ? true : false;
@@ -149,11 +158,11 @@ abstract class WPSSTM_Music_Data{
 
         //clicked a musicbrainz action button
         $action = null;
-        if ( isset($_POST['wpsstm-mb-id-lookup']) ){
+        if ( isset($_POST['wpsstm-musicid-lookup']) ){
             $action = 'autoguess-id';
-        }elseif ( isset($_POST['wpsstm-mb-reload']) ){
+        }elseif ( isset($_POST['wpsstm-musicdata-reload']) ){
             $action = 'reload';
-        }elseif ( isset($_POST['wpsstm-mb-fill']) ){
+        }elseif ( isset($_POST['wpsstm-musicdata-fill']) ){
             $action = 'fill';
         }
 
@@ -186,13 +195,6 @@ abstract class WPSSTM_Music_Data{
             break;
             case 'reload':
                 $this->save_music_details($post_id);
-            break;
-            case 'fill':
-                $field_slugs = isset($_POST['wpsstm-mb-fill-fields']) ? $_POST['wpsstm-mb-fill-fields'] : array();
-
-                if ( !empty($field_slugs) ){
-                    $this->fill_post_with_details($post_id,$field_slugs,true);
-                }
             break;
         }
     }
@@ -285,7 +287,7 @@ abstract class WPSSTM_Music_Data{
                             <?php
                     
                             if (!$music_id){
-                                submit_button( __('Search','wpsstm'), null, 'wpsstm-mb-id-lookup');
+                                submit_button( __('Search','wpsstm'), null, 'wpsstm-musicid-lookup');
                             }
                             if ($music_id &&  ($this->slug === 'musicbrainz')) { //TOUFIX should be available for any service
                                 $entries_url = get_edit_post_link();
@@ -294,7 +296,7 @@ abstract class WPSSTM_Music_Data{
                             }
                     
                             if ($music_data){
-                                submit_button( __('Refresh data','wpsstm'), null, 'wpsstm-mb-reload');
+                                submit_button( __('Refresh data','wpsstm'), null, 'wpsstm-musicdata-reload');
                             }
                     
                             ?>
@@ -452,14 +454,14 @@ abstract class WPSSTM_Music_Data{
             wpsstm()->debug_log('deleted music details datas','reload music details');
         }
 
-        $data = $this->get_details_for_post($post_id);
+        $data = $this->get_music_data_for_post($post_id);
 
         if ( is_wp_error($data) ) $data = null;
 
         if ( $success = update_post_meta( $post_id, $this->data_metakey, $data ) ){
             
             //fill empty fields with mb datas
-            $this->fill_post_with_details($post_id);
+            $this->fill_post_with_music_data($post_id);
             
             //save timestamp
             $now = current_time('timestamp');
@@ -470,45 +472,55 @@ abstract class WPSSTM_Music_Data{
         return $success;
         
     }
-            
-    //TO FIX TO CHECK
-    //Do not override basic informations ? (eg. for a track, artist & title)
-    private function fill_post_with_details($post_id=null,$field_slugs=null,$override=false){
+
+    private function fill_post_with_music_data($post_id=null){
         $data = $this->get_post_music_data($post_id);
         if ( !$data ) return;
-        $fields = $this->get_fillable_details_map($post_id);
-
-        $fields_success = array();
         
-        //which fields to fill ?
-        if ($field_slugs === null){
-            $field_slugs = array_keys($fields);
-        }
-
-        foreach($field_slugs as $slug){
-            
-            $field = ( isset($fields[$slug]) ) ? $fields[$slug] : null;
-            if (!$field) continue;
-
-            $meta_value =   get_post_meta($post_id,$field['metaname'],true);
-            $mb_value =     wpsstm_get_array_value($field['mbpath'], $data);
-
-            if ( !$meta_value || $override ){
-                if ($mb_value){
-                    $fields_success[$slug] = update_post_meta( $post_id,$field['metaname'],$mb_value);
-                }else{
-                    $fields_success[$slug] = delete_post_meta( $post_id,$field['metaname']);
-                }
+        wpsstm()->debug_log( "fill post with music datas..." );
+        $debug = array();
+        
+        $post_type = get_post_type($post_id);
+        
+        switch($post_type){
+            case wpsstm()->post_type_artist:
                 
-            }
-            
+                $artist = $debug['artist'] = $this->artistdata_get_artist($data);
+                WPSSTM_Core_Tracks::save_track_artist($post_id, $artist);
+                
+            break;
+            case wpsstm()->post_type_track:
+                
+                $artist = $debug['artist'] = $this->trackdata_get_artist($data);
+                WPSSTM_Core_Tracks::save_track_artist($post_id, $artist);
+                
+                $track = $debug['track'] = $this->trackdata_get_track($data);
+                WPSSTM_Core_Tracks::save_track_title($post_id, $track);
+                
+                $album = $debug['album'] = $this->trackdata_get_album($data);
+                WPSSTM_Core_Tracks::save_track_album($post_id, $album);
+                
+                $length = $debug['length'] = $this->trackdata_get_length($data);
+                WPSSTM_Core_Tracks::save_track_length($post_id, $length);
+                
+            break;
+            case wpsstm()->post_type_album:
+                
+                $artist = $debug['artist'] = $this->albumdata_get_artist($data);
+                WPSSTM_Core_Tracks::save_track_artist($post_id, $artist);
+                
+                $album = $debug['album'] = $this->albumdata_get_album($data);
+                WPSSTM_Core_Tracks::save_track_album($post_id, $album);
+                
+            break;
         }
-
-        //log
-        $fields_success['post_id'] = $post_id;
-        wpsstm()->debug_log( json_encode($fields_success),"filled post with music datas" ); 
+        
+        $debug['post_id'] = $post_id;
+        wpsstm()->debug_log($debug,"...filled post with music datas" ); 
 
     }
+
+    
             
     /*
     Use MusicBrainz API to search artists

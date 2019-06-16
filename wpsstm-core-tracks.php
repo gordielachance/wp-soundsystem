@@ -927,7 +927,7 @@ class WPSSTM_Core_Tracks{
     }
     
     static function save_track_length($post_id, $value = null){
-        $value = trim($value);
+        $value = filter_var($value, FILTER_VALIDATE_INT); //cast to int
         if (!$value){
             delete_post_meta( $post_id, self::$length_metakey );
         }else{
