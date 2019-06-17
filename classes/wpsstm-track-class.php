@@ -683,7 +683,8 @@ class WPSSTM_Track{
             $seconds = $now - $last_autolinkd;
             $hours = $seconds / HOUR_IN_SECONDS;
 
-            $this->did_autolink = ($hours < 48);
+            $max_hours = wpsstm()->get_options('autolink_lock_hours');
+            $this->did_autolink = ($hours < $max_hours);
         }
 
         return $this->did_autolink;

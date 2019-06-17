@@ -102,6 +102,7 @@ class WP_SoundSystem {
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'community_user_id'                 => null,
             'autolink'                          => true,
+            'autolink_lock_hours'               => 48,
             'limit_autolinks'                   => 5,
             'importer_enabled'                  => true,
             'radios_enabled'                    => true,
