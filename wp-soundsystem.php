@@ -143,6 +143,7 @@ class WP_SoundSystem {
         }
 
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
+        require $this->plugin_dir . 'classes/wpsstm-importer.php';
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-track-link-class.php';

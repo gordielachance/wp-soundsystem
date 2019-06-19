@@ -625,41 +625,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         return wpsstm_get_html_attr($values_attr);
     }
-    
-    public function populate_preset(){
-        /*
-        redirect URL
-        Hook to filter bangs, etc.
-        */
-        $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url,$this);
-
-        /*
-        Build presets.
-        The default preset, WPSSTM_Remote_Tracklist, should be hooked with the lowest priority
-        */
-        $presets = array();
-        $presets = apply_filters('wpsstm_remote_presets',$presets,$this);
-
-        /*
-        Select a preset based on the tracklist URL, or use the default preset
-        */
-        foreach((array)$presets as $test_preset){
-            
-            $test_preset->__construct($feed_url,$this->options);
-            
-            if ( ( $ready = $test_preset->init_url($feed_url) ) && !is_wp_error($ready) ){
-                $this->preset = $test_preset;
-                break;
-            }
-        }
-        
-        //default presset
-        if (!$this->preset){
-            $this->preset = new WPSSTM_Remote_Tracklist($feed_url,$this->options);
-        }
-
-        $this->tracklist_log($this->preset->get_preset_name(),'preset found');
-    }
 
     function populate_subtracks(){
         global $wpdb;
@@ -680,16 +645,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $refresh_now ){
             
             $this->tracklist_log("refresh radio...");
+            
+            /*
+            redirect URL
+            Hook to filter bangs, etc.
+            */
+            $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url,$this);
+            
+            die("API WORK");
 
-            $this->populate_preset();
-            $tracks = $this->preset->populate_remote_tracks();
 
-            if ( !is_wp_error($tracks) ){
-                $updated = $this->update_radio_data();
-            }else{
-                //TOUFIX THIS IS A WIZARD NOTICE, should be stored elsewhere so it is shown only on the backend.
-                $this->add_notice($tracks->get_error_code(), $tracks->get_error_message() );
-            }
 
         }
         
