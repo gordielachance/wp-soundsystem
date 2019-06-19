@@ -1,10 +1,14 @@
 <?php
-
 class WPSSTM_Importer{
+    
+    var $uploads_dir = null;
+    
     function __construct(){
+        global $wpsstm_importer;
+        $wpsstm_importer = $this;
 
         $this->options = array(
-
+            'cache_time_min' => 1,
         );
         
         if ($this->can_importer() === true){
@@ -26,6 +30,21 @@ class WPSSTM_Importer{
         //TRACK
 		$controller = new WPSSTM_Importer_Endpoints();
 		$controller->register_routes();
+    }
+    
+    /*
+    Get path where are written pinim files
+    */
+    static function get_uploads_dir(){
+        
+        $dir = WP_CONTENT_DIR . '/uploads/xspf';
+        
+        if (!file_exists($dir)) {
+            wp_mkdir_p($dir);
+        }else{
+            return $dir;
+        }
+
     }
 
 }
@@ -80,11 +99,9 @@ class WPSSTM_Importer_Endpoints extends WP_REST_Controller {
         /*
         Start Import
         */
-        
-        
+
         $importer = new WPSSTM_Imported_Tracklist($url);
-        $render = $importer->get_xspf();
-        print_r($render);die("kik");
+        return $importer->get_xspf_url();
     }
 
 
@@ -93,12 +110,16 @@ class WPSSTM_Importer_Endpoints extends WP_REST_Controller {
 class WPSSTM_Imported_Tracklist{
     
     var $url = null;
+    var $id = null;
     var $preset = null;
+    var $cachetime_trans_name = null;
     
     function __construct($url){
         $url = filter_var($url, FILTER_VALIDATE_URL);
         if(!$url) return;
         $this->url = $url;
+        $this->id = md5($this->url);
+        $this->cachetime_trans_name = sprintf('wpsttm-cache-%s',$this->id);
     }
     
     public function populate_preset(){
@@ -132,7 +153,7 @@ class WPSSTM_Imported_Tracklist{
         return $this->preset;
     }
     
-    function get_xspf(){
+    private function render_xspf(){
         
         $tracklist = new WPSSTM_Tracklist();
         $preset = $this->populate_preset();
@@ -141,34 +162,22 @@ class WPSSTM_Imported_Tracklist{
         if ( is_wp_error($tracks) ) return $tracks;
         
         $tracklist->add_tracks($tracks);
-        
-        ///
 
         require wpsstm()->plugin_dir . 'classes/wpsstm-playlist-xspf.php';
 
         $xspf = new mptre\Xspf();
+        $xspf->addPlaylistInfo('location', $this->url);
+        $xspf->addPlaylistInfo('title', $preset->get_remote_title() );
+        $xspf->addPlaylistInfo('creator', $preset->get_remote_author() );
 
-        //playlist
-        if ( $title = get_the_title() ){
-            $xspf->addPlaylistInfo('title', $title);
-        }
+        $timestamp = current_time( 'timestamp', true );
+        $date = gmdate(DATE_ISO8601,$timestamp);
+        $xspf->addPlaylistInfo('date', $date);
 
-        if ( $author = $tracklist->author ){
-            $xspf->addPlaylistInfo('creator', $author);
-        }
-
-        if ( $timestamp = $tracklist->updated_time ){
-            $date = gmdate(DATE_ISO8601,$timestamp);
-            $xspf->addPlaylistInfo('date', $date);
-        }
-
-        if ( $location = $tracklist->location ){
-            $xspf->addPlaylistInfo('location', $location);
-        }
-
+        /*
         $annotation = sprintf( __('Station generated with the %s plugin — %s','wpsstm'),'WP SoundSystem','https://wordpress.org/plugins/wp-soundsystem/');
         $xspf->addPlaylistInfo('annotation', $annotation);
-
+        */
 
         //subtracks
         if ( $tracklist->have_subtracks() ) {
@@ -182,7 +191,81 @@ class WPSSTM_Imported_Tracklist{
 
         return $xspf->output();
     }
+
+    function get_xspf_url(){
+        global $wpsstm_importer;
+        
+        $file = get_transient( $this->cachetime_trans_name );
+        $cache_url = null;
+        $transient_name = $this->cachetime_trans_name;
+
+        if ( ( false === ( $file ) ) || ( !file_exists($file) ) ) {
+            
+            $this->importer_log('write cache...');
+
+            $file = $this->write_xspf();
+            if ( is_wp_error($file) ) return $file;
+            
+            $lock_time = $wpsstm_importer->options['cache_time_min'] * MINUTE_IN_SECONDS;
+
+            set_transient( $transient_name, $file, $lock_time );
+            
+        }else{
+            $this->importer_log($file,'...FROM cache');
+        }
+
+        return $file;
+    }
     
+    function get_xspf_path(){
+        
+        if ( !$this->id ){
+            return new WP_Error('wpsstm_missing_import_id',__('Missing import ID','wpsstmapi'));
+        }
+
+        $log_dir = WPSSTM_Importer::get_uploads_dir();
+        return $log_dir . sprintf('/%s.xspf',$this->id);
+    }
+    
+    private function write_xspf(){
+        
+        $file = $this->get_xspf_path();
+        if ( is_wp_error($file) ) return $file;
+
+        $content = $this->render_xspf();
+        if ( is_wp_error($content) ) return $content;
+
+        try{
+            $handle = fopen($file, 'w');
+            flock($handle, LOCK_EX);
+            fwrite($handle, $content);
+            flock($handle, LOCK_UN);
+            fclose($handle);
+
+        } catch ( Exception $e ) {
+            $error_msg = sprintf(__("Unable to write file: %s",'wpsstmapi'),$file);
+            return new WP_Error('wpsstmapi_write_xspf',$error_msg);
+        }
+        
+        $this->importer_log($file,'...HAS written cache');
+        
+        return $file;
+
+    }
+
+    function seconds_before_refresh(){
+
+        $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+        if(!$updated_time) return 0;//never imported
+
+        if (!$this->cache_min) return 0; //no delay
+
+        $expiration_time = $updated_time + ($this->cache_min * MINUTE_IN_SECONDS);
+        $now = current_time( 'timestamp', true );
+
+        return $expiration_time - $now;
+    }
+
     function importer_log($data,$title = null){
         $title = sprintf('[importer:%s] ',$this->url) . $title;
         wpsstm()->debug_log($data,$title);
