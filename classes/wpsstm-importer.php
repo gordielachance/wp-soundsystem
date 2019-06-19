@@ -83,12 +83,8 @@ class WPSSTM_Importer_Endpoints extends WP_REST_Controller {
         
         
         $importer = new WPSSTM_Imported_Tracklist($url);
-        $render = $importer->render_xspf();
-        print_r($render);die();
-        $tracklist->render_xspf();
-
-        print_r($tracks);die();
-
+        $render = $importer->get_xspf();
+        print_r($render);die("kik");
     }
 
 
@@ -119,7 +115,7 @@ class WPSSTM_Imported_Tracklist{
         */
         foreach((array)$presets as $test_preset){
             
-            $test_preset->__construct($this->url,$this->options);
+            $test_preset->__construct($this->url);
             
             if ( ( $ready = $test_preset->init_url($this->url) ) && !is_wp_error($ready) ){
                 $this->preset = $test_preset;
@@ -136,30 +132,17 @@ class WPSSTM_Imported_Tracklist{
         return $this->preset;
     }
     
-    function render_xspf(){
+    function get_xspf(){
         
+        $tracklist = new WPSSTM_Tracklist();
         $preset = $this->populate_preset();
+        
         $tracks = $preset->populate_remote_tracks();
+        if ( is_wp_error($tracks) ) return $tracks;
         
-        print_r($tracks);die();
+        $tracklist->add_tracks($tracks);
         
-        global $wpsstm_tracklist;
-        $wpsstm_tracklist->populate_subtracks();
-
-        $tracklist = $wpsstm_tracklist;
-
-        $is_download = wpsstm_get_array_value('dl',$_REQUEST);
-        $is_download = filter_var($is_download, FILTER_VALIDATE_BOOLEAN);
-
-        if ( $is_download ){
-            $now = current_time( 'timestamp', true );
-            $filename = $post->post_name;
-            $filename = sprintf('%s-%s.xspf',$filename,$now);
-            header("Content-Type: application/xspf+xml");
-            header('Content-disposition: attachment; filename="'.$filename.'"');
-        }else{
-            header("Content-Type: text/xml");
-        }
+        ///
 
         require wpsstm()->plugin_dir . 'classes/wpsstm-playlist-xspf.php';
 
@@ -197,15 +180,11 @@ class WPSSTM_Imported_Tracklist{
             }
         }
 
-        echo $xspf->output();
+        return $xspf->output();
     }
     
     function importer_log($data,$title = null){
-
-        //global log
-        if ($this->post_id){
-            $title = sprintf('[importer:%s] ',$this->url) . $title;
-        }
+        $title = sprintf('[importer:%s] ',$this->url) . $title;
         wpsstm()->debug_log($data,$title);
     }
     

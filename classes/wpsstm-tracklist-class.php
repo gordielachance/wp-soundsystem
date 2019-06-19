@@ -1255,7 +1255,10 @@ class WPSSTM_Tracklist{
 			$this->track = $this->tracks[0];
 		}
 	}
-
+    
+    function tracklist_log($data,$title = null){
+        wpsstm()->debug_log($data,$title);
+    }
     
 }
 
