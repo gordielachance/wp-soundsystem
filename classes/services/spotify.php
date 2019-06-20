@@ -22,9 +22,6 @@ class WPSSTM_Spotify{
             
             //presets
             add_filter('wpsstm_feed_url', array($this, 'spotify_playlist_bang_to_url'));
-            add_filter('wpsstm_remote_presets',array($this,'register_spotify_presets'));
-
-            add_filter('wpsstm_wizard_service_links',array($this,'register_spotify_service_links'), 6);
             add_filter('wpsstm_wizard_bang_links',array($this,'register_spotify_bang_links'));
             
         }
@@ -42,12 +39,7 @@ class WPSSTM_Spotify{
         
         return $url;
     }
-    
-    function register_spotify_presets($presets){
-        $presets[] = new WPSSTM_Spotify_Playlist_Api_Preset();
-        return $presets;
-    }
-    
+
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
@@ -125,12 +117,6 @@ class WPSSTM_Spotify{
         );
     }
 
-    function register_spotify_service_links($links){
-        $item = sprintf('<a href="https://www.spotify.com" target="_blank" title="%s"><img src="%s" /></a>','Spotify',wpsstm()->plugin_url . '_inc/img/spotify-icon.png');
-        $links[] = $item;
-        return $links;
-    }
-    
     function register_spotify_bang_links($links){
         $bang_playlist = '<label><code>spotify:user:USER:playlist:PLAYLIST_ID</code></label>';
         //$bang_playlist .= sprintf('<div id="wpsstm-spotify-playlist-bang" class="wpsstm-bang-desc">%s</div>',$desc);
@@ -326,107 +312,6 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
 
 class WPSSTM_Spotify_Entries extends WPSSTM_Music_Entries {
     //TOUFIX
-}
-
-class WPSSTM_Spotify_Playlist_Api_Preset extends WPSSTM_Remote_Tracklist{
-    
-    var $playlist_id;
-    var $playlist_data;
-
-    function __construct($url = null,$options = null) {
-        
-        $this->preset_options = array(
-            'selectors' => array(
-                'tracks'           => array('path'=>'root > items'),
-                'track_artist'     => array('path'=>'track > artists > name'),
-                'track_album'      => array('path'=>'track > album > name'),
-                'track_title'      => array('path'=>'track > name'),
-            )
-        );
-        
-        parent::__construct($url,$options);
-        
-        $this->request_pagination['tracks_per_page'] = 100; //spotify API
-        
-
-    }
-    
-    public function init_url($url){
-        global $wpsstm_spotify;
-
-        if ( $this->playlist_id = self::get_playlist_id_from_url($url) ){
-
-            $transient_name = sprintf('wpsstm-spotify-data-%s',$this->playlist_id);//TO FIX TO CHECK might be too long for a transient key ?
-
-            //data cache ?
-            if ( false === ( $api_results = get_transient($transient_name ) ) ) {
-
-                $api_url = sprintf('services/spotify/data/playlists/%s',$this->playlist_id);
-
-                $api_results = WPSSTM_Core_API::api_request($api_url);
-                if (is_wp_error($api_results)) return $api_results;
-                
-                set_transient( $transient_name, $api_results, 1 * DAY_IN_SECONDS );
-                
-            }
-            
-            $this->playlist_data = $api_results;
-            
-            //update pagination
-            $total_tracks = wpsstm_get_array_value(array('tracks','total'),$this->playlist_data);
-            $this->request_pagination['total_pages'] = ceil($total_tracks / $this->request_pagination['tracks_per_page']);
-
-        }
-
-        return (bool)$this->playlist_id;
-
-    }
-    
-    static function get_playlist_id_from_url($url){
-        $pattern = '~^https?://(?:open|play).spotify.com/(?:user/([^/]+)/)?playlist/([\w\d]+)~i';
-        preg_match($pattern,$url, $matches);
-
-        $user_id =  isset($matches[1]) ? $matches[1] : null;
-        $playlist_id = isset($matches[2]) ? $matches[2] : null;
-        
-        return $playlist_id;
-        
-    }
-
-    function get_remote_request_url(){
-        $url = sprintf('https://api.spotify.com/v1/playlists/%s/tracks',$this->playlist_id);
-
-        $pagination_args = array(
-            'limit'     => $this->request_pagination['tracks_per_page'],
-            'offset'    => $this->request_pagination['current_page'] * $this->request_pagination['tracks_per_page']
-        );
-
-        $url = add_query_arg($pagination_args,$url);
-
-        return $url;
-    }
-
-    function get_remote_request_args(){
-        global $wpsstm_spotify;
-        
-        $args = parent::get_remote_request_args();
-        $spotify_args = $wpsstm_spotify->get_spotify_request_args();
-        
-        if (is_wp_error($spotify_args) ) return $spotify_args;
-        return array_merge($args,$spotify_args);
-    }
-
-    function get_remote_title(){
-        $title = wpsstm_get_array_value('name', $this->playlist_data);
-        return $title;
-
-    }
-    
-    function get_remote_author(){
-        $author = wpsstm_get_array_value(array('owner','id'), $this->playlist_data);
-        return $author;
-    }
-
 }
 
 function wpsstm_spotify_init(){

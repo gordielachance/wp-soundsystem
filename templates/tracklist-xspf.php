@@ -18,7 +18,7 @@ if ( $is_download ){
     header("Content-Type: text/xml");
 }
 
-require wpsstm()->plugin_dir . 'classes/wpsstm-playlist-xspf.php';
+require wpsstm()->plugin_dir . '_inc/php/xspf.php';
 
 $xspf = new mptre\Xspf();
 

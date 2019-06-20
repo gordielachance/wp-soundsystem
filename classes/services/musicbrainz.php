@@ -367,62 +367,6 @@ class WPSSTM_MB_Entries extends WPSSTM_Music_Entries {
     
 }
 
-class WPSSTM_Musicbrainz_Release_ID_Preset extends WPSSTM_Remote_Tracklist{
-    
-    var $mbid;
-    var $mbdatas;
-    
-    function __construct($url = null,$options = null) {
-        
-        $this->preset_options = array(
-            'selectors' => array(
-                'tracks'           => array('path'=>'track'),
-                'track_artist'     => array('path'=>'artist > name'),
-                'track_title'      => array('path'=>'recording > title'),
-                'track_album'      => array('path'=>'/ release > title'),
-            )
-        );
-        
-        parent::__construct($url,$options);
-        
-    }
-
-    public function init_url($url){
-        global $wpsstm_musicbrainz;
-        
-        if ( $this->mbid = self::get_release_mbid($url) ){
-            
-            $api_url = sprintf('services/musicbrainz/data/releases/%s',$this->mbid);
-            
-            $api_results = WPSSTM_Core_API::api_request($api_url);
-            
-            if ( !is_wp_error($api_results) ){
-                $this->mbdatas = $api_results;
-            }
-        }
-        
-        return $this->mbdatas;
-    }
-    
-    function get_remote_request_url(){
-        $url = sprintf('http://musicbrainz.org/ws/2/release/%s',$this->mbid);
-        $inc = array('artist-credits','recordings');
-        $url = add_query_arg(array('inc'=>implode('+',$inc)),$url);
-        return $url;
-    }
-
-    static function get_release_mbid($url){
-        $pattern = '~^https?://(?:www\.)?musicbrainz.org/release/([\w\d-]+)~i';
-        preg_match($pattern,$url, $matches);
-
-        $mbid =  isset($matches[1]) ? $matches[1] : null;
-        
-        return $mbid;
-        
-    }
-    
-}
-
 function wpsstm_musicbrainz_init(){
     global $wpsstm_musicbrainz;
     $wpsstm_musicbrainz = new WPSSTM_MusicBrainz();

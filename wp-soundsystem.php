@@ -111,7 +111,7 @@ class WP_SoundSystem {
             'details_engine'                    => array('musicbrainz'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
-            'ajax_tracks'                       => true,
+            'ajax_tracks'                       => false,//TOUFIX TOUREMOVE
             'ajax_autolink'                     => true,
         );
         
@@ -122,7 +122,7 @@ class WP_SoundSystem {
     
     function includes(){
         
-        require_once(wpsstm()->plugin_dir . '_inc/php/autoload.php'); // PHP dependencies (last.fm, scraper, etc.)
+        require_once(wpsstm()->plugin_dir . '_inc/php/autoload.php'); // PHP dependencies
         
         require $this->plugin_dir . 'wpsstm-templates.php';
         require $this->plugin_dir . 'wpsstm-functions.php';
@@ -143,12 +143,11 @@ class WP_SoundSystem {
         }
 
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
-        require $this->plugin_dir . 'classes/wpsstm-importer.php';
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-post-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-track-link-class.php';
         require $this->plugin_dir . 'classes/wpsstm-player-class.php';
-        require $this->plugin_dir . 'classes/wpsstm-remote-datas.php';
         
         //include APIs/services stuff (lastfm,youtube,spotify,etc.)
         $this->load_services();
