@@ -53,6 +53,47 @@ class WPSSTM_Souncloud{
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
+    
+
+    
+    function souncloud_settings_desc(){
+        $new_app_link = 'http://soundcloud.com/you/apps/new';
+        printf(__('Get an API key %s.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+    }
+
+    function soundcloud_api_settings(){
+        $client_id = $this->get_options('client_id');
+        $client_secret = $this->get_options('client_secret');
+
+        //client ID
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[client_id]" value="%s" /></p>',
+            __('Client ID:','wpsstm'),
+            self::$soundcloud_options_meta_name,
+            $client_id
+        );
+        
+        //client secret
+        printf(
+            '<p><label>%s</label> <input type="text" name="%s[client_secret]" value="%s" /></p>',
+            __('Client Secret:','wpsstm'),
+            self::$soundcloud_options_meta_name,
+            $client_secret
+        );
+        
+    }
+    
+    public static function can_soundcloud_api(){
+        
+        $client_id = $this->get_options('client_id');
+        $client_secret = $this->get_options('client_secret');
+        
+        if ( !$client_id ) return new WP_Error( 'soundcloud_no_client_id', __( "Required Soundcloud client ID missing", "wpsstm" ) );
+        if ( !$client_secret ) return new WP_Error( 'soundcloud_no_client_secret', __( "Required Soundcloud client secret missing", "wpsstm" ) );
+        
+        return true;
+        
+    }
 
     public function get_soundcloud_link_type($type,WPSSTM_Track_Link $link){
         if ( $this->get_sc_track_id($link->permalink_url) ){
