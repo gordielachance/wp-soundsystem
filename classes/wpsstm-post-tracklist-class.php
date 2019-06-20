@@ -663,31 +663,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url,$this);
             
             /*
-            Get XSPF file
+            Get the XSPF tracklist
+            http://xspf.org
             */
 
             $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
             $api_url = add_query_arg(array('url'=>$feed_url,'options'=>$importer_options),'import/url');
 
-            $xspf_url = WPSSTM_Core_API::api_request($api_url);
-            if (is_wp_error($xspf_url)) return $xspf_url;
+            $xspf = WPSSTM_Core_API::api_request($api_url);
+            if (is_wp_error($xspf)) return $xspf;
 
-            $request = wp_remote_get( $xspf_url );
-            if (is_wp_error($request)) return $request;
-            
-            $response = wp_remote_retrieve_body( $request );
-            if (is_wp_error($response)) return $response;
-            
-            $content_type = wp_remote_retrieve_header( $request, 'content-type' );
-            
-            if ($content_type !== 'application/xspf+xml'){
-                return new WP_Error( 'wpsstm_import_type_error', __('Not a valid XSPF file.','wpsstm') );
-            }
-
-            $content = simplexml_load_string($response, null,LIBXML_NOCDATA);
-            $json = json_encode($content);
-            $xspf = json_decode($json,TRUE);
-            
             /*
             Create playlist
             */

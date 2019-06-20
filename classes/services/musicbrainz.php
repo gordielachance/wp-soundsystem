@@ -15,9 +15,6 @@ class WPSSTM_MusicBrainz {
         );
         
         $this->options = wp_parse_args(get_option( self::$mbz_options_meta_name),$options_default);
-        
-        add_filter('wpsstm_remote_presets',array($this,'register_musicbrainz_preset'));
-        add_filter('wpsstm_wizard_service_links',array($this,'register_musicbrainz_service_links'), 8);
 
         //backend
         add_action( 'admin_init', array( $this, 'mbz_settings_init' ) );
@@ -28,11 +25,7 @@ class WPSSTM_MusicBrainz {
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
-    
-    function register_musicbrainz_preset($presets){
-        $presets[] = new WPSSTM_Musicbrainz_Release_ID_Preset();
-        return $presets;
-    }
+
 
     function mbz_settings_init(){
         register_setting(
@@ -84,12 +77,6 @@ class WPSSTM_MusicBrainz {
         printf('<p>%s</p>',$el);
     }
     
-    static function register_musicbrainz_service_links($links){
-        $item = sprintf('<a href="https://www.musicbrainz.org" target="_blank" title="%s"><img src="%s" /></a>','Musicbrainz',wpsstm()->plugin_url . '_inc/img/musicbrainz-icon.png');
-        $links[] = $item;
-        return $links;
-    }
-
     public function register_details_engine($engines){
         $engines[] = new WPSSTM_Musicbrainz_Data();
         return $engines;

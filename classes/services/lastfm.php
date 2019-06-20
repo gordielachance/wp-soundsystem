@@ -34,7 +34,6 @@ class WPSSTM_LastFM{
         
 
         add_filter( 'wpsstm_wizard_input',array(__class__,'wizard_no_url_input'));
-        add_filter('wpsstm_wizard_service_links',array($this,'register_lastfm_service_links'), 5);
         add_filter('wpsstm_wizard_bang_links',array($this,'register_lastfm_bang_links'));
         
         add_action( 'init', array($this,'setup_lastfm_user') ); //TO FIX only if player is loaded ?
@@ -190,7 +189,7 @@ class WPSSTM_LastFM{
         $new_app_url = 'https://www.last.fm/api/account/create';
         
         $api_link = sprintf('<a href="%s" target="_blank">%s</a>',$new_app_url,__('here','wpsstm') );
-        printf(__('Required for the Last.fm importer preset and Last.fm features.  Get an API account %s.','wpsstm'),$api_link );
+        printf(__('Required for the Last.fm features.  Get an API account %s.','wpsstm'),$api_link );
     }
     
     
@@ -647,12 +646,6 @@ class WPSSTM_LastFM{
         return ( $community_user->is_user_connected() === true);
     }
 
-    static function register_lastfm_service_links($links){
-        $item = sprintf('<a href="https://www.last.fm" target="_blank" title="%s"><img src="%s" /></a>','Last.fm',wpsstm()->plugin_url . '_inc/img/lastfm-icon.png');
-        $links[] = $item;
-        return $links;
-    }
-    
     function register_lastfm_bang_links($links){
         $bang_artist = '<label for="wpsstm-lastfm-artist-bang"><code>artist:NAME</code></label>';
         $desc = sprintf(__('Will fetch the top tracks by %s, while %s will load a station based on that artist.','wpsstm'),'<code>NAME</code>','<code>artist:NAME:similar</code>');
