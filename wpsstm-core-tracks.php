@@ -277,6 +277,7 @@ class WPSSTM_Core_Tracks{
         
         if ($success){
             if ( is_wp_error($success) ){
+                //TOUFIX we should remove that track notice function.
                 $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
             }else{
                 $wpsstm_track->add_notice('success',__('Track action success!','wpsstm'));

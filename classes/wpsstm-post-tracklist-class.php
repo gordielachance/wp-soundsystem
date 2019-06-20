@@ -685,13 +685,62 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $playlist->location = $xspf['location'];
             $playlist->updated_time = strtotime ($xspf['date'] );
             
-            foreach ($xspf['trackList']['track'] as $xspf_track) {
+            foreach ((array)$xspf['trackList']['track'] as $xspf_track) {
+
                 $track = new WPSSTM_Track();
-                $track->title = $xspf_track['title'];
-                $track->artist = $xspf_track['creator'];
+                
+                //location
+                $track->location = wpsstm_get_array_value('location',$xspf_track);
+
+                //identifier
+
+                //title
+                $track->title = wpsstm_get_array_value('title',$xspf_track);
+
+                //creator
+                $track->artist = wpsstm_get_array_value('creator',$xspf_track);
+
+                //annotation
+
+                //info
+
+                //image
+                $track->image_url = wpsstm_get_array_value('image',$xspf_track);
+ 
+                //album
+                $track->album = wpsstm_get_array_value('album',$xspf_track);
+
+                //trackNum
+                $track->position = wpsstm_get_array_value('trackNum',$xspf_track);
+
+                //duration
+                $track->duration = wpsstm_get_array_value('duration',$xspf_track);
+
+
+                //links
+                //when there are several links, it is an array; while it is a string for a single link.  So force array.
+                if ( $links = wpsstm_get_array_value('link',$xspf_track) ){
+                    $links = (array)$links;
+                    
+                    foreach($links as $url){
+                        $link = new WPSSTM_Track_Link();
+                        $link->permalink_url = $url;
+                        $addlinks[] = $link;
+                    }
+
+                    $track->add_links($addlinks);
+                }
+
+
+                //meta
+
+                //extension
+                
+                ////
+  
                 $playlist_tracks[] = $track;
             }
-            
+
             $playlist->add_tracks($playlist_tracks);
             
             /*
