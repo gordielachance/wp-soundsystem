@@ -11,14 +11,6 @@ class WPSSTM_Core_API {
     function __construct(){
         add_filter( 'wpsstm_autolink_input',array($this,'api_track_autolink'), 5, 2 );
     }
-    
-    /*
-    YESSS,... You could...
-    But please consider the time i've spent developping this plugin.
-    You can by an API key here: https://api.spiff-radio.org/?p=10
-    Or make on donation there : https://api.spiff-radio.org/?p=31
-    Thanks !
-    */
 
     public static function can_wpsstmapi(){
         
