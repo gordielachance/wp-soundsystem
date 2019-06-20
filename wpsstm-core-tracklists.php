@@ -618,7 +618,7 @@ class WPSSTM_Core_Tracklists{
     */
     static function trash_temporary_tracklists(){
         
-        if ( !current_user_can('administrator') ){
+        if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
 

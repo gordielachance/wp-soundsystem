@@ -1226,7 +1226,7 @@ class WPSSTM_Core_Tracks{
     */
     static function trash_orphan_tracks(){
         
-        if ( !current_user_can('administrator') ){
+        if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
 
