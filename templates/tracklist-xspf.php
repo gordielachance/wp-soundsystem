@@ -31,7 +31,7 @@ if ( $author = $tracklist->author ){
     $xspf->addPlaylistInfo('creator', $author);
 }
 
-if ( $timestamp = $tracklist->updated_time ){
+if ( $timestamp = $tracklist->date_timestamp ){
     $date = gmdate(DATE_ISO8601,$timestamp);
     $xspf->addPlaylistInfo('date', $date);
 }

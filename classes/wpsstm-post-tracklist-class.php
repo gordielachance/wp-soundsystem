@@ -8,8 +8,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     var $default_options = array();
     var $options = array();
-    
-    var $updated_time = null;
     public $is_expired = false;
     
     var $pagination = array(
@@ -110,9 +108,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //time updated
         //TOUFIX bad logic.  We should rather update the post time when an import is done.
         if ( $last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ){
-            $this->updated_time = (int)$last_import_time;
+            $this->date_timestamp = (int)$last_import_time;
         }else{
-            $this->updated_time = (int)get_post_modified_time( 'U', true, $this->post_id, true );
+            $this->date_timestamp = (int)get_post_modified_time( 'U', true, $this->post_id, true );
         }
         
         if ( $this->tracklist_type === 'live' ){
@@ -671,7 +669,23 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $api_url = add_query_arg(array('url'=>$feed_url,'options'=>$importer_options),'import/url');
 
             $xspf = WPSSTM_Core_API::api_request($api_url);
-            if (is_wp_error($xspf)) return $xspf;
+            if ( is_wp_error($xspf) ){
+                $error_code = $xspf->get_error_code();
+                $error_message = $xspf->get_error_message();
+
+                if($error_code == 'rest_forbidden'){
+                    
+                    if ( current_user_can('manage_options') ){
+                        $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstmapi') );
+                        $this->add_notice('wpsstm-api-error',sprintf(__('An API key is needed. Get one %s.','wpsstm'),$api_link)  );
+                    }
+
+                }else{
+                    $this->add_notice('wpsstm-api-error',sprintf(__('WPSSTMAPI error: %s','wpsstm'),$error_message)  );
+                }
+
+                return $xspf;
+            }
 
             /*
             Create playlist
@@ -680,12 +694,17 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $playlist = new WPSSTM_Tracklist();
             $playlist_tracks = array();
             
-            $playlist->title = $xspf['title'];
-            $playlist->author = $xspf['creator'];
-            $playlist->location = $xspf['location'];
-            $playlist->updated_time = strtotime ($xspf['date'] );
+            $playlist->title = wpsstm_get_array_value('title',$xspf);
+            $playlist->author = wpsstm_get_array_value('creator',$xspf);
+            $playlist->location = wpsstm_get_array_value('location',$xspf);
             
-            foreach ((array)$xspf['trackList']['track'] as $xspf_track) {
+            if ($date = wpsstm_get_array_value('date',$xspf) ){
+                $playlist->date_timestamp = strtotime ($date);
+            }
+            
+            $xspf_tracks = wpsstm_get_array_value(array('trackList','track'),$xspf);
+            
+            foreach ((array)$xspf_tracks as $xspf_track) {
 
                 $track = new WPSSTM_Track();
                 
@@ -794,7 +813,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $meta_input = array(
             self::$remote_title_meta_name =>                            $input_tracklist->title,
             WPSSTM_Core_Live_Playlists::$remote_author_meta_name =>     $input_tracklist->author,
-            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>      $input_tracklist->updated_time,
+            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>      $input_tracklist->date_timestamp,
         );
 
         $tracklist_post = array(
@@ -886,7 +905,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         if ( !$cache_seconds ) return false;
         
-        $time_refreshed = $this->updated_time;
+        $time_refreshed = $this->date_timestamp;
         $next_refresh = $time_refreshed + $cache_seconds;
         $now = current_time( 'timestamp', true );
         

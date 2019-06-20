@@ -12,6 +12,7 @@ class WPSSTM_Tracklist{
     var $title = null;
     var $author = null;
     var $location = null;
+    var $date_timestamp = null;
     
     //datas
     var $tracks = array();

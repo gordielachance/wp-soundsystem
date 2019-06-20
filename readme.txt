@@ -156,6 +156,9 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= 2.7.5 =
+* Import urls using the API endpoint
+
 = 2.7.4 =
 * store artist,track & album metas as taxonomies instead of post metas; for performance issues (see https://wordpress.stackexchange.com/a/276315/70449 and https://wordpress.stackexchange.com/a/159012/70449)
 * trash orphan links option
