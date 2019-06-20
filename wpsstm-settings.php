@@ -50,7 +50,11 @@ class WPSSTM_Settings {
     
     function settings_sanitize( $input ){
         $new_input = array();
-
+        
+        //clear some transients
+        delete_transient( WPSSTM_Core_Importer::$importer_links_transient_name );
+        
+        //reset
         if ( self::is_settings_reset() ) return;
             
         if( isset( $input['trash-orphan-tracks'] ) ){

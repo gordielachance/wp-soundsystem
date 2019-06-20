@@ -3,6 +3,7 @@
 class WPSSTM_Core_Importer{
 
     static $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
+    static $importer_links_transient_name = 'wpsstmapi_importers_links';
 
     function __construct(){
 
@@ -540,6 +541,20 @@ class WPSSTM_Core_Importer{
 
         echo $output;
 
+    }
+    
+    static function get_import_services(){
+        
+        $services = get_transient( self::$importer_links_transient_name );
+
+        if (false === $services){
+            $services = WPSSTM_Core_API::api_request('import/services/get');
+            if ( !is_wp_error($services) ){
+                set_transient( self::$importer_links_transient_name, $services, 1 * DAY_IN_SECONDS );
+            }
+        }
+        
+        return $services;
     }
 
 }
