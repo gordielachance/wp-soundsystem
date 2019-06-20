@@ -1,7 +1,6 @@
 <?php
 
-//TOUFIX TOUREMOVE define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/');
-define('WPSSTM_API_URL','http://localhost:8888/la-bonne-toune/wordpress/wp-json/');
+define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/');
 define('WPSSTM_API_REGISTER_URL','https://api.spiff-radio.org/?p=10');
 define('WPSSTM_API_NAMESPACE','wpsstmapi/v1');
 
