@@ -1177,7 +1177,7 @@ class WPSSTM_Core_Tracks{
         }
 
         if ($trashed){
-            $track->track_log( json_encode(array('post_id'=>$post_id,'links'=>$links_query->post_count,'trashed'=>$trashed)),"WPSSTM_Post_Tracklist::trash_track_links()");
+            //$track->track_log( json_encode(array('post_id'=>$post_id,'links'=>$links_query->post_count,'trashed'=>$trashed)),"WPSSTM_Post_Tracklist::trash_track_links()");
         }
 
     }
