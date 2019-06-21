@@ -1090,7 +1090,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function get_html_metas(){
         $metas = array(
-            'numTracks' => $this->track_count
+            'numTracks' => $this->get_subtracks_count(),
         );
         
         if ( $this->tracklist_type == 'live'){
