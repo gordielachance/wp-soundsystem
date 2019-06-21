@@ -408,12 +408,19 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //trash tracklist
         if ( $can_trash_tracklist ){
+            
             $actions['trash'] = array(
                 'text' =>      __('Trash'),
                 'classes' =>    array('wpsstm-advanced-action'),
                 'desc' =>       __('Trash this tracklist','wpsstm'),
                 'href' =>       $this->get_tracklist_action_url('trash'),
             );
+            
+            $is_trashed = ( get_post_type($this->post_id) === 'trash' );
+            if ($is_trashed){
+                $actions['trash']['classes'][] = 'wpsstm-freeze';
+            }
+
         }
 
         return apply_filters('wpsstm_tracklist_actions',$actions, $this);

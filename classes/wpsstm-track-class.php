@@ -1001,6 +1001,12 @@ class WPSSTM_Track{
                 'desc' =>       __('Trash this track','wpsstm'),
                 'href' =>       $this->get_track_action_url('trash'),
             );
+            
+            $is_trashed = ( get_post_type($this->post_id) === 'trash' );
+            if ($is_trashed){
+                $actions['trash']['classes'][] = 'wpsstm-freeze';
+            }
+            
         }
         
         //backend
