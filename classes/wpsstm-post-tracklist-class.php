@@ -1030,7 +1030,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( is_wp_error($success) ) return $success;
 
         $track->subtrack_id = $wpdb->insert_id;
-        return $success;
+        return $wpdb->insert_id;
 
     }
 
