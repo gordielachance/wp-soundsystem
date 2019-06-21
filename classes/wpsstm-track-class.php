@@ -970,7 +970,7 @@ class WPSSTM_Track{
                     $actions['toggle-tracklists'] = array(
                         'text' =>      __('Playlists manager','wpsstm'),
                         'href' =>       $this->get_track_action_url('manage'),
-                        'classes' =>    array('wpsstm-track-popup'),
+                        'classes' =>    array('wpsstm-action-popup'),
                     );
                 }else{
                     $actions['toggle-tracklists'] = array(
@@ -1013,7 +1013,7 @@ class WPSSTM_Track{
         if ($can_edit_track){
             $actions['edit-backend'] = array(
                 'text' =>      __('Edit Track','wpsstm'),
-                'classes' =>    array('wpsstm-advanced-action','wpsstm-track-popup'),
+                'classes' =>    array('wpsstm-advanced-action','wpsstm-action-popup'),
                 'href' =>       get_edit_post_link( $this->post_id ),
             );
         }

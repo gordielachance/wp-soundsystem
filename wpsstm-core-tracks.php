@@ -837,7 +837,7 @@ class WPSSTM_Core_Tracks{
     function metabox_track_options_content( $post ){
         global $wpsstm_track;
         
-        $classes =  array('wpsstm-track-popup button');
+        $classes =  array('wpsstm-action-popup button');
 
         $attr = array(
             'href' =>       $wpsstm_track->get_track_action_url('manage'),
