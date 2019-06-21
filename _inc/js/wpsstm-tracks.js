@@ -212,8 +212,8 @@ class WpsstmTrack extends HTMLElement{
             var loader_el = $('<p class="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
             var popup = $('<div></div>').append(loader_el);
 
-            var popup_w = $(window).width();
-            var popup_h = $(window).height();
+            var popup_w = $(window).width() *.75;
+            var popup_h = $(window).height() *.75;
 
             popup.dialog({
                 width:popup_w,
@@ -222,6 +222,7 @@ class WpsstmTrack extends HTMLElement{
                 dialogClass: 'wpsstm-track-dialog wpsstm-dialog dialog-loading',
 
                 open: function(ev, ui){
+                    $('body').addClass('wpsstm-popup-overlay');
                     var dialog = $(this).closest('.ui-dialog');
                     var dialog_content = dialog.find('.ui-dialog-content');
                     var iframe = $('<iframe src="'+content_url+'"></iframe>');
@@ -231,6 +232,7 @@ class WpsstmTrack extends HTMLElement{
                     });
                 },
                 close: function(ev, ui){
+                    $('body').removeClass('wpsstm-popup-overlay');
                 }
 
             });

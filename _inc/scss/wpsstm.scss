@@ -165,10 +165,17 @@ a.toggle-children-link, .toggle-children-link a{
 }
 
 /*popups*/
+
+body.wpsstm-popup-overlay >*:not(.wpsstm-dialog){
+    @extend .wpsstm-freeze;
+    opacity:.25;
+}
+
 .wpsstm-dialog{
     z-index:11;
     background:rgba(255,255,255,.98);
-    border:1px solid #F7F7F7;
+    border:1px solid rgba(0, 0, 0, .2);
+    @include box-shadow( rgba(0, 0, 0, 0.1) 0 5px 10px );
     
     position:relative;
 

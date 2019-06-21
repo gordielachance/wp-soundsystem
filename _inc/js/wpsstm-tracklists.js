@@ -13,8 +13,8 @@ $('body.wpsstm-popup').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklist
     var loader_el = $('<p class="wpsstm-dialog-loader" class="wpsstm-loading-icon"></p>');
     var popup = $('<div></div>').append(loader_el);
 
-    popup_w = $(window).width();
-    popup_h = $(window).height();
+    var popup_w = $(window).width() *.75;
+    var popup_h = $(window).height() *.75;
 
     popup.dialog({
         width:popup_w,
@@ -23,6 +23,7 @@ $('body.wpsstm-popup').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklist
         dialogClass: 'wpsstm-tracklist-dialog wpsstm-dialog dialog-loading',
 
         open: function(ev, ui){
+            $('body').addClass('wpsstm-popup-overlay');
             var dialog = $(this).closest('.ui-dialog');
             var dialog_content = dialog.find('.ui-dialog-content');
             var iframe = $('<iframe src="'+content_url+'"></iframe>');
@@ -32,6 +33,7 @@ $('body.wpsstm-popup').on('click', 'a.wpsstm-tracklist-popup,li.wpsstm-tracklist
             });
         },
         close: function(ev, ui){
+            $('body').removeClass('wpsstm-popup-overlay');
         }
 
     });

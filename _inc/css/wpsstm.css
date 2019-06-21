@@ -111,7 +111,7 @@ input.wpsstm-fullwidth {
 }
 
 /* line 90, ../scss/_wpsstm-shared.scss */
-.wpsstm-freeze, input.input-loading, input[type='checkbox'][readonly], .wpsstm-action.action-loading, wpsstm-tracklist.tracklist-reloading, wpsstm-tracklist .wpsstm-new-subtrack.action-loading, wpsstm-track.track-reloading {
+.wpsstm-freeze, input.input-loading, input[type='checkbox'][readonly], .wpsstm-action.action-loading, body.wpsstm-popup-overlay > *:not(.wpsstm-dialog), wpsstm-tracklist.tracklist-reloading, wpsstm-tracklist .wpsstm-new-subtrack.action-loading, wpsstm-track.track-reloading {
   pointer-events: none;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
@@ -376,58 +376,66 @@ ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
 }
 
 /*popups*/
-/* line 168, ../scss/wpsstm.scss */
+/* line 169, ../scss/wpsstm.scss */
+body.wpsstm-popup-overlay > *:not(.wpsstm-dialog) {
+  opacity: .25;
+}
+
+/* line 174, ../scss/wpsstm.scss */
 .wpsstm-dialog {
   z-index: 11;
   background: rgba(255, 255, 255, 0.98);
-  border: 1px solid #F7F7F7;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: rgba(0, 0, 0, 0.1) 0 5px 10px;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0 5px 10px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 5px 10px;
   position: relative;
 }
-/* line 179, ../scss/wpsstm.scss */
+/* line 186, ../scss/wpsstm.scss */
 .wpsstm-dialog button.ui-dialog-titlebar-close {
   background: none;
   color: black;
 }
-/* line 184, ../scss/wpsstm.scss */
+/* line 191, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-content {
   display: -webkit-flex !important;
   display: flex !important;
 }
-/* line 186, ../scss/wpsstm.scss */
+/* line 193, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-content .wpsstm-dialog-loader {
   font-size: 3em;
 }
-/* line 191, ../scss/wpsstm.scss */
+/* line 198, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-content > * {
   margin: auto;
 }
-/* line 194, ../scss/wpsstm.scss */
+/* line 201, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-content .wpsstm-dialog-loader {
   display: none;
 }
-/* line 203, ../scss/wpsstm.scss */
+/* line 210, ../scss/wpsstm.scss */
 .wpsstm-dialog.dialog-loading .ui-dialog-content > * {
   display: none;
 }
-/* line 206, ../scss/wpsstm.scss */
+/* line 213, ../scss/wpsstm.scss */
 .wpsstm-dialog.dialog-loading .ui-dialog-content .wpsstm-dialog-loader {
   display: inherit;
 }
-/* line 213, ../scss/wpsstm.scss */
+/* line 220, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-titlebar-close {
   position: absolute;
   right: 0;
   top: 0;
 }
-/* line 219, ../scss/wpsstm.scss */
+/* line 226, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-titlebar-close .ui-icon-closethick:before {
   content: "\f00d";
 }
-/* line 223, ../scss/wpsstm.scss */
+/* line 230, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-titlebar-close .ui-button-text {
   display: none;
 }
-/* line 229, ../scss/wpsstm.scss */
+/* line 236, ../scss/wpsstm.scss */
 .wpsstm-dialog iframe {
   width: 100%;
   height: 100%;
