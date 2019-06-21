@@ -80,7 +80,6 @@ Get more out of this plugin by [registering an API key](https://api.spiff-radio.
 
 * the Tracklist Importer
 * the Autolink module
-* the Radios post type
 
 Those are optionals, but are nice features to a solid plugin.
 Consider getting one as a nice way to support the work done – hundred of hours – , and to ensure its durability.
@@ -93,9 +92,7 @@ This would be very appreciated — Thanks !
 
 = Dependencies =
 
-* [phpQuery](https://github.com/punkave/phpQuery) - a PHP port of jQuery selectors
 * [PHP Last.fm API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
-* [forceutf8](https://github.com/neitanod/forceutf8) - fixes mixed encoded strings
 
 = Contributors =
 
