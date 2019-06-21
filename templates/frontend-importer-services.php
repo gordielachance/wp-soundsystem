@@ -1,15 +1,19 @@
 <?php
-$services = array();
-$links = apply_filters('wpsstm_wizard_service_links',array());
 
-if ( empty($links) ) return;
+$services = WPSSTM_Core_Importer::get_import_services();
+
+if ( is_wp_error($services) ){
+    //TODOU?
+}
+
+if (!$services) return;
 
 //wrap
 $list_els = array_map(
    function ($el) {
       return "<li>{$el}</li>";
    },
-   $links
+   $services
 );
 ?>
 <section id="wpsstm-importer-services">

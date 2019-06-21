@@ -3,6 +3,7 @@
 class WPSSTM_Core_Importer{
 
     static $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
+    static $importer_links_transient_name = 'wpsstmapi_importers_links';
 
     function __construct(){
 
@@ -13,7 +14,7 @@ class WPSSTM_Core_Importer{
 
         //backend
         add_action( 'add_meta_boxes', array($this, 'metabox_importer_register'), 11 );
-        add_action( 'save_post', array($this,'metabox_save_importer') );
+        add_action( 'save_post', array($this,'metabox_save_radio_settings') );
 
         add_action( 'admin_enqueue_scripts', array( $this, 'importer_register_scripts_styles' ) );
 
@@ -68,7 +69,7 @@ class WPSSTM_Core_Importer{
         wpsstm_locate_template( 'tracklist-importer.php', true );
     }
     
-    function metabox_save_importer( $post_id ) {
+    function metabox_save_radio_settings( $post_id ) {
 
         //check save status
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
@@ -90,8 +91,7 @@ class WPSSTM_Core_Importer{
         if ( !$data = wpsstm_get_array_value('wpsstm_wizard',$_POST) ) return;
         
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
-
-        $success = self::save_importer($tracklist,$data);
+        $success = self::save_radio_settings($tracklist,$data);
 
     }
 
@@ -196,21 +196,21 @@ class WPSSTM_Core_Importer{
         global $wpsstm_tracklist;
         
         //path
-        $path = $wpsstm_tracklist->preset->get_selectors( array($selector,'path') );
-        $path_forced = $wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'path'));
+        $path = $wpsstm_tracklist->get_importer_options( array('selectors',$selector,'path') );
+        $path_forced = null;//TOUFIX$wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'path'));
         $path_disabled = disabled( (bool)$path_forced, true, false );
         $path = ( $path ? htmlentities($path) : null);
 
 
         //regex
-        $regex = $wpsstm_tracklist->preset->get_selectors(array($selector,'regex') );
-        $regex_forced = $wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'regex'));
+        $regex = $wpsstm_tracklist->get_importer_options( array('selectors',$selector,'regex') );
+        $regex_forced = null;//TOUFIX$wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'regex'));
         $regex_disabled = disabled( (bool)$regex_forced, true, false );
         $regex = ( $regex ? htmlentities($regex) : null);
 
         //attr
-        $attr = $wpsstm_tracklist->preset->get_selectors(array($selector,'attr') );
-        $attr_forced = $wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'attr'));
+        $attr = $wpsstm_tracklist->get_importer_options( array('selectors',$selector,'attr') );
+        $attr_forced = null;//TOUFIX$wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'attr'));
         $attr_disabled = disabled( (bool)$attr_forced, true, false );
         $attr = ( $attr ? htmlentities($attr) : null);
 
@@ -256,7 +256,7 @@ class WPSSTM_Core_Importer{
             }
             
             if ($selector!='tracks'){
-                $tracks_prefix = $wpsstm_tracklist->preset->get_options(array('selectors','tracks','path'));
+                $tracks_prefix = $wpsstm_tracklist->get_importer_options(array('selectors','tracks','path'));
 
                 if ($tracks_prefix){
                     printf(
@@ -272,7 +272,7 @@ class WPSSTM_Core_Importer{
             
             
             printf(
-                '<input type="text" class="wpsstm-importer-selector-jquery" name="%s[selectors][%s][path]" value="%s" %s />',
+                '<input type="text" class="wpsstm-importer-selector-jquery" name="%s[importer][selectors][%s][path]" value="%s" %s />',
                 'wpsstm_wizard',
                 $selector,
                 $path,
@@ -297,7 +297,7 @@ class WPSSTM_Core_Importer{
                                     <?php
 
                                     printf(
-                                        '<span class="wpsstm-importer-selector-attr"><input name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
+                                        '<span class="wpsstm-importer-selector-attr"><input name="%s[importer][selectors][%s][attr]" type="text" value="%s" %s/></span>',
                                         'wpsstm_wizard',
                                         $selector,
                                         $attr,
@@ -316,7 +316,7 @@ class WPSSTM_Core_Importer{
                                     printf(
                                         '<p class="wpsstm-importer-selector-regex">
                                         <span>~</span>
-                                        <input class="regex" name="%s[selectors][%s][regex]" type="text" value="%s" %s />
+                                        <input class="regex" name="%s[importer][selectors][%s][regex]" type="text" value="%s" %s />
                                         <span>~mi</span>
                                         </p>',
                                         'wpsstm_wizard',
@@ -336,7 +336,7 @@ class WPSSTM_Core_Importer{
         
     }
 
-    static private function save_importer(WPSSTM_Post_Tracklist $tracklist,$wizard_data){
+    static private function save_radio_settings(WPSSTM_Post_Tracklist $tracklist,$wizard_data){
         $post_id = $tracklist->post_id;
         $post_type = get_post_type($post_id);
 
@@ -344,52 +344,62 @@ class WPSSTM_Core_Importer{
             return new WP_Error('wpsstm_invalid_tracklist',__('Invalid tracklist','wpsstm'));
         }
         
-        //scraper
-        $db_settings = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
-        $wizard_data = self::sanitize_importer_settings($wizard_data,$tracklist);
+        /*
+        radio
+        */
+        
+        $radio_input = wpsstm_get_array_value('radio',$wizard_data);
+        $radio_input = self::sanitize_radio_settings($radio_input);
         
         //feed URL
-        $feed_url = wpsstm_get_array_value('feed_url',$wizard_data);
+        $feed_url = wpsstm_get_array_value('feed_url',$radio_input);
         
         if ($feed_url){
             update_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name,$feed_url);
-            unset($wizard_data['feed_url']);//we don't want to save it in the scraper settings
         }else{
             delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name);
         }
         
         //website URL
-        $website_url = wpsstm_get_array_value('website_url',$wizard_data);
+        $website_url = wpsstm_get_array_value('website_url',$radio_input);
         
         if ($website_url){
             update_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name,$website_url);
-            unset($wizard_data['website_url']);//we don't want to save it in the scraper settings
         }else{
             delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name);
         }
         
         //cache time
-        $cache_min = wpsstm_get_array_value('cache_min',$wizard_data);
+        $cache_min = wpsstm_get_array_value('cache_min',$radio_input);
         
         if ($cache_min){
             update_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name,$cache_min);
-            unset($wizard_data['cache_min']);//we don't want to save it in the scraper settings
         }else{
             delete_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name);
         }
+        
+        /*
+        importer
+        */
+        
+        $importer_input = wpsstm_get_array_value('importer',$wizard_data);
+        
+        $importer_options = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
+        $importer_input = self::sanitize_importer_settings($importer_input);
 
         //settings have been updated, clear tracklist cache
-        if ($db_settings != $wizard_data){
+        if ($importer_options != $importer_input){
+            //TOUFIX OR if cache time has been updated ?
             wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','Save wizard' );
             $tracklist->remove_cache_timestamp();
         }
 
-        if (!$wizard_data){
+        if (!$importer_input){
             $success = delete_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name);
         }else{
-            $success = update_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name, $wizard_data);
+            $success = update_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name, $importer_input);
         }
-        
+
         //reload settings
         $tracklist->populate_tracklist_post();
 
@@ -401,12 +411,8 @@ class WPSSTM_Core_Importer{
      * Sanitize wizard data
      */
     
-    static function sanitize_importer_settings($input,$tracklist){
-
+    static function sanitize_radio_settings($input){
         $new_input = array();
-
-        //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
-
         
         $new_input['feed_url'] = isset($input['feed_url']) ? trim($input['feed_url']) : null;
         $new_input['website_url'] = isset($input['website_url']) ? trim($input['website_url']) : null;
@@ -415,6 +421,16 @@ class WPSSTM_Core_Importer{
         if ( isset($input['cache_min']) && ctype_digit($input['cache_min']) ){
             $new_input['cache_min'] = $input['cache_min'];
         }
+        
+        return $new_input;
+        
+    }
+    
+    static function sanitize_importer_settings($input){
+
+        $new_input = array();
+
+        //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
 
         //selectors 
         if ( isset($input['selectors']) && !empty($input['selectors']) ){
@@ -435,8 +451,10 @@ class WPSSTM_Core_Importer{
                 if ( isset($value['regex']) ) {
                     $value['regex'] = trim($value['regex']);
                 }
-
-                $new_input['selectors'][$selector_slug] = array_filter($value);
+                
+                if ( $value = array_filter($value) ){
+                    $new_input['selectors'][$selector_slug] = array_filter($value);
+                }
 
             }
         }
@@ -523,6 +541,20 @@ class WPSSTM_Core_Importer{
 
         echo $output;
 
+    }
+    
+    static function get_import_services(){
+        
+        $services = get_transient( self::$importer_links_transient_name );
+
+        if (false === $services){
+            $services = WPSSTM_Core_API::api_request('import/services/get');
+            if ( !is_wp_error($services) ){
+                set_transient( self::$importer_links_transient_name, $services, 1 * DAY_IN_SECONDS );
+            }
+        }
+        
+        return $services;
     }
 
 }

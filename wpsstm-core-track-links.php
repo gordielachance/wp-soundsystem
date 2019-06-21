@@ -571,7 +571,7 @@ class WPSSTM_Core_Track_Links{
     */
     static function trash_orphan_links(){
         
-        if ( !current_user_can('administrator') ){
+        if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
 
@@ -596,7 +596,7 @@ class WPSSTM_Core_Track_Links{
     */
     static function trash_duplicate_links(){
         
-        if ( !current_user_can('administrator') ){
+        if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
 
@@ -623,7 +623,7 @@ class WPSSTM_Core_Track_Links{
         
         $trashed = array();
         
-        if ( !current_user_can('administrator') ){
+        if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
 

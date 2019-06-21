@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.7.4
+Version: 2.7.5
 License: GPL2
 */
 
@@ -57,8 +57,8 @@ class WP_SoundSystem {
     public $post_type_playlist = 'wpsstm_playlist';
     public $post_type_live_playlist = 'wpsstm_live_playlist';
     
-    public $tracklist_post_types = array('wpsstm_playlist');
-    public $static_tracklist_post_types = array('wpsstm_playlist','wpsstm_release');
+    public $tracklist_post_types = array('wpsstm_playlist','wpsstm_live_playlist');
+    public $static_tracklist_post_types = array('wpsstm_playlist','wpsstm_live_playlist','wpsstm_release');
 
     public $subtracks_table_name = 'wpsstm_subtracks';
     public $user;
@@ -122,7 +122,7 @@ class WP_SoundSystem {
     
     function includes(){
         
-        require_once(wpsstm()->plugin_dir . '_inc/php/autoload.php'); // PHP dependencies (last.fm, scraper, etc.)
+        require_once(wpsstm()->plugin_dir . '_inc/php/autoload.php'); // PHP dependencies
         
         require $this->plugin_dir . 'wpsstm-templates.php';
         require $this->plugin_dir . 'wpsstm-functions.php';
@@ -137,17 +137,13 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';
         require $this->plugin_dir . 'wpsstm-core-api.php';
         require $this->plugin_dir . 'classes/wpsstm-music-details.php';
-
-        if ( WPSSTM_Core_API::can_wpsstmapi() === true ){
-            require $this->plugin_dir . 'wpsstm-core-importer.php';
-        }
-
+        require $this->plugin_dir . 'wpsstm-core-importer.php';
         require $this->plugin_dir . 'wpsstm-core-playlists-live.php';
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-post-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-track-link-class.php';
         require $this->plugin_dir . 'classes/wpsstm-player-class.php';
-        require $this->plugin_dir . 'classes/wpsstm-remote-datas.php';
         
         //include APIs/services stuff (lastfm,youtube,spotify,etc.)
         $this->load_services();

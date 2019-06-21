@@ -15,19 +15,12 @@ class WPSSTM_Core_Live_Playlists{
 
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_live_playlist' ));
 
-        if ( wpsstm()->can_importer() === true ){
-            
-            wpsstm()->tracklist_post_types[] = 'wpsstm_live_playlist';
-            add_filter( 'pre_get_posts', array($this,'pre_get_tracklist_by_pulse') );
-            add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
-            add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
+        add_filter( 'pre_get_posts', array($this,'pre_get_tracklist_by_pulse') );
+        add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
+        add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
 
-            add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
-            add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
-
-        }else{
-            add_filter( 'the_content', array( $this, 'content_cannot_radios_notice' ) );
-        }
+        add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_community_view') );
 
     }
 
@@ -201,22 +194,6 @@ class WPSSTM_Core_Live_Playlists{
         
 
         return $query;
-    }
-    
-    function content_cannot_radios_notice($content){
-        global $post;
-
-        if ( get_post_type() !== wpsstm()->post_type_live_playlist ) return $content;
-        $can = wpsstm()->can_importer();
-        
-        if ( is_wp_error($can) ){
-            $notice = $can->get_error_message();
-            $notice = sprintf('<p class="wpsstm-notice">%s</p>',$notice);
-            $content.= $notice;
-        }
-
-        return $content;
-        
     }
 
 }

@@ -277,6 +277,7 @@ class WPSSTM_Core_Tracks{
         
         if ($success){
             if ( is_wp_error($success) ){
+                //TOUFIX we should remove that track notice function.
                 $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
             }else{
                 $wpsstm_track->add_notice('success',__('Track action success!','wpsstm'));
@@ -1176,7 +1177,7 @@ class WPSSTM_Core_Tracks{
         }
 
         if ($trashed){
-            $track->track_log( json_encode(array('post_id'=>$post_id,'links'=>$links_query->post_count,'trashed'=>$trashed)),"WPSSTM_Post_Tracklist::trash_track_links()");
+            //$track->track_log( json_encode(array('post_id'=>$post_id,'links'=>$links_query->post_count,'trashed'=>$trashed)),"WPSSTM_Post_Tracklist::trash_track_links()");
         }
 
     }
@@ -1225,7 +1226,7 @@ class WPSSTM_Core_Tracks{
     */
     static function trash_orphan_tracks(){
         
-        if ( !current_user_can('administrator') ){
+        if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
 

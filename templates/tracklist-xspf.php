@@ -18,7 +18,7 @@ if ( $is_download ){
     header("Content-Type: text/xml");
 }
 
-require wpsstm()->plugin_dir . 'classes/wpsstm-playlist-xspf.php';
+require wpsstm()->plugin_dir . '_inc/php/xspf.php';
 
 $xspf = new mptre\Xspf();
 
@@ -31,7 +31,7 @@ if ( $author = $tracklist->author ){
     $xspf->addPlaylistInfo('creator', $author);
 }
 
-if ( $timestamp = $tracklist->updated_time ){
+if ( $timestamp = $tracklist->date_timestamp ){
     $date = gmdate(DATE_ISO8601,$timestamp);
     $xspf->addPlaylistInfo('date', $date);
 }

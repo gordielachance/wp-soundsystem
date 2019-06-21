@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: https://api.spiff-radio.org?p=31
 Tags: music,audio player,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks
 Requires at least: 4.9
-Tested up to: 5.2.1
+Tested up to: 5.2.2
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -155,6 +155,9 @@ The community user is a Wordpress user you need to create, and that will be assi
 8. Music menu on a BuddyPress profile
 
 == Changelog ==
+
+= 2.7.5 =
+* Import urls using the API endpoint
 
 = 2.7.4 =
 * store artist,track & album metas as taxonomies instead of post metas; for performance issues (see https://wordpress.stackexchange.com/a/276315/70449 and https://wordpress.stackexchange.com/a/159012/70449)

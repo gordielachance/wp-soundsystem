@@ -40,7 +40,7 @@ $notice = $wpsstm_tracklist->importer_notice();
         <p class="wpsstm-tracklist-time">
             <?php
             //updated
-            if ($updated = $wpsstm_tracklist->updated_time){
+            if ($updated = $wpsstm_tracklist->date_timestamp){
                 ?>
                 <time class="wpsstm-tracklist-updated">
                     <i class="fa fa-clock-o" aria-hidden="true"></i> 

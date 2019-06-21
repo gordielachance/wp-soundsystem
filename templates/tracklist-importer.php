@@ -2,7 +2,6 @@
 global $wpsstm_tracklist;
 
 $wpsstm_tracklist = new WPSSTM_Post_Tracklist(get_the_ID());
-$wpsstm_tracklist->populate_preset();
 
 $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
 
@@ -22,13 +21,13 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
         <h3 class="wpsstm-importer-section-label"><?php _e('Feed URL','wpsstm');?></h3>
         <?php _e('URL where we could fetch the tracklist.  The data could be HTML, XML, XSPF, JSON,..','wpsstm');?>
         <p>
-            <input type="text" name="wpsstm_wizard[feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a tracklist URL or type a bang (eg. artist:Gorillaz)','wpsstm');?>" />
+            <input type="text" name="wpsstm_wizard[radio][feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a tracklist URL or type a bang (eg. artist:Gorillaz)','wpsstm');?>" />
         </p>
         <h3 class="wpsstm-importer-section-label"><?php _e('Website URL','wpsstm');?></h3>
         <?php _e("URL of the link that will be displayed in the tracklist header.",'wpsstm');?><br/>
         <?php _e("If empty, the Feed URL will be used : fill it when the feed URL points to raw datas.",'wpsstm');?>
         <p>
-            <input type="text" name="wpsstm_wizard[website_url]" value="<?php echo $wpsstm_tracklist->website_url;?>" class="wpsstm-fullwidth" />
+            <input type="text" name="wpsstm_wizard[radio][website_url]" value="<?php echo $wpsstm_tracklist->website_url;?>" class="wpsstm-fullwidth" />
         </p>
     </div>
     
@@ -53,12 +52,12 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
             <h4 class="wpsstm-importer-row-label"><?php _e('Order','wpsstm');?></h4>
             <div class="wpsstm-importer-row-content">
                 <?php
-                $forced_option = $wpsstm_tracklist->preset->get_preset_options('tracks_order');
-                $option = ($forced_option) ? $forced_option : $wpsstm_tracklist->preset->get_options('tracks_order');
+                $forced_option = null;//TOUFIX$wpsstm_tracklist->preset->get_preset_options('tracks_order');
+                $option = ($forced_option) ? $forced_option : $wpsstm_tracklist->get_importer_options('tracks_order');
                 $disabled = disabled( (bool)$forced_option, true, false );
 
                 $desc_text = sprintf(
-                    '<input type="radio" name="%1s[tracks_order]" value="desc" %s %s /><span class="wizard-field-desc">%s</span>',
+                    '<input type="radio" name="%1s[importer][tracks_order]" value="desc" %s %s /><span class="wizard-field-desc">%s</span>',
                     'wpsstm_wizard',
                     checked($option, 'desc', false),
                     $disabled,
@@ -66,7 +65,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
                 );
 
                 $asc_text = sprintf(
-                    '<input type="radio" name="%s[tracks_order]" value="asc" %s %s /><span class="wizard-field-desc">%s</span>',
+                    '<input type="radio" name="%s[importer][tracks_order]" value="asc" %s %s /><span class="wizard-field-desc">%s</span>',
                     'wpsstm_wizard',
                     checked($option, 'asc', false),
                     $disabled,
@@ -145,7 +144,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
                 $desc = implode("<br/>",$desc);
 
                 printf(
-                    '<input type="number" name="%s[cache_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
+                    '<input type="number" name="%s[radio][cache_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
                     'wpsstm_wizard',
                     $option,
                     __('minutes','spiff'),
