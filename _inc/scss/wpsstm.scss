@@ -55,6 +55,16 @@
 
 }
 
+.wpsstm-copy-link{
+    text-align:center;
+    margin: 2em;
+    input[type="text"]{
+        padding:.5em;
+        font-size:1.5em;
+        text-align:center;
+    }
+}
+
 ul{
     &.comma-list{
         list-style: none;

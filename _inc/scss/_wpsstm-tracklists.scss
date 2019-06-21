@@ -55,64 +55,82 @@ wpsstm-tracklist{
         font-size:.9em;
         text-align:center;
         
-        .wpsstm-tracklist-image{
+        @include display-flex();
+        
+        .wpsstm-tracklist-cover{
             position:relative;
             width:25%;
             box-sizing: content-box;
-            margin-right:.5em;
-            float:left;
-            div{
+            > div{
                 width: 100%;
                 padding-top: 100%; /* 1:1 Aspect Ratio */
                 background: rgba(0, 0, 0, 0.05);
-                img{
-                    width: 100%;
-                    height: 100%;
-                    vertical-align: top;
-                    object-fit: cover;
-                    position:absolute;
-                    top: 0;
-                    left: 0;
+            }
+            .wpsstm-tracklist-play-bt{
+                position: absolute;
+                top: calc(50% - 1em);
+                left: calc(50% - 1em);
+                width: 2em;
+                height: 2em;
+                line-height: 2em;
+                font-size: 2em;
+                text-align: center;
+                text-align: center;
+                border-radius: 50%;
+                background: white;
+                @extend .wpsstm-can-click;
+                z-index: 1;
+            }
+            img{
+                width: 100%;
+                height: 100%;
+                vertical-align: top;
+                object-fit: cover;
+                position:absolute;
+                top: 0;
+                left: 0;
+            }
+        }
+        
+        .wpsstm-tracklist-data{
+            margin:1em;
+            @include flex-grow(1);
+            .wpsstm-live-tracklist-icon{
+                position: absolute;
+                top: 0;
+                right: 0;
+                width: 2em;
+                height: 2em;
+                background: #efef90;
+                border-radius: 50%;
+                @extend .wpsstm-align-both;
+                > *{
+                    font-size:.5em;
                 }
             }
-        }
 
-        .wpsstm-live-tracklist-icon{
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 2em;
-            height: 2em;
-            background: #efef90;
-            border-radius: 50%;
-            @extend .wpsstm-align-both;
-            > *{
-                font-size:.5em;
+            .wpsstm-tracklist-title{
+                font-size:1.5em;
+                margin:0;
+                margin-bottom:.5em;
+            }
+
+            .wpsstm-live-tracklist-link{
+                display:block;
+                @extend .wpsstm-no-underline;
+            }
+            .wpsstm-tracklist-time{
+                font-size:.8em;
+                .wpsstm-tracklist-refresh-time{
+                    @include opacity(.25);
+                }
+            }
+            .wpsstm-live-tracklist-link{
+                display:block;
+                font-size:.8em;
             }
         }
-        
-        .wpsstm-tracklist-title{
-            font-size:1.5em;
-            margin:0;
-            margin-bottom:.5em;
-        }
 
-        .wpsstm-live-tracklist-link{
-            display:block;
-            @extend .wpsstm-no-underline;
-        }
-        .wpsstm-tracklist-time{
-            font-size:.8em;
-            .wpsstm-tracklist-refresh-time{
-                @include opacity(.25);
-            }
-        }
-        .wpsstm-live-tracklist-link{
-            display:block;
-            font-size:.8em;
-        }
-
-        
     }
 
     &.tracklist-reloading{
@@ -185,6 +203,41 @@ wpsstm-tracklist{
         }
 
     }
+    
+    
+    //play BT
+
+    &:not(.tracks-container-has-played){
+        .wpsstm-tracklist-play-bt{
+            animation: opacityPulse 1s linear infinite;
+        }
+    }
+    &.tracks-container-loading .wpsstm-tracklist-play-bt .wpsstm-icon{
+        @extend .wpsstm-loading-icon;
+        @extend .wpsstm-freeze;
+    }
+    &:not(.tracks-container-playing) .wpsstm-tracklist-play-bt .wpsstm-icon:before{
+        content:"\f04b"; //.fa-play
+    }
+    
+    &.tracks-container-has-played{
+        .wpsstm-tracklist-cover{
+            .wpsstm-tracklist-play-bt{
+                display:none;
+            }
+            &:hover .wpsstm-tracklist-play-bt{
+                display:inherit;
+            }
+        }
+    }
+
+    &.tracks-container-playing{
+        .wpsstm-tracklist-play-bt .wpsstm-icon:before{
+            content:"\f04c"; //.fa-pause;
+        }
+    }
+    
+
 
 }
 

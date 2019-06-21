@@ -462,6 +462,9 @@ class WPSSTM_Core_Tracklists{
             case 'export':
                 $template = wpsstm_locate_template( 'tracklist-xspf.php' );
             break;
+            case 'share':
+                $template = wpsstm_locate_template( 'tracklist-share.php' );
+            break;
         }
 
         return $template;

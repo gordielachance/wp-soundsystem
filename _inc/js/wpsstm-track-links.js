@@ -212,37 +212,27 @@ class WpsstmLink extends HTMLElement{
         });
 
         $(player.current_media).on('error', function(error) {
-            track_instances.addClass('track-error');
+            track.status = 'error';
             link_instances.removeClass('link-active');
             link_instances.playable = false;
             success.reject(error);
         });
 
         $(player.current_media).on('play', function() {
-            $(player).addClass('player-playing player-has-played');
-            tracks_container.addClass('tracks-container-playing tracks-container-has-played');
-            track_instances.removeClass('track-error').addClass('track-playing track-has-played');
-            track.status = 'playing';
             link_instances.addClass('link-playing link-has-played');
+            track.status = 'playing';
             success.resolve();
         });
 
         $(player.current_media).on('pause', function() {
-            //player.debug('player - pause');
-
-            $(player).removeClass('player-playing');
-            tracks_container.removeClass('tracks-container-playing');
-            track.status = 'paused';
-            track_instances.removeClass('track-playing');
             link_instances.removeClass('link-playing');
+            track.status = 'paused';
         });
 
         $(player.current_media).on('ended', function() {
 
             player.debug('media - ended');
             
-            $(player).removeClass('player-playing');
-            tracks_container.removeClass('tracks-container-playing');
             track.status = '';
             link_instances.removeClass('link-playing link-active');
 

@@ -212,7 +212,7 @@ class WpsstmPlayer extends HTMLElement{
         
         $(container).addClass('tracks-container');
         var tracks = $(container).find('wpsstm-track');
-        var icon = $(container).find('.wpsstm-tracks-container-icon');
+        var icon = $(container).find('.wpsstm-tracklist-play-bt');
         var autoplayTrackIdx;
 
         tracks.each(function(index, track) {
@@ -226,7 +226,7 @@ class WpsstmPlayer extends HTMLElement{
         player.debug("Queued tracks: " + tracks.length );
         
         //container play icon
-        $(container).on('click', '.wpsstm-tracks-container-icon', function(e) {
+        $(container).on('click', '.wpsstm-tracklist-play-bt', function(e) {
 
             var tracks = $(player).find('wpsstm-track');
             var activeTrack = tracks.filter('.track-active').get(0);

@@ -72,27 +72,41 @@ class WpsstmTrack extends HTMLElement{
         var track = this;
         var trackInstances = track.get_instances();
         var player = track.closest('wpsstm-player');
-        
+        var tracksContainer = trackInstances.closest('.tracks-container');
+
         //track.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
 
         switch (attrName) {
             case 'trackstatus':
 
                 if ( !newVal ){
+                    trackInstances.removeClass('track-active track-loading');
+                    $(player).removeClass('player-playing');
 
-                    var track_instances = track.get_instances();
-                    track_instances.removeClass('track-active track-loading');
                     track.end_track();
+                }
+
+                if ( newVal == 'error' ){
+                    trackInstances.addClass('track-error');
                 }
 
                 if (newVal == 'request'){
                     player.setup_track(track); 
                     trackInstances.addClass('track-loading');
-                    
+                    $(tracksContainer).addClass('tracks-container-loading tracks-container-has-played');
                 }
                 
                 if ( newVal == 'playing' ){
-                    trackInstances.removeClass('track-loading');
+                    trackInstances.removeClass('track-loading track-error').addClass('track-playing track-has-played');
+                    
+                    $(player).addClass('player-playing player-has-played');
+                    $(tracksContainer).removeClass('tracks-container-loading').addClass('tracks-container-playing tracks-container-has-played');
+                }
+                
+                if ( newVal == 'paused' ){
+                    $(player).removeClass('player-playing');
+                    $(tracksContainer).removeClass('tracks-container-playing');
+                    trackInstances.removeClass('track-playing');
                 }
 
             break;

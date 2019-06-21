@@ -336,7 +336,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'text' =>       __('Share', 'wpsstm'),
             'classes' =>    array('wpsstm-advanced-action'),
             'href' =>       $this->get_tracklist_action_url('share'),
-            'classes' =>    array('wpsstm-tracklist-popup'),
+            'classes' =>    array('wpsstm-tracklist-popup wpsstm-action-popup'),
         );
         
         //export
@@ -774,6 +774,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             */
 
             $updated = $this->update_radio_data($playlist);
+            
+            
+            $this->tracklist_log(
+                array(
+                    'tracks_populated'=>$this->track_count,
+                    'is_expired'=>$this->is_expired,
+                    'refresh_delay'=>$refresh_delay
+                ),'Imported subtracks'
+            );
+            
 
         }
         
@@ -782,14 +792,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( !is_wp_error($tracks) ){
             $this->add_tracks($tracks);
         }
-
-        $this->tracklist_log(
-            array(
-                'tracks_populated'=>$this->track_count,
-                'is_expired'=>$this->is_expired,
-                'refresh_delay'=>$refresh_delay
-            ),'Populated subtracks'
-        );
 
     }
 
