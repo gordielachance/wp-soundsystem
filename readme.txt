@@ -157,7 +157,7 @@ The community user is a Wordpress user you need to create, and that will be assi
 == Changelog ==
 
 = 2.7.5 =
-* Import urls using the API endpoint
+* Moved all the import stuff to the API.  Now uses rest route 'wp-json/wpsstmapi/v1/import/url/?url=...' (on the API)
 
 = 2.7.4 =
 * store artist,track & album metas as taxonomies instead of post metas; for performance issues (see https://wordpress.stackexchange.com/a/276315/70449 and https://wordpress.stackexchange.com/a/159012/70449)
