@@ -629,7 +629,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'itemtype' =>                           "http://schema.org/MusicPlaylist",
             'data-wpsstm-tracklist-id' =>           $this->post_id,
             'data-wpsstm-domain' =>                 wpsstm_get_url_domain( $this->feed_url ),
-            'wpsstm-playable' =>                    ( wpsstm()->get_options('player_enabled') && $this->get_options('playable') ),
+            'wpsstm-playable' =>                    ( wpsstm()->get_options('player_enabled') && $this->get_options('playable') && $this->track_count ),
         );
 
         $values_attr = array_merge($values_defaults,(array)$values_attr);
@@ -788,7 +788,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( !is_wp_error($tracks) ){
             $this->add_tracks($tracks);
         }
-
+        
     }
 
     

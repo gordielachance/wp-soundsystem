@@ -153,6 +153,12 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= 2.7.6 =
+* better player JS
+* fixed tracklist share
+* better tracklist header
+* improve lightbox
+
 = 2.7.5 =
 * Moved all the import stuff to the API.  Now uses rest route 'wp-json/wpsstmapi/v1/import/url/?url=...' (on the API)
 
