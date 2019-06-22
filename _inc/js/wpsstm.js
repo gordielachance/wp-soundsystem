@@ -56,8 +56,9 @@ $(document).on('click', 'a.wpsstm-close-notice', function(e) {
 var bottomPlayer = $('wpsstm-player#wpsstm-bottom-player').get(0);
 if (bottomPlayer){
     $(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
-        bottomPlayer.queueContainer(tracklist);
-
+        if (tracklist.playable){
+            bottomPlayer.queueContainer(tracklist);
+        }
     });
 }
 

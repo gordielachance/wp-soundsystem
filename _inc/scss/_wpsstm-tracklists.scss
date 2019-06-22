@@ -133,6 +133,10 @@ wpsstm-tracklist{
         }
 
     }
+    
+    &:not([wpsstm-playable]) .wpsstm-tracklist-play-bt{
+        display:none;
+    }
 
     &.tracklist-reloading{
         @extend .wpsstm-freeze;

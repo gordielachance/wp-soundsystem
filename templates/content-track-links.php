@@ -9,12 +9,13 @@ $init_autolink = ( !$wpsstm_track->have_links() && !wpsstm()->get_options('ajax_
 if ( $init_autolink ){
     $wpsstm_track->autolink();
 }
+?>
 
-if ( $wpsstm_track->have_links() ) { ?>
-    <div class="wpsstm-track-links-list">
-        <?php
+<div class="wpsstm-track-links-list">
+    <?php
+    if ( $wpsstm_track->have_links() ) {
         while ( $wpsstm_track->have_links() ) {
-            
+
             $wpsstm_track->the_track_link();
             global $wpsstm_link;
             ?>
@@ -29,7 +30,7 @@ if ( $wpsstm_track->have_links() ) { ?>
             <?php
 
         }
-        ?>
-    </div>
-    <?php 
-}
+    }
+    ?>
+</div>
+<?php 

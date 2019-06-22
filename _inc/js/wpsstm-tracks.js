@@ -1,28 +1,5 @@
 var $ = jQuery.noConflict();
 
-//play/pause track button
-$(document).on('click','.wpsstm-track-action-play', function(e) {
-    e.preventDefault();
-    var track = this.closest('wpsstm-track');
-    var player;
-    var trackIdx;
-
-    if (track.queueNode){ //page track, get the queue track
-        track = track.queueNode;
-    }
-    
-    player = track.closest('wpsstm-player');
-    trackIdx = Array.from(track.parentNode.children).indexOf(track);
-
-    var links = $(track).find('wpsstm-track-link');
-    var activeLink = links.filter('.link-active').get(0);
-    var linkIdx = links.index( activeLink );
-    linkIdx = (linkIdx > 0) ? linkIdx : 0;
-    
-    player.play_queue(trackIdx,linkIdx);
-
-});
-
 class WpsstmTrack extends HTMLElement{
     constructor() {
         super(); //required to be first
@@ -35,6 +12,7 @@ class WpsstmTrack extends HTMLElement{
         this.post_id =              undefined;
         this.pageNode =             undefined;
         this.queueNode =            undefined;
+        this.player =               undefined;
 
         // Setup a click listener on <wpsstm-tracklist> itself.
         this.addEventListener('click', e => {
@@ -71,7 +49,6 @@ class WpsstmTrack extends HTMLElement{
         
         var track = this;
         var trackInstances = track.get_instances();
-        var player = track.closest('wpsstm-player');
         var tracksContainer = trackInstances.closest('.tracks-container');
 
         //track.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
@@ -81,37 +58,36 @@ class WpsstmTrack extends HTMLElement{
 
                 if ( !newVal ){
                     trackInstances.removeClass('track-active track-loading');
-                    $(player).removeClass('player-playing');
+                    $(track.player).removeClass('player-playing');
 
                     track.end_track();
                 }
 
-                if ( newVal == 'error' ){
-                    trackInstances.addClass('track-error');
-                }
-
                 if (newVal == 'request'){
-                    player.setup_track(track); 
-                    trackInstances.addClass('track-loading');
+                    track.player.current_track = track;
+                    track.player.render_queue_controls();
+                    trackInstances.addClass('track-active track-loading');
                     $(tracksContainer).addClass('tracks-container-loading tracks-container-has-played');
                 }
                 
                 if ( newVal == 'playing' ){
                     trackInstances.removeClass('track-loading track-error').addClass('track-playing track-has-played');
                     
-                    $(player).addClass('player-playing player-has-played');
+                    $(track.player).addClass('player-playing player-has-played');
                     $(tracksContainer).removeClass('tracks-container-loading').addClass('tracks-container-playing tracks-container-has-played');
                 }
                 
                 if ( newVal == 'paused' ){
-                    $(player).removeClass('player-playing');
+                    $(track.player).removeClass('player-playing');
                     $(tracksContainer).removeClass('tracks-container-playing');
                     trackInstances.removeClass('track-playing');
                 }
 
             break;
+    
         }
     }
+    
     adoptedCallback(){
         /*
         The custom element has been moved into a new document (e.g. someone called document.adoptNode(el)).
@@ -119,7 +95,7 @@ class WpsstmTrack extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['trackstatus','trackplayable','didautolink'];
+        return ['trackstatus','wpsstm-playable','didautolink'];
     }
     
     get status() {
@@ -131,15 +107,15 @@ class WpsstmTrack extends HTMLElement{
     }
     
     get playable() {
-        return this.hasAttribute('trackplayable');
+        return this.hasAttribute('wpsstm-playable');
     }
     
     set playable(value) {
         const isChecked = Boolean(value);
         if (isChecked) {
-            this.setAttribute('trackplayable', '');
+            this.setAttribute('wpsstm-playable', '');
         } else {
-            this.removeAttribute('trackplayable');
+            this.removeAttribute('wpsstm-playable');
         }
     }
     
@@ -157,7 +133,45 @@ class WpsstmTrack extends HTMLElement{
     }
     
     ///
-    ///
+    listenLinks(){
+        
+        var track = this;
+        
+        /*
+        Toggle display the track when the queue is updated
+        */
+
+        return new MutationObserver(function(mutationsList){
+            for(var mutation of mutationsList) {
+                
+                if (mutation.type == 'childList') {
+                    track.initLinks();
+                }
+            }
+        });
+        
+    }
+    
+    initLinks(){
+        var track = this;
+        var sourceLinks = $(track).find('wpsstm-track-link').filter('[wpsstm-playable]');
+        
+        if (!sourceLinks.length && track.didautolink){
+            track.playable = false;
+        }
+
+        var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
+
+        //link count
+        var linkCountEl = toggleLinksEl.find('.wpsstm-links-count');
+        if ( !linkCountEl.length ){ //create item
+            linkCountEl = $('<span class="wpsstm-links-count"></span>');
+            toggleLinksEl.append(linkCountEl);            
+        }
+
+        track.setAttribute('data-wpsstm-links-count',sourceLinks.length);
+        linkCountEl.text( sourceLinks.length );
+    }
 
     debug(msg){
         var debug = {message:msg,track:this};
@@ -174,37 +188,26 @@ class WpsstmTrack extends HTMLElement{
         track.track_album =         $(track).find('[itemprop="inAlbum"]').text();
         track.post_id =             Number($(track).attr('data-wpsstm-track-id'));
         track.subtrack_id =         Number($(track).attr('data-wpsstm-subtrack-id'));
-
-        /*
-        populate existing links
-        */
-        var trackLinks = $(track).find('wpsstm-track-link');
-        var playableTrackLinks = trackLinks.filter('[linkplayable]');
-        track.playable = (playableTrackLinks.length > 0);
-
-        var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
         
-        //link count
-        var linkCountEl = toggleLinksEl.find('.wpsstm-links-count');
-        if ( !linkCountEl.length ){ //create item
-            linkCountEl = $('<span class="wpsstm-links-count"></span>');
-            toggleLinksEl.append(linkCountEl);            
-        }
+        /*
+        Track Links
+        */
+        
+        var linksNode = $(track).find('.wpsstm-track-links-list').get(0);
+        track.initLinks();
 
-        track.setAttribute('data-wpsstm-links-count',trackLinks.length);
-        linkCountEl.text( trackLinks.length );
+        // Watch for links update
+        var linksUpdated = track.listenLinks();
+        linksUpdated.observe(linksNode,{childList: true});
 
-        // sort track links
-        var links_container = $(this);
-        var links_list_el = links_container.find('.wpsstm-track-links-list');
-
-        links_list_el.sortable({
+        // sort links
+        $(linksNode).sortable({
             axis: "y",
             items : "wpsstm-track-link",
             handle: '.wpsstm-track-link-action-move',
             update: function(event, ui) {
 
-                var linkOrder = links_list_el.sortable('toArray', {
+                var linkOrder = $(linksNode).sortable('toArray', {
                     attribute: 'data-wpsstm-link-id'
                 });
 
@@ -212,8 +215,6 @@ class WpsstmTrack extends HTMLElement{
 
             }
         });
-
-
 
         //toggle favorite
         $(track).on('click','.wpsstm-track-action-favorite,.wpsstm-track-action-unfavorite', function(e) {
@@ -272,8 +273,7 @@ class WpsstmTrack extends HTMLElement{
         var track_instances = track.get_instances();
         var success = $.Deferred();
 
-        track_instances.addClass('track-reloading');
-        track.debug("autolink...");
+        track_instances.addClass('track-links-loading');
 
         var ajax_data = {
             action:     'wpsstm_track_autolink',
@@ -291,43 +291,29 @@ class WpsstmTrack extends HTMLElement{
 
             if ( data.success ){
                 
-                /*
-                delete old nodes, and add new ones instead
-                */
+                var newLinksContainer = $(data.html);
+                var newLinks = newLinksContainer.find('wpsstm-track-link');
 
-                var newContent = $(data.html);
-                
-                var oldStatus = track.status;
+                track_instances.find('.wpsstm-track-links-list').empty().append(newLinks);
 
-                var newQueueTrack = newContent.get(0);
-                var newPageTrack = newContent.clone().get(0);
-
-                var oldQueueNode = track.parentNode;
-                var oldPageNode = track.pageNode;
-
-                newQueueTrack.pageNode = newPageTrack;
-                newPageTrack.queueNode = newQueueTrack;
-
-                oldQueueNode.replaceChild(newQueueTrack, track); //replace in queue
-                oldPageNode.parentNode.replaceChild(newPageTrack, oldPageNode); //replace in page
-                
-                /* pass the status to the new node*/
-                newQueueTrack.status = oldStatus;
-                
-                success.resolve(newQueueTrack);
+                success.resolve();
                 
             }else{
-                track.debug("track refresh failed: " + data.message);
-                success.reject(data.message);
+                success.reject();
             }
         });
         
+        success.done(function(v) {
+            track_instances.attr('didautolink',true);
+        });
+        
         success.fail(function() {
+            track.debug("track refresh failed: ");
             track_instances.addClass('track-error');
         });
 
         success.always(function() {
-            track_instances.removeClass('track-reloading');
+            track_instances.removeClass('track-links-loading');
         });
         
         return success.promise();
@@ -504,7 +490,7 @@ class WpsstmTrack extends HTMLElement{
             data:ajax_data,
             dataType: 'json',
             beforeSend: function() {
-                track_instances.addClass('track-reloading');
+                track_instances.addClass('track-links-loading');
             },
             success: function(data){
                 if (data.success === false) {
@@ -522,7 +508,7 @@ class WpsstmTrack extends HTMLElement{
         })
 
         ajax.always(function() {
-            track_instances.removeClass('track-reloading');
+            track_instances.removeClass('track-links-loading');
         });
         
         
@@ -532,7 +518,6 @@ class WpsstmTrack extends HTMLElement{
     play_track(link_idx){
         var track = this;
         var track_instances = track.get_instances();
-        var player = track.closest('wpsstm-player');
 
         var success = $.Deferred();
         
@@ -562,7 +547,7 @@ class WpsstmTrack extends HTMLElement{
 
         success.fail(function() {
             track_instances.playable = false;
-            player.next_track_jump();
+            track.player.next_track_jump();
         })
 
         return success.promise();
@@ -574,8 +559,7 @@ class WpsstmTrack extends HTMLElement{
     */
     next_tracks_autolink(){
         var track = this;
-        var player = track.closest('wpsstm-player');
-        var tracks = $(player).find('wpsstm-track');
+        var tracks = $(track.player).find('wpsstm-track');
 
         var max_items = 4; //number of following tracks to preload
         var track_index = tracks.index( track );
@@ -601,7 +585,6 @@ class WpsstmTrack extends HTMLElement{
     play_first_available_link(link_idx){
 
         var track = this;
-        var player = track.closest('wpsstm-player');
         var success = $.Deferred();
 
         link_idx = (typeof link_idx !== 'undefined') ? link_idx : 0;
@@ -663,10 +646,8 @@ class WpsstmTrack extends HTMLElement{
         var track_instances = track.get_instances();
         track_instances.removeClass('track-playing');
 
-        var player = track.closest('wpsstm-player');
-
-        if (player && player.current_link){
-            player.current_media.pause();
+        if (track.player && track.player.current_link){
+            track.player.current_media.pause();
             track_instances.find('wpsstm-track-link').removeClass('link-playing link-active');
         }
 

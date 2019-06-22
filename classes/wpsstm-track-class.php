@@ -1039,6 +1039,7 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
             'didautolink' =>                    $this->did_autolink,
+            'wpsstm-playable' =>                wpsstm()->get_options('player_enabled'),
         );
 
         return wpsstm_get_html_attr($attr);

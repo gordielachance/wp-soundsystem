@@ -218,7 +218,7 @@ class WPSSTM_Track_Link{
             'data-wpsstm-link-idx' =>           $this->track->current_link,
             'data-wpsstm-community-link' =>     (int)wpsstm_is_community_post($this->post_id),
             'class' =>                          implode( ' ',$this->get_link_class() ),
-            'linkplayable' =>                   $this->is_playable_link(),
+            'wpsstm-playable' =>                $this->is_playable_link(),
         );
         
         if ( $this->is_playable_link() ){

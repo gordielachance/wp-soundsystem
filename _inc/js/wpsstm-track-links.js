@@ -39,19 +39,19 @@ class WpsstmLink extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['linkplayable'];
+        return ['wpsstm-playable'];
     }
-
+    
     get playable() {
-      return this.hasAttribute('linkplayable');
+        return this.hasAttribute('wpsstm-playable');
     }
-
+    
     set playable(value) {
         const isChecked = Boolean(value);
         if (isChecked) {
-            this.setAttribute('linkplayable', '');
+            this.setAttribute('wpsstm-playable', '');
         } else {
-            this.removeAttribute('linkplayable');
+            this.removeAttribute('wpsstm-playable');
         }
     }
     
@@ -85,10 +85,10 @@ class WpsstmLink extends HTMLElement{
         });
         
         //play link
-        $(self).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link[playable] .wpsstm-link-title', function(e) {
+        $(self).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link[wpsstm-playable] .wpsstm-link-title', function(e) {
             e.preventDefault();
             var link = this.closest('wpsstm-track-link');
-            var track = this.closest('wpsstm-track');
+            var track = this.track;
             var linkIdx = Array.from(link.parentNode.children).indexOf(link);
 
             if (track.queueNode){ //page track, get the queue track
@@ -97,15 +97,15 @@ class WpsstmLink extends HTMLElement{
 
             var trackIdx = Array.from(track.parentNode.children).indexOf(track);
 
-            var player = track.closest('wpsstm-player');
+            if(track.player){
+                //toggle tracklist links
+                if ( !$(track).hasClass('track-playing') ){
+                    var list = $(track).find('.wpsstm-track-links-list');
+                    $( list ).removeClass('active');
+                }
 
-            //toggle tracklist links
-            if ( !$(track).hasClass('track-playing') ){
-                var list = $(track).find('.wpsstm-track-links-list');
-                $( list ).removeClass('active');
+                track.player.play_queue(trackIdx,linkIdx);
             }
-
-            player.play_queue(trackIdx,linkIdx);
 
         });
 
@@ -178,11 +178,10 @@ class WpsstmLink extends HTMLElement{
 
     play_link(){
         var link = this;
-        var track = this.closest('wpsstm-track');
+        var track = this.track;
         var track_instances = link.track.get_instances();
         var link_instances = link.get_instances();
         var tracks_container = track_instances.parents('.tracks-container');
-        var player = this.closest('wpsstm-player');
         var success = $.Deferred();
         
         if( !link.playable ){
@@ -196,55 +195,55 @@ class WpsstmLink extends HTMLElement{
         
         link.debug("play link: " + link.src);
         link.setAttribute('requestLinkPlay',true);
-        player.current_link = link;
+        link.track.player.current_link = link;
 
         /*
         register new events
         */
 
-        $(player.current_media).off(); //remove old events
+        $(link.track.player.current_media).off(); //remove old events
         $(document).trigger( "wpsstmSourceInit",[link] ); //custom event
 
-        $(player.current_media).on('loadeddata', function() {
+        $(track.player.current_media).on('loadeddata', function() {
             
-            player.debug('source loaded');
-            player.current_media.play();
+            track.player.debug('source loaded');
+            track.player.current_media.play();
         });
 
-        $(player.current_media).on('error', function(error) {
+        $(track.player.current_media).on('error', function(error) {
             track.status = 'error';
-            link_instances.removeClass('link-active');
-            link_instances.playable = false;
+            link_instances.removeClass('link-active').addClass('link-error');
+            link.playable = false;
             success.reject(error);
         });
 
-        $(player.current_media).on('play', function() {
-            link_instances.addClass('link-playing link-has-played');
+        $(track.player.current_media).on('play', function() {
+            link_instances.removeClass('link-error').addClass('link-playing link-has-played');
             track.status = 'playing';
             success.resolve();
         });
 
-        $(player.current_media).on('pause', function() {
+        $(track.player.current_media).on('pause', function() {
             link_instances.removeClass('link-playing');
             track.status = 'paused';
         });
 
-        $(player.current_media).on('ended', function() {
+        $(track.player.current_media).on('ended', function() {
 
-            player.debug('media - ended');
+            track.player.debug('media - ended');
             
             track.status = '';
             link_instances.removeClass('link-playing link-active');
 
             //Play next song if any
-            player.next_track_jump();
+            track.player.next_track_jump();
         });
         
         success.always(function(data, textStatus, jqXHR) {
             link_instances.removeClass('link-loading');
         })
         success.done(function(v) {
-            player.tracksHistory.push(track);
+            track.player.tracksHistory.push(track);
             link_instances.playable = true;
             //TOUFIX ajax --> +1 track play; user now playing...
         })
@@ -253,8 +252,8 @@ class WpsstmLink extends HTMLElement{
         })
 
         ////
-        player.current_media.setSrc(link.src);
-        player.current_media.load();
+        track.player.current_media.setSrc(link.src);
+        track.player.current_media.load();
         
         ////
 

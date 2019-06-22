@@ -6,7 +6,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $index = -1;
     var $tracklist_type = 'static';
     
-    var $default_options = array();
+    var $default_options = array(
+        'cache_min' => 15, //toufix broken if within the default options of WPSSTM_Remote_Tracklist
+        'playable'  => true,
+    );
+    
     var $options = array();
     public $is_expired = false;
     
@@ -39,17 +43,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'per_page'      => 0, //TO FIX default option
             'current_page'  => ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1
         );
-        
-        /*
-        options
-        */
-        
-        $can_autolink = ( WPSSTM_Core_Track_Links::can_autolink() === true);
-        
-        $this->default_options = array(
-            'autolink'                => ( wpsstm()->get_options('autolink') && $can_autolink ),
-            'cache_min'          => 15, //toufix broken if within the default options of WPSSTM_Remote_Tracklist
-        );
 
         $this->set_tracklist_pagination($pagination_args);
 
@@ -58,6 +51,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $this->post_id = $post_id;
             $this->populate_tracklist_post();
         }
+
     }
     
     static function get_tracklist_title($post_id){
@@ -90,6 +84,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $db_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
         $this->options = array_replace_recursive($this->default_options,(array)$db_options); //last one has priority
 
+        //separate metas
+        $this->feed_url =       get_post_meta($this->post_id, self::$feed_url_meta_name, true );
+        $this->website_url =    get_post_meta($this->post_id, self::$website_url_meta_name, true );        
+        $this->date_timestamp = (int)get_post_modified_time( 'U', true, $this->post_id, true );
+
         //type        
         $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
         
@@ -100,22 +99,18 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $post_author_id = get_post_field( 'post_author', $this->post_id );
         $this->author = get_the_author_meta( 'display_name', $post_author_id );
 
-        //live
-        $this->feed_url =       get_post_meta($this->post_id, self::$feed_url_meta_name, true );
-        $this->website_url =    get_post_meta($this->post_id, self::$website_url_meta_name, true );
-        $this->cache_min =      ($meta = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true)) ? $meta : $this->options['cache_min'];
-        
-        //time updated
-        //TOUFIX bad logic.  We should rather update the post time when an import is done.
-        if ( $last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ){
-            $this->date_timestamp = (int)$last_import_time;
-        }else{
-            $this->date_timestamp = (int)get_post_modified_time( 'U', true, $this->post_id, true );
-        }
-        
         if ( $this->tracklist_type === 'live' ){
+            
             $seconds = $this->seconds_before_refresh();
             $this->is_expired = ( ($seconds !== false) && ($seconds <= 0) );
+            
+            $last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+            $last_import_time = filter_var($last_import_time, FILTER_VALIDATE_INT);
+
+            if ($last_import_time){
+                $this->date_timestamp = $last_import_time;
+            }
+            
         }
 
         //location
@@ -634,6 +629,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'itemtype' =>                           "http://schema.org/MusicPlaylist",
             'data-wpsstm-tracklist-id' =>           $this->post_id,
             'data-wpsstm-domain' =>                 wpsstm_get_url_domain( $this->feed_url ),
+            'wpsstm-playable' =>                    ( wpsstm()->get_options('player_enabled') && $this->get_options('playable') ),
         );
 
         $values_attr = array_merge($values_defaults,(array)$values_attr);
@@ -893,9 +889,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
         if(!$updated_time) return 0;//never imported
 
-        if (!$this->cache_min) return 0; //no delay
+        if ( !$cache_min = $this->get_options('cache_min') ) return 0; //no delay
 
-        $expiration_time = $updated_time + ($this->cache_min * MINUTE_IN_SECONDS);
+        $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
         $now = current_time( 'timestamp', true );
 
         return $expiration_time - $now;
@@ -909,11 +905,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function get_human_next_refresh_time(){
         
         if ($this->tracklist_type != 'live') return false;
-
-        $cache_seconds = $this->cache_min ? $this->cache_min * MINUTE_IN_SECONDS : false;
-
-        if ( !$cache_seconds ) return false;
+        if ( !$cache_min = $this->get_options('cache_min') ) return false;
         
+        $cache_seconds = $cache_min * MINUTE_IN_SECONDS;
         $time_refreshed = $this->date_timestamp;
         $next_refresh = $time_refreshed + $cache_seconds;
         $now = current_time( 'timestamp', true );

@@ -193,8 +193,7 @@ $(document).on( "wpsstmPlayerInit", function( event,player ) {
 $(document).on( "wpsstmSourceInit", function( event, link ) {
 
     var track =                 link.closest('wpsstm-track');
-    var player =                link.closest('wpsstm-player');
-    var scrobble_icon =         $(player).find('.wpsstm-player-action-scrobbler');
+    var scrobble_icon =         $(track.player).find('.wpsstm-player-action-scrobbler');
     var scrobbler_enabled =     scrobble_icon.hasClass('active');
 
     var nowPlayingTrack = function(){
@@ -214,7 +213,7 @@ $(document).on( "wpsstmSourceInit", function( event, link ) {
     }
 
     var ScrobbleTrack = function() {
-        var duration = player.current_media.duration;
+        var duration = track.player.current_media.duration;
         if ( duration < 30) return;
 
         if (scrobbler_enabled){
@@ -238,10 +237,10 @@ $(document).on( "wpsstmSourceInit", function( event, link ) {
     }
 
     //now playing
-    $(player.current_media).one('play', nowPlayingTrack);
+    $(track.player.current_media).one('play', nowPlayingTrack);
 
     //track end
-    $(player.current_media).one('ended', ScrobbleTrack);
+    $(track.player.current_media).one('ended', ScrobbleTrack);
 
 });
 

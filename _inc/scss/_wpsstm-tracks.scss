@@ -102,6 +102,7 @@ wpsstm-track{
     }
     
     .wpsstm-track-action-play{
+        display:none; //display using JS
         margin:0;
     }
     
@@ -114,7 +115,7 @@ wpsstm-track{
     }
 
     &.track-error .wpsstm-track-action-play:before,
-    &[didautolink]:not([trackplayable]) .wpsstm-track-action-play:before,
+    &[didautolink]:not([wpsstm-playable]) .wpsstm-track-action-play:before,
     {
         content:"\f071"; //.fa-exclamation-triangle;
     }
@@ -176,7 +177,7 @@ wpsstm-track{
         }
     }
     
-    &.track-reloading{
+    &.track-links-loading{
         @extend .wpsstm-freeze;
         @include striped-bg();
     }

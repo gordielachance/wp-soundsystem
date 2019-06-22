@@ -987,11 +987,13 @@ class WPSSTM_Core_Tracks{
     }
 
     function ajax_track_autolink(){
+        
+        global $wpsstm_track;
 
         $ajax_data = wp_unslash($_POST);
 
-        $track = new WPSSTM_Track();
-        $track->from_array($ajax_data['track']);
+        $wpsstm_track = new WPSSTM_Track();
+        $wpsstm_track->from_array($ajax_data['track']);
         
         $result = array(
             'input'         => $ajax_data,
@@ -1003,18 +1005,22 @@ class WPSSTM_Core_Tracks{
    
         //autolink
         $new_ids = array();
-        $new_ids = $track->autolink();
+        $new_ids = $wpsstm_track->autolink();
 
         if ( is_wp_error($new_ids) ){
             $result['error_code'] = $new_ids->get_error_code();
             $result['message'] = $new_ids->get_error_message();
         }else{
-            $result['link_ids'] = $new_ids;
-            $result['html'] = $track->get_track_html();
+            
+            ob_start();
+            wpsstm_locate_template( 'content-track-links.php', true, false );
+            $content = ob_get_clean();
+
+            $result['html'] = $content;
             $result['success'] = true;
         }
         
-        $result['track'] = $track->to_array(); //maybe we have a new post ID here, if the track has been created
+        $result['track'] = $wpsstm_track->to_array(); //maybe we have a new post ID here, if the track has been created
 
         header('Content-type: application/json');
         wp_send_json( $result );

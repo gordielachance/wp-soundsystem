@@ -48,6 +48,7 @@ class WpsstmTracklist extends HTMLElement{
         this.post_id =                  undefined;
         this.tracklist_request =        undefined;
         this.isExpired =                undefined;
+        this.player =                   undefined;
 
         // Setup a click listener on <wpsstm-tracklist> itself.
         this.addEventListener('click', e => {
@@ -78,7 +79,20 @@ class WpsstmTracklist extends HTMLElement{
     }
     
     static get observedAttributes() {
-        //return ['id', 'my-custom-attribute', 'data-something', 'disabled'];
+        return ['wpsstm-playable'];
+    }
+    
+    get playable() {
+        return this.hasAttribute('wpsstm-playable');
+    }
+    
+    set playable(value) {
+        const isChecked = Boolean(value);
+        if (isChecked) {
+            this.setAttribute('wpsstm-playable', '');
+        } else {
+            this.removeAttribute('wpsstm-playable');
+        }
     }
     
     ///
@@ -94,7 +108,7 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = this;
 
         tracklist.post_id =     Number( $(tracklist).data('wpsstm-tracklist-id') );
-        
+
         tracklist.init_tracklist_expiration();
 
         /*
@@ -164,6 +178,7 @@ class WpsstmTracklist extends HTMLElement{
         */
 
         var tracks = $(tracklist).find('wpsstm-track');
+        var playableTracks = tracks.filter('[wpsstm-playable]');
 
         //sort subtracks
         var startSortIdx, endSortIdx;
@@ -188,6 +203,10 @@ class WpsstmTracklist extends HTMLElement{
 
             }
         });
+        
+        if (!playableTracks.length){
+            tracklist.playable = false;
+        }
 
         tracklist.debug("Tracklist ready");
         
