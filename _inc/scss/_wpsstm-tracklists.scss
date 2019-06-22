@@ -60,6 +60,7 @@ wpsstm-tracklist{
         .wpsstm-tracklist-cover{
             position:relative;
             width:25%;
+            @include flex-shrink(0);
             box-sizing: content-box;
             > div{
                 width: 100%;
