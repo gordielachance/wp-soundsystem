@@ -27,7 +27,7 @@ Add or remove tracks on the fly, reorder them, favorite a track or a tracklist, 
 = Tracks =
 
 When editing a track, you can query details from music services like [MusicBrainz](https://musicbrainz.org/) (The Open Music Encyclopedia) or Spotify. 
-Audio links can be linked to your tracks with the *Tracks Links* metabox.
+Tracks can be favorited by your users frontend, or added to any new playlist on-the-fly. 
 
 = Tracks Links =
 
