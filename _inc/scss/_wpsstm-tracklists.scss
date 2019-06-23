@@ -116,20 +116,34 @@ wpsstm-tracklist{
                 margin:0;
                 margin-bottom:.5em;
             }
-
-            .wpsstm-live-tracklist-link{
-                display:block;
-                @extend .wpsstm-no-underline;
-            }
-            .wpsstm-tracklist-time{
+            
+            >ul{
+                text-align: right;
+                list-style: none;
                 font-size:.8em;
-                .wpsstm-tracklist-refresh-time{
-                    @include opacity(.25);
+                opacity:.5;
+                > li{
+                    @extend .wpsstm-icon;
+                    margin-top: 0;
+                    line-height: 1.25em;
+                    &.wpsstm-tracklist-date{
+                        >time{
+                            @extend .wpsstm-icon;
+                            &.wpsstm-tracklist-updated:before{
+                                content:"\f017"; //.fa-clock-o
+                            }
+                            &.wpsstm-tracklist-refresh-time:before{
+                                content:"\f021"; //.fa-refresh
+                            }
+                        }
+                    }
+                    &.wpsstm-live-tracklist-link:before{
+                        content:"\f0c1";
+                    }
+                    &.wpsstm-tracklist-tracks-count:before{
+                        content:"\f0ca"; //.fa-list-ul
+                    }
                 }
-            }
-            .wpsstm-live-tracklist-link{
-                display:block;
-                font-size:.8em;
             }
         }
 

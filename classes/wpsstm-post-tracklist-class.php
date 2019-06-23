@@ -901,6 +901,17 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
         $this->is_expired = true;
     }
+    
+    function get_human_pulse(){
+        if ($this->tracklist_type != 'live') return false;
+        if ( !$cache_min = $this->get_options('cache_min') ) return false;
+        $cache_seconds = $cache_min * MINUTE_IN_SECONDS;
+        
+        $now = current_time( 'timestamp', true );
+        $then = $now + $cache_seconds;
+        
+        return human_time_diff( $now, $then );
+    }
 
     function get_human_next_refresh_time(){
         
@@ -1125,7 +1136,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     /*
-    TOUFIX this should be linked to a Wordpress query (exclude trashed posts, etc.), and allow query args ?
+    TOUFIX 
+    this should be linked to a Wordpress query (exclude trashed posts, etc.), and allow query args ?
+    cache this value ?
     */
     
     function get_subtracks_count(){
