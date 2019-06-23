@@ -664,34 +664,62 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url,$this);
             
             /*
-            Get the XSPF tracklist
+            Get the XSPF tracklist (as an array)
             http://xspf.org
             */
+            
+            if ( $xspf_url = wpsstm_is_xpsf_url($feed_url) ){
+                
+                $this->tracklist_log("...is an XSPF url, do not query WPSSTM API.");
+                
+                $response = wp_remote_get( $xspf_url );
+                $xml = wp_remote_retrieve_body( $response );
 
-            $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
-            $api_url = add_query_arg(array('url'=>$feed_url,'options'=>$importer_options),'import/url');
-
-            $xspf = WPSSTM_Core_API::api_request($api_url);
-            if ( is_wp_error($xspf) ){
-                $error_code = $xspf->get_error_code();
-                $error_message = $xspf->get_error_message();
-
-                if($error_code == 'rest_forbidden'){
+                if ( is_wp_error($xml) ){
+                    $error_code = $xml->get_error_code();
+                    $error_message = $xml->get_error_message();
                     
-                    if ( current_user_can('manage_options') ){
-                        $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstmapi') );
-                        $this->add_notice('wpsstm-api-error',sprintf(__('An API key is needed. Get one %s.','wpsstm'),$api_link)  );
+                    $this->add_notice('wpsstm-xspf-error',sprintf(__('Error while importing the XSPF file: [%s] %s','wpsstm'),$error_code,$error_message)  );
+                    
+                    return $xml;
+                }
+                
+                //convert to array
+                
+                $xml = simplexml_load_string($xml, "SimpleXMLElement", LIBXML_NOCDATA);
+                $json = json_encode($xml);
+                $xspf = json_decode($json,TRUE);
+                
+                $this->tracklist_log("...succeeded loading XSPF");
+                
+                
+            }else{
+                $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
+                $api_url = add_query_arg(array('url'=>$feed_url,'options'=>$importer_options),'import/url');
+                $xspf = WPSSTM_Core_API::api_request($api_url);
+                
+                if ( is_wp_error($xspf) ){
+                    $error_code = $xspf->get_error_code();
+                    $error_message = $xspf->get_error_message();
+
+                    if($error_code == 'rest_forbidden'){
+
+                        if ( current_user_can('manage_options') ){
+                            $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstmapi') );
+                            $this->add_notice('wpsstm-api-error',sprintf(__('An API key is needed. Get one %s.','wpsstm'),$api_link)  );
+                        }
+
+                    }else{
+                        $this->add_notice('wpsstm-api-error',sprintf(__('WPSSTMAPI error: %s','wpsstm'),$error_message)  );
                     }
 
-                }else{
-                    $this->add_notice('wpsstm-api-error',sprintf(__('WPSSTMAPI error: %s','wpsstm'),$error_message)  );
+                    return $xspf;
                 }
-
-                return $xspf;
+                
             }
 
             /*
-            Create playlist
+            Create playlist from the XSPF array
             */
             
             $playlist = new WPSSTM_Tracklist();

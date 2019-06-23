@@ -11,8 +11,6 @@ WP SoundSystem is a complete solution to manage a music library within WordPress
 
 == Description ==
 
-*If you are updating the plugin from < version 2.5, please BACKUP your database first, as many, many things have been updated.*
-
 *WP SoundSystem* is a complete solution to manage a music library within WordPress.
 
 Use it to build or import playlists, manage tracks and audio links, albums, artists, and play them with our audio player.
@@ -47,11 +45,12 @@ Those playlists are synced with remote webpages or services, and are refreshed s
 
 [Check some Radios on Spiff Radio](http://spiff-radio.org/?post_type=wpsstm_live_playlist&tag=editors-pick&author=1)
 
-= Tracklist Importer (requires an API key) =
+= Tracklist Importer =
 
-Backup your playlists using the Tracklist Importer. 
-Popular services (Spotify, Last.fm, Radionomy, Deezer, BBC, Soundcloud, Soundsgood, Hype Machine, Indie Shuffle, RadioKing,…) are available out-of-the-box, just by pasting a playlist link.
-More advanced setups are also available, if you are somewhat familiar with [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp).
+Import [XSPF playlists](http://xspf.org/) using the Tracklist Importer.
+
+If you have an [API key](https://api.spiff-radio.org/?p=10), you could also import playlists from those services: Last.fm, Spotify, SoundCloud, Deezer, Musicbrainz, Radionomy, Hypem, 8tracks, BBC, indieshuffle, Online Radio Box, radio.fr, RadioKing, Reddit, SomaFM, Soundsgood,...
+Custom setups are also available, if you are somewhat familiar with [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp).
 
 [Frontend Importer on Spiff Radio](https://www.spiff-radio.org/?p=213)
 
@@ -78,7 +77,7 @@ Wanna give a hand as developer ? Check the [Github](https://github.com/gordielac
 
 Get more out of this plugin by [registering an API key](https://api.spiff-radio.org/?p=10); which will enable
 
-* the Tracklist Importer
+* Direct import from a lot of music services
 * the Autolink module
 
 Those are optionals, but are nice features to a solid plugin.
@@ -86,7 +85,6 @@ Consider getting one as a nice way to support the work done – hundred of hours
 
 = Donate =
 Whatever, if you like this plugin, please also consider [making a donation](https://api.spiff-radio.org/?p=31).
-This would be very appreciated !
 
 This would be very appreciated — Thanks !
 
@@ -153,11 +151,13 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= 2.7.6 =
+= 2.7.8 =
 * better player JS
+* allow XSPF tracklist import without the need of an API key
 * fixed tracklist share
 * better tracklist header
 * improve lightbox
+* remove settings 'importer_enabled' & 'radios_enabled'
 
 = 2.7.5 =
 * Moved all the import stuff to the API.  Now uses rest route 'wp-json/wpsstmapi/v1/import/url/?url=...' (on the API)

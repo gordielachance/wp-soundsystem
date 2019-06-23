@@ -19,10 +19,31 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
     <!--remote url-->
     <div id="wpsstm-importer-step-feed-url" class="wpsstm-importer-section">
         <h3 class="wpsstm-importer-section-label"><?php _e('Feed URL','wpsstm');?></h3>
-        <?php _e('URL where we could fetch the tracklist.  The data could be HTML, XML, XSPF, JSON,..','wpsstm');?>
+        <?php 
+        $xspf_link = sprintf('<a href="%s" target="_blank">%s</a>','http://xspf.org','.xspf');
+        printf(__('Tracklist URL. It should have an %s extension.','wpsstm'),$xspf_link);
+        ?>
         <p>
             <input type="text" name="wpsstm_wizard[radio][feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a tracklist URL or type a bang (eg. artist:Gorillaz)','wpsstm');?>" />
         </p>
+        <?php
+        $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('API key','wpsstm'));
+        $items = array();
+        $services = WPSSTM_Core_Importer::get_import_services();
+
+        if ( !is_wp_error($services) ){
+            foreach((array)$services as $service){
+                $item = $service['name'];
+                if ( $url = $service['url'] ){
+                    $item = sprintf('<a target="_blank" href="%s">%s</a>',$url,$item);
+                }
+                $items[] = $item;
+            }
+        }
+
+        $services_list = sprintf('<em>%s</em>',implode(', ',$items));
+        printf(__('If you have an %s, you could also enter URL to those services: %s - or use your own custom import settings!','wpsstm'),$api_link,$services_list);
+        ?>
         <h3 class="wpsstm-importer-section-label"><?php _e('Website URL','wpsstm');?></h3>
         <?php _e("URL of the link that will be displayed in the tracklist header.",'wpsstm');?><br/>
         <?php _e("If empty, the Feed URL will be used : fill it when the feed URL points to raw datas.",'wpsstm');?>

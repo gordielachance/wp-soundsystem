@@ -153,6 +153,19 @@ function wpsstm_shorten_text($str,$skiptext = ' ... '){
     }
 }
 
+/*
+Simple check for XSPF urls; by URL extension.
+Could eventually be filtered for advanced uses (check request, mime type, ...); but we'll let developpers do that for their own cases; since we have the WPSSTM API for complex imports - and don't want an extra request which would slow down our imports.
+*/
+function wpsstm_is_xpsf_url($feed_url){
+    
+    $ext = pathinfo($feed_url, PATHINFO_EXTENSION);
+    
+    $feed_url = ($ext === 'xspf') ? $feed_url : null;
+    
+    return apply_filters('wpsstm_xpsf_url',$feed_url);
+}
+
 function wpsstm_get_notice($msg){
     return sprintf('<div class="wpsstm-block-notice"><span>%s</span><a href="#" class="wpsstm-close-notice"><i class="fa fa-close"></i></a></div>',$msg);
 }

@@ -119,9 +119,6 @@ class WPSSTM_Settings {
         /*
         Importer
         */
-        
-        $new_input['importer_enabled'] = isset($input['importer_enabled']);
-        $new_input['radios_enabled'] = isset($input['radios_enabled']);
 
         //scraper wizard page ID
         if ( isset ($input['frontend_scraper_page_id']) && ctype_digit($input['frontend_scraper_page_id']) ){
@@ -242,14 +239,6 @@ class WPSSTM_Settings {
             array( $this, 'section_importer_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
-        
-        add_settings_field(
-            'importer_enabled', 
-            __('Tracklist Importer','wpsstm'), 
-            array( $this, 'importer_enabled_callback' ), 
-            'wpsstm-settings-page', 
-            'tracklist_importer'
-        );
 
         add_settings_field(
             'frontend_scraper_page_id', 
@@ -263,21 +252,15 @@ class WPSSTM_Settings {
         Radios
         */
 
+        /*
         add_settings_section(
             'radio_settings', // ID
             __('Radios','wpsstm'), // Title
             array( $this, 'section_radios_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
-        
-        add_settings_field(
-            'radios_enabled', 
-            __('Radios post type','wpsstm'), 
-            array( $this, 'radios_enabled_callback' ), 
-            'wpsstm-settings-page', 
-            'radio_settings'
-        );
-        
+        */
+
         /*
         Tracks
         */
@@ -585,73 +568,7 @@ class WPSSTM_Settings {
         echo implode("\n",$desc);
         
     }
-    
-    function importer_enabled_callback(){
-        $desc = '';
-        $enabled = wpsstm()->get_options('importer_enabled');
-        $can = wpsstm()->can_importer();
-        $readonly = is_wp_error($can);
-        
-        printf(
-            '<input type="checkbox" name="%s[importer_enabled]" value="on" %s %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $enabled,true, false ),
-            wpsstm_readonly( $readonly,true, false ),
-            $desc
-        );
-        
-        /*
-        errors
-        */
-        
-        //register errors
-        if ( $enabled ){
-        
-            //autolink
-            $can = wpsstm()->can_importer();
-            if ( is_wp_error($can) ){
-                add_settings_error('importer',$can->get_error_code(),$can->get_error_message(),'inline');
-            }
-            
-        }
-        
-        //display errors
-        settings_errors('importer');
-        
-    }
-    
-    function radios_enabled_callback(){
-        
-        $desc = '';
-        $enabled = wpsstm()->get_options('radios_enabled');
-        
-        $can = wpsstm()->can_importer();
-        $readonly = is_wp_error($can);
-        
-        //register errors
-        if ( $enabled ){
-        
-            //autolink
-            
-            if ( is_wp_error($can) ){
-                add_settings_error('radios',$can->get_error_code(),$can->get_error_message(),'inline');
-            }
-            
-        }
 
-        printf(
-            '<input type="checkbox" name="%s[radios_enabled]" value="on" %s %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $enabled,true, false ),
-            wpsstm_readonly( $readonly,true, false ),
-            $desc
-        );
-        
-        //display errors
-        settings_errors('radios');
-        
-    }
-    
     function frontend_importer_callback(){
         $option = (int)wpsstm()->get_options('frontend_scraper_page_id');
         $can = wpsstm()->can_frontend_importer();

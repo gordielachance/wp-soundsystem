@@ -199,7 +199,6 @@ class WPSSTM_Core_Live_Playlists{
 }
 
 function wpsstm_live_playlists_init(){
-    if ( !wpsstm()->get_options('radios_enabled') ) return;
     new WPSSTM_Core_Live_Playlists();
 }
 

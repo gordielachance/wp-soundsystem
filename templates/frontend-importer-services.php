@@ -1,19 +1,29 @@
 <?php
 
+$items = array();
 $services = WPSSTM_Core_Importer::get_import_services();
 
 if ( is_wp_error($services) ){
     //TODOU?
 }
 
-if (!$services) return;
+foreach((array)$services as $service){
+    $item = sprintf('<img src="%s" title="%s"/>',$service['image'],$service['name']);
+    if ($url = $service['url']){
+        $item = sprintf('<a href="%s" target="_blank">%s</a>',$url,$item);
+    }
+
+    $items[] = $item;
+}
+
+if (!$items) return;
 
 //wrap
 $list_els = array_map(
    function ($el) {
       return "<li>{$el}</li>";
    },
-   $services
+   $items
 );
 ?>
 <section id="wpsstm-importer-services">
