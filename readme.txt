@@ -47,9 +47,9 @@ Those playlists are synced with remote webpages or services, and are refreshed s
 
 = Tracklist Importer =
 
-Import [XSPF playlists](http://xspf.org/) using the Tracklist Importer.
+Import [XSPF playlists](http://xspf.org/) using the *Tracklist Importer*.
 
-If you have an [API key](https://api.spiff-radio.org/?p=10), you could also import playlists from those services: Last.fm, Spotify, SoundCloud, Deezer, Musicbrainz, Radionomy, Hypem, 8tracks, BBC, indieshuffle, Online Radio Box, radio.fr, RadioKing, Reddit, SomaFM, Soundsgood,...
+If you have an [API key](https://api.spiff-radio.org/?p=10), you could also import playlists from various services: *Last.fm, Spotify, SoundCloud, Deezer, Musicbrainz, Radionomy, Hypem, 8tracks, BBC, indieshuffle, Online Radio Box, radio.fr, RadioKing, Reddit, SomaFM, Soundsgood,...*
 Custom setups are also available, if you are somewhat familiar with [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp).
 
 [Frontend Importer on Spiff Radio](https://www.spiff-radio.org/?p=213)
