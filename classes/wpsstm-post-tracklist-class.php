@@ -696,7 +696,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 
             }else{
                 $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
-                $api_url = add_query_arg(array('url'=>$feed_url,'options'=>$importer_options),'import/url');
+                $args = array(
+                    'url' =>        $feed_url,
+                    'options'=>     $importer_options
+                );
+                
+                $args = rawurlencode_deep( $args );
+                $api_url = add_query_arg($args,'import/url');
                 $xspf = WPSSTM_Core_API::api_request($api_url);
                 
                 if ( is_wp_error($xspf) ){
