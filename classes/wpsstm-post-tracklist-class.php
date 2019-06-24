@@ -82,7 +82,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //options
         $db_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
-        $this->options = array_replace_recursive($this->default_options,(array)$db_options); //last one has priority
+        $this->options = array_replace_recursive($this->default_options,(array)$db_options);//last one has priority
+        $this->options['cache_min'] = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true);
 
         //separate metas
         $this->feed_url =       get_post_meta($this->post_id, self::$feed_url_meta_name, true );
@@ -123,7 +124,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if( $this->is_tracklist_favorited_by() ) {
             $this->classes[] = 'favorited-tracklist';
         }
-        
+
         return $this->post_id;
 
     }
