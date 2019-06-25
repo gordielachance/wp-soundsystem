@@ -118,7 +118,7 @@ class WPSSTM_Core_Importer{
         importer
         */
 
-        $importer_options = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
+        $importer_options = get_post_meta($post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
         $importer_data = self::sanitize_importer_settings($data);
 
         //settings have been updated, clear tracklist cache
@@ -129,9 +129,9 @@ class WPSSTM_Core_Importer{
         }
 
         if (!$importer_data){
-            $success = delete_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name);
+            $success = delete_post_meta($post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name);
         }else{
-            $success = update_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name, $importer_data);
+            $success = update_post_meta($post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name, $importer_data);
         }
 
         //reload settings

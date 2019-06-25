@@ -29,8 +29,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     var $paged_var = 'tracklist_page';
 
-    //live
-    static $scraper_meta_name = '_wpsstm_scraper_options';
+    static $tracklist_options_meta_name = '_wpsstm_tracklist_options';
+    static $importer_options_meta_name = '_wpsstm_scraper_options';
     static $feed_url_meta_name = '_wpsstm_scraper_url';
     static $website_url_meta_name = '_wpsstm_website_url';
     private static $remote_title_meta_name = 'wpsstm_remote_title';
@@ -91,8 +91,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         
         //options
-        $db_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
-        
+        $db_options = (array)get_post_meta($this->post_id,self::$tracklist_options_meta_name,true);
+
         if( $cache_min = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true) ){
             $db_options['cache_min'] = $cache_min;
         }
@@ -107,8 +107,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( $this->tracklist_type === 'live' ){
             $this->default_importer_options['tracks_order'] = 'desc';
         }
-        $db_importer_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
-        $this->importer_options = array_replace_recursive($this->default_importer_options,(array)$db_importer_options);//last one has priority
+        $db_importer_options = (array)get_post_meta($this->post_id,self::$importer_options_meta_name,true);
+        $this->importer_options = array_replace_recursive($this->default_importer_options,$db_importer_options);//last one has priority
         
         //title (will be filtered)
         $this->title = get_the_title($this->post_id);
@@ -712,7 +712,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 
                 
             }else{
-                $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
+                $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
                 $args = array(
                     'url' =>        $feed_url,
                     'options'=>     $importer_options

@@ -289,7 +289,7 @@ class WP_SoundSystem {
             
             if ($current_version < 202){
                 
-                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", WPSSTM_Post_Tracklist::$scraper_meta_name );
+                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", WPSSTM_Post_Tracklist::$importer_options_meta_name );
                 
                 $rows = $wpdb->get_results($querystr);
 
@@ -302,7 +302,7 @@ class WP_SoundSystem {
                     update_post_meta($row->post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name, $min);
                     
                     unset($metadata['remote_delay_min']);
-                    update_post_meta($row->post_id, WPSSTM_Post_Tracklist::$scraper_meta_name, $metadata);
+                    update_post_meta($row->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name, $metadata);
                     
                     
                 }

@@ -148,7 +148,7 @@ class WPSSTM_Core_Tracklists{
         $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_tracklist_options_meta_box_nonce'], 'wpsstm_tracklist_options_meta_box' ) );
         if ( !$is_valid_nonce ) return;
         
-        if ( !$tracklist_input = wpsstm_get_array_value('wpsstm_tracklist_options',$_POST) ) return;
+        if ( !$input_data = wpsstm_get_array_value('wpsstm_tracklist_options',$_POST) ) return;
         
         ////
         ////
@@ -156,13 +156,27 @@ class WPSSTM_Core_Tracklists{
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
         
         //cache time
-        $cache_min = wpsstm_get_array_value('cache_min',$tracklist_input);
+        $cache_min = wpsstm_get_array_value('cache_min',$input_data);
         
         if ($cache_min){
             update_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name,$cache_min);
         }else{
             delete_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name);
         }
+        
+        //playable
+        $new_input['playable'] = isset($input_data['playable']);
+
+        if (!$new_input){
+            $success = delete_post_meta($post_id, WPSSTM_Post_Tracklist::$tracklist_options_meta_name);
+        }else{
+            $success = update_post_meta($post_id, WPSSTM_Post_Tracklist::$tracklist_options_meta_name, $new_input);
+        }
+
+        //reload settings
+        $tracklist->populate_tracklist_post();
+
+        return $success;
 
     }
     
@@ -170,8 +184,19 @@ class WPSSTM_Core_Tracklists{
         
         global $wpsstm_tracklist;
         
-        if ($wpsstm_tracklist->tracklist_type === 'live' ) {
+            //playable
+            $option = $wpsstm_tracklist->get_options('playable');
+
+            $input = sprintf(
+                '<input type="checkbox" name="%s[playable]" value="on" %s />',
+                'wpsstm_tracklist_options',
+                checked($option,true, false)
+            );
             
+            printf('<p>%s <label>%s</label></p>',$input,__('Playable','wpsstm'));
+        
+        if ($wpsstm_tracklist->tracklist_type === 'live' ) {
+
             //cache min
 
             $option = $wpsstm_tracklist->get_options('cache_min');
