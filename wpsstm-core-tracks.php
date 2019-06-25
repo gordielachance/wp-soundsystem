@@ -722,8 +722,8 @@ class WPSSTM_Core_Tracks{
         );
 
         add_meta_box( 
-            'wpsstm-track-tracklists', 
-            __('Track','wpsstm'),
+            'wpsstm-track-options', 
+            __('Track Settings','wpsstm'),
             array($this,'metabox_track_options_content'),
             wpsstm()->post_type_track, 
             'side', //context

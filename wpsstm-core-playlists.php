@@ -9,8 +9,6 @@ class WPSSTM_Core_Playlists{
 
         add_action( 'current_screen', array($this,'import_at_init') );
         
-        add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
-        
         /*
         AJAX
         */
@@ -137,26 +135,7 @@ class WPSSTM_Core_Playlists{
          );
         
     }
-    
-    function metabox_tracklist_register(){
 
-        add_meta_box( 
-            'wpsstm-tracklist', 
-            __('Playlist','wpsstm'),
-            array($this,'metabox_playlist_content'),
-            wpsstm()->static_tracklist_post_types, 
-            'normal', 
-            'high' //priority 
-        );
-        
-    }
-    
-    function metabox_playlist_content( $post ){
-        global $wpsstm_tracklist;
-        $output = $wpsstm_tracklist->get_tracklist_html();
-        echo $output;
-    }
-    
     /*
     Specifically for static post types, set the tracklist as expired until an import has been made; or the tracklist will be empty...
     */

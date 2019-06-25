@@ -13,7 +13,7 @@ class WPSSTM_Core_Importer{
         add_filter( 'the_content', array($this,'frontend_importer_content'));
 
         //backend
-        add_action( 'add_meta_boxes', array($this, 'metabox_importer_register'), 11 );
+        add_action( 'add_meta_boxes', array($this, 'metabox_importer_register'), 9 );
         add_action( 'save_post', array($this,'metabox_save_radio_settings') );
 
         add_action( 'admin_enqueue_scripts', array( $this, 'importer_register_scripts_styles' ) );

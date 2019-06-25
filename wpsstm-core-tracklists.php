@@ -69,6 +69,11 @@ class WPSSTM_Core_Tracklists{
         */
         add_action( 'before_delete_post', array($this,'unset_from_tracklist_id') );
         add_action( 'delete_post', array($this,'delete_tracklist_subtracks') );
+        
+        /*
+        Backend
+        */
+        add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
 
     }
 
@@ -93,6 +98,25 @@ class WPSSTM_Core_Tracklists{
             wp_enqueue_script( 'wpsstm-tracklist-manager' );
         }
 
+    }
+    
+    function metabox_tracklist_register(){
+
+        add_meta_box( 
+            'wpsstm-tracklist', 
+            __('Tracklist','wpsstm'),
+            array($this,'metabox_playlist_content'),
+            wpsstm()->tracklist_post_types,
+            'normal', 
+            'high' //priority 
+        );
+        
+    }
+    
+    function metabox_playlist_content( $post ){
+        global $wpsstm_tracklist;
+        $output = $wpsstm_tracklist->get_tracklist_html();
+        echo $output;
     }
     
     function the_single_backend_tracklist(){ //TOUFIX TOUCHECK TOUREMOVE ?
