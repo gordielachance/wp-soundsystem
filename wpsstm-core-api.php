@@ -30,7 +30,7 @@ class WPSSTM_Core_API {
         
         if ( false === ( $is_auth = get_transient(self::$auth_transient_name ) ) ) {
 
-            $api_results = self::api_request('token/validate','jwt-auth/v1','POST');
+            $api_results = self::api_request('token/validate','simple-jwt-authentication/v1','POST');
             
             if ( is_wp_error($api_results) ) {
                 wpsstm()->debug_log($api_results,'check auth failed');
