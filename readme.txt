@@ -151,7 +151,7 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= 2.7.9 =
+= 2.8.0 =
 * better player JS
 * allow XSPF tracklist import without the need of an API key
 * fixed tracklist share
@@ -162,8 +162,6 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 = 2.7.5 =
 * Moved all the import stuff to the API.  Now uses rest route 'wp-json/wpsstmapi/v1/import/url/?url=...' (on the API)
-
-= 2.7.4 =
 * store artist,track & album metas as taxonomies instead of post metas; for performance issues (see https://wordpress.stackexchange.com/a/276315/70449 and https://wordpress.stackexchange.com/a/159012/70449)
 * trash orphan links option
 * trash duplicate links option
@@ -184,18 +182,12 @@ The community user is a Wordpress user you need to create, and that will be assi
 * New track links setting 'Exclude hosts'
 * JS link/track/tracklist reclick fix
 * Tracklist template : featured image
-
-= 2.6.3 =
 * "Sources" renamed to "Track Links" (post type, some metas, some filters renamed)
 * Fixed toggle playable track link
 * Fixed sort track links
-
-= 2.6.2 =
 * fixed OnlineRadioBox service
 * fixed bugfix XSPF export
 * track links JS/CSS improvements
-
-= 2.6.1 =
 * BuddyPress - improved queue track/ love tracklist activities
 * Radio.fr - new service
 * Spotify: improved playlists regex
@@ -214,8 +206,6 @@ The community user is a Wordpress user you need to create, and that will be assi
 * Last.fm : fix url encoding / fix regexes / fix importer / scrobbler disabled by default
 * abord autolink if 'wpsstm_autolink_input' returns an error
 * + various bug fixes
-
-= 2.5.3 =
 * new class WPSSTM_Music_Data
 
 = 2.5.0 =
