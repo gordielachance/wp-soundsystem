@@ -22,7 +22,7 @@ class WPSSTM_Spotify{
             
             //presets
             add_filter('wpsstm_feed_url', array($this, 'spotify_playlist_bang_to_url'));
-            add_filter('wpsstm_wizard_bang_links',array($this,'register_spotify_bang_links'));
+            add_filter('wpsstm_importer_bang_links',array($this,'register_spotify_bang_links'));
             
         }
     }

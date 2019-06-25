@@ -7,11 +7,18 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $tracklist_type = 'static';
     
     var $default_options = array(
-        'cache_min' => 15, //toufix broken if within the default options of WPSSTM_Remote_Tracklist
+        'cache_min' => 15,
         'playable'  => true,
     );
     
+    var $default_importer_options = array(
+        'tracks_order' => 'asc'
+    );
+    
     var $options = array();
+    var $importer_options = array();
+    
+    
     public $is_expired = false;
     
     var $pagination = array(
@@ -75,6 +82,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function populate_tracklist_post(){
         
         $post_type = get_post_type($this->post_id);
+        
+        //type        
+        $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
 
         if ( !$this->post_id || ( !in_array($post_type,wpsstm()->tracklist_post_types) ) ){
             return new WP_Error( 'wpsstm_invalid_tracklist_post', __('Invalid tracklist post.','wpsstm') );
@@ -82,16 +92,23 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //options
         $db_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
-        $db_options['cache_min'] = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true);
         
+        if( $cache_min = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true) ){
+            $db_options['cache_min'] = $cache_min;
+        }
+
         $this->options = array_replace_recursive($this->default_options,(array)$db_options);//last one has priority
 
         $this->feed_url =       get_post_meta($this->post_id, self::$feed_url_meta_name, true );
         $this->website_url =    get_post_meta($this->post_id, self::$website_url_meta_name, true );        
         $this->date_timestamp = (int)get_post_modified_time( 'U', true, $this->post_id, true );
 
-        //type        
-        $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
+        //importer options
+        if ( $this->tracklist_type === 'live' ){
+            $this->default_importer_options['tracks_order'] = 'desc';
+        }
+        $db_importer_options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
+        $this->importer_options = array_replace_recursive($this->default_importer_options,(array)$db_importer_options);//last one has priority
         
         //title (will be filtered)
         $this->title = get_the_title($this->post_id);
@@ -138,11 +155,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function get_importer_options($keys=null){
-        $options = get_post_meta($this->post_id,self::$scraper_meta_name,true);
+
         if ($keys){
-            return wpsstm_get_array_value($keys, $options);
+            return wpsstm_get_array_value($keys, $this->importer_options);
         }else{
-            return $options;
+            return $this->importer_options;
         }
     }
 

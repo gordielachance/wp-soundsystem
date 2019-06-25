@@ -1,5 +1,5 @@
 <?php
-$links = apply_filters('wpsstm_wizard_bang_links',array());
+$links = apply_filters('wpsstm_importer_bang_links',array());
 if ( empty($links) ) return;
 
 //wrap

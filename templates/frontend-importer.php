@@ -19,7 +19,7 @@ global $wpsstm_tracklist;
             );
 
 
-            $submit_input = '<button type="submit" name="wpsstm_wizard[action][load-url]" id="wpsstm_wizard[action][load-url]" class="button button-primary wpsstm-icon-button"><i class="fa fa-search" aria-hidden="true"></i></button>';
+            $submit_input = '<button type="submit" name="wpsstm_importer[action][load-url]" id="wpsstm_importer[action][load-url]" class="button button-primary wpsstm-icon-button"><i class="fa fa-search" aria-hidden="true"></i></button>';
 
 
             printf('<p class="wpsstm-icon-input" id="wpsstm-importer-search">%s%s</p>',$text_input,$submit_input);
@@ -32,7 +32,7 @@ global $wpsstm_tracklist;
         //post ID
         if ($wpsstm_tracklist->post_id){
             ?>
-            <input type="hidden" name="wpsstm_wizard[post_id]" value="<?php echo $wpsstm_tracklist->post_id;?>" />
+            <input type="hidden" name="wpsstm_importer[post_id]" value="<?php echo $wpsstm_tracklist->post_id;?>" />
             <?php
         }
 

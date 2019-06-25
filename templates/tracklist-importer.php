@@ -11,7 +11,6 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
         <li><a href="#wpsstm-importer-step-feed-url"><?php _e('URLs','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-tracks"><?php _e('Tracks','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-single-track"><?php _e('Details','wpsstm');?></a></li>
-        <li><a href="#wpsstm-importer-step-options"><?php _e('Options','wpsstm');?></a></li>
     </ul>
 
     <!--remote url-->
@@ -22,7 +21,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
         printf(__('Tracklist URL. It should have an %s extension.','wpsstm'),$xspf_link);
         ?>
         <p>
-            <input type="text" name="wpsstm_wizard[radio][feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a tracklist URL or type a bang (eg. artist:Gorillaz)','wpsstm');?>" />
+            <input type="text" name="wpsstm_importer[feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a tracklist URL or type a bang (eg. artist:Gorillaz)','wpsstm');?>" />
         </p>
         <?php
         $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('API key','wpsstm'));
@@ -46,7 +45,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
         <?php _e("URL of the link that will be displayed in the tracklist header.",'wpsstm');?><br/>
         <?php _e("If empty, the Feed URL will be used : fill it when the feed URL points to raw datas.",'wpsstm');?>
         <p>
-            <input type="text" name="wpsstm_wizard[radio][website_url]" value="<?php echo $wpsstm_tracklist->website_url;?>" class="wpsstm-fullwidth" />
+            <input type="text" name="wpsstm_importer[website_url]" value="<?php echo $wpsstm_tracklist->website_url;?>" class="wpsstm-fullwidth" />
         </p>
     </div>
     
@@ -73,22 +72,23 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
                 <?php
                 $forced_option = null;//TOUFIX$wpsstm_tracklist->preset->get_preset_options('tracks_order');
                 $option = ($forced_option) ? $forced_option : $wpsstm_tracklist->get_importer_options('tracks_order');
+                
                 $disabled = disabled( (bool)$forced_option, true, false );
 
                 $desc_text = sprintf(
-                    '<input type="radio" name="%1s[importer][tracks_order]" value="desc" %s %s /><span class="wizard-field-desc">%s</span>',
-                    'wpsstm_wizard',
+                    '<input type="radio" name="%1s[tracks_order]" value="desc" %s %s /><span class="wizard-field-desc">%s</span>',
+                    'wpsstm_importer',
                     checked($option, 'desc', false),
                     $disabled,
                     __('Descending','spiff')
                 );
 
                 $asc_text = sprintf(
-                    '<input type="radio" name="%s[importer][tracks_order]" value="asc" %s %s /><span class="wizard-field-desc">%s</span>',
-                    'wpsstm_wizard',
+                    '<input type="radio" name="%s[tracks_order]" value="asc" %s %s /><span class="wizard-field-desc">%s</span>',
+                    'wpsstm_importer',
                     checked($option, 'asc', false),
                     $disabled,
-                    __('Ascending','spiff')
+                    __('Ascending','wpsstm')
                 );
 
                 echo $desc_text." ".$asc_text;
@@ -141,35 +141,6 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
             <div id="wpsstm-importer-single-track-links" class="wpsstm-importer-row">
                 <h4 class="wpsstm-importer-row-label"><?php _e('Track Link URLs Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
                 <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_link_urls');?></div>
-            </div>
-        </div>
-    </div>
-    
-    <!--options-->
-    <div id="wpsstm-importer-step-options" class="wpsstm-importer-section wpsstm-importer-section-advanced">
-        <div class="wpsstm-importer-section-label">
-            <h3><?php _e('Tracklist options','wpsstm');?></h3>
-        </div>
-        <div class="wpsstm-importer-row">
-            <h4 class="wpsstm-importer-row-label"><?php _e('Cache duration','wpsstm');?></h4>
-            <div class="wpsstm-importer-row-content">
-                <?php
-
-                $option = $wpsstm_tracklist->cache_min;
-
-                $desc[] = __('If set, posts will be created for each track when the remote playlist is retrieved.','wpsstm');
-                $desc[] = __("They will be flushed after the cache time has expired; if the track does not belong to another playlist or user's likes.",'wpsstm');
-                $desc[] = __("This can be useful if you have a lot of traffic - there will be less remote requests ans track links will be searched only once.",'wpsstm');
-                $desc = implode("<br/>",$desc);
-
-                printf(
-                    '<input type="number" name="%s[radio][cache_min]" size="4" min="0" value="%s" /> %s<br/><small>%s</small>',
-                    'wpsstm_wizard',
-                    $option,
-                    __('minutes','spiff'),
-                    $desc
-                );
-                ?>
             </div>
         </div>
     </div>

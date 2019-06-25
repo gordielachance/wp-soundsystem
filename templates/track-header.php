@@ -36,7 +36,7 @@ Parent playlists
 if ( $playlists_list = $wpsstm_track->get_parents_list() ){
 
     ?>
-    <div class="wpsstm-track-tracklists">
+    <div class="wpsstm-track-options">
         <label><?php _e('In tracklists:','wpsstm');?></label>
         <?php echo $playlists_list; ?>
     </div>

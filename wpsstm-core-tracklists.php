@@ -74,6 +74,7 @@ class WPSSTM_Core_Tracklists{
         Backend
         */
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
+        add_action( 'save_post', array($this,'metabox_save_tracklist_options') );
 
     }
 
@@ -111,12 +112,80 @@ class WPSSTM_Core_Tracklists{
             'high' //priority 
         );
         
+        add_meta_box( 
+            'wpsstm-tracklist-options', 
+            __('Tracklist Settings','wpsstm'),
+            array($this,'metabox_tracklist_options_content'),
+            wpsstm()->tracklist_post_types,
+            'side', //context
+            'default' //priority
+        );
+        
     }
     
     function metabox_playlist_content( $post ){
         global $wpsstm_tracklist;
         $output = $wpsstm_tracklist->get_tracklist_html();
         echo $output;
+    }
+    
+    function metabox_save_tracklist_options( $post_id ) {
+
+        //check save status
+        $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
+        $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );
+        $is_revision = wp_is_post_revision( $post_id );
+        $is_metabox = isset($_POST['wpsstm_tracklist_options_meta_box_nonce']);
+        if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
+        
+        //check post type
+        $post_type = get_post_type($post_id);
+        if( !in_array($post_type,wpsstm()->tracklist_post_types ) ){
+            return new WP_Error('wpsstm_invalid_tracklist',__('Invalid tracklist','wpsstm'));
+        }
+
+        //nonce
+        $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_tracklist_options_meta_box_nonce'], 'wpsstm_tracklist_options_meta_box' ) );
+        if ( !$is_valid_nonce ) return;
+        
+        if ( !$tracklist_input = wpsstm_get_array_value('wpsstm_tracklist_options',$_POST) ) return;
+        
+        ////
+        ////
+
+        $tracklist = new WPSSTM_Post_Tracklist($post_id);
+        
+        //cache time
+        $cache_min = wpsstm_get_array_value('cache_min',$tracklist_input);
+        
+        if ($cache_min){
+            update_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name,$cache_min);
+        }else{
+            delete_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name);
+        }
+
+    }
+    
+    function metabox_tracklist_options_content( $post ){
+        
+        global $wpsstm_tracklist;
+        
+        if ($wpsstm_tracklist->tracklist_type === 'live' ) {
+            
+            //cache min
+
+            $option = $wpsstm_tracklist->get_options('cache_min');
+
+            $input = sprintf(
+                '<input type="number" name="%s[cache_min]" size="4" min="1" value="%s" />',
+                'wpsstm_tracklist_options',
+                $option
+            );
+            
+            printf('<p><strong>%s</strong> <small>(%s)</small></br>%s</p>',__('Cache time','wpsstm'),__('minutes','wpsstm'),$input);
+        }
+        
+         wp_nonce_field( 'wpsstm_tracklist_options_meta_box', 'wpsstm_tracklist_options_meta_box_nonce' );
     }
     
     function the_single_backend_tracklist(){ //TOUFIX TOUCHECK TOUREMOVE ?

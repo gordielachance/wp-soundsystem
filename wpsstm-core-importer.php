@@ -14,7 +14,7 @@ class WPSSTM_Core_Importer{
 
         //backend
         add_action( 'add_meta_boxes', array($this, 'metabox_importer_register'), 9 );
-        add_action( 'save_post', array($this,'metabox_save_radio_settings') );
+        add_action( 'save_post', array($this,'metabox_save_importer_settings') );
 
         add_action( 'admin_enqueue_scripts', array( $this, 'importer_register_scripts_styles' ) );
 
@@ -69,7 +69,8 @@ class WPSSTM_Core_Importer{
         wpsstm_locate_template( 'tracklist-importer.php', true );
     }
     
-    function metabox_save_radio_settings( $post_id ) {
+    function metabox_save_importer_settings( $post_id ) {
+        global $wpsstm_tracklist;
 
         //check save status
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
@@ -87,11 +88,56 @@ class WPSSTM_Core_Importer{
         //nonce
         $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_tracklist_importer_meta_box_nonce'], 'wpsstm_tracklist_importer_meta_box' ) );
         if ( !$is_valid_nonce ) return;
+
+        /////
+        /////
         
-        if ( !$data = wpsstm_get_array_value('wpsstm_wizard',$_POST) ) return;
-        
+        if ( !$data = wpsstm_get_array_value('wpsstm_importer',$_POST) ) return;
+
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
-        $success = self::save_radio_settings($tracklist,$data);
+        
+        //feed URL
+        $feed_url = wpsstm_get_array_value('feed_url',$data);
+
+        if ($feed_url){
+            update_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name,$feed_url);
+        }else{
+            delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name);
+        }
+
+        //website URL
+        $website_url = wpsstm_get_array_value('website_url',$data);
+        
+        if ($website_url){
+            update_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name,$website_url);
+        }else{
+            delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name);
+        }
+        
+        /*
+        importer
+        */
+
+        $importer_options = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
+        $importer_data = self::sanitize_importer_settings($data);
+
+        //settings have been updated, clear tracklist cache
+        if ($importer_options != $importer_data){
+            //TOUFIX OR if cache time has been updated ?
+            wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','Save wizard' );
+            $tracklist->remove_cache_timestamp();
+        }
+
+        if (!$importer_data){
+            $success = delete_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name);
+        }else{
+            $success = update_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name, $importer_data);
+        }
+
+        //reload settings
+        $tracklist->populate_tracklist_post();
+
+        return $success;
 
     }
 
@@ -272,8 +318,8 @@ class WPSSTM_Core_Importer{
             
             
             printf(
-                '<input type="text" class="wpsstm-importer-selector-jquery" name="%s[importer][selectors][%s][path]" value="%s" %s />',
-                'wpsstm_wizard',
+                '<input type="text" class="wpsstm-importer-selector-jquery" name="%s[selectors][%s][path]" value="%s" %s />',
+                'wpsstm_importer',
                 $selector,
                 $path,
                 $path_disabled
@@ -297,8 +343,8 @@ class WPSSTM_Core_Importer{
                                     <?php
 
                                     printf(
-                                        '<span class="wpsstm-importer-selector-attr"><input name="%s[importer][selectors][%s][attr]" type="text" value="%s" %s/></span>',
-                                        'wpsstm_wizard',
+                                        '<span class="wpsstm-importer-selector-attr"><input name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
+                                        'wpsstm_importer',
                                         $selector,
                                         $attr,
                                         $attr_disabled
@@ -316,10 +362,10 @@ class WPSSTM_Core_Importer{
                                     printf(
                                         '<p class="wpsstm-importer-selector-regex">
                                         <span>~</span>
-                                        <input class="regex" name="%s[importer][selectors][%s][regex]" type="text" value="%s" %s />
+                                        <input class="regex" name="%s[selectors][%s][regex]" type="text" value="%s" %s />
                                         <span>~mi</span>
                                         </p>',
-                                        'wpsstm_wizard',
+                                        'wpsstm_importer',
                                         $selector,
                                         $regex,
                                         $regex_disabled
@@ -336,95 +382,6 @@ class WPSSTM_Core_Importer{
         
     }
 
-    static private function save_radio_settings(WPSSTM_Post_Tracklist $tracklist,$wizard_data){
-        $post_id = $tracklist->post_id;
-        $post_type = get_post_type($post_id);
-
-        if( !in_array($post_type,wpsstm()->tracklist_post_types ) ){
-            return new WP_Error('wpsstm_invalid_tracklist',__('Invalid tracklist','wpsstm'));
-        }
-        
-        /*
-        radio
-        */
-        
-        $radio_input = wpsstm_get_array_value('radio',$wizard_data);
-        $radio_input = self::sanitize_radio_settings($radio_input);
-        
-        //feed URL
-        $feed_url = wpsstm_get_array_value('feed_url',$radio_input);
-        
-        if ($feed_url){
-            update_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name,$feed_url);
-        }else{
-            delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name);
-        }
-        
-        //website URL
-        $website_url = wpsstm_get_array_value('website_url',$radio_input);
-        
-        if ($website_url){
-            update_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name,$website_url);
-        }else{
-            delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name);
-        }
-        
-        //cache time
-        $cache_min = wpsstm_get_array_value('cache_min',$radio_input);
-        
-        if ($cache_min){
-            update_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name,$cache_min);
-        }else{
-            delete_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name);
-        }
-        
-        /*
-        importer
-        */
-        
-        $importer_input = wpsstm_get_array_value('importer',$wizard_data);
-        
-        $importer_options = get_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name,true);
-        $importer_input = self::sanitize_importer_settings($importer_input);
-
-        //settings have been updated, clear tracklist cache
-        if ($importer_options != $importer_input){
-            //TOUFIX OR if cache time has been updated ?
-            wpsstm()->debug_log('scraper settings have been updated, clear tracklist cache','Save wizard' );
-            $tracklist->remove_cache_timestamp();
-        }
-
-        if (!$importer_input){
-            $success = delete_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name);
-        }else{
-            $success = update_post_meta($post_id, WPSSTM_Post_Tracklist::$scraper_meta_name, $importer_input);
-        }
-
-        //reload settings
-        $tracklist->populate_tracklist_post();
-
-        return $success;
-
-    }
-
-    /*
-     * Sanitize wizard data
-     */
-    
-    static function sanitize_radio_settings($input){
-        $new_input = array();
-        
-        $new_input['feed_url'] = isset($input['feed_url']) ? trim($input['feed_url']) : null;
-        $new_input['website_url'] = isset($input['website_url']) ? trim($input['website_url']) : null;
-        
-        //cache
-        if ( isset($input['cache_min']) && ctype_digit($input['cache_min']) ){
-            $new_input['cache_min'] = $input['cache_min'];
-        }
-        
-        return $new_input;
-        
-    }
     
     static function sanitize_importer_settings($input){
 

@@ -33,8 +33,8 @@ class WPSSTM_LastFM{
         add_filter('wpsstm_feed_url', array($this, 'lastfm_station_user_bang_to_url'));
         
 
-        add_filter( 'wpsstm_wizard_input',array(__class__,'wizard_no_url_input'));
-        add_filter('wpsstm_wizard_bang_links',array($this,'register_lastfm_bang_links'));
+        add_filter( 'wpsstm_importer_input',array(__class__,'wizard_no_url_input'));
+        add_filter('wpsstm_importer_bang_links',array($this,'register_lastfm_bang_links'));
         
         add_action( 'init', array($this,'setup_lastfm_user') ); //TO FIX only if player is loaded ?
         add_action( 'wp', array($this,'after_app_auth') );
