@@ -151,6 +151,9 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= XXX =
+* new metabox 'Tracklist options'
+
 = 2.8.0 =
 * better player JS
 * allow XSPF tracklist import without the need of an API key
