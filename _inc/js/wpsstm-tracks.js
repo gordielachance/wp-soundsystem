@@ -561,7 +561,7 @@ class WpsstmTrack extends HTMLElement{
         var track = this;
         var tracks = $(track.player).find('wpsstm-track');
 
-        var max_items = 4; //number of following tracks to preload
+        var max_items = 3; //number of following tracks to preload //TOUFIX should be in php options
         var track_index = tracks.index( track );
         if (track_index < 0) return; //index not found
 
@@ -576,10 +576,15 @@ class WpsstmTrack extends HTMLElement{
 
         //reduce to X tracks
         var tracks_slice = next_tracks.slice( 0, max_items );
+        var results = [];
 
-        $(tracks_slice).each(function(index, track_to_preload) {
-            track_to_preload.track_autolink();
-        });
+        return tracks_slice.toArray().reduce((promise, track) => {
+            return promise.then((result) => {
+                return track.track_autolink().then(result => results.push(result));
+            })
+            .catch(console.error);
+        }, Promise.resolve());
+
     }
     
     play_first_available_link(link_idx){
