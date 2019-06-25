@@ -102,6 +102,10 @@ class WPSSTM_Core_API {
     
     function api_track_autolink($links_auto,$track){
         
+        if (!$track->post_id){
+            return new WP_Error( 'missing_track_id',__( 'Missing Track ID.', 'wpsstm' ));
+        }
+        
         if ($this->can_wpsstmapi() === true){
 
             $spotify_engine = new WPSSTM_Spotify_Data();
