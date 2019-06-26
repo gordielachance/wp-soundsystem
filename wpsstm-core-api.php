@@ -59,8 +59,9 @@ class WPSSTM_Core_API {
         }
 
         //build headers
-        $auth_args = array(
-            'method' =>     $method,
+        $api_args = array(
+            'method' =>     $method, //TOUFIX TOUCHECK compatible with wp_remote_get ?
+            'timeout' =>    wpsstm()->get_options('wpsstmapi_timeout'),
             'headers'=>     array(
                 'Accept' =>         'application/json',
             )
@@ -68,7 +69,7 @@ class WPSSTM_Core_API {
         
         //token
         if ( $token = wpsstm()->get_options('wpsstmapi_token') ){
-            $auth_args['headers']['Authorization'] = sprintf('Bearer %s',$token);
+            $api_args['headers']['Authorization'] = sprintf('Bearer %s',$token);
         }
         
         //build URL
@@ -76,7 +77,7 @@ class WPSSTM_Core_API {
 
         wpsstm()->debug_log(array('url'=>$url,'token'=>$token),'query API...');
 
-        $request = wp_remote_get($url,$auth_args);
+        $request = wp_remote_get($url,$api_args);
         if (is_wp_error($request)) return $request;
 
         $response = wp_remote_retrieve_body( $request );
