@@ -569,10 +569,13 @@ class WpsstmTrack extends HTMLElement{
         var rtrack_in = track_index + 1;
         var next_tracks = tracks.slice( rtrack_in );
 
+        /*
+        NOT NEEDED, and those are extra queries. Just stick to the few X next tracks.
         //remove tracks that have already been autolinkd
         var next_tracks = next_tracks.filter(function (index) {
             return !this.didautolink;
         });
+        */
 
         //reduce to X tracks
         var tracks_slice = next_tracks.slice( 0, max_items );
