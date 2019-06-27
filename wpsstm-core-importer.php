@@ -506,9 +506,10 @@ class WPSSTM_Core_Importer{
 
         if (false === $services){
             $services = WPSSTM_Core_API::api_request('import/services/get');
-            if ( !is_wp_error($services) ){
-                set_transient( self::$importer_links_transient_name, $services, 1 * DAY_IN_SECONDS );
-            }
+
+            if ( is_wp_error($services) ) return false;
+
+            set_transient( self::$importer_links_transient_name, $services, 1 * DAY_IN_SECONDS );
         }
         
         return $services;

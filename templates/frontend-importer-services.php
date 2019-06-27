@@ -3,17 +3,15 @@
 $items = array();
 $services = WPSSTM_Core_Importer::get_import_services();
 
-if ( is_wp_error($services) ){
-    //TODOU?
-}
+if ( $services && !is_wp_error($services) ){
+    foreach($services as $service){
+        $item = sprintf('<img src="%s" title="%s"/>',$service['image'],$service['name']);
+        if ($url = $service['url']){
+            $item = sprintf('<a href="%s" target="_blank">%s</a>',$url,$item);
+        }
 
-foreach((array)$services as $service){
-    $item = sprintf('<img src="%s" title="%s"/>',$service['image'],$service['name']);
-    if ($url = $service['url']){
-        $item = sprintf('<a href="%s" target="_blank">%s</a>',$url,$item);
+        $items[] = $item;
     }
-
-    $items[] = $item;
 }
 
 if (!$items) return;
