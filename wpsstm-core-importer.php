@@ -11,6 +11,7 @@ class WPSSTM_Core_Importer{
         add_action( 'wp', array($this,'handle_frontend_importer' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'importer_register_scripts_styles' ) );
         add_filter( 'the_content', array($this,'frontend_importer_content'));
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_ignore_community_tracklists') );
 
         //backend
         add_action( 'add_meta_boxes', array($this, 'metabox_importer_register'), 9 );
@@ -20,6 +21,27 @@ class WPSSTM_Core_Importer{
 
     }
 
+    /*
+    Usually, we don't want community playlists; it's only used by the importer.
+    So ignore those playlists frontend.
+    */
+    
+    function pre_get_posts_ignore_community_tracklists( $query ){
+
+        $post_type = $query->get('post_type');
+        if ( !in_array($post_type,wpsstm()->tracklist_post_types) ) return $query;
+        if ( !$user_id = wpsstm()->get_options('community_user_id') ) return $query;
+        
+        //we HAVE an author query
+        if ( $query->get('author') || $query->get('author_name') || $query->get('author__in') ) return $query;
+        
+        //ignore community posts
+        $author_not_in = $query->get('author__not_in');
+        $author_not_in[] = $user_id;
+        $query->set('author__not_in',$author_not_in);
+
+        return $query;
+    }
     
     /*
     We're requesting the frontend wizard page, load the wizard template
