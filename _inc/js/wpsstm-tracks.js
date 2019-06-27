@@ -579,6 +579,9 @@ class WpsstmTrack extends HTMLElement{
 
         //reduce to X tracks
         var tracks_slice = next_tracks.slice( 0, max_items );
+        
+        /*
+        TOUFIX TOUCHECK this preloads the tracks SEQUENCIALLY
         var results = [];
 
         return tracks_slice.toArray().reduce((promise, track) => {
@@ -587,6 +590,12 @@ class WpsstmTrack extends HTMLElement{
             })
             .catch(console.error);
         }, Promise.resolve());
+        */
+        
+        $(tracks_slice).each(function(index, track_to_preload) {	
+            track_to_preload.track_autolink();	
+        });
+        
 
     }
     
