@@ -51,9 +51,6 @@ class WPSSTM_Settings {
     function settings_sanitize( $input ){
         $new_input = array();
         
-        //clear some transients
-        delete_transient( WPSSTM_Core_Importer::$importer_links_transient_name );
-        
         //reset
         if ( self::is_settings_reset() ) return;
             
@@ -327,6 +324,12 @@ class WPSSTM_Settings {
     }
     
     function system_settings_init(){
+        
+        
+        //clear some transients
+        delete_transient( WPSSTM_Core_Importer::$importer_links_transient_name );
+        
+        
         add_settings_section(
             'settings_system', // ID
             __('System','wpsstm'), // Title
