@@ -28,12 +28,22 @@ class WPSSTM_Core_Importer{
     
     function pre_get_posts_ignore_community_tracklists( $query ){
 
+        //main query check
+        if ( !$query->is_main_query() ) return $query;
+
+        //archive check
+        if ( $query->is_singular() ) return $query;
+        
+        //post type check
         $post_type = $query->get('post_type');
         if ( !in_array($post_type,wpsstm()->tracklist_post_types) ) return $query;
-        if ( !$user_id = wpsstm()->get_options('community_user_id') ) return $query;
         
         //we HAVE an author query
         if ( $query->get('author') || $query->get('author_name') || $query->get('author__in') ) return $query;
+
+        if ( !$user_id = wpsstm()->get_options('community_user_id') ) return $query;
+        
+
         
         //ignore community posts
         $author_not_in = $query->get('author__not_in');
