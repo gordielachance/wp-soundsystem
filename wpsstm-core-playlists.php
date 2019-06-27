@@ -6,12 +6,7 @@ class WPSSTM_Core_Playlists{
         
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_playlists_submenu' ) );
-
         add_action( 'current_screen', array($this,'import_at_init') );
-        
-        /*
-        AJAX
-        */
 
     }
 

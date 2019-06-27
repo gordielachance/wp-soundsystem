@@ -26,9 +26,9 @@ class WPSSTM_Core_Albums{
     function metabox_album_register(){
 
         add_meta_box( 
-            'wpsstm-music-details', 
-            __('Music Details','wpsstm'),
-            array('WPSSTM_Core_Tracks','metabox_music_details_content'),
+            'wpsstm-album-info', 
+            __('Album','wpsstm'),
+            array('WPSSTM_Core_Tracks','metabox_music_infos_content'),
             wpsstm()->post_type_album, 
             'after_title', 
             'high' 

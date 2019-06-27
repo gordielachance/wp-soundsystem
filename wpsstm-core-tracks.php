@@ -713,9 +713,9 @@ class WPSSTM_Core_Tracks{
     function metabox_track_register(){
 
         add_meta_box( 
-            'wpsstm-music-details', 
-            __('Music Details','wpsstm'),
-            array(__class__,'metabox_music_details_content'),
+            'wpsstm-track-info', 
+            __('Track','wpsstm'),
+            array(__class__,'metabox_music_infos_content'),
             wpsstm()->post_type_track, 
             'after_title', 
             'high' 
@@ -732,7 +732,7 @@ class WPSSTM_Core_Tracks{
 
     }
     
-    static function metabox_music_details_content( $post ){
+    static function metabox_music_infos_content( $post ){
         
         $post_type = get_post_type($post);
         
