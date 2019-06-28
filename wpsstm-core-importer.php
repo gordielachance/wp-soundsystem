@@ -182,8 +182,7 @@ class WPSSTM_Core_Importer{
         
         global $wpsstm_tracklist;
 
-        if ( !is_page(wpsstm()->get_options('frontend_scraper_page_id')) ) return;
-        if ( is_wp_error(wpsstm()->can_frontend_importer()) ) return;
+        if ( !wpsstm()->get_options('frontend_scraper_page_id') ) return;
         
         $url = wpsstm_get_array_value('wpsstm_frontend_wizard_url',$_POST);
         if (!$url) return;

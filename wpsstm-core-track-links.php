@@ -538,8 +538,8 @@ class WPSSTM_Core_Track_Links{
         }
         
         //wpssstm API
-        $can_wpsstm_api = WPSSTM_Core_API::can_wpsstmapi();
-        if ( $can_wpsstm_api !== true ) return $can_wpsstm_api;
+        $is_premium = WPSSTM_Core_API::check_auth();
+        if ( $is_premium !== true ) return $is_premium;
 
         //capability check
         $links_post_type_obj = get_post_type_object(wpsstm()->post_type_track_link);

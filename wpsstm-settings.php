@@ -413,39 +413,16 @@ class WPSSTM_Settings {
         
         $enabled = wpsstm()->get_options('autolink');
 
-        $can = WPSSTM_Core_API::can_wpsstmapi();
-        $readonly = is_wp_error($can);
-
         /*
         form
         */
         
         printf(
-            '<input type="checkbox" name="%s[autolink]" value="on" %s %s /> %s',
+            '<input type="checkbox" name="%s[autolink]" value="on" %s /> %s',
             wpsstm()->meta_name_options,
             checked( $enabled, true, false ),
-            wpsstm_readonly( $readonly,true, false ),
             __("Try to get track links (stream URLs, ...) automatically if none have been set.","wpsstm")
         );
-        
-        /*
-        errors
-        */
-        
-        //register errors
-        if ( $enabled ){
-        
-            //autolink
-            $can = WPSSTM_Core_Track_Links::can_autolink();
-
-            if ( is_wp_error($can) ){
-                add_settings_error('autolink',$can->get_error_code(),$can->get_error_message(),'inline');
-            }
-            
-        }
-        
-        //display errors
-        settings_errors('autolink');
 
     }
     
@@ -573,9 +550,7 @@ class WPSSTM_Settings {
     }
 
     function frontend_importer_callback(){
-        $option = (int)wpsstm()->get_options('frontend_scraper_page_id');
-        $can = wpsstm()->can_frontend_importer();
-        $readonly = is_wp_error($can);
+        $option = wpsstm()->get_options('frontend_scraper_page_id');
 
         $help = array();
         $help[]= __("ID of the page used to display the frontend Tracklist Importer.","wpsstm");
@@ -583,21 +558,11 @@ class WPSSTM_Settings {
         $help = sprintf("<small>%s</small>",implode('  ',$help));
         
         printf(
-            '<input type="number" name="%s[frontend_scraper_page_id]" size="4" min="0" value="%s" %s /><br/>%s',
+            '<input type="number" name="%s[frontend_scraper_page_id]" size="4" min="0" value="%s"/><br/>%s',
             wpsstm()->meta_name_options,
             $option,
-            wpsstm_readonly( $readonly,true, false ),
             $help
         );
-        
-        //register errors
-        if ( $option && is_wp_error($can) ){
-            add_settings_error('frontend_wizard',$can->get_error_code(),$can->get_error_message(),'inline');
-        }
-        
-        //display errors
-        settings_errors('frontend_wizard');
-        
     }
 
     function registration_notice_callback(){
@@ -724,11 +689,9 @@ class WPSSTM_Settings {
 	}
     
     function api_key_notice(){
-        if ( !wpsstm()->is_admin_page() ) return;
         
-        $can = WPSSTM_Core_API::can_wpsstmapi();
-        $is_auth = !is_wp_error($can);
-        if ($is_auth) return;
+        if ( !wpsstm()->is_admin_page() ) return;
+        if ( WPSSTM_Core_API::check_auth() ) return;
 
         $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('Get an API key','wpsstm'));
 

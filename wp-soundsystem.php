@@ -727,31 +727,6 @@ class WP_SoundSystem {
         return implode("\n",$output);
     }
 
-    public function can_importer(){
-        //wpssstm API
-        $can_wpsstm_api = WPSSTM_Core_API::can_wpsstmapi();
-        if ( $can_wpsstm_api !== true ) return $can_wpsstm_api;
-        
-        //community user
-        if ( !$user_id = wpsstm()->get_options('community_user_id') ){
-            return new WP_Error( 'wpsstm_missing_community_user', __("Missing community user.",'wpsstm'));
-        }
-        
-        return true;
-        
-    }
-
-    public function can_frontend_importer(){
-        $page_id = $this->get_options('frontend_scraper_page_id');
-        
-        if (!$page_id){
-            return new WP_Error( 'wpsstm_missing_frontend_wizard_page', __('No frontend wizard page defined.','wpsstm'));
-        }
-        
-        return $this->can_importer();
-
-    }
-
     public function is_community_user_ready(){
         //community user
         $user_id = $this->get_options('community_user_id');

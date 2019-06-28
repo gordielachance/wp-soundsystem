@@ -158,6 +158,8 @@ class WpsstmTrack extends HTMLElement{
         
         if (!sourceLinks.length && track.didautolink){
             track.playable = false;
+        }else{
+            track.playable = true;
         }
 
         var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
