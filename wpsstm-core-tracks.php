@@ -118,8 +118,8 @@ class WPSSTM_Core_Tracks{
     
 
     function populate_global_track($query){
-
         global $wpsstm_track;
+        require_once(ABSPATH . 'wp-admin/includes/screen.php'); //FIXES crash when get_current_screen() is not defined - should investigate ?
 
         $success = null;
         $post_id = $query->get( 'p' );

@@ -434,6 +434,7 @@ class WPSSTM_Core_Tracklists{
     
     function populate_global_tracklist($query){
         global $wpsstm_tracklist;
+        require_once(ABSPATH . 'wp-admin/includes/screen.php'); //FIXES crash when get_current_screen() is not defined - should investigate ?
 
         $success = null;
         $post_id = $query->get( 'p' );
