@@ -29,6 +29,8 @@ define("WPSSTM_LINK_SLUG", "link");
 define("WPSSTM_NEW_ITEM_SLUG", "new");
 define("WPSSTM_MANAGER_SLUG", "manager");
 
+define('WPSSTM_REST_NAMESPACE','wpsstm/v1');
+
 class WP_SoundSystem {
     /** Version ***************************************************************/
     /**

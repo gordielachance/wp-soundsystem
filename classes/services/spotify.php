@@ -20,6 +20,9 @@ class WPSSTM_Spotify{
         
         if ( $this->can_spotify_api() === true ){
             
+            //music details
+            add_action( 'rest_api_init', array($this,'register_endpoints') );
+            
             //presets
             add_filter('wpsstm_feed_url', array($this, 'spotify_playlist_bang_to_url'));
             add_filter('wpsstm_importer_bang_links',array($this,'register_spotify_bang_links'));
@@ -27,6 +30,12 @@ class WPSSTM_Spotify{
         }
     }
     
+    function register_endpoints() {
+        //TRACK
+		$controller = new WPSSTM_Spotify_Endpoints();
+		$controller->register_routes();
+    }
+
     function spotify_playlist_bang_to_url($url){
         $pattern = '~^spotify:user:([^:]+):playlist:([\w\d]+)~i';
         preg_match($pattern,$url, $matches);
@@ -144,7 +153,6 @@ class WPSSTM_Spotify{
             )
         );
 
-
         $response = wp_remote_post( 'https://accounts.spotify.com/api/token', $args );
 
         if ( is_wp_error($response) ){
@@ -178,10 +186,130 @@ class WPSSTM_Spotify{
         
     }
     
+    public function get_search_results($type,$artist,$album='_',$track='null'){
+        
+        //sanitize input
+        $allowed_types = array('artists', 'albums', 'tracks','playlists');
+
+        if ( !in_array($type,$allowed_types) ) 
+            return new WP_Error('spotify_invalid_api_type',__("invalid item type",'wpsstmapi'));
+
+        if ($album==='_') $album = null;
+        $search_type = null;
+
+        switch($type){
+                
+            case 'artists':
+                
+                if ( !$artist ) break;
+                
+                $search_str = sprintf('artist:%s',$artist);
+                $search_type = 'artist';
+                
+            break;
+                
+            case 'tracks':
+                
+                if ( !$artist || !$track ) break;
+                
+                $search_str = sprintf('artist:%s track:%s',$artist,$track);
+
+                /*
+                TOU FIX seems that we get better results when we ignore albums, maybe we should do this is two passes ?
+                One with the album, if no result, retry without ?
+                if($album){
+                    $search_str = sprintf('artist:%s album:%s track:%s',$artist,$album,$track);
+                }
+                */
+                
+                $search_type = 'track';
+                
+            break;
+                
+            case 'albums':
+                
+                if ( !$artist || !$album ) break;
+                
+                $search_str = sprintf('artist:%s album:%s',$artist,$album);
+                $search_type = 'album';
+                
+                
+            break;
+
+        }
+        
+        if (!$search_str){
+            return new WP_Error('spotify_missing_search_query',__("Missing search query",'wpsstmapi'));
+        }
+        
+        ///
+        
+        $url_args = array(
+            'q' =>      rawurlencode($search_str),
+            'type' =>   $search_type,
+            'limit' =>  10,
+        );
+
+        $url = add_query_arg($url_args,'https://api.spotify.com/v1/search');
+
+        $spotify_args = $this->get_spotify_request_args();
+        if (is_wp_error($spotify_args) ) return $spotify_args;
+
+        $request = wp_remote_get($url,$spotify_args);
+        if (is_wp_error($request)) return $request;
+
+        $response = wp_remote_retrieve_body( $request );
+        if (is_wp_error($response)) return $response;
+
+        $api_results = json_decode($response, true);
+        if ( is_wp_error($api_results) ) return $api_results;
+        
+        //check for errors
+        if ( $error_msg = wpsstm_get_array_value('error',$api_results) ){
+
+            return new WP_Error( 'spotify_api_search',$error_msg);
+        }
+        
+        $result_keys = array($type,'items');
+        $results = wpsstm_get_array_value($result_keys, $api_results);
+        
+        if ( empty($results) ){
+            wpsstm()->debug_log(array('search_str'=>$search_str,'type'=>$type),'no Spotify search results');
+        }
+        
+        return $results;
+
+    }
+    
+    public function get_item_data($type,$id){
+        $allowed_types = array('artists', 'albums', 'tracks','playlists');
+
+        if ( !in_array($type,$allowed_types) ) 
+            return new WP_Error('spotify_invalid_api_type',__("invalid item type",'wpsstmapi'));
+
+        $url = sprintf('https://api.spotify.com/v1/%s/%s',$type,$id);
+        
+        $spotify_args = $this->get_spotify_request_args();
+        if (is_wp_error($spotify_args) ) return $spotify_args;
+
+        $request = wp_remote_get($url,$spotify_args);
+        if (is_wp_error($request)) return $request;
+
+        $response = wp_remote_retrieve_body( $request );
+        if (is_wp_error($response)) return $response;
+
+        $api_results = json_decode($response, true);
+        
+        return $api_results;
+        
+    }
+    
     public function register_details_engine($engines){
         $engines[] = new WPSSTM_Spotify_Data();
         return $engines;
     }
+    
+    
 
 }
 
@@ -308,6 +436,165 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
         return wpsstm_get_array_value(array('name'), $data);
     }  
             
+}
+
+class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
+    /**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->namespace = WPSSTM_REST_NAMESPACE;
+		$this->rest_base = 'services/spotify';
+	}
+    /**
+     * Register the component routes.
+     */
+
+    public function register_routes() {
+        
+        //identify a track
+        // .../wp-json/wpsstm/v1/services/spotify/search/U2/_/Sunday Bloody Sunday
+        register_rest_route( $this->namespace, '/' . $this->rest_base . '/search/(?P<artist>.*)/(?P<album>.*)/(?P<track>.*)', array(
+            array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => array( $this, 'search_tracks' ),
+				'args' => array(
+		            'artist' => array(
+                        'required' => true,
+		                //'validate_callback' => array($this, 'validatePhone')
+		            ),
+		            'album' => array(
+                        'required' => true,
+		                //'validate_callback' => array($this, 'validatePhone')
+		            ),
+		            'track' => array(
+                        'required' => true,
+		                //'validate_callback' => array($this, 'validatePhone')
+		            ),
+                ),
+                //TOUFIX should be local request 'permission_callback' => array( 'WP_SoundSystem_API', 'auth_logged_user' ),
+            )
+        ) );
+        
+        //identify an album
+        // .../wp-json/wpsstm/v1/services/spotify/search/Radiohead/Kid A
+        register_rest_route( $this->namespace, '/' . $this->rest_base . '/search/(?P<artist>.*)/(?P<album>.*)', array(
+            array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => array( $this, 'search_albums' ),
+				'args' => array(
+		            'artist' => array(
+                        'required' => true,
+		                //'validate_callback' => array($this, 'validatePhone')
+		            ),
+		            'album' => array(
+                        'required' => true,
+		                //'validate_callback' => array($this, 'validatePhone')
+		            ),
+                ),
+                //TOUFIX should be local request 'permission_callback' => array( 'WP_SoundSystem_API', 'auth_logged_user' ),
+            )
+        ) );
+        
+        //identify an artist
+        // .../wp-json/wpsstm/v1/services/spotify/search/Radiohead
+        register_rest_route( $this->namespace, '/' . $this->rest_base . '/search/(?P<artist>.*)', array(
+            array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => array( $this, 'search_artists' ),
+				'args' => array(
+		            'artist' => array(
+                        'required' => true,
+		                //'validate_callback' => array($this, 'validatePhone')
+		            ),
+                ),
+                //TOUFIX should be local request 'permission_callback' => array( 'WP_SoundSystem_API', 'auth_logged_user' ),
+            )
+        ) );
+
+        /* get datas based on ID */
+        // .../wp-json/wpsstm/v1/services/spotify/data/playlists/37i9dQZF1DX4JAvHpjipBk
+        register_rest_route( $this->namespace, '/' . $this->rest_base . '/data/(?P<type>.*)/(?P<id>[0-9A-Za-z]+)', array(
+            array(
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => array( $this, 'get_id_data' ),
+				'args' => array(
+		            'type' => array(
+                        'required' => true,
+		                //'validate_callback' => array($this, 'validatePhone')
+		            ),
+		            'id' => array(
+                        'required' => true,
+		                //'validate_callback' => array($this, 'validatePhone')
+		            ),
+                ),
+                //TOUFIX should be local request 'permission_callback' => array( 'WP_SoundSystem_API', 'auth_logged_user' ),
+            )
+        ) );
+
+        
+    }
+
+    public function search_artists( $request ) {
+        global $wpsstm_spotify;
+        
+        //get parameters from request
+        $params = $request->get_params();
+
+        $artist = urldecode(wpsstm_get_array_value('artist',$params));
+        $data = $wpsstm_spotify->get_search_results('artists',$artist);
+
+        return WP_SoundSystem_API::format_response($data);
+        
+    }
+    
+    public function search_albums( $request ) {
+        global $wpsstm_spotify;
+        
+        //get parameters from request
+        $params = $request->get_params();
+
+        $artist = urldecode(wpsstm_get_array_value('artist',$params));
+        $album = urldecode(wpsstm_get_array_value('album',$params));
+        $data = $wpsstm_spotify->get_search_results('albums',$artist,$album);
+
+        return WP_SoundSystem_API::format_response($data);
+        
+    }
+    
+    public function search_tracks( $request ) {
+        global $wpsstm_spotify;
+        
+        //get parameters from request
+        $params = $request->get_params();
+
+        $artist = urldecode(wpsstm_get_array_value('artist',$params));
+        $album = urldecode(wpsstm_get_array_value('album',$params));
+        $track = urldecode(wpsstm_get_array_value('track',$params));
+
+        $data = $wpsstm_spotify->get_search_results('tracks',$artist,$album,$track);
+
+        return WP_SoundSystem_API::format_response($data);
+        
+    }
+
+    /**
+     * Retrieve datas based on a spotify ID
+     */
+    public function get_id_data( $request ) {
+        global $wpsstm_spotify;
+        
+        //get parameters from request
+        $params = $request->get_params();
+
+        $type = wpsstm_get_array_value('type',$params);
+        $id = wpsstm_get_array_value('id',$params);
+
+        $data = $wpsstm_spotify->get_item_data($type,$id);
+
+        return WP_SoundSystem_API::format_response($data);
+    }
+
 }
 
 class WPSSTM_Spotify_Entries extends WPSSTM_Music_Entries {

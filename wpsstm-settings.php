@@ -183,7 +183,7 @@ class WPSSTM_Settings {
         
         add_settings_field(
             'details_engine', 
-            __('Music Details','wpsstm') . sprintf(' <small style="color:red">%s</small>',__('API key required')), 
+            __('Music Details','wpsstm'), 
             array( $this, 'details_engine_callback' ), 
             'wpsstm-settings-page', 
             'wpsstmapi_settings'
