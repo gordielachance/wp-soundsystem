@@ -534,12 +534,15 @@ class WPSSTM_Core_Track_Links{
         //community user
         $community_user_id = wpsstm()->get_options('community_user_id');
         if (!$community_user_id){
-            return new WP_Error( 'wpsstm_autolink',__('Autolink requires a community user to be set.','wpsstm') );   
+            return new WP_Error( 'wpsstm_autolink',__('Autolink requires a community user to be set.','wpsstm') );
         }
         
         //wpssstm API
-        $is_premium = WPSSTM_Core_API::check_auth();
-        if ( $is_premium !== true ) return $is_premium;
+        $is_premium = WPSSTM_Core_API::is_premium();
+        
+        if ( $is_premium !== true ){
+            return new WP_Error( 'wpsstm_premium_missing',__('This requires you to be premium.','wpsstm') );
+        }
 
         //capability check
         $links_post_type_obj = get_post_type_object(wpsstm()->post_type_track_link);

@@ -10,7 +10,6 @@ class WPSSTM_Settings {
 		add_action( 'admin_menu', array( $this, 'create_admin_menu' ), 8 );
         add_action( 'admin_init', array( $this, 'settings_init' ), 5 );
         add_action( 'admin_init', array( $this, 'system_settings_init' ), 15 );
-        add_action( 'admin_notices', array( $this, 'api_key_notice' ) );
 	}
 
     function create_admin_menu(){
@@ -138,14 +137,8 @@ class WPSSTM_Settings {
         */
 
         $old_token = wpsstm()->get_options('wpsstmapi_token');
-        $new_token = trim( wpsstm_get_array_value('wpsstmapi_token',$input) );
-        
-        if($old_token !== $new_token){
-            delete_transient( WPSSTM_Core_API::$auth_transient_name );
-            wpsstm()->debug_log('deleted wpsstmapi auth transient');
-        }
 
-        $new_input['wpsstmapi_token'] = $new_token;
+        $new_input['wpsstmapi_token'] = trim( wpsstm_get_array_value('wpsstmapi_token',$input) );
         
         $new_input['details_engine'] = (array)$input['details_engine'];
 
@@ -172,19 +165,25 @@ class WPSSTM_Settings {
             'wpsstm-settings-page' // Page
         );
 
-        $register_api_link = sprintf('<small>  <a href="%s" target="_blank">%s</a></small>',WPSSTM_API_REGISTER_URL,__('Get one','wpsstm'));
-        
         add_settings_field(
             'wpsstmapi_token', 
-            __('API Token','wpsstm') . $register_api_link,
-            array( $this, 'wpsstmapi_apisecret_callback' ), 
+            __('API Key (free)','wpsstm'),
+            array( $this, 'wpsstmapi_apitoken_callback' ), 
+            'wpsstm-settings-page', 
+            'wpsstmapi_settings'
+        );
+        
+        add_settings_field(
+            'wpsstmapi_premium', 
+            __('Premium','wpsstm'),
+            array( $this, 'wpsstmapi_apipremium_callback' ), 
             'wpsstm-settings-page', 
             'wpsstmapi_settings'
         );
         
         add_settings_field(
             'details_engine', 
-            __('Music Details','wpsstm'), 
+            __('Music Details','wpsstm') . sprintf(' <small style="color:red">%s</small>',__('API key required')), 
             array( $this, 'details_engine_callback' ), 
             'wpsstm-settings-page', 
             'wpsstmapi_settings'
@@ -289,7 +288,7 @@ class WPSSTM_Settings {
         
         add_settings_field(
             'autolink', 
-            __('Autolink','wpsstm'), 
+            __('Autolink','wpsstm') . sprintf(' <small style="color:red">%s</small>',__('premium')), 
             array( $this, 'autolink_callback' ), 
             'wpsstm-settings-page', 
             'track_link_settings'
@@ -324,12 +323,13 @@ class WPSSTM_Settings {
     }
     
     function system_settings_init(){
-        
-        
-        //clear some transients
+
+        //force API checks by deleting some transients
+        wpsstm()->debug_log('deleted settings transients...');
         delete_transient( WPSSTM_Core_Importer::$importer_links_transient_name );
-        
-        
+        delete_transient( WPSSTM_Core_API::$valid_token_transient_name );
+        delete_transient( WPSSTM_Core_API::$premium_expiry_transient_name );
+
         add_settings_section(
             'settings_system', // ID
             __('System','wpsstm'), // Title
@@ -506,21 +506,84 @@ class WPSSTM_Settings {
                 $engine->name
             );
         }
+        
+        //register errors
+        $valid_token = WPSSTM_Core_API::has_valid_api_token();
 
     }
     
-    function wpsstmapi_apisecret_callback(){
+    function wpsstmapi_apitoken_callback(){
         //client secret
         $client_secret = wpsstm()->get_options('wpsstmapi_token');
+        $valid_token = WPSSTM_Core_API::has_valid_api_token();
+        
         printf(
             '<p><input type="text" name="%s[wpsstmapi_token]" value="%s" class="wpsstm-fullwidth" /></p>',
             wpsstm()->meta_name_options,
             $client_secret
         );
+        
+        /*
+        errors
+        */
+
+        //register errors
+        if ( is_wp_error($valid_token) ){
+            add_settings_error('missing_api_token',$valid_token->get_error_code(),$valid_token->get_error_message(),'inline');
+        }
+        
+        if ( !$valid_token || is_wp_error($valid_token) ){
+            $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstm'));
+            $desc = sprintf( __('WP Soundsystem uses an external API for several features. Get a free API key %s.','wpsstm'),$link);
+            
+            add_settings_error('api_token','api_get_token',$desc,'inline');
+            
+        }
+        
+        //display errors
+        settings_errors('api_token');
+
+    }
+    
+    function wpsstmapi_apipremium_callback(){
+
+        $response = null;
+        $response = WPSSTM_Core_API::is_premium();
+
+        if ( is_wp_error($response) ){
+            add_settings_error('api_premium',$response->get_error_code(),$response->get_error_message(),'inline');
+        }
+        
+        if ( !$response || is_wp_error($response) ){
+            
+            $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('Get premium','wpsstm'));
+            $desc = sprintf(__('%s and unlock powerful features : Tracklists Importer, Tracks Autolink...  First and foremost, it is a nice way to support this  plugin, and to ensure its durability.  Thanks for your help!','wppstm'),$link);
+
+            add_settings_error('api_premium','api_get_premium',$desc,'inline');
+            
+        }else{
+            
+            $datas = WPSSTM_Core_API::get_premium_datas();
+   
+            if ( $expiry = wpsstm_get_array_value('expiry',$datas) ){
+                echo get_date_from_gmt( date( 'Y-m-d H:i:s', $expiry ), get_option( 'date_format' ) );   
+            }else{
+                echo '—';
+            }
+            
+        }
+
+        /*
+        errors
+        */
+
+        //display errors
+        settings_errors('api_premium');
+
     }
 
     function section_importer_desc(){
-        $desc[] = __('This module adds a new metabox to import tracks from various services like Spotify, or any webpage where a tracklist is displayed.','wppsm');
+        $desc[] = __('This module adds a new metabox to import tracks from various services like Spotify, or any webpage where a tracklist is displayed.','wppstm');
         
         //wrap
         $desc = array_map(
@@ -535,7 +598,7 @@ class WPSSTM_Settings {
     }
     
     function section_radios_desc(){
-        $desc[] = __('Radios are how we call live playlists.  Those are automatically synced with remote datas, like a web page or a Spotify playlist.','wppsm');
+        $desc[] = __('Radios are how we call live playlists.  Those are automatically synced with remote datas, like a web page or a Spotify playlist.','wppstm');
         
         //wrap
         $desc = array_map(
@@ -687,28 +750,6 @@ class WPSSTM_Settings {
         </div>
         <?php
 	}
-    
-    function api_key_notice(){
-        
-        if ( !wpsstm()->is_admin_page() ) return;
-        if ( WPSSTM_Core_API::check_auth() ) return;
-
-        $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('Get an API key','wpsstm'));
-
-        $desc[] = sprintf(__('%s and unlock powerful features : Tracklists Importer, Radios post type, Autolink tracks...','wppsm'),$link);
-
-        $desc[] = __("First and foremost, it is a nice way to support this  plugin, and to ensure its durability.  Thanks for your help !",'wppsm');
-        
-        //wrap
-        $desc = array_map(
-           function ($el) {
-              return "<p>{$el}</p>";
-           },
-           $desc
-        );
-        
-        printf('<div class="notice notice-success is-dismissible">%s</div>',implode("\n",$desc));
-    }
 
 }
 

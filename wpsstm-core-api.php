@@ -6,52 +6,71 @@ define('WPSSTM_API_NAMESPACE','wpsstmapi/v1');
 
 class WPSSTM_Core_API {
     
-    public static $auth_transient_name = 'wpsstmapi_is_auth';
+    public static $valid_token_transient_name = 'wpsstmapi_is_auth';
+    public static $premium_expiry_transient_name = 'wpsstmapi_premium_expiry';
 
     function __construct(){
         add_filter( 'wpsstm_autolink_input',array($this,'api_track_autolink'), 5, 2 );
     }
-
-    public static function can_wpsstmapi(){
-        
-        $token = wpsstm()->get_options('wpsstmapi_token');
-        $auth = self::check_auth();
-
-        if ( $token && $auth && !is_wp_error($auth) ) return true;
-
-        return new WP_Error('wpsstmapi_required',__("A valid WPSSTM API key is required.",'wpsstm'));
-        
-    }
     
-    private static function check_auth(){
+    public static function has_valid_api_token(){
         
-        $is_auth = false;
+        $valid = false;
         
-        
-        if ( false === ( $is_auth = get_transient(self::$auth_transient_name ) ) ) {
+        if ( !$token = wpsstm()->get_options('wpsstmapi_token') ){
+            return false;
+        }
+
+        if ( false === ( $valid = get_transient(self::$valid_token_transient_name ) ) ) {
 
             $api_results = self::api_request('token/validate','simple-jwt-authentication/v1','POST');
-            
+
             if ( is_wp_error($api_results) ) {
-                wpsstm()->debug_log($api_results,'check auth failed');
+                $valid = $api_results;
             }else{
+
                 $data = wpsstm_get_array_value('data',$api_results);
                 $status = wpsstm_get_array_value(array('data','status'),$api_results);
 
-                if ($status === 200) {
-                    $is_auth = true;
+                if ($status === 200) { //is a valid token
+                    $valid = true;
                 }
-            }
 
-            set_transient( self::$auth_transient_name, $is_auth, 1 * DAY_IN_SECONDS );
+            }
+            
+            $transient_value = is_wp_error($valid) ? false : $valid;
+            set_transient( self::$valid_token_transient_name, $transient_value, 1 * DAY_IN_SECONDS );
 
         }
         
-        return $is_auth;
+        return $valid;
+    }
+    
+    public static function get_premium_datas(){
+        
+        $valid_token = self::has_valid_api_token();
+        if ( !$valid_token || is_wp_error($valid_token) ) return $valid_token;
+        
+        if ( false === ( $datas = get_transient(self::$premium_expiry_transient_name ) ) ) {
+            $datas = WPSSTM_Core_API::api_request('premium/get');
+            if ( is_wp_error($datas) ){
+                return $datas;
+            }
+            
+            set_transient( self::$premium_expiry_transient_name, $datas, 1 * DAY_IN_SECONDS );
+        }
+        
+        return $datas;
+    }
+    
+    public static function is_premium(){
+        $response = self::get_premium_datas();
+        if ( is_wp_error($response) ) return false;
+        return wpsstm_get_array_value('is_premium',$response);
     }
 
     static function api_request($endpoint = null, $namespace = null, $method = 'GET'){
-        
+
         if (!$namespace) $namespace = WPSSTM_API_NAMESPACE; 
 
         if (!$endpoint){
@@ -92,8 +111,12 @@ class WPSSTM_Core_API {
         $status = wpsstm_get_array_value(array('data','status'),$response);
 
         if ( $code && $message && ($status >= 400) ){
+
+            $message = sprintf(__('WPSSTMAPI error: %s','wpsstm'),$message);
             $error = new WP_Error($code,$message,$data );
-            wpsstm()->debug_log($error,'query API error');
+            
+            wpsstm()->debug_log($error,'api_request');
+
             return $error;
         }
         
@@ -106,27 +129,24 @@ class WPSSTM_Core_API {
         if (!$track->post_id){
             return new WP_Error( 'missing_track_id',__( 'Missing Track ID.', 'wpsstm' ));
         }
-        
-        if ($this->can_wpsstmapi() === true){
 
-            $spotify_engine = new WPSSTM_Spotify_Data();
-            if ( !$music_id = $spotify_engine->get_post_music_id($track->post_id) ){
+        $spotify_engine = new WPSSTM_Spotify_Data();
+        if ( !$music_id = $spotify_engine->get_post_music_id($track->post_id) ){
 
-                $music_id = $spotify_engine->auto_music_id($track->post_id); //we need a post ID here
-                
-                if ( is_wp_error($music_id) ) $music_id = null;
+            $music_id = $spotify_engine->auto_music_id($track->post_id); //we need a post ID here
 
-            }
-
-            if ( !$music_id ){
-                return new WP_Error( 'missing_spotify_id',__( 'Missing Spotify ID.', 'wpsstmapi' ));
-            }
-
-            $api_url = sprintf('track/autolink/spotify/%s',$music_id);
-            $links_auto = WPSSTM_Core_API::api_request($api_url);
-            if ( is_wp_error($links_auto) ) return $links_auto;
+            if ( is_wp_error($music_id) ) $music_id = null;
 
         }
+
+        if ( !$music_id ){
+            return new WP_Error( 'missing_spotify_id',__( 'Missing Spotify ID.', 'wpsstmapi' ));
+        }
+
+        $api_url = sprintf('track/autolink/spotify/%s',$music_id);
+        $links_auto = WPSSTM_Core_API::api_request($api_url);
+        if ( is_wp_error($links_auto) ) return $links_auto;
+
         return $links_auto;
     }
 
