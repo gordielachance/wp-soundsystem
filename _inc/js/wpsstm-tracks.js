@@ -84,6 +84,13 @@ class WpsstmTrack extends HTMLElement{
                 }
 
             break;
+                
+            case 'data-sources-count':
+
+                var sourceCountEl = $(track).find('.wpsstm-track-action-toggle-links .wpsstm-sources-count');
+                sourceCountEl.text( newVal );
+                
+            break;
     
         }
     }
@@ -95,7 +102,7 @@ class WpsstmTrack extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['trackstatus','wpsstm-playable','didautolink'];
+        return ['trackstatus','wpsstm-playable','didautolink','data-sources-count'];
     }
     
     get status() {
@@ -105,7 +112,7 @@ class WpsstmTrack extends HTMLElement{
     set status(value) {
         this.setAttribute('trackstatus',value);
     }
-    
+
     get playable() {
         return this.hasAttribute('wpsstm-playable');
     }
@@ -131,48 +138,19 @@ class WpsstmTrack extends HTMLElement{
             this.removeAttribute('didautolink');
         }
     }
-    
-    ///
-    listenLinks(){
-        
-        var track = this;
-        
-        /*
-        Toggle display the track when the queue is updated
-        */
 
-        return new MutationObserver(function(mutationsList){
-            for(var mutation of mutationsList) {
-                
-                if (mutation.type == 'childList') {
-                    track.initLinks();
-                }
-            }
-        });
-        
-    }
-    
-    initLinks(){
+    countSources(){
         var track = this;
+        var track_instances = track.get_instances();
         var sourceLinks = $(track).find('wpsstm-track-link').filter('[wpsstm-playable]');
         
         if (!sourceLinks.length && track.didautolink){
-            track.playable = false;
+            track_instances.prop('playable',false);
         }else{
-            track.playable = true;
+             track_instances.prop('playable',true);
         }
 
-        var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
-
-        //link count
-        var linkCountEl = toggleLinksEl.find('.wpsstm-links-count');
-        if ( !linkCountEl.length ){ //create item
-            linkCountEl = $('<span class="wpsstm-links-count"></span>');
-            toggleLinksEl.append(linkCountEl);            
-        }
-
-        track.setAttribute('data-wpsstm-links-count',sourceLinks.length);
-        linkCountEl.text( sourceLinks.length );
+        track_instances.attr('data-sources-count',sourceLinks.length);
     }
 
     debug(msg){
@@ -194,15 +172,22 @@ class WpsstmTrack extends HTMLElement{
         /*
         Track Links
         */
-        
-        var linksNode = $(track).find('.wpsstm-track-links-list').get(0);
-        track.initLinks();
 
-        // Watch for links update
-        var linksUpdated = track.listenLinks();
-        linksUpdated.observe(linksNode,{childList: true});
+        var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
+        
+        toggleLinksEl.click(function(e) {
+            e.preventDefault();
+
+            $(this).toggleClass('active');
+            $(this).parents('.wpsstm-track').find('.wpsstm-track-links-list').toggleClass('active');
+        });
+        
+        //show links count
+        var sourceCountEl = $('<span class="wpsstm-sources-count"></span>');
+        toggleLinksEl.append(sourceCountEl);
 
         // sort links
+        var linksNode = $(track).find('.wpsstm-track-links-list').get(0);
         $(linksNode).sortable({
             axis: "y",
             items : "wpsstm-track-link",
@@ -217,6 +202,9 @@ class WpsstmTrack extends HTMLElement{
 
             }
         });
+        
+        //at last, init links
+        track.countSources();
 
         //toggle favorite
         $(track).on('click','.wpsstm-track-action-favorite,.wpsstm-track-action-unfavorite', function(e) {
@@ -239,21 +227,30 @@ class WpsstmTrack extends HTMLElement{
             e.preventDefault();
             track.trash_track();
         });
-
-        //links
-
-        var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
-
-        toggleLinksEl.click(function(e) {
-            e.preventDefault();
-
-            $(this).toggleClass('active');
-            $(this).parents('.wpsstm-track').find('.wpsstm-track-links-list').toggleClass('active');
-        });
         
         //move play button at the beginning of the row
         var playLinkEl = $(track).find('.wpsstm-track-action-play');
         playLinkEl.parents('.wpsstm-track').find('.wpsstm-track-pre').prepend(playLinkEl);
+        
+        //play/pause
+        $(track).on('click','.wpsstm-track-action-play', function(e) {
+            e.preventDefault();
+            
+            if (!track.player) return;
+
+            var queueTrack = track.queueNode ? track.queueNode : track;
+            var trackIdx = Array.from(queueTrack.parentNode.children).indexOf(queueTrack);
+
+            var links = $(queueTrack).find('wpsstm-track-link');
+            var activeLink = links.filter('.link-active').get(0);
+            var linkIdx = links.index( activeLink );
+            linkIdx = (linkIdx > 0) ? linkIdx : 0;
+
+            track.player.play_queue(trackIdx,linkIdx);
+
+
+        });
+        
     }
 
     get_instances(){
@@ -289,8 +286,6 @@ class WpsstmTrack extends HTMLElement{
         });
 
         autolink_request.done(function(data) {
-            
-            track_instances.prop('didautolink', true); //use prop and not attr here - https://stackoverflow.com/a/12940759/782013
 
             if ( data.success ){
                 
@@ -301,10 +296,13 @@ class WpsstmTrack extends HTMLElement{
                 
             }
             
+            track_instances.prop('didautolink', true); //use prop and not attr here - https://stackoverflow.com/a/12940759/782013
+            
         });
         
         autolink_request.always(function (dataOrjqXHR, textStatus, jqXHRorErrorThrown) {
             track_instances.removeClass('track-links-loading');
+            track.countSources();
         });
 
         return autolink_request;

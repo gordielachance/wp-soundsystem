@@ -256,13 +256,13 @@ class WpsstmPlayer extends HTMLElement{
         var playerQueue = $(player).find('.player-queue').get(0);
 
         //show play BT
+        $(track).find('.wpsstm-track-action-play').show();
         //clone page track & append to queue
         var queueTrack = $(track).clone().get(0);
         
         //set player
         track.player = player;
         queueTrack.player = player;
-        $(track).find('.wpsstm-track-action-play').show();
 
         queueTrack.pageNode = track;
         playerQueue.append(queueTrack);
@@ -270,23 +270,6 @@ class WpsstmPlayer extends HTMLElement{
 
         //post track
         track.queueNode = queueTrack;
-        
-        //play/pause
-        $(track).on('click','.wpsstm-track-action-play', function(e) {
-            e.preventDefault();
-
-            var queueTrack = track.queueNode;
-            var trackIdx = Array.from(queueTrack.parentNode.children).indexOf(queueTrack);
-
-            var links = $(queueTrack).find('wpsstm-track-link');
-            var activeLink = links.filter('.link-active').get(0);
-            var linkIdx = links.index( activeLink );
-            linkIdx = (linkIdx > 0) ? linkIdx : 0;
-
-            player.play_queue(trackIdx,linkIdx);
-
-
-        });
         
         player.refresh_queue_tracks_positions();
 

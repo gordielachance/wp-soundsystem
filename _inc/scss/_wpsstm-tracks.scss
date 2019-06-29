@@ -144,7 +144,7 @@ wpsstm-track{
         }
     }
 
-    &[data-wpsstm-links-count="0"]{
+    &[data-sources-count="0"]{
         @include opacity(.25);
         .wpsstm-track-links{
             display:none!important;
@@ -227,7 +227,7 @@ wpsstm-track{
         content: "\f08a";//.fa-heart-o;
     }
     &.wpsstm-track-action-toggle-links{
-        .wpsstm-links-count{
+        .wpsstm-sources-count{
             display:inline;
         }
         &:before{
@@ -236,7 +236,7 @@ wpsstm-track{
         &.active:before{
             content: "\f077";//.fa-chevron-up;
         }
-        .wpsstm-links-count{
+        .wpsstm-sources-count{
             font-weight: bold;
             font-size:.8em;
         }
