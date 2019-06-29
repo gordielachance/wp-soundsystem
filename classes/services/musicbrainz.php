@@ -128,7 +128,7 @@ class WPSSTM_MusicBrainz {
         if ($inc) $url = add_query_arg(array('inc'=>implode('+',$inc)),$url);
         $url = add_query_arg(array('fmt'=>'json'),$url);
         
-        wpsstm()->debug_log($url,'musicbrainz search');
+        WP_SoundSystem::debug_log($url,'musicbrainz search');
    
         //TO FIX TO CHECK : delay API call ?
         /*
@@ -140,7 +140,7 @@ class WPSSTM_MusicBrainz {
         //do request
         $request_args = array(
           'timeout' => 20,
-          'User-Agent' => sprintf('wpsstmapi/%s',wpsstmapi()->version)
+          'User-Agent' => WPSSTM_REST_NAMESPACE,
         );
 
         $request = wp_remote_get($url,$request_args);
@@ -227,7 +227,7 @@ class WPSSTM_MusicBrainz {
         //do request
         $request_args = array(
           'timeout' => 20,
-          'User-Agent' => sprintf('wpsstmapi/%s',wpsstmapi()->version)
+          'User-Agent' => WPSSTM_REST_NAMESPACE,
         );
 
         $request = wp_remote_get($url,$request_args);
@@ -349,10 +349,10 @@ class WPSSTM_MusicBrainz_Endpoints extends WP_REST_Controller {
         $params = $request->get_params();
 
         $artist = urldecode(wpsstm_get_array_value('artist',$params));
-        $data = WPSSTMAPI_Musicbrainz::get_search_results('artists',$artist);
+        $data = WPSSTM_Musicbrainz::get_search_results('artists',$artist);
 
         
-        return WP_SoundSystem_API::format_response($data);
+        return WP_SoundSystem::format_rest_response($data);
         
     }
     
@@ -364,9 +364,9 @@ class WPSSTM_MusicBrainz_Endpoints extends WP_REST_Controller {
         $artist = urldecode(wpsstm_get_array_value('artist',$params));
         $album = urldecode(wpsstm_get_array_value('album',$params));
 
-        $data = WPSSTMAPI_Musicbrainz::get_search_results('releases',$artist,$album);
+        $data = WPSSTM_Musicbrainz::get_search_results('releases',$artist,$album);
 
-        return WP_SoundSystem_API::format_response($data);
+        return WP_SoundSystem::format_rest_response($data);
         
     }
     
@@ -379,9 +379,9 @@ class WPSSTM_MusicBrainz_Endpoints extends WP_REST_Controller {
         $album = urldecode(wpsstm_get_array_value('album',$params));
         $track = urldecode(wpsstm_get_array_value('track',$params));
 
-        $data = WPSSTMAPI_Musicbrainz::get_search_results('recordings',$artist,$album,$track);
+        $data = WPSSTM_Musicbrainz::get_search_results('recordings',$artist,$album,$track);
 
-        return WP_SoundSystem_API::format_response($data);
+        return WP_SoundSystem::format_rest_response($data);
         
     }
 
@@ -396,9 +396,9 @@ class WPSSTM_MusicBrainz_Endpoints extends WP_REST_Controller {
         $type = wpsstm_get_array_value('type',$params);
         $id = wpsstm_get_array_value('id',$params);
 
-        $data = WPSSTMAPI_Musicbrainz::get_item_data($type,$id);
+        $data = WPSSTM_Musicbrainz::get_item_data($type,$id);
 
-        return WP_SoundSystem_API::format_response($data);
+        return WP_SoundSystem::format_rest_response($data);
     }
 
 }
@@ -445,7 +445,7 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
             
     protected function query_music_entries( $artist,$album = null,$track = null ){
 
-        $api_url = null;
+        $endpoint = null;
         
         //url encode
         $artist = urlencode($artist);
@@ -454,18 +454,18 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
         $track = urlencode($track);
         
         if($artist && $track){//track
-            $api_url = sprintf('services/musicbrainz/search/%s/%s/%s',$artist,$album,$track);
+            $endpoint = sprintf('services/musicbrainz/search/%s/%s/%s',$artist,$album,$track);
         }elseif($artist && $album){//album
-            $api_url = sprintf('services/musicbrainz/search/%s/%s',$artist,$album);
+            $endpoint = sprintf('services/musicbrainz/search/%s/%s',$artist,$album);
         }elseif($artist){//artist
-            $api_url = sprintf('services/musicbrainz/search/%s',$artist);
+            $endpoint = sprintf('services/musicbrainz/search/%s',$artist);
         }
 
-        if (!$api_url){
+        if (!$endpoint){
             return new WP_Error('wpsstmapi_no_api_url',__("We were unable to build the API url",'wpsstm'));
         }
 
-        return WPSSTM_Core_API::api_request($api_url);
+        return wpsstm()->local_rest_request($endpoint);
     }
             
     public function get_item_auto_id($artist,$album=null,$track=null){
@@ -506,8 +506,8 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
             break;
         }
         
-        $api_url = sprintf('services/musicbrainz/data/%s/%s',$endpoint,$music_id);
-        return WPSSTM_Core_API::api_request($api_url);
+        $endpoint = sprintf('services/musicbrainz/data/%s/%s',$endpoint,$music_id);
+        return wpsstm()->local_rest_request($endpoint);
     }
 
     protected function artistdata_get_artist($data){

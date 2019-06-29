@@ -169,7 +169,7 @@ class WPSSTM_Tracklist{
 	}
     
     function tracklist_log($data,$title = null){
-        wpsstm()->debug_log($data,$title);
+        WP_SoundSystem::debug_log($data,$title);
     }
     
 }

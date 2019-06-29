@@ -1207,7 +1207,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ($this->post_id){
             $title = sprintf('[tracklist:%s] ',$this->post_id) . $title;
         }
-        wpsstm()->debug_log($data,$title);
+        WP_SoundSystem::debug_log($data,$title);
     }
 
     function get_tracklist_hidden_form_fields(){

@@ -151,6 +151,9 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= 2.8.3 =
+* WPSSTM_Spotify_Endpoints & WPSSTM_Musicbrainz_Endpoints moved from API so we don't need two requests
+
 = 2.8.2 =
 * new metabox 'Tracklist options'
 * ignore community tracklists unless author is set in query

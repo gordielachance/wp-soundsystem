@@ -10,6 +10,7 @@ class WPSSTM_Settings {
 		add_action( 'admin_menu', array( $this, 'create_admin_menu' ), 8 );
         add_action( 'admin_init', array( $this, 'settings_init' ), 5 );
         add_action( 'admin_init', array( $this, 'system_settings_init' ), 15 );
+        add_action( 'current_screen', array( $this, 'clear_settings_transients' ) );
 	}
 
     function create_admin_menu(){
@@ -143,8 +144,16 @@ class WPSSTM_Settings {
         $new_input['details_engine'] = (array)$input['details_engine'];
 
         return $new_input;
-        
-        
+
+    }
+    
+    function clear_settings_transients(){
+        //force API checks by deleting some transients
+        if ( !WP_SoundSystem::is_settings_page() ) return;
+        WP_SoundSystem::debug_log('deleted settings transients...');
+        delete_transient( WPSSTM_Core_Importer::$importer_links_transient_name );
+        delete_transient( WPSSTM_Core_API::$valid_token_transient_name );
+        delete_transient( WPSSTM_Core_API::$premium_expiry_transient_name );
     }
 
     function settings_init(){
@@ -167,7 +176,7 @@ class WPSSTM_Settings {
 
         add_settings_field(
             'wpsstmapi_token', 
-            __('API Key (free)','wpsstm'),
+            __('API Key','wpsstm'),
             array( $this, 'wpsstmapi_apitoken_callback' ), 
             'wpsstm-settings-page', 
             'wpsstmapi_settings'
@@ -288,7 +297,7 @@ class WPSSTM_Settings {
         
         add_settings_field(
             'autolink', 
-            __('Autolink','wpsstm') . sprintf(' <small style="color:red">%s</small>',__('premium')), 
+            __('Autolink','wpsstm'), 
             array( $this, 'autolink_callback' ), 
             'wpsstm-settings-page', 
             'track_link_settings'
@@ -321,14 +330,8 @@ class WPSSTM_Settings {
         );
 
     }
-    
-    function system_settings_init(){
 
-        //force API checks by deleting some transients
-        wpsstm()->debug_log('deleted settings transients...');
-        delete_transient( WPSSTM_Core_Importer::$importer_links_transient_name );
-        delete_transient( WPSSTM_Core_API::$valid_token_transient_name );
-        delete_transient( WPSSTM_Core_API::$premium_expiry_transient_name );
+    function system_settings_init(){
 
         add_settings_section(
             'settings_system', // ID
@@ -423,6 +426,7 @@ class WPSSTM_Settings {
             checked( $enabled, true, false ),
             __("Try to get track links (stream URLs, ...) automatically if none have been set.","wpsstm")
         );
+        printf('<p style="color:red">%s</p>',__('Requires the Spotify API settings, and WP SoundSystem API premium.','wpsstm'));
 
     }
     
@@ -516,7 +520,7 @@ class WPSSTM_Settings {
         //client secret
         $client_secret = wpsstm()->get_options('wpsstmapi_token');
         $valid_token = WPSSTM_Core_API::has_valid_api_token();
-        
+
         printf(
             '<p><input type="text" name="%s[wpsstmapi_token]" value="%s" class="wpsstm-fullwidth" /></p>',
             wpsstm()->meta_name_options,
@@ -529,16 +533,17 @@ class WPSSTM_Settings {
 
         //register errors
         if ( is_wp_error($valid_token) ){
-            add_settings_error('missing_api_token',$valid_token->get_error_code(),$valid_token->get_error_message(),'inline');
+            add_settings_error('api_token',$valid_token->get_error_code(),$valid_token->get_error_message(),'inline');
         }
         
+        /*
         if ( !$valid_token || is_wp_error($valid_token) ){
             $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstm'));
             $desc = sprintf( __('WP Soundsystem uses an external API for several features. Get a free API key %s.','wpsstm'),$link);
             
             add_settings_error('api_token','api_get_token',$desc,'inline');
-            
         }
+        */
         
         //display errors
         settings_errors('api_token');
@@ -550,6 +555,7 @@ class WPSSTM_Settings {
         $response = null;
         $response = WPSSTM_Core_API::is_premium();
 
+        //register errors
         if ( is_wp_error($response) ){
             add_settings_error('api_premium',$response->get_error_code(),$response->get_error_message(),'inline');
         }

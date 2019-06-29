@@ -1155,7 +1155,7 @@ class WPSSTM_Core_Tracks{
             'track' => array('artist'=>'U2','title'=>'Sunday Bloody Sunday')
         );
         
-        wpsstm()->debug_log($_POST,'testing autolink AJAX');
+        WP_SoundSystem::debug_log($_POST,'testing autolink AJAX');
         
         $this->ajax_track_autolink();
     }
@@ -1246,7 +1246,7 @@ class WPSSTM_Core_Tracks{
             }
         }
 
-        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan tracks");
+        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan tracks");
 
         return $trashed;
 

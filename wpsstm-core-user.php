@@ -61,7 +61,7 @@ class WPSSTM_Core_User{
         $tracklist = new WPSSTM_Post_Tracklist($love_id);
         $tracklist->love_tracklist(true);
 
-        wpsstm()->debug_log(array('user_id'=>$user_id,'post_id'=>$love_id,'meta'=>$meta),'created favorites tracklist');
+        WP_SoundSystem::debug_log(array('user_id'=>$user_id,'post_id'=>$love_id,'meta'=>$meta),'created favorites tracklist');
         
         return $love_id;
     }

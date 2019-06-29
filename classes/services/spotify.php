@@ -16,12 +16,12 @@ class WPSSTM_Spotify{
         
         /*backend*/
         add_action( 'admin_init', array( $this, 'spotify_settings_init' ) );
-        add_filter( 'wpsstm_get_music_detail_engines',array($this,'register_details_engine') );
+        add_action( 'rest_api_init', array($this,'register_endpoints') );
         
         if ( $this->can_spotify_api() === true ){
             
             //music details
-            add_action( 'rest_api_init', array($this,'register_endpoints') );
+            add_filter( 'wpsstm_get_music_detail_engines',array($this,'register_details_engine') );
             
             //presets
             add_filter('wpsstm_feed_url', array($this, 'spotify_playlist_bang_to_url'));
@@ -274,7 +274,8 @@ class WPSSTM_Spotify{
         $results = wpsstm_get_array_value($result_keys, $api_results);
         
         if ( empty($results) ){
-            wpsstm()->debug_log(array('search_str'=>$search_str,'type'=>$type),'no Spotify search results');
+            $results = false;
+            WP_SoundSystem::debug_log(array('search_str'=>$search_str,'type'=>$type),'no Spotify search results');
         }
         
         return $results;
@@ -388,29 +389,27 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
             break;
         }
         
-        $api_url = sprintf('services/spotify/data/%s/%s',$endpoint,$music_id);
-        $api_results = WPSSTM_Core_API::api_request($api_url);
-
-        return $api_results;
+        $endpoint = sprintf('services/spotify/data/%s/%s',$endpoint,$music_id);
+        return wpsstm()->local_rest_request($endpoint);
     }
     
     protected function query_music_entries( $artist,$album = null,$track = null ){
 
+        $endpoint = null;
         $artist = urlencode($artist);
         $album = ($album === '_') ? null : $album;
         $album = urlencode($album);
         $track = urlencode($track);
         
         if($artist && $track){//track
-            $api_url = sprintf('services/spotify/search/%s/%s/%s',$artist,$album,$track);
+            $endpoint = sprintf('services/spotify/search/%s/%s/%s',$artist,$album,$track);
         }elseif($artist && $album){//album
-            $api_url = sprintf('services/spotify/search/%s/%s',$artist,$album);
+            $endpoint = sprintf('services/spotify/search/%s/%s',$artist,$album);
         }elseif($artist){//artist
-            $api_url = sprintf('services/spotify/search/%s',$artist);
+            $endpoint = sprintf('services/spotify/search/%s',$artist);
         }
 
-        $api_results = WPSSTM_Core_API::api_request($api_url);
-        return $api_results;
+        return wpsstm()->local_rest_request($endpoint);
         
     }
 
@@ -451,6 +450,7 @@ class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
      */
 
     public function register_routes() {
+        global $wpsstm_spotify;
         
         //identify a track
         // .../wp-json/wpsstm/v1/services/spotify/search/U2/_/Sunday Bloody Sunday
@@ -472,7 +472,7 @@ class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
 		                //'validate_callback' => array($this, 'validatePhone')
 		            ),
                 ),
-                //TOUFIX should be local request 'permission_callback' => array( 'WP_SoundSystem_API', 'auth_logged_user' ),
+                'permission_callback' => array($wpsstm_spotify, 'can_spotify_api' ), //TOUFIX TOUCHECK + should be local request only
             )
         ) );
         
@@ -492,7 +492,7 @@ class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
 		                //'validate_callback' => array($this, 'validatePhone')
 		            ),
                 ),
-                //TOUFIX should be local request 'permission_callback' => array( 'WP_SoundSystem_API', 'auth_logged_user' ),
+                'permission_callback' => array($wpsstm_spotify, 'can_spotify_api' ), //TOUFIX TOUCHECK + should be local request only
             )
         ) );
         
@@ -508,7 +508,7 @@ class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
 		                //'validate_callback' => array($this, 'validatePhone')
 		            ),
                 ),
-                //TOUFIX should be local request 'permission_callback' => array( 'WP_SoundSystem_API', 'auth_logged_user' ),
+                'permission_callback' => array($wpsstm_spotify, 'can_spotify_api' ), //TOUFIX TOUCHECK + should be local request only
             )
         ) );
 
@@ -528,7 +528,7 @@ class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
 		                //'validate_callback' => array($this, 'validatePhone')
 		            ),
                 ),
-                //TOUFIX should be local request 'permission_callback' => array( 'WP_SoundSystem_API', 'auth_logged_user' ),
+                'permission_callback' => array($wpsstm_spotify, 'can_spotify_api' ), //TOUFIX TOUCHECK + should be local request only
             )
         ) );
 
@@ -544,7 +544,7 @@ class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
         $artist = urldecode(wpsstm_get_array_value('artist',$params));
         $data = $wpsstm_spotify->get_search_results('artists',$artist);
 
-        return WP_SoundSystem_API::format_response($data);
+        return WP_SoundSystem::format_rest_response($data);
         
     }
     
@@ -558,7 +558,7 @@ class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
         $album = urldecode(wpsstm_get_array_value('album',$params));
         $data = $wpsstm_spotify->get_search_results('albums',$artist,$album);
 
-        return WP_SoundSystem_API::format_response($data);
+        return WP_SoundSystem::format_rest_response($data);
         
     }
     
@@ -574,7 +574,7 @@ class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
 
         $data = $wpsstm_spotify->get_search_results('tracks',$artist,$album,$track);
 
-        return WP_SoundSystem_API::format_response($data);
+        return WP_SoundSystem::format_rest_response($data);
         
     }
 
@@ -592,7 +592,7 @@ class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
 
         $data = $wpsstm_spotify->get_item_data($type,$id);
 
-        return WP_SoundSystem_API::format_response($data);
+        return WP_SoundSystem::format_rest_response($data);
     }
 
 }

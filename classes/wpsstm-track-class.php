@@ -1235,7 +1235,7 @@ class WPSSTM_Track{
         if ( $this->tracklist->post_id ){
             $this->tracklist->tracklist_log($data,$title);
         }else{
-            wpsstm()->debug_log($data,$title);
+            WP_SoundSystem::debug_log($data,$title);
         }
 
     }

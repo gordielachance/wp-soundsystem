@@ -537,6 +537,13 @@ class WPSSTM_Core_Track_Links{
             return new WP_Error( 'wpsstm_autolink',__('Autolink requires a community user to be set.','wpsstm') );
         }
         
+        //Spotify API
+        $has_spotify_api = $wpsstm_spotify->can_spotify_api();
+
+        if ( $has_spotify_api !== true ){
+            return new WP_Error( 'wpsstm_spotify_api_missing',__('This requires a Spotify API key & secret.','wpsstm') );
+        }
+        
         //wpssstm API
         $is_premium = WPSSTM_Core_API::is_premium();
         
@@ -588,7 +595,7 @@ class WPSSTM_Core_Track_Links{
             }
         }
 
-        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan links");
+        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan links");
 
         return $trashed;
 
@@ -613,7 +620,7 @@ class WPSSTM_Core_Track_Links{
             }
         }
 
-        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted duplicate links");
+        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted duplicate links");
 
         return $trashed;
 
@@ -637,7 +644,7 @@ class WPSSTM_Core_Track_Links{
             }
         }
 
-        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted duplicate links");
+        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted duplicate links");
         
         return $trashed;
     }

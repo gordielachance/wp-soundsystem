@@ -754,7 +754,7 @@ class WPSSTM_Core_Tracklists{
             }
         }
 
-        wpsstm()->debug_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"Deleted temporary tracklists");
+        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"Deleted temporary tracklists");
 
         return $flushed_ids;
 

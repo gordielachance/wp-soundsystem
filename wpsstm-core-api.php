@@ -1,8 +1,7 @@
 <?php
-
 define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/');
-define('WPSSTM_API_REGISTER_URL','https://api.spiff-radio.org/?p=10');
 define('WPSSTM_API_NAMESPACE','wpsstmapi/v1');
+define('WPSSTM_API_REGISTER_URL','https://api.spiff-radio.org/?p=10');
 
 class WPSSTM_Core_API {
     
@@ -15,6 +14,7 @@ class WPSSTM_Core_API {
     
     public static function has_valid_api_token(){
         
+        $response = null;
         $valid = false;
         
         if ( !$token = wpsstm()->get_options('wpsstmapi_token') ){
@@ -23,26 +23,42 @@ class WPSSTM_Core_API {
 
         if ( false === ( $valid = get_transient(self::$valid_token_transient_name ) ) ) {
 
-            $api_results = self::api_request('token/validate','simple-jwt-authentication/v1','POST');
+            $url = WPSSTM_API_URL . 'simple-jwt-authentication/v1/token/validate';
+            
+            //build headers
+            $args = array(
+                'headers'=>     array(
+                    'Accept' =>         'application/json',
+                    'Authorization' =>  sprintf('Bearer %s',$token),
+                )
+            );
 
-            if ( is_wp_error($api_results) ) {
-                $valid = $api_results;
-            }else{
+            $request = wp_remote_post($url,$args);
+            $response = wp_remote_retrieve_body( $request );
+            if ( is_wp_error($response) ) return $response;
 
-                $data = wpsstm_get_array_value('data',$api_results);
-                $status = wpsstm_get_array_value(array('data','status'),$api_results);
+            $response = json_decode($response, true);
 
-                if ($status === 200) { //is a valid token
-                    $valid = true;
-                }
+            //check for errors
+            $code = wpsstm_get_array_value('code',$response);
+            $message = wpsstm_get_array_value('message',$response);
+            $data = wpsstm_get_array_value('data',$response);
+            $status = wpsstm_get_array_value(array('data','status'),$response);
+            $valid = ($status === 200);
 
+            if ( $code && $message && ($status >= 400) ){
+                $message = sprintf(__('TOKEN error: %s','wpsstm'),$message);
+                $response = new WP_Error($code,$message,$data );
             }
             
-            $transient_value = is_wp_error($valid) ? false : $valid;
-            set_transient( self::$valid_token_transient_name, $transient_value, 1 * DAY_IN_SECONDS );
+            set_transient( self::$valid_token_transient_name, $valid, 1 * DAY_IN_SECONDS );
+            
+            if ( is_wp_error($response) ){
+                return $response;
+            }
 
         }
-        
+
         return $valid;
     }
     
@@ -86,15 +102,17 @@ class WPSSTM_Core_API {
             )
         );
         
+        $token = self::has_valid_api_token() ? wpsstm()->get_options('wpsstmapi_token') : null;
+        
         //token
-        if ( $token = wpsstm()->get_options('wpsstmapi_token') ){
+        if ( $token ){
             $api_args['headers']['Authorization'] = sprintf('Bearer %s',$token);
         }
         
         //build URL
         $url = WPSSTM_API_URL . $namespace . '/' .$endpoint;
 
-        wpsstm()->debug_log(array('url'=>$url,'token'=>$token),'query API...');
+        WP_SoundSystem::debug_log(array('url'=>$url,'token'=>$token),'query API...');
 
         $request = wp_remote_get($url,$api_args);
         if (is_wp_error($request)) return $request;
@@ -115,7 +133,7 @@ class WPSSTM_Core_API {
             $message = sprintf(__('WPSSTMAPI error: %s','wpsstm'),$message);
             $error = new WP_Error($code,$message,$data );
             
-            wpsstm()->debug_log($error,'api_request');
+            WP_SoundSystem::debug_log($error,'api_request');
 
             return $error;
         }
@@ -133,8 +151,7 @@ class WPSSTM_Core_API {
         $spotify_engine = new WPSSTM_Spotify_Data();
         if ( !$music_id = $spotify_engine->get_post_music_id($track->post_id) ){
 
-            $music_id = $spotify_engine->auto_music_id($track->post_id); //we need a post ID here
-
+            $music_id = $spotify_engine->auto_music_id($track->post_id); //we need a Spotify ID here
             if ( is_wp_error($music_id) ) $music_id = null;
 
         }

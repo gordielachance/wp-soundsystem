@@ -702,10 +702,10 @@ class WPSSTM_LastFM_User{
         $this->user_id = $user_id;
     }
     
-    function debug_log($data,$title = null){
+    function lastfm_log($data,$title = null){
 
         $title = sprintf('[lastfm user: %s] ',$this->user_id) . $title;
-        wpsstm()->debug_log($data,$title);
+        WP_SoundSystem::debug_log($data,$title);
 
     }
     
@@ -775,7 +775,7 @@ class WPSSTM_LastFM_User{
             'token' =>      $token
         );
 
-        $this->debug_log($auth_args,"lastfm - set_lastfm_user_api_metas()"); 
+        self::lastfm_log($auth_args,"lastfm - set_lastfm_user_api_metas()"); 
 
         try {
 
@@ -788,7 +788,7 @@ class WPSSTM_LastFM_User{
 
             );
 
-            $this->debug_log($usermetas,"WPSSTM_LastFM_User::set_lastfm_user_api_metas()");
+            self::lastfm_log($usermetas,"WPSSTM_LastFM_User::set_lastfm_user_api_metas()");
 
         }catch(Exception $e){
             return new WP_Error( $e->getCode(), $e->getMessage() );
@@ -836,7 +836,7 @@ class WPSSTM_LastFM_User{
         }elseif ($api_metas){
             //TOUFIX is this at the right place ?
             delete_user_meta( $this->user_id, WPSSTM_LastFM::$lastfm_user_api_metas_name );
-            $this->debug_log("deleted lastfm user api metas");
+            self::lastfm_log("deleted lastfm user api metas");
         }
     }
     
@@ -867,7 +867,7 @@ class WPSSTM_LastFM_User{
                 'lastfm_username' =>    $this->get_lastfm_user_metas('username')
             );
             
-            //$this->debug_log($debug,"lastfm - is_user_api_logged()");
+            //self::lastfm_log($debug,"lastfm - is_user_api_logged()");
             
         }
 
@@ -905,7 +905,7 @@ class WPSSTM_LastFM_User{
         $debug_args['success'] = $results;
         $debug_args['do_love'] = $do_love;
         
-        $this->debug_log($debug_args,"lastfm love track");
+        self::lastfm_log($debug_args,"lastfm love track");
         
         return $results;
     }
@@ -925,7 +925,7 @@ class WPSSTM_LastFM_User{
         $debug_args = $api_args;
         $debug_args['lastfm_username'] = $this->get_lastfm_user_metas('username');
         
-        $this->debug_log($debug_args,"WPSSTM_LastFM_User::now_playing_lastfm_track()'");
+        self::lastfm_log($debug_args,"WPSSTM_LastFM_User::now_playing_lastfm_track()'");
         
         try {
             $track_api = new TrackApi($this->user_auth);
@@ -962,7 +962,7 @@ class WPSSTM_LastFM_User{
         $debug_args = $api_args;
         $debug_args['lastfm_username'] = $this->get_lastfm_user_metas('username');
 
-        $this->debug_log($debug_args,"scrobble last.fm track");
+        self::lastfm_log($debug_args,"scrobble last.fm track");
         
         try {
             $track_api = new TrackApi($this->user_auth);

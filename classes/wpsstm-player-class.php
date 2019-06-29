@@ -27,7 +27,7 @@ class WPSSTM_Player{
         
         $options = wp_parse_args($options,$defaults);
         
-        //wpsstm()->debug_log($options,'init player');
+        //WP_SoundSystem::debug_log($options,'init player');
         
         $wpsstm_player->options = $options;
         

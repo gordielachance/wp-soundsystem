@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.8.2
+Version: 2.8.3
 License: GPL2
 */
 
@@ -36,7 +36,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '2.8.2';
+    public $version = '2.8.3';
     /**
     * @public string plugin DB version
     */
@@ -219,12 +219,12 @@ class WP_SoundSystem {
     }
 	
     function activate_wpsstm() {
-        $this->debug_log('activation');
+        self::debug_log('activation');
         $this->add_custom_capabilites();
     }
     
     function init_post_types(){
-        //$this->debug_log('init post types');
+        //self::debug_log('init post types');
         do_action('wpsstm_init_post_types');
     }
     
@@ -232,7 +232,7 @@ class WP_SoundSystem {
     Hook for rewrite rules.
     */
     function init_rewrite(){
-        //$this->debug_log('set rewrite rules');
+        //self::debug_log('set rewrite rules');
 
         do_action('wpsstm_init_rewrite');
         
@@ -253,7 +253,7 @@ class WP_SoundSystem {
     }
 
     function deactivate_wpsstm() {
-        $this->debug_log('deactivation');
+        self::debug_log('deactivation');
         $this->remove_custom_capabilities();
         flush_rewrite_rules();
     }
@@ -552,11 +552,15 @@ class WP_SoundSystem {
         );
 
         $is_allowed_post_type =  ( in_array($post_type,$allowed_post_types) );
-        $is_top_menu = ($screen->id == 'toplevel_page_wpsstm');
 
-        if (!$is_allowed_post_type && !$is_top_menu) return;
+        return ( $is_allowed_post_type || self::is_settings_page() );
+    }
+    
+    static function is_settings_page(){
+        if ( !wpsstm_is_backend() ) return;
+        if ( !$screen = get_current_screen() ) return;
         
-        return true;
+        return ($screen->id == 'toplevel_page_wpsstm');
     }
     
     function promo_notice(){
@@ -576,7 +580,7 @@ class WP_SoundSystem {
 
     }
 
-    public function debug_log($data,$title = null) {
+    public static function debug_log($data,$title = null) {
 
         if (WP_DEBUG_LOG !== true) return false;
 
@@ -751,6 +755,68 @@ class WP_SoundSystem {
     public function get_available_detail_engines(){
         return apply_filters('wpsstm_get_music_detail_engines',array());
     }
+    
+    public static function local_rest_request($endpoint = null, $namespace = null, $method = 'GET'){
+        
+        if (!$namespace) $namespace = WPSSTM_REST_NAMESPACE; 
+
+        if (!$endpoint){
+            return new WP_Error('wpsstm_no_rest_endpoint',__("Missing REST endpoint",'wpsstm'));
+        }
+
+        //build headers
+        $auth_args = array(
+            'method' =>     $method,
+            'headers'=>     array(
+                'Accept' =>         'application/json',
+            )
+        );
+
+        //build URL
+        $url = get_rest_url() . $namespace . '/' .$endpoint;
+
+        self::debug_log(array('url'=>$url),'query REST...');
+
+        $request = wp_remote_get($url,$auth_args);
+        if (is_wp_error($request)) return $request;
+
+        $response = wp_remote_retrieve_body( $request );
+        if (is_wp_error($response)) return $response;
+        
+        $response = json_decode($response, true);
+
+        //check for errors
+        $code = wpsstm_get_array_value('code',$response);
+        $message = wpsstm_get_array_value('message',$response);
+        $data = wpsstm_get_array_value('data',$response);
+        $status = wpsstm_get_array_value(array('data','status'),$response);
+
+        if ( $code && $message && ($status >= 400) ){
+            $error = new WP_Error($code,$message,$data );
+            self::debug_log($error,'query REST error');
+            return $error;
+        }
+        
+        return $response;
+
+    }
+    
+    public static function format_rest_response($response){
+
+        if ( is_wp_error($response) ){
+            //force error status if not set
+            $code = $response->get_error_code();
+            $data = $response->get_error_data($code);
+            $status = wpsstm_get_array_value('status',$data);
+            if (!$status){
+                $response->add_data(array('status'=>404, $code));
+            }
+            
+        }
+        
+        $response = rest_ensure_response( $response );
+        return $response;
+    }   
 
 }
 

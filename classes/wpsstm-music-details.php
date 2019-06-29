@@ -428,10 +428,14 @@ abstract class WPSSTM_Music_Data{
         $id = $this->get_item_auto_id($artist,$album,$track);
 
         if ( is_wp_error($id) ) $id = null;
-
-        if ( $success = update_post_meta( $post_id, $this->id_metakey, $id ) ){
-            wpsstm()->debug_log( json_encode(array('post_id'=>$post_id,'id'=>$id,'engine'=>$this->slug)),"Updated Music ID" ); 
-            $this->save_music_details($post_id);
+        
+        if ($id){
+            if ( $success = update_post_meta( $post_id, $this->id_metakey, $id ) ){
+                WP_SoundSystem::debug_log( json_encode(array('post_id'=>$post_id,'id'=>$id,'engine'=>$this->slug)),"Updated Music ID" ); 
+                $this->save_music_details($post_id);
+            }
+        }else{
+            $success = delete_post_meta( $post_id, $this->id_metakey );
         }
 
         return $id;
@@ -451,7 +455,7 @@ abstract class WPSSTM_Music_Data{
         //delete existing
         if ( delete_post_meta( $post_id, $this->data_metakey ) ){
             delete_post_meta( $post_id, $this->time_metakey ); //delete timestamp
-            wpsstm()->debug_log('deleted music details datas','reload music details');
+            WP_SoundSystem::debug_log('deleted music details datas','reload music details');
         }
 
         $data = $this->get_music_data_for_post($post_id);
@@ -477,7 +481,7 @@ abstract class WPSSTM_Music_Data{
         $data = $this->get_post_music_data($post_id);
         if ( !$data ) return;
         
-        wpsstm()->debug_log( "fill post with music datas..." );
+        WP_SoundSystem::debug_log( "fill post with music datas..." );
         $debug = array();
         
         $post_type = get_post_type($post_id);
@@ -516,7 +520,7 @@ abstract class WPSSTM_Music_Data{
         }
         
         $debug['post_id'] = $post_id;
-        wpsstm()->debug_log($debug,"...filled post with music datas" ); 
+        WP_SoundSystem::debug_log($debug,"...filled post with music datas" ); 
 
     }
 
