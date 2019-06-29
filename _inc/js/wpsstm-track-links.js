@@ -88,9 +88,9 @@ class WpsstmLink extends HTMLElement{
         $(self).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link[wpsstm-playable] .wpsstm-link-title', function(e) {
             e.preventDefault();
             var link = this.closest('wpsstm-track-link');
-            var track = this.track;
             var linkIdx = Array.from(link.parentNode.children).indexOf(link);
 
+            var track = self.track;
             if (track.queueNode){ //page track, get the queue track
                 track = track.queueNode;
             }
