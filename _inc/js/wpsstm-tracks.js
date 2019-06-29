@@ -71,7 +71,7 @@ class WpsstmTrack extends HTMLElement{
                 }
                 
                 if ( newVal == 'playing' ){
-                    trackInstances.removeClass('track-loading track-error').addClass('track-playing track-has-played');
+                    trackInstances.removeClass('track-loading').addClass('track-playing track-has-played');
                     
                     $(track.player).addClass('player-playing player-has-played');
                     $(tracksContainer).removeClass('tracks-container-loading').addClass('tracks-container-playing tracks-container-has-played');
@@ -311,7 +311,6 @@ class WpsstmTrack extends HTMLElement{
         
         success.fail(function() {
             track.debug("track refresh failed: ");
-            track_instances.addClass('track-error');
         });
 
         success.always(function() {
