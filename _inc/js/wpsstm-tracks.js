@@ -273,7 +273,6 @@ class WpsstmTrack extends HTMLElement{
 
         var track = this;
         var track_instances = track.get_instances();
-        var success = $.Deferred();
 
         track_instances.addClass('track-links-loading');
 
@@ -290,6 +289,8 @@ class WpsstmTrack extends HTMLElement{
         });
 
         autolink_request.done(function(data) {
+            
+            track_instances.prop('didautolink', true); //use prop and not attr here - https://stackoverflow.com/a/12940759/782013
 
             if ( data.success ){
                 
@@ -297,27 +298,16 @@ class WpsstmTrack extends HTMLElement{
                 var newLinks = newLinksContainer.find('wpsstm-track-link');
 
                 track_instances.find('.wpsstm-track-links-list').empty().append(newLinks);
-
-                success.resolve();
                 
-            }else{
-                success.reject();
             }
+            
         });
         
-        success.done(function(v) {
-            track_instances.attr('didautolink',true);
-        });
-        
-        success.fail(function() {
-            track.debug("track refresh failed: ");
-        });
-
-        success.always(function() {
+        autolink_request.always(function (dataOrjqXHR, textStatus, jqXHRorErrorThrown) {
             track_instances.removeClass('track-links-loading');
         });
-        
-        return success.promise();
+
+        return autolink_request;
     }
 
 
@@ -569,17 +559,14 @@ class WpsstmTrack extends HTMLElement{
         //keep only tracks after this one
         var rtrack_in = track_index + 1;
         var next_tracks = tracks.slice( rtrack_in );
+        
+        //consider only the next X tracks
+        var tracks_slice = next_tracks.slice( 0, max_items );
 
-        /*
-        NOT NEEDED, and those are extra queries. Just stick to the few X next tracks.
-        //remove tracks that have already been autolinkd
-        var next_tracks = next_tracks.filter(function (index) {
+        //remove those that already been autolinked
+        tracks_slice = tracks_slice.filter(function (index) {
             return !this.didautolink;
         });
-        */
-
-        //reduce to X tracks
-        var tracks_slice = next_tracks.slice( 0, max_items );
         
         /*
         TOUFIX TOUCHECK this preloads the tracks SEQUENCIALLY
