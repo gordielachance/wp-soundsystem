@@ -84,14 +84,7 @@ class WpsstmTrack extends HTMLElement{
                 }
 
             break;
-                
-            case 'data-sources-count':
 
-                var sourceCountEl = $(track).find('.wpsstm-track-action-toggle-links .wpsstm-sources-count');
-                sourceCountEl.text( newVal );
-                
-            break;
-    
         }
     }
     
@@ -102,7 +95,7 @@ class WpsstmTrack extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['trackstatus','wpsstm-playable','didautolink','data-sources-count'];
+        return ['trackstatus','wpsstm-playable','didautolink'];
     }
     
     get status() {
@@ -138,11 +131,33 @@ class WpsstmTrack extends HTMLElement{
             this.removeAttribute('didautolink');
         }
     }
+    
+    listenLinks(){
+        
+        var track = this;
+        
+        /*
+        Toggle display the track when the queue is updated
+        */
+
+        return new MutationObserver(function(mutationsList){
+            for(var mutation of mutationsList) {
+                
+                if (mutation.type == 'childList') {
+                    track.countSources();
+                }
+            }
+        });
+        
+    }
 
     countSources(){
         var track = this;
         var track_instances = track.get_instances();
         var sourceLinks = $(track).find('wpsstm-track-link').filter('[wpsstm-playable]');
+        
+        var sourceCountEl = $(track).find('.wpsstm-track-action-toggle-links .wpsstm-sources-count');
+        sourceCountEl.text( sourceLinks.length );
         
         if (!sourceLinks.length && track.didautolink){
             track_instances.prop('playable',false);
@@ -172,6 +187,11 @@ class WpsstmTrack extends HTMLElement{
         /*
         Track Links
         */
+        var linksNode = $(track).find('.wpsstm-track-links-list').get(0);
+        
+        // Watch for links update
+        var linksUpdated = track.listenLinks();
+        linksUpdated.observe(linksNode,{childList: true});
 
         var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
         
@@ -187,7 +207,6 @@ class WpsstmTrack extends HTMLElement{
         toggleLinksEl.append(sourceCountEl);
 
         // sort links
-        var linksNode = $(track).find('.wpsstm-track-links-list').get(0);
         $(linksNode).sortable({
             axis: "y",
             items : "wpsstm-track-link",
@@ -283,9 +302,8 @@ class WpsstmTrack extends HTMLElement{
             url:        wpsstmL10n.ajaxurl,
             data:       ajax_data,
             dataType:   'json',
-        });
-
-        autolink_request.done(function(data) {
+        })
+        .done(function(data) {
 
             if ( data.success ){
                 
@@ -294,15 +312,20 @@ class WpsstmTrack extends HTMLElement{
 
                 track_instances.find('.wpsstm-track-links-list').empty().append(newLinks);
                 
+            }else{
+                track.debug(ajax_data,"autolink failed");
+                track_instances.prop('playable', false);
             }
             
             track_instances.prop('didautolink', true); //use prop and not attr here - https://stackoverflow.com/a/12940759/782013
             
-        });
-        
-        autolink_request.always(function (dataOrjqXHR, textStatus, jqXHRorErrorThrown) {
+        })
+        .fail(function() {
+            track.debug(ajax_data,"autolink ajax request failed");
+            track_instances.prop('playable', false);
+        })
+        .always(function() {
             track_instances.removeClass('track-links-loading');
-            track.countSources();
         });
 
         return autolink_request;
