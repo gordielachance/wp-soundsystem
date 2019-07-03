@@ -529,6 +529,12 @@ class WP_SoundSystem {
         
         //CSS
         wp_enqueue_style( 'wpsstm' );
+        
+        //@polymer/paper-menu-button 3.0.1
+        wp_register_script( 'paper-icon-button', $this->plugin_url . '_inc/node_modules/@polymer/paper-icon-button/paper-icon-button.js',null,'3.0.1');
+        wp_register_script( 'paper-items', $this->plugin_url . '_inc/node_modules/@polymer/paper-item/paper-item.js',null,'3.0.1');
+        wp_register_script( 'paper-paper-listbox', $this->plugin_url . '_inc/node_modules/@polymer/paper-listbox/paper-listbox.js',null,'3.0.1');
+        wp_enqueue_script( 'paper-menu-button', $this->plugin_url . '_inc/node_modules/@polymer/paper-menu-button/paper-menu-button.js',array('paper-icon-button','paper-items','paper-paper-listbox'),'3.0.1');
  
     }
 

@@ -138,12 +138,12 @@ function get_actions_list($actions,$prefix){
         );
         $link_attr = array_filter($link_attr);
         
-        $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$action['text']);
+        $link = sprintf('<paper-item><a %s><span>%s</span></a></paper-item>',wpsstm_get_html_attr($link_attr),$action['text']);
         $track_actions_list[] = $link;
     }
 
     if ( !empty($track_actions_list) ){
-        return sprintf('<div class="wpsstm-%s-actions wpsstm-actions-list">%s</div>',$prefix,implode("\n",$track_actions_list));
+        return sprintf('<paper-menu-button class="wpsstm-%s-actions wpsstm-actions-list"><paper-icon-button icon="menu" slot="dropdown-trigger"></paper-icon-button><paper-listbox slot="dropdown-content">%s</paper-listbox></paper-menu-button>',$prefix,implode("\n",$track_actions_list));
     }
 }
 
