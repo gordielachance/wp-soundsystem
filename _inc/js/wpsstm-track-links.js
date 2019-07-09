@@ -28,9 +28,39 @@ class WpsstmLink extends HTMLElement{
         */
     }
     attributeChangedCallback(attrName, oldVal, newVal){
-        /*
-        Called when an observed attribute has been added, removed, updated, or replaced. Also called for initial values when an element is created by the parser, or upgraded. Note: only attributes listed in the observedAttributes property will receive this callback.
-        */
+        
+        var isValueChanged = (newVal !== oldVal);
+        if (!isValueChanged) return;
+        
+        var source = this;
+        var sourceInstances = source.get_instances();
+
+        //source.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
+
+        switch (attrName) {
+            case 'linkstatus':
+
+                if ( !newVal ){
+                    sourceInstances.removeClass('link-active link-loading link-playing');                    
+                }
+                
+                if (newVal == 'request'){
+                    source.debug("request source: " + source.src);
+                    sourceInstances.addClass('link-active link-loading');
+                }
+                
+                if ( newVal == 'playing' ){
+                    sourceInstances.removeClass('link-loading').addClass('link-playing link-has-played');
+                }
+                
+                if ( newVal == 'paused' ){
+                    sourceInstances.removeClass('link-playing');
+                }
+                
+                
+        }
+        
+        
     }
     adoptedCallback(){
         /*
@@ -39,7 +69,15 @@ class WpsstmLink extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['wpsstm-playable'];
+        return ['linkstatus','wpsstm-playable'];
+    }
+    
+    get status() {
+        return this.getAttribute('linkstatus');
+    }
+    
+    set status(value) {
+        this.setAttribute('linkstatus',value);
     }
     
     get playable() {
@@ -190,58 +228,49 @@ class WpsstmLink extends HTMLElement{
         }
 
         ///
-        link_instances.addClass('link-active link-loading');
-        //
-        
-        link.debug("play link: " + link.src);
-        link.setAttribute('requestLinkPlay',true);
+        $(link.track.player.current_media).off(); //remove old events
+        link.status = 'request';
         link.track.player.current_link = link;
+        $(document).trigger( "wpsstmSourceInit",[link] ); //custom event
 
         /*
         register new events
         */
 
-        $(link.track.player.current_media).off(); //remove old events
-        $(document).trigger( "wpsstmSourceInit",[link] ); //custom event
-
         $(track.player.current_media).on('loadeddata', function() {
-            
             track.player.debug('source loaded');
             track.player.current_media.play();
         });
 
         $(track.player.current_media).on('error', function(error) {
-            track.status = 'error';
-            link_instances.removeClass('link-active').addClass('link-error');
             link.playable = false;
+            link.status = '';
+            track.status = '';
             success.reject(error);
         });
 
         $(track.player.current_media).on('play', function() {
-            link_instances.removeClass('link-error').addClass('link-playing link-has-played');
+            link.status = 'playing';
             track.status = 'playing';
             success.resolve();
         });
 
         $(track.player.current_media).on('pause', function() {
-            link_instances.removeClass('link-playing');
+            link.status = 'paused';
             track.status = 'paused';
         });
 
         $(track.player.current_media).on('ended', function() {
 
             track.player.debug('media - ended');
+            link.status = '';
             
-            track.status = '';
-            link_instances.removeClass('link-playing link-active');
-
             //Play next song if any
             track.player.next_track_jump();
+            
+            
         });
-        
-        success.always(function(data, textStatus, jqXHR) {
-            link_instances.removeClass('link-loading');
-        })
+
         success.done(function(v) {
             track.player.tracksHistory.push(track);
             link_instances.playable = true;
