@@ -19,8 +19,8 @@ class WPSSTM_Settings {
         /////Create our custom menu
 
         $menu_page = add_menu_page( 
-            __( 'WP SoundSystem', 'wpsstm' ), //page title
-            __( 'WP SoundSystem', 'wpsstm' ), //menu title
+            __( 'Music', 'wpsstm' ), //page title
+            __( 'Music', 'wpsstm' ), //menu title
             'manage_options', //capability
             self::$menu_slug,
             array($this,'settings_page'), //this function will output the content of the 'Music' page.
