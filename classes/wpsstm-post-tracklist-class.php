@@ -734,7 +734,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                         }
 
                     }else{
-                        $this->add_notice('wpsstm-api-error',sprintf(__('WPSSTMAPI error: %s','wpsstm'),$error_message)  );
+                        $this->add_notice('wpsstm-api-error',$error_message  );
                     }
 
                     return $xspf;
