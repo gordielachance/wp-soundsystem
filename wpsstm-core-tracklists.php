@@ -102,16 +102,24 @@ class WPSSTM_Core_Tracklists{
     }
     
     function metabox_tracklist_register(){
-
-        add_meta_box( 
-            'wpsstm-tracklist', 
-            __('Tracklist','wpsstm'),
-            array($this,'metabox_playlist_content'),
-            wpsstm()->tracklist_post_types,
-            'normal', 
-            'high' //priority 
-        );
         
+        $screen = get_current_screen();
+        $post_id = get_the_ID();
+        $post_type = $screen->post_type;
+        $post_status = get_post_status($post_id);
+        $is_radio_autodraft = ( ($post_type === wpsstm()->post_type_live_playlist) && ($post_status === 'auto-draft') );
+        
+        if (!$is_radio_autodraft) {
+            add_meta_box( 
+                'wpsstm-tracklist', 
+                __('Tracklist','wpsstm'),
+                array($this,'metabox_playlist_content'),
+                wpsstm()->tracklist_post_types,
+                'normal', 
+                'high' //priority 
+            );
+        }    
+
         add_meta_box( 
             'wpsstm-tracklist-options', 
             __('Tracklist Settings','wpsstm'),
@@ -231,8 +239,8 @@ class WPSSTM_Core_Tracklists{
         $post_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
         
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
-
         $tracklist->remove_cache_timestamp();
+        
         $html = $tracklist->get_tracklist_html();
 
         $result = array(
