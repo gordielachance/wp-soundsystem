@@ -950,7 +950,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function remove_cache_timestamp(){
-        delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name);
+        if ( !$last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ) return;
+        if ( !$success = delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name) ) return;
         $this->is_expired = true;
     }
     
