@@ -664,8 +664,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $tracks = array();
         $refresh_delay = $this->get_human_next_refresh_time();
         
-        $refresh_now = ( 
-            $this->is_expired && ( 
+        $refresh_now = ( $this->is_expired && ( 
                 ( wpsstm()->get_options('ajax_tracks') && wp_doing_ajax() ) || 
                 ( !wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() ) 
             ) 
@@ -834,12 +833,24 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             
 
         }
+            
+        if ( ($this->tracklist_type == 'live') && ( !$this->feed_url ) ){
+            $tracks = new WP_Error( 'wpsstm_missing_feed_url', __('Please add a Feed URL in the radio settings.','wpsstm') );
+            $error_msg = $tracks->get_error_message();
+            $this->add_notice('populate_subtracks',$error_msg );
+            return $tracks;
+        }
         
+        //get static subtracks
         $tracks = $this->get_static_subtracks();
 
-        if ( !is_wp_error($tracks) ){
-            $this->add_tracks($tracks);
+        if ( is_wp_error($tracks) ){
+            $error = $tracks->get_error_message();
+            $this->add_notice('populate_subtracks',$error );
+            return $tracks;
         }
+
+        $this->add_tracks($tracks);
         
     }
 
@@ -1000,7 +1011,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $new_track->subtrack_id = null;
 
         $success = $this->add_subtrack($new_track);
-        
+
         if ( $success && !is_wp_error($success) ){
             do_action('wpsstm_queue_track',$track,$this->post_id);
             
@@ -1094,6 +1105,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         $success = $wpdb->insert($subtracks_table,$track_data);
+        $track->track_log(array('success'=>$success,'subtrack_id'=>$wpdb->insert_id,'data'=>$track_data), "add subtrack" ); 
+
         if ( is_wp_error($success) ) return $success;
 
         $track->subtrack_id = $wpdb->insert_id;
