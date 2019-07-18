@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: https://api.spiff-radio.org?p=31
 Tags: music,audio player,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks
 Requires at least: 4.9
-Tested up to: 5.2.2
+Tested up to: 5.2.3
 Stable tag: trunk
 License: GPLv2 or later
 

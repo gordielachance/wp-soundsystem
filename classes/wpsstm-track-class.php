@@ -474,7 +474,12 @@ class WPSSTM_Track{
         //save track links from parser if any
         $new_ids = $this->save_new_links();
 
-        $this->track_log( array('post_id'=>$this->post_id,'links'=>count($new_ids),'track'=>json_encode($this->to_array())), "Saved track details" ); 
+        $this->track_log(
+            array(
+                'post_id'=>$this->post_id,
+                'links'=>count($new_ids),
+                'track'=>json_encode($this->to_array())
+            ), "Saved track details" ); 
 
         return $this->post_id;
         
