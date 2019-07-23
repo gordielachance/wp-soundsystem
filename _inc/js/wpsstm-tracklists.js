@@ -46,7 +46,6 @@ class WpsstmTracklist extends HTMLElement{
         
         this.index =                    undefined;
         this.post_id =                  undefined;
-        this.tracklist_request =        undefined;
         this.isExpired =                undefined;
         this.player =                   undefined;
 
@@ -158,7 +157,6 @@ class WpsstmTracklist extends HTMLElement{
             });
         }
 
-
         /*
         Tracklist actions
         */
@@ -233,19 +231,26 @@ class WpsstmTracklist extends HTMLElement{
         }
 
         tracklist.debug("reload tracklist... autoplay ?" + autoplay);
-
+        
         var ajax_data = {
             action:     'wpsstm_reload_tracklist',
             tracklist:      tracklist.to_ajax(),   
         };
+        
+        var abord_reload = function(e) {
+             if ( (e.key === "Escape") ) { // escape key maps to keycode `27`
+                xhr.abort();
+            }
+        }
 
-        return $.ajax({
+        var xhr = $.ajax({
             type:           "post",
             url:            wpsstmL10n.ajaxurl,
             data:           ajax_data,
             dataType:       'json',
             beforeSend:     function() {
                 $(tracklist).addClass('tracklist-reloading');
+                $(document).bind( "keyup.reloadtracklist", abord_reload ); //use namespace - https://acdcjunior.github.io/jquery-creating-specific-event-and-removing-it-only.html
             },
             success: function(data){
                 if (data.success === false) {
@@ -271,8 +276,11 @@ class WpsstmTracklist extends HTMLElement{
             },
             complete: function() {
                 $(tracklist).removeClass('tracklist-reloading');
+                $(document).unbind( "keyup.reloadtracklist", abord_reload );
             }
         })
+        
+        return xhr;
     }
     
     toggle_favorite_tracklist(do_love){
