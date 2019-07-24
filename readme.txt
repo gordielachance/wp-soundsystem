@@ -154,7 +154,6 @@ The community user is a Wordpress user you need to create, and that will be assi
 = 2.8.8 =
 * JS: Abord tracklist reload when pressing ESC
 * JS: Ability to add more than one track at once when editing a tracklist
-* Renamed import endpoint
 
 = 2.8.7 =
 * WPSSTM_Spotify_Endpoints & WPSSTM_Musicbrainz_Endpoints moved from API so we don't need two requests
