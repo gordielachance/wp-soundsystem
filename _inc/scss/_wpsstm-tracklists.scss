@@ -179,47 +179,53 @@ wpsstm-tracklist{
         }
     }
     
-    .wpsstm-new-subtrack{
+    #wpsstm-queue-tracks{
         margin: 1em 0;
-        padding: 1em;
-        
-        label{
-            margin-bottom:1em;
-            display:block;
-        }
-        
-        .wpsstm-new-subtrack-fields{
+        text-align: center;
+
+        .wpsstm-new-track{
+            padding: 1em;
+            margin: 0;
+            border-bottom: 1px solid white;
             @extend .wpsstm-align-both;
             > * {
                 margin: 0 .5em;
             }
+            &:first-child{
+                >button{ //we should not be able to remove the first row
+                    @extend .wpsstm-freeze;
+                    @include opacity(0);
+                }
+            }
+            &.action-loading{
+                @extend .wpsstm-freeze;
+                @include striped-bg();
+                > *{
+                    @include opacity(.25);
+                }
+            }
+
+            &.action-error{
+                border:1px solid red;
+            }
+        }
+        
+        #wpsstm-queue-more-tracks{
+            display: inline-block;
+            line-height: 26px;
+        }
+        
+        .wpsstm-new-track{
+            background: #fcf8e3;
         }
 
-        &.wpsstm-new-subtrack-simple{
-            label{
+        &:not(.expanded){
+            #wpsstm-queue-more-tracks{
                 display:none;
             }
-            .wpsstm-new-subtrack-fields > *:not(button){
+            .wpsstm-new-track{
                 display:none;
             }
-        }
-        &:not(.wpsstm-new-subtrack-simple){
-            background: #fcf8e3;
-            button span{
-                display:none;
-            }
-        }
-        
-        &.action-loading{
-            @extend .wpsstm-freeze;
-            @include striped-bg();
-            > *{
-                @include opacity(.25);
-            }
-        }
-        
-        &.action-error{
-            border:1px solid red;
         }
 
     }

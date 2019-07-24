@@ -114,26 +114,62 @@ class WpsstmTracklist extends HTMLElement{
         New subtracks
         */
 
-        var new_subtrack_el = $(tracklist).find('.wpsstm-new-subtrack');
-        new_subtrack_el.addClass('wpsstm-new-subtrack-simple');
-        var new_subtrack_bt = new_subtrack_el.find('button');
+        var queue_tracks_form = $(tracklist).find('#wpsstm-queue-tracks');
+        var queue_tracks_submit = queue_tracks_form.find('#wpsstm-queue-tracks-submit');
+        var queue_more_tracks = queue_tracks_form.find('#wpsstm-queue-more-tracks');
+
+        //add new track row
+        queue_more_tracks.on( "click", function(e) {
+            e.preventDefault();
+            var last_row = queue_tracks_form.find('.wpsstm-new-track').last();
+
+            var new_row = last_row.clone();
+            new_row.find('input').val('');
+            new_row.removeClass('wpsstm-new-track-ready');
+            new_row.insertAfter( last_row );
+        });
         
-        new_subtrack_bt.click(function(e) {
+        //remove new track row
+        queue_tracks_form.on( "click",'.wpsstm-remove-new-track-row', function(e) {
+            var row = $(this).parents('.wpsstm-new-track');
+            row.remove();
+        });
+        
+        
+        //submit tracks
+        queue_tracks_submit.click(function(e) {
             
-             e.preventDefault();
+            e.preventDefault();
             
-            var isExpanded = !new_subtrack_bt.parents('.wpsstm-new-subtrack').hasClass('wpsstm-new-subtrack-simple');
+            var isExpanded = queue_tracks_form.hasClass('expanded');
             
             if (!isExpanded){
-                new_subtrack_el.removeClass('wpsstm-new-subtrack-simple');
+                queue_tracks_form.addClass('expanded');
             }else{
-                var track = new WpsstmTrack();
-                track.track_artist = new_subtrack_el.find('input[name="wpsstm_track_data[artist]"]').val();
-                track.track_title = new_subtrack_el.find('input[name="wpsstm_track_data[title]"]').val();
-                track.track_album = new_subtrack_el.find('input[name="wpsstm_track_data[album]"]').val();
                 
-                tracklist.new_subtrack(track);
+                var rows = queue_tracks_form.find('.wpsstm-new-track');
+                var ajaxCalls = [];
                 
+                queue_tracks_form.addClass('wpsstm-freeze');
+                
+                rows.each(function( index ) {
+                    var row = $(this);
+                    var track = new WpsstmTrack();
+                    track.track_artist = row.find('input[name="wpsstm_track_data[artist]"]').val();
+                    track.track_title = row.find('input[name="wpsstm_track_data[title]"]').val();
+                    track.track_album = row.find('input[name="wpsstm_track_data[album]"]').val();
+                    
+                    var ajax = tracklist.new_subtrack(track,row);
+                    ajaxCalls.push(ajax);
+                    
+                });
+                
+                //chain all ajax calls
+                $.when.apply( undefined, ajaxCalls ).then(function( data, textStatus, jqXHR ) {
+                    queue_tracks_form.removeClass('wpsstm-freeze');
+                    tracklist.reload_tracklist();
+                });
+
             }
 
         });
@@ -433,11 +469,9 @@ class WpsstmTracklist extends HTMLElement{
         return filtered;
     }
     
-    new_subtrack(track){
+    new_subtrack(track,row){
         
         var tracklist = this;
-        var container_el = $(tracklist).find('.wpsstm-new-subtrack');
-        var tracklist = container_el.parents('wpsstm-tracklist').get(0);
 
         var ajax_data = {
             action:         'wpsstm_tracklist_new_subtrack',
@@ -453,23 +487,20 @@ class WpsstmTracklist extends HTMLElement{
             dataType:   'json',
 
             beforeSend: function() {
-                container_el.removeClass('action-error').addClass('action-loading');
+                row.removeClass('action-error').addClass('action-loading');
             },
             success: function(data){
-
                 if (data.success === false) {
                     console.log(data);
-                }else{
-                    tracklist.reload_tracklist();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 console.log(xhr.status);
                 console.log(thrownError);
-                container_el.addClass('action-error');
+                row.addClass('action-error');
             },
             complete: function() {
-                container_el.removeClass('action-loading');
+                row.removeClass('action-loading');
             }
         })
     }

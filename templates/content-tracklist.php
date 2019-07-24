@@ -57,15 +57,18 @@ $notice = $wpsstm_tracklist->importer_notice();
     
     if ( $wpsstm_tracklist->user_can_reorder_tracks() ){
         ?>
-        <div class="wpsstm-new-subtrack">
-            <label><?php _e('New track','wpsstm');?></label>
-            <p class="wpsstm-new-subtrack-fields">
-            <input type="text" name="wpsstm_track_data[artist]" placeholder="<?php _e('Artist','wpsstm');?>"/>
-            <input type="text" name="wpsstm_track_data[title]" placeholder="<?php _e('Title','wpsstm');?>"/>
-            <input type="text" name="wpsstm_track_data[album]" placeholder="<?php _e('Album','wpsstm');?>"/>
-            <button type="submit" class="button button-primary wpsstm-icon-button"><i class="fa fa-plus" aria-hidden="true"></i><span> <?php _e('Add subtrack','wpsstm');?></span></button>
+        <div id="wpsstm-queue-tracks">
+            <p class="wpsstm-new-track">
+                <input type="text" name="wpsstm_track_data[artist]" placeholder="<?php _e('Artist','wpsstm');?>"/>
+                <input type="text" name="wpsstm_track_data[title]" placeholder="<?php _e('Title','wpsstm');?>"/>
+                <input type="text" name="wpsstm_track_data[album]" placeholder="<?php _e('Album','wpsstm');?>"/>
+                <button type="submit" class="button button-primary wpsstm-icon-button wpsstm-remove-new-track-row"><i class="fa fa-minus" aria-hidden="true"></i></button>
             </p>
-            <input type="hidden" name="tracklist_id" value="<?php echo $wpsstm_tracklist->post_id;?>"/>
+            <p>
+                <button type="submit" id="wpsstm-queue-tracks-submit" class="button button-primary"><span> <?php _e('Add tracks','wpsstm');?></span></button>
+                <a href="#" id="wpsstm-queue-more-tracks"><?php _e('Add row','wpsstm');?></a>
+                <input type="hidden" name="tracklist_id" value="<?php echo $wpsstm_tracklist->post_id;?>"/>
+            </p>
         </div>
         <?php
     }
