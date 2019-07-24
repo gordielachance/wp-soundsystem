@@ -718,7 +718,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 );
                 
                 $args = rawurlencode_deep( $args );
-                $api_url = add_query_arg($args,'url/import');
+                $api_url = add_query_arg($args,'import/url');
                 $xspf = WPSSTM_Core_API::api_request($api_url);
                 
                 if ( is_wp_error($xspf) ){
