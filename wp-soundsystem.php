@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.8.8
+Version: 2.8.9
 License: GPL2
 */
 
@@ -36,7 +36,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '2.8.8';
+    public $version = '2.8.9';
     /**
     * @public string plugin DB version
     */
@@ -106,7 +106,6 @@ class WP_SoundSystem {
             'autolink'                          => true,
             'autolink_lock_hours'               => 48,
             'limit_autolinks'                   => 5,
-            'registration_notice'               => true,
             'wpsstmapi_token'                   => null,
             'wpsstmapi_timeout'                 => 10, //timeout for API requests, in secs.
             'details_engine'                    => array('musicbrainz'),
@@ -482,24 +481,6 @@ class WP_SoundSystem {
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
-    
-    private function get_registration_notice(){
-        global $wp;
-        
-        //registration notice
-        if ( is_admin() ) return;
-        if ( get_current_user_id() ) return;
-        if ( !wpsstm()->get_options('registration_notice') ) return;
-        
-        
-        $redirect_url = home_url( $wp->request );
-        $login_link = sprintf('<a class="wpsstm-login" href="%s">%s</a>',wp_login_url($redirect_url),__('Login','wpsstm'));
-        
-        
-        $registration_link = sprintf('<a class="wpsstm-join" href="%s">%s</a>',wp_registration_url(),__('Join','wpsstm'));
-        
-        return sprintf(__('Get the best out of %s : create and manage playlists, favorite tracks, sync your account with other services, and much more. %s or %s now !','wpsstm'),sprintf('<strong>%s</strong>',get_bloginfo('name')),$login_link,$registration_link);
-    }
 
     function register_scripts_styles(){
 
@@ -517,7 +498,6 @@ class WP_SoundSystem {
         $datas = array(
             'debug'                 => (WP_DEBUG),
             'ajaxurl'               => admin_url( 'admin-ajax.php' ),
-            'registration_notice'   => $this->get_registration_notice(),
             'ajax_tracks'           => wpsstm()->get_options('ajax_tracks'),
             'autolink'              => ( wpsstm()->get_options('autolink') && wpsstm()->get_options('ajax_autolink') ), 
         );

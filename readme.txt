@@ -151,6 +151,9 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
+= 2.8.9 =
+* Removed registration call to action (should be handled by a theme, not by this plugin)
+
 = 2.8.8 =
 * JS: Abord tracklist reload when pressing ESC
 * JS: Ability to add more than one track at once when editing a tracklist

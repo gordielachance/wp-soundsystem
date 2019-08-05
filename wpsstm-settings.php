@@ -127,13 +127,6 @@ class WPSSTM_Settings {
         }
 
         /*
-        Styling
-        */
-        
-        //recent wizard entries
-        $new_input['registration_notice'] = isset($input['registration_notice']);
-        
-        /*
         WPSSTM API
         */
 
@@ -309,24 +302,6 @@ class WPSSTM_Settings {
             array( $this, 'exclude_hosts_callback' ), 
             'wpsstm-settings-page', 
             'track_link_settings'
-        );
-
-        /*
-        Styling
-        */
-        add_settings_section(
-            'settings_styling', // ID
-            __('Display','wpsstm'), // Title
-            array( $this, 'section_desc_empty' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
-        
-        add_settings_field(
-            'registration_notice', 
-            __('Registration notice','wpsstm'), 
-            array( $this, 'registration_notice_callback' ), 
-            'wpsstm-settings-page', 
-            'settings_styling'
         );
 
     }
@@ -631,19 +606,6 @@ class WPSSTM_Settings {
             wpsstm()->meta_name_options,
             $option,
             $help
-        );
-    }
-
-    function registration_notice_callback(){
-        $option = wpsstm()->get_options('registration_notice');
-        $readonly = !get_option( 'users_can_register' );
-
-        printf(
-            '<input type="checkbox" name="%s[registration_notice]" value="on" %s %s /> %s',
-            wpsstm()->meta_name_options,
-            checked( $option,true, false ),
-            wpsstm_readonly( $readonly,true, false ),
-            __("Invite non-logged users to login or register by displaying a frontend notice.","wpsstm")
         );
     }
     
