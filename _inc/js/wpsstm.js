@@ -40,11 +40,6 @@ $('.wpsstm-artist-autocomplete').each(function() {
     });
 });
 
-//registration notice
-if ( registration_notice = wpsstmL10n.registration_notice){
-    wpsstm_js_notice(registration_notice);
-}
-
 //notices
 
 $(document).on('click', 'a.wpsstm-close-notice', function(e) {
