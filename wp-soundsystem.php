@@ -175,9 +175,7 @@ class WP_SoundSystem {
         // activation, deactivation...
         register_activation_hook( $this->file, array( $this, 'activate_wpsstm'));
         register_deactivation_hook( $this->file, array( $this, 'deactivate_wpsstm'));
-        
-        add_action( 'plugins_loaded', array($this, 'startup_check_options'));
-        
+
         //init
         add_action( 'init', array($this,'init_post_types'), 5);
         add_action( 'init', array($this,'init_rewrite'), 5);
@@ -399,15 +397,7 @@ class WP_SoundSystem {
         //update DB version
         update_option("_wpsstm-db_version", $this->db_version );
     }
-    
-    function startup_check_options(){
-        
-        //community user
-        if ( !$user_id = $this->get_options('community_user_id') ) return;
-        if ( !$userdatas = get_userdata($user_id) ) {
-            $this->options['community_user_id'] = null;
-        }
-    }
+
     
     function setup_subtracks_table(){
         global $wpdb;
