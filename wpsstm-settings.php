@@ -76,13 +76,7 @@ class WPSSTM_Settings {
 
         //user id
         if ( isset ($input['community_user_id']) && ctype_digit($input['community_user_id']) ){
-            
-            $user_id = $input['community_user_id'];
-            $userdata = get_userdata( $user_id );
-            
-            if ( $userdata ){ //check user exists
-                $new_input['community_user_id'] = $user_id;
-            }
+            $new_input['community_user_id'] = $input['community_user_id'];
         }
 
         /*
@@ -455,17 +449,14 @@ class WPSSTM_Settings {
 
     function section_community_user_desc(){
         $desc = array();
-        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features; like autolink and tracklist importer.","wpsstm");
-
-        //wrap
-        $desc = array_map(
-           function ($el) {
-              return "<p>{$el}</p>";
-           },
-           $desc
-        );
         
-        echo implode("\n",$desc);
+        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features; like autolink and tracklist importer.","wpsstm");
+        
+        $faq_url = 'https://github.com/gordielachance/wp-soundsystem/wiki/Frequently-Asked-Questions';
+        $plugin_link = sprintf('<a href="%s" target="_blank">%s</a>',$faq_url,__('FAQ','wpsstm'));
+        $desc[] = sprintf( __("See the plugin's %s for more information.","wpsstm"), $plugin_link );
+        
+        echo implode("  ",$desc);
 
     }
 
@@ -610,7 +601,12 @@ class WPSSTM_Settings {
     }
     
     function community_user_id_callback(){
-        $option = wpsstm()->get_options('community_user_id');
+        $community_id = wpsstm()->get_options('community_user_id');
+        $can_community = wpsstm()->is_community_user_ready();
+
+        if ( is_wp_error($can_community) ){
+            add_settings_error('community_user',$can_community->get_error_code(),$can_community->get_error_message(),'inline');
+        }
 
         /*
         form
@@ -618,13 +614,13 @@ class WPSSTM_Settings {
         printf(
             '<input type="number" name="%s[community_user_id]" size="4" min="0" value="%s" />',
             wpsstm()->meta_name_options,
-            $option
+            $community_id
         );
         
         /*
         errors
         */
-        settings_errors('community_user_id');
+        settings_errors('community_user');
     }
 
     /*

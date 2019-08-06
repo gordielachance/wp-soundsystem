@@ -1209,13 +1209,13 @@ class WPSSTM_Core_Tracks{
     */
     static function get_orphan_track_ids(){
         global $wpdb;
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        if ( !$community_user_id ) return;
+        $community_id = wpsstm()->get_options('community_user_id');
+        if ( !$community_id ) return;
 
         //get community tracks
         $orphan_tracks_args = array(
             'post_type' =>              wpsstm()->post_type_track,
-            'author' =>                 $community_user_id,
+            'author' =>                 $community_id,
             'post_status' =>            'any',
             'posts_per_page'=>          -1,
             'fields' =>                 'ids',

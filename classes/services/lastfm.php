@@ -563,16 +563,16 @@ class WPSSTM_LastFM{
     function ajax_lastfm_scrobble_community_track(){
         
         $ajax_data = wp_unslash($_POST);
-        $community_user_id = wpsstm()->get_options('community_user_id');
+        $community_id = wpsstm()->get_options('community_user_id');
 
         $result = array(
             'input' =>              $ajax_data,
             'message' =>            null,
             'success' =>            false,
-            'community_user_id' =>  $community_user_id
+            'community_user_id' =>  $community_id
         );
         
-        if ( $community_user_id ){
+        if ( $community_id ){
             
             $start_timestamp = $result['playback_start'] = wpsstm_get_array_value(array('playback_start'),$ajax_data);
             
@@ -581,7 +581,7 @@ class WPSSTM_LastFM{
             $track->from_array($ajax_data['track']);
             $result['track'] = $track->to_array();
 
-            $community_user = new WPSSTM_LastFM_User($community_user_id);
+            $community_user = new WPSSTM_LastFM_User($community_id);
             $success = $community_user->scrobble_lastfm_track($track,$start_timestamp);
 
             if ( $success ){
@@ -636,12 +636,12 @@ class WPSSTM_LastFM{
     
     public function can_scrobble_along(){
 
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        if (!$community_user_id){
-            return new WP_Error( 'wpsstm_lastfm_community_scrobble',__('A community user is required.','wpsstm') );   
+        $community_id = wpsstm()->get_options('community_user_id');
+        if (!$community_id){
+            return new WP_Error( 'wpsstm_lastfm_community_scrobble',__('Scrobble Along requires a community user.','wpsstm') );   
         }
 
-        $community_user = new WPSSTM_LastFM_User($community_user_id);
+        $community_user = new WPSSTM_LastFM_User($community_id);
 
         return ( $community_user->is_user_connected() === true);
     }

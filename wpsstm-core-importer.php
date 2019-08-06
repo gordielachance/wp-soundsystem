@@ -41,13 +41,11 @@ class WPSSTM_Core_Importer{
         //we HAVE an author query
         if ( $query->get('author') || $query->get('author_name') || $query->get('author__in') ) return $query;
 
-        if ( !$user_id = wpsstm()->get_options('community_user_id') ) return $query;
-        
+        if ( !$community_id = wpsstm()->get_options('community_user_id') ) return $query;
 
-        
         //ignore community posts
         $author_not_in = $query->get('author__not_in');
-        $author_not_in[] = $user_id;
+        $author_not_in[] = $community_id;
         $query->set('author__not_in',$author_not_in);
 
         return $query;
@@ -59,6 +57,13 @@ class WPSSTM_Core_Importer{
     
     function frontend_importer_content($content){
         if ( !is_page(wpsstm()->get_options('frontend_scraper_page_id')) ) return $content;
+        
+        //check community user
+        $can_community = wpsstm()->is_community_user_ready();
+        if ( is_wp_error($can_community) ){
+            WP_SoundSystem::debug_log('Community user not ready','Frontend import template' );
+            return $content;
+        }
         
         ob_start();
         wpsstm_locate_template( 'frontend-importer.php', true, false );
@@ -187,6 +192,15 @@ class WPSSTM_Core_Importer{
         $url = wpsstm_get_array_value('wpsstm_frontend_wizard_url',$_POST);
         if (!$url) return;
 
+        //check community user
+        $can_community = wpsstm()->is_community_user_ready();
+        if ( is_wp_error($can_community) ){
+            WP_SoundSystem::debug_log('Community user not ready','Frontend import URL' );
+            return;
+        }
+        $community_id = wpsstm()->get_options('community_user_id');
+
+        
         $duplicate_args = array(
             'post_type'         => wpsstm()->post_type_live_playlist,
             'fields'            => 'ids',
@@ -199,7 +213,7 @@ class WPSSTM_Core_Importer{
         );
         
         /*
-        Check that this user already created a tracklist for that same search and redirect to it.
+        Check for radio duplicates, by user ID
         */
         if ( $user_id = get_current_user_id() ){
             
@@ -217,11 +231,11 @@ class WPSSTM_Core_Importer{
 
 
         /*
-        Check that there is already a temporary wizard tracklist existing for that same search and redirect to it.
+        Check for radio duplicates, by community user ID
         */
-        
+
         $community_duplicate_args = $duplicate_args;
-        $community_duplicate_args['post_author'] = wpsstm()->get_options('community_user_id');
+        $community_duplicate_args['post_author'] = $community_id;
 
         $duplicate_query = new WP_Query( $community_duplicate_args );
         if ( $duplicate_query->have_posts() ){
@@ -232,16 +246,16 @@ class WPSSTM_Core_Importer{
         }
 
         /*
-        Create a new tracklist and redirect to it
+        Create a new temporary radio and redirect to it
         */
 
         //store as wizard tracklist (author = community user / ->is_wizard_tracklist_metakey = true)
 
         $post_args = array(
-            'post_type'     => wpsstm()->post_type_live_playlist,
-            'post_status'   => 'publish',
-            'post_author'   => wpsstm()->get_options('community_user_id'),
-            'meta_input'   => array(
+            'post_type' =>      wpsstm()->post_type_live_playlist,
+            'post_status' =>    'publish',
+            'post_author' =>    $community_id,
+            'meta_input' =>     array(
                 WPSSTM_Post_Tracklist::$feed_url_meta_name => $url,
                 self::$is_wizard_tracklist_metakey  => true,
             )

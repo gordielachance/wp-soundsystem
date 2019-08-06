@@ -398,35 +398,19 @@ class WPSSTM_Track{
         $valid = $this->validate_track();
         if ( is_wp_error( $valid ) ) return $valid;
         
-        //user ID
-        if ( !$user_id = wpsstm()->get_options('community_user_id') ){
-            return new WP_Error( 'wpsstm_missing_community_user', __("Missing community user.",'wpsstm'));
-        }
-        
+        //check community user
+        $can_community = wpsstm()->is_community_user_ready();
+        if ( is_wp_error($can_community) ) return $can_community;
+        $community_id = wpsstm()->get_options('community_user_id');
+
         $post_id = null;
 
         $args_default = array(
             'post_status'   => 'publish',
-            'post_author'   => $user_id,
+            'post_author'   => $community_id,
         );
         
         $args = (!$args) ? $args_default : wp_parse_args($args,$args_default);
-
-        //capability check
-        
-        /*
-        TOUFIX
-        By doing this, we cannot call this function before the init hook.  Use hardcoded cap instead, at least until this function is no more called in the plugin upgrade routine.
-        
-        $post_type_obj =    get_post_type_object(wpsstm()->post_type_track);
-        $required_cap =     $post_type_obj->cap->create_posts;
-        */
-        $required_cap = 'create_tracks';
-        
-
-        if ( !user_can($user_id,$required_cap) ){
-            return new WP_Error( 'wpsstm_missing_capability', __("Missing track creation capability.",'wpsstm') );
-        }
         
         //album
         if ($this->album === '_'){
@@ -472,7 +456,7 @@ class WPSSTM_Track{
         $this->populate_track_post($post_id);
 
         //save track links from parser if any
-        $new_ids = $this->save_new_links();
+        $new_ids = $this->batch_create_links();
 
         $this->track_log(
             array(
@@ -773,7 +757,7 @@ class WPSSTM_Track{
         $new_links = apply_filters('wpsstm_track_autolinks',$new_links);
 
         $this->add_links($new_links);
-        $new_ids = $this->save_new_links();
+        $new_ids = $this->batch_create_links();
         
         //repopulate links
         $this->populate_links();
@@ -784,7 +768,7 @@ class WPSSTM_Track{
 
     }
     
-    public function save_new_links(){
+    public function batch_create_links(){
 
         if ( !$this->post_id ){
             return new WP_Error( 'wpsstm_track_no_id', __('Unable to store link: track ID missing.','wpsstm') );
@@ -797,7 +781,7 @@ class WPSSTM_Track{
         foreach((array)$this->links as $link){
 
             if ($link->post_id) continue;
-            $link_id = $link->save_link();
+            $link_id = $link->create_link();
 
             if ( is_wp_error($link_id) ) continue;
             $inserted[] = $link_id;

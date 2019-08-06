@@ -126,10 +126,9 @@ class WPSSTM_Track_Link{
         $this->title = trim($this->title);
     }
 
-    function save_link(){
+    function create_link(){
         
         $validated = $this->validate_link();
-
         if ( is_wp_error($validated) ) return $validated;
         
         if (!$this->track->post_id){
@@ -152,14 +151,22 @@ class WPSSTM_Track_Link{
             $link_id = $duplicates[0];
             return new WP_Error( 'wpsstm_link_exists', __('This link already exists, do not create it','wpsstm'), array('url'=>$this->permalink_url,'existing'=>$link_id) );
         }else{
-            $post_author = ($this->is_community) ? wpsstm()->get_options('community_user_id') : get_current_user_id();
+            
+            if ($this->is_community){
+                
+                //check community user
+                $can_community = wpsstm()->is_community_user_ready();
+                if ( is_wp_error($can_community) ) return $can_community;
+                $post_author = wpsstm()->get_options('community_user_id');
+                
+            }else{
+                
+                $post_author = get_current_user_id();
 
-            //capability check
-            $post_type_obj = get_post_type_object(wpsstm()->post_type_track_link);
-            $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
-
-            if ( !user_can($post_author,$required_cap) ){
-                return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this souce.",'wpsstm') );
+                if ( !user_can($post_author,'create_tracks') ){
+                    return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to create track links.",'wpsstm') );
+                }
+                
             }
 
             $args = array(

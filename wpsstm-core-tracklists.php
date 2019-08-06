@@ -727,13 +727,13 @@ class WPSSTM_Core_Tracklists{
     }
 
     static function get_temporary_tracklists_ids(){
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        if ( !$community_user_id ) return;
+        $community_id = wpsstm()->get_options('community_user_id');
+        if ( !$community_id ) return;
 
         //get community tracks
         $args = array(
             'post_type' =>              wpsstm()->tracklist_post_types,
-            'author' =>                 $community_user_id,
+            'author' =>                 $community_id,
             'post_status' =>            'any',
             'posts_per_page'=>          -1,
             'fields' =>                 'ids',

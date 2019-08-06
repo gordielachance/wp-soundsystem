@@ -660,198 +660,211 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //avoid populating the subtracks several times (eg. Jetpack populates the content several times) TOUFIX TOUCHECK ?
         if ($this->track_count !== null) return;
- 
+
         $tracks = array();
-        $refresh_delay = $this->get_human_next_refresh_time();
-        
+
+        //refresh radio ?
         $refresh_now = ( $this->is_expired && ( 
                 ( wpsstm()->get_options('ajax_tracks') && wp_doing_ajax() ) || 
                 ( !wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() ) 
             ) 
         );
-
-        if ( $refresh_now ){
-            
-            $this->tracklist_log("refresh radio...");
-            
-            /*
-            redirect URL
-            Hook to filter bangs, etc.
-            */
-            $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url,$this);
-            
-            /*
-            Get the XSPF tracklist (as an array)
-            http://xspf.org
-            */
-            
-            if ( $xspf_url = wpsstm_is_xpsf_url($feed_url) ){
-                
-                $this->tracklist_log("...is an XSPF url, do not query WPSSTM API.");
-                
-                $response = wp_remote_get( $xspf_url );
-                $xml = wp_remote_retrieve_body( $response );
-
-                if ( is_wp_error($xml) ){
-                    $error_code = $xml->get_error_code();
-                    $error_message = $xml->get_error_message();
-                    
-                    $this->add_notice('wpsstm-xspf-error',sprintf(__('Error while importing the XSPF file: [%s] %s','wpsstm'),$error_code,$error_message)  );
-                    
-                    return $xml;
-                }
-                
-                //convert to array
-                
-                $xml = simplexml_load_string($xml, "SimpleXMLElement", LIBXML_NOCDATA);
-                $json = json_encode($xml);
-                $xspf = json_decode($json,TRUE);
-                
-                $this->tracklist_log("...succeeded loading XSPF");
-                
-                
-            }else{
-                $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
-                $args = array(
-                    'url' =>        $feed_url,
-                    'options'=>     $importer_options
-                );
-                
-                $args = rawurlencode_deep( $args );
-                $api_url = add_query_arg($args,'import/url');
-                $xspf = WPSSTM_Core_API::api_request($api_url);
-                
-                if ( is_wp_error($xspf) ){
-                    $error_code = $xspf->get_error_code();
-                    $error_message = $xspf->get_error_message();
-
-                    if($error_code == 'rest_forbidden'){
-
-                        if ( current_user_can('manage_options') ){
-                            $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstmapi') );
-                            $this->add_notice('wpsstm-api-error',sprintf(__('An API key is needed. Get one %s.','wpsstm'),$api_link)  );
-                        }
-
-                    }else{
-                        $this->add_notice('wpsstm-api-error',$error_message  );
-                    }
-
-                    return $xspf;
-                }
-                
-            }
-
-            /*
-            Create playlist from the XSPF array
-            */
-            
-            $playlist = new WPSSTM_Tracklist();
-            $playlist_tracks = array();
-            
-            $playlist->title = wpsstm_get_array_value('title',$xspf);
-            $playlist->author = wpsstm_get_array_value('creator',$xspf);
-            $playlist->location = wpsstm_get_array_value('location',$xspf);
-            
-            if ($date = wpsstm_get_array_value('date',$xspf) ){
-                $playlist->date_timestamp = strtotime ($date);
-            }
-            
-            $xspf_tracks = wpsstm_get_array_value(array('trackList','track'),$xspf);
-            
-            foreach ((array)$xspf_tracks as $xspf_track) {
-
-                $track = new WPSSTM_Track();
-                
-                //location
-                $track->location = wpsstm_get_array_value('location',$xspf_track);
-
-                //identifier
-
-                //title
-                $track->title = wpsstm_get_array_value('title',$xspf_track);
-
-                //creator
-                $track->artist = wpsstm_get_array_value('creator',$xspf_track);
-
-                //annotation
-
-                //info
-
-                //image
-                $track->image_url = wpsstm_get_array_value('image',$xspf_track);
- 
-                //album
-                $track->album = wpsstm_get_array_value('album',$xspf_track);
-
-                //trackNum
-                $track->position = wpsstm_get_array_value('trackNum',$xspf_track);
-
-                //duration
-                $track->duration = wpsstm_get_array_value('duration',$xspf_track);
-
-
-                //links
-                //when there are several links, it is an array; while it is a string for a single link.  So force array.
-                if ( $links = wpsstm_get_array_value('link',$xspf_track) ){
-                    $links = (array)$links;
-                    
-                    foreach($links as $url){
-                        $link = new WPSSTM_Track_Link();
-                        $link->permalink_url = $url;
-                        $addlinks[] = $link;
-                    }
-
-                    $track->add_links($addlinks);
-                }
-
-
-                //meta
-
-                //extension
-                
-                ////
-  
-                $playlist_tracks[] = $track;
-            }
-
-            $playlist->add_tracks($playlist_tracks);
-            
-            /*
-            Update
-            */
-
-            $updated = $this->update_radio_data($playlist);
-            
-            
-            $this->tracklist_log(
-                array(
-                    'tracks_populated'=>$this->track_count,
-                    'is_expired'=>$this->is_expired,
-                    'refresh_delay'=>$refresh_delay
-                ),'Imported subtracks'
-            );
-            
-
-        }
-            
-        if ( ($this->tracklist_type == 'live') && ( !$this->feed_url ) ){
-            $tracks = new WP_Error( 'wpsstm_missing_feed_url', __('Please add a Feed URL in the radio settings.','wpsstm') );
-            $error_msg = $tracks->get_error_message();
-            $this->add_notice('populate_subtracks',$error_msg );
-            return $tracks;
-        }
         
+        if ( $refresh_now ){
+            $this->sync_radio();
+        }
+
         //get static subtracks
         $tracks = $this->get_static_subtracks();
 
         if ( is_wp_error($tracks) ){
             $error = $tracks->get_error_message();
-            $this->add_notice('populate_subtracks',$error );
+            $this->add_notice('populate_static_subtracks',$error );
             return $tracks;
         }
 
         $this->add_tracks($tracks);
         
+    }
+    
+    private function sync_radio(){
+
+        //check feed URL
+        if ( !$this->feed_url ){
+                $tracks = new WP_Error( 'wpsstm_missing_feed_url', __('Please add a Feed URL in the radio settings.','wpsstm') );
+                $error_msg = $tracks->get_error_message();
+                $this->add_notice('refresh_radio',$error_msg );
+                return;
+        }
+        
+        //check community user
+        $can_community = wpsstm()->is_community_user_ready();
+        if ( is_wp_error($can_community) ){
+            $error_msg = $can_community->get_error_message();
+            $this->add_notice('refresh_radio',$error_msg );
+            return;
+        }
+            
+        $this->tracklist_log("refresh radio...");
+
+        /*
+        redirect URL
+        Hook to filter bangs, etc.
+        */
+        $feed_url = apply_filters('wpsstm_feed_url',$this->feed_url,$this);
+
+        /*
+        Get the XSPF tracklist (as an array)
+        http://xspf.org
+        */
+
+        if ( $xspf_url = wpsstm_is_xpsf_url($feed_url) ){
+
+            $this->tracklist_log("...is an XSPF url, do not query WPSSTM API.");
+
+            $response = wp_remote_get( $xspf_url );
+            $xml = wp_remote_retrieve_body( $response );
+
+            if ( is_wp_error($xml) ){
+                $error_code = $xml->get_error_code();
+                $error_message = $xml->get_error_message();
+
+                $this->add_notice('wpsstm-xspf-error',sprintf(__('Error while importing the XSPF file: [%s] %s','wpsstm'),$error_code,$error_message)  );
+
+                return $xml;
+            }
+
+            //convert to array
+
+            $xml = simplexml_load_string($xml, "SimpleXMLElement", LIBXML_NOCDATA);
+            $json = json_encode($xml);
+            $xspf = json_decode($json,TRUE);
+
+            $this->tracklist_log("...succeeded loading XSPF");
+
+
+        }else{
+            $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
+            $args = array(
+                'url' =>        $feed_url,
+                'options'=>     $importer_options
+            );
+
+            $args = rawurlencode_deep( $args );
+            $api_url = add_query_arg($args,'import/url');
+            $xspf = WPSSTM_Core_API::api_request($api_url);
+
+            if ( is_wp_error($xspf) ){
+                $error_code = $xspf->get_error_code();
+                $error_message = $xspf->get_error_message();
+
+                if($error_code == 'rest_forbidden'){
+
+                    if ( current_user_can('manage_options') ){
+                        $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstmapi') );
+                        $this->add_notice('wpsstm-api-error',sprintf(__('An API key is needed. Get one %s.','wpsstm'),$api_link)  );
+                    }
+
+                }else{
+                    $this->add_notice('wpsstm-api-error',$error_message  );
+                }
+
+                return $xspf;
+            }
+
+        }
+
+        /*
+        Create playlist from the XSPF array
+        */
+
+        $playlist = new WPSSTM_Tracklist();
+        $playlist_tracks = array();
+
+        $playlist->title = wpsstm_get_array_value('title',$xspf);
+        $playlist->author = wpsstm_get_array_value('creator',$xspf);
+        $playlist->location = wpsstm_get_array_value('location',$xspf);
+
+        if ($date = wpsstm_get_array_value('date',$xspf) ){
+            $playlist->date_timestamp = strtotime ($date);
+        }
+
+        $xspf_tracks = wpsstm_get_array_value(array('trackList','track'),$xspf);
+
+        foreach ((array)$xspf_tracks as $xspf_track) {
+
+            $track = new WPSSTM_Track();
+
+            //location
+            $track->location = wpsstm_get_array_value('location',$xspf_track);
+
+            //identifier
+
+            //title
+            $track->title = wpsstm_get_array_value('title',$xspf_track);
+
+            //creator
+            $track->artist = wpsstm_get_array_value('creator',$xspf_track);
+
+            //annotation
+
+            //info
+
+            //image
+            $track->image_url = wpsstm_get_array_value('image',$xspf_track);
+
+            //album
+            $track->album = wpsstm_get_array_value('album',$xspf_track);
+
+            //trackNum
+            $track->position = wpsstm_get_array_value('trackNum',$xspf_track);
+
+            //duration
+            $track->duration = wpsstm_get_array_value('duration',$xspf_track);
+
+
+            //links
+            //when there are several links, it is an array; while it is a string for a single link.  So force array.
+            if ( $links = wpsstm_get_array_value('link',$xspf_track) ){
+                $links = (array)$links;
+
+                foreach($links as $url){
+                    $link = new WPSSTM_Track_Link();
+                    $link->permalink_url = $url;
+                    $addlinks[] = $link;
+                }
+
+                $track->add_links($addlinks);
+            }
+
+
+            //meta
+
+            //extension
+
+            ////
+
+            $playlist_tracks[] = $track;
+        }
+
+        $playlist->add_tracks($playlist_tracks);
+
+        /*
+        Update
+        */
+
+        $updated = $this->update_radio_data($playlist);
+
+
+        $this->tracklist_log(
+            array(
+                'tracks_populated' =>   $this->track_count,
+                'is_expired' =>         $this->is_expired,
+                'refresh_delay' =>      $this->get_human_next_refresh_time()
+            ),'Imported subtracks'
+        );
+        
+        return $updated;
     }
 
     
@@ -904,9 +917,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        //capability check
-        $can = wpsstm()->is_community_user_ready();
-        if ( is_wp_error($can) ) return $can;
+        //check community user
+        $can_community = wpsstm()->is_community_user_ready();
+        if ( is_wp_error($can_community) ) return $can_community;
         
         //delete actual subtracks
         $this->tracklist_log('delete current tracklist subtracks...'); 
@@ -921,7 +934,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->tracklist_log('save subtracks...'); 
 
         $error_msgs = array();
-        $saved_count = 0;
 
         $tracks = apply_filters('wpsstm_radio_tracks_input',$input_tracklist->tracks,$this);
 
@@ -934,12 +946,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             if( is_wp_error($success) ){
                 $error_code = $success->get_error_code();
                 $error_msgs[] = sprintf('Failed saving subtrack #%s: %s',$index,$error_code);
-            }else{
-                $saved_count++;
             }
         }
         
-        $this->tracklist_log(array('input'=>count($input_tracklist->tracks),'filtered'=>count($tracks),'errors'=>count($error_msgs),'error_msgs'=>$error_msgs),'...has saved subtracks'); 
+        $this->tracklist_log(array('input'=>count($input_tracklist->tracks),'output'=>count($tracks),'errors'=>count($error_msgs),'error_msgs'=>$error_msgs),'...has saved subtracks'); 
 
         return true;
         
@@ -1105,7 +1115,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         $success = $wpdb->insert($subtracks_table,$track_data);
-        $track->track_log(array('success'=>$success,'subtrack_id'=>$wpdb->insert_id,'data'=>$track_data), "add subtrack" ); 
+        //$track->track_log(array('success'=>$success,'subtrack_id'=>$wpdb->insert_id,'data'=>$track_data), "add subtrack" ); 
 
         if ( is_wp_error($success) ) return $success;
 

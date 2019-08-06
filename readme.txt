@@ -41,7 +41,7 @@ It will search for remote links and attach them to your tracks automatically.
 = Radios =
 
 Radios are how we call *live playlists*. 
-Those playlists are synced with remote webpages or services, and are refreshed seamlessly after a short delay.
+Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are synced seamlessly after a user-defined delay.
 
 [Check some Radios on Spiff Radio](http://spiff-radio.org/?post_type=wpsstm_live_playlist&tag=editors-pick&author=1)
 
@@ -96,7 +96,7 @@ This would be very appreciated — Thanks !
 
 Contributors [are listed here](https://github.com/gordielachance/wp-soundsystem/contributors)
 
-= Notes =
+= Bugs/Development =
 
 For feature request and bug reports, please use the [Github Issues Tracker](https://github.com/gordielachance/wp-soundsystem/issues).
 
@@ -111,32 +111,9 @@ This plugin requires PHP Version 5.4 or later.
 
 == Frequently Asked Questions ==
 
-== How can I embed a track or a playlist ? =
+= Frequently Asked Questions =
 
-Using shortcodes:
-
-`[wpsstm-tracklist post_id="160"]`
-
-`[wpsstm-track post_id="150"]`
-`[wpsstm-track artist="Patrick Sébastien" album="Pochette surprise" title="Les Sardines"]`
-
-Or directly with PHP functions:
-
-`<?php
-$tracklist = new WPSSTM_Post_Tracklist($post_id);
-echo $tracklist->get_tracklist_html();
-?>`
-
-`<?php
-$track = new WPSSTM_Track($post_id);
-echo $track->get_track_html();
-?>`
-
-! There is currently a Wordpress bug that breaks our shortcodes.  See [the issue on Github](https://github.com/gordielachance/wp-soundsystem/issues/82)..
-
-= What is the community user ? =
-
-The community user is a Wordpress user you need to create, and that will be assigned as author to the content created automatically by the plugin, for instance imported tracks or links.
+See the [FAQ](https://github.com/gordielachance/wp-soundsystem/wiki/Frequently-Asked-Questions) of the Github wiki.
 
 == Screenshots ==
 
@@ -151,19 +128,18 @@ The community user is a Wordpress user you need to create, and that will be assi
 
 == Changelog ==
 
-= 2.8.9 =
+= 2.9.0 =
 * Removed registration call to action (should be handled by a theme, not by this plugin)
-
-= 2.8.8 =
 * JS: Abord tracklist reload when pressing ESC
 * JS: Ability to add more than one track at once when editing a tracklist
+* Queue subtracks bug fix
+* Improve community user code
 
-= 2.8.7 =
+= 2.8.5 =
 * WPSSTM_Spotify_Endpoints & WPSSTM_Musicbrainz_Endpoints moved from API so we don't need two requests
 * new metabox 'Tracklist options'
 * ignore community tracklists unless author is set in query
 * JS bugfixes
-* Queue subtracks bug fix
 
 = 2.8.0 =
 * better player JS

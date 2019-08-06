@@ -416,7 +416,7 @@ class WPSSTM_Core_Track_Links{
             }
 
             $track->add_links($new_links);
-            $success = $track->save_new_links();
+            $success = $track->batch_create_links();
 
         }
         
@@ -530,13 +530,11 @@ class WPSSTM_Core_Track_Links{
     
     static function can_autolink(){
         global $wpsstm_spotify;
-
-        //community user
-        $community_user_id = wpsstm()->get_options('community_user_id');
-        if (!$community_user_id){
-            return new WP_Error( 'wpsstm_autolink',__('Autolink requires a community user to be set.','wpsstm') );
-        }
         
+        //check community user
+        $can_community = wpsstm()->is_community_user_ready();
+        if ( is_wp_error($can_community) ) return $can_community;
+
         //Spotify API
         $has_spotify_api = $wpsstm_spotify->can_spotify_api();
 
@@ -551,16 +549,6 @@ class WPSSTM_Core_Track_Links{
             return new WP_Error( 'wpsstm_premium_missing',__('This requires you to be premium.','wpsstm') );
         }
 
-        //capability check
-        $links_post_type_obj = get_post_type_object(wpsstm()->post_type_track_link);
-        if ($links_post_type_obj){ //be sure post type is registered before doing that check - eg. it isn't when saving settings.
-            $autolink_cap = $links_post_type_obj->cap->create_posts;
-            if ( !$has_cap = user_can($community_user_id,$autolink_cap) ){
-                $error = sprintf(__("Autolink requires the community user to have the %s capability granted.",'wpsstm'),'<em>'.$autolink_cap.'</em>');
-                return new WP_Error( 'wpsstm_autolink',$error );
-            }
-        }
-        
         //TOFIXKKK TO CHECK has links providers ?
 
         return true;

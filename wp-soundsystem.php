@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.8.9
+Version: 2.9.0
 License: GPL2
 */
 
@@ -36,7 +36,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '2.8.9';
+    public $version = '2.9.0';
     /**
     * @public string plugin DB version
     */
@@ -566,12 +566,12 @@ class WP_SoundSystem {
     
     function register_community_view($views){
         
-        if ( !$user_id = $this->get_options('community_user_id') ) return $views;
+        if ( !$community_id = $this->get_options('community_user_id') ) return $views;
         
         $screen = get_current_screen();
         $post_type = $screen->post_type;
 
-        $link = add_query_arg( array('post_type'=>$post_type,'author'=>$user_id),admin_url('edit.php') );
+        $link = add_query_arg( array('post_type'=>$post_type,'author'=>$community_id),admin_url('edit.php') );
         
         $attr = array(
             'href' =>   $link,
@@ -579,11 +579,11 @@ class WP_SoundSystem {
         
         $author_id = isset($_REQUEST['author']) ? $_REQUEST['author'] : null;
         
-        if ($author_id==$user_id){
+        if ($author_id==$community_id){
             $attr['class'] = 'current';
         }
         
-        $count = count_user_posts( $user_id , $post_type  );
+        $count = count_user_posts( $community_id , $post_type  );
 
         $views['community'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Community','wpsstm'),$count);
         
@@ -704,18 +704,36 @@ class WP_SoundSystem {
     }
 
     public function is_community_user_ready(){
+        
         //community user
-        $user_id = $this->get_options('community_user_id');
-        if (!$user_id){
+        $community_id = $this->get_options('community_user_id');
+        
+        if ( !$community_id ){
             return new WP_Error( 'wpsstm_missing_community_user', __("Missing community user.",'wpsstm'));
         }
         
-        $tracklist_obj = get_post_type_object( wpsstm()->post_type_playlist );
-        $can = user_can($user_id,$tracklist_obj->cap->edit_posts);
-        
-        if (!$can){
-            return new WP_Error( 'wpsstm_cannot_remote_request', __("The community user requires edit capabilities.",'wpsstm'));
+        if ( !$userdatas = get_userdata($community_id) ) {
+            return new WP_Error( 'wpsstm_invalid_community_user', __("Invalid community user.",'wpsstm'));
         }
+        
+        //check can create radios
+        if ( !user_can($community_id,'create_live_playlists') ){
+            return new WP_Error( 'wpsstm_missing_capability', __("The community user requires the 'create_live_playlists' capability.",'wpsstm'));
+        }
+        
+        //check can create tracks
+        if ( !user_can($community_id,'create_tracks') ){
+            return new WP_Error( 'wpsstm_missing_capability', __("The community user requires the 'create_tracks' capability.",'wpsstm') );
+        }
+        
+        //check can create track links
+        //commented since it is the same capability than for tracks.
+        /*
+        if ( !user_can($community_id,'create_tracks') ){
+            return new WP_Error( 'wpsstm_missing_capability', __("The community user requires the 'create_tracks' capability.",'wpsstm'));
+        }
+        */
+        
         return true;
     }
     

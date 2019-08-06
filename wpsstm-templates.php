@@ -158,9 +158,12 @@ function wpsstm_get_datetime($timestamp){
 //Check that a post is a community post (created with the bot user)
 function wpsstm_is_community_post($post_id = null){
     global $post;
+    
+    if ( !$community_id = wpsstm()->get_options('community_user_id') ) return false;
+
     if (!$post_id && $post) $post_id = $post->ID;
     $post_author_id = get_post_field( 'post_author', $post_id );
-    return ( $post_author_id == wpsstm()->get_options('community_user_id') );
+    return ( $post_author_id == $community_id );
 }
 
 function wpsstm_get_backend_form_input($options = null){
