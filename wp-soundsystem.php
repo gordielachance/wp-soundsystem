@@ -107,7 +107,7 @@ class WP_SoundSystem {
             'autolink_lock_hours'               => 48,
             'limit_autolinks'                   => 5,
             'wpsstmapi_token'                   => null,
-            'wpsstmapi_timeout'                 => 10, //timeout for API requests, in secs.
+            'wpsstmapi_timeout'                 => 20, //timeout for API requests, in secs.
             'details_engine'                    => array('musicbrainz'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
