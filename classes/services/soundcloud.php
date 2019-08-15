@@ -65,7 +65,10 @@ class WPSSTM_Souncloud{
     
     function souncloud_settings_desc(){
         $new_app_link = 'http://soundcloud.com/you/apps/new';
-        printf(__('Get an API key %s.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+        $desc = array();
+        $desc[] = sprintf('Required to play Souncloud tracks.','wpsstm');
+        $desc[] = sprintf(__('Get an API key %s.','wpsstm'),sprintf('<a href="%s" target="_blank">%s</a>',$new_app_link,__('here','wpsstm') ) );
+        echo implode('  ',$desc);
     }
 
     function soundcloud_api_settings(){
