@@ -111,9 +111,7 @@ This plugin requires PHP Version 5.4 or later.
 
 == Frequently Asked Questions ==
 
-= Frequently Asked Questions =
-
-See the [FAQ](https://github.com/gordielachance/wp-soundsystem/wiki/Frequently-Asked-Questions) of the Github wiki.
+See the [Frequently Asked Questions](https://github.com/gordielachance/wp-soundsystem/wiki/Frequently-Asked-Questions) of the Github wiki.
 
 == Screenshots ==
 
@@ -127,6 +125,10 @@ See the [FAQ](https://github.com/gordielachance/wp-soundsystem/wiki/Frequently-A
 8. Music menu on a BuddyPress profile
 
 == Changelog ==
+
+= 2.9.1 =
+* Soundcloud : fix settings not saving
+* Autolink : better GUI
 
 = 2.9.0 =
 * Removed registration call to action (should be handled by a theme, not by this plugin)
