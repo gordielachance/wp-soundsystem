@@ -7,6 +7,13 @@ class WPSSTM_Souncloud{
     public $options = array();
     
     function __construct(){
+        
+        $options_default = array(
+            'client_id' =>      null,
+            'client_secret' =>  null
+        );
+        
+        $this->options = wp_parse_args(get_option( self::$soundcloud_options_meta_name),$options_default);
 
         add_filter('wpsstm_get_link_mimetype',array($this,'get_soundcloud_link_type'),10,2);
         add_filter('wpsstm_get_stream_url',array($this,'get_soundcloud_stream_url'),10,2);
@@ -46,7 +53,7 @@ class WPSSTM_Souncloud{
         //soundcloud
         $new_input['client_id'] = ( isset($input['client_id']) ) ? trim($input['client_id']) : null;
         $new_input['client_secret'] = ( isset($input['client_secret']) ) ? trim($input['client_secret']) : null;
-        
+
         return $new_input;
     }
     
