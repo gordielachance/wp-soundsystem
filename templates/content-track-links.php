@@ -9,6 +9,20 @@ $init_autolink = ( !$wpsstm_track->have_links() && !wpsstm()->get_options('ajax_
 if ( $init_autolink ){
     $wpsstm_track->autolink();
 }
+
+if ( $wpsstm_track->have_links() && is_admin() ){
+    ?>
+    <p>
+    <?php
+
+    //edit links bt
+    $post_links_url = admin_url(sprintf('edit.php?post_type=%s&post_parent=%s',wpsstm()->post_type_track_link,$wpsstm_track->post_id));
+    printf('<a href="%s" class="button">%s</a>',$post_links_url,__('Edit links','wpsstm'));
+
+    ?>
+    </p>
+    <?php
+}
 ?>
 
 <div class="wpsstm-track-links-list">

@@ -307,23 +307,28 @@ class WPSSTM_Core_Track_Links{
             <?php _e("If the player and the 'Autolink' setting are enabled, we'll try to find playable links automatically when the track is requested to play.",'wpsstm');?>
         </p>
 
+        <p>
         <?php
+        
+        //autolink
 
-        if ( $then = get_post_meta( $wpsstm_track->post_id, self::$autolink_time_metakey, true ) ){
+        if ( $autolinked = get_post_meta( $wpsstm_track->post_id, self::$autolink_time_metakey, true ) ){
             $now = current_time( 'timestamp' );
-            $refreshed = human_time_diff( $now, $then );
-            $refreshed = sprintf(__('Last autolink query: %s ago.','wpsstm'),$refreshed);
-            
-            $unset_autolink_bt = sprintf('<input id="wpsstm-unset-autolink-bt" type="submit" name="wpsstm_unset_autolink" class="button" value="%s">',__('Clear','wpsstm'));
+            $next_refresh = $now + ( wpsstm()->get_options('autolink_lock_hours') * HOUR_IN_SECONDS);
+
+            $refreshed = human_time_diff( $now, $next_refresh );
+            $refreshed = sprintf(__('This track has been autolinked already.  Wait %s.','wpsstm'),$refreshed);
+
+            $unset_autolink_bt = sprintf('<input id="wpsstm-unset-autolink-bt" type="submit" name="wpsstm_unset_autolink" class="button" value="%s">',__('Reset','wpsstm'));
                 ?>
 
                 <?php
-            
-            echo '  ' . $refreshed .' ' . $unset_autolink_bt;
-        }
 
-        //track links
+            echo $refreshed . '  ' . $unset_autolink_bt;
+        }
         ?>
+        </p>
+
         <div class="wpsstm-track-links">
             <?php wpsstm_locate_template( 'content-track-links.php', true, false );?>
         </div>
@@ -340,19 +345,40 @@ class WPSSTM_Core_Track_Links{
         </p>
         <p class="wpsstm-submit-wrapper">
             <?php
-            //autolink
-            if ( ( wpsstm()->get_options('autolink') ) && (WPSSTM_Core_Track_Links::can_autolink() === true) ){
-                ?>
-                <input id="wpsstm-autolink-bt" type="submit" name="wpsstm_track_autolink" class="button" value="<?php _e('Autolink','wpsstm');?>">
-                <?php
+        
+            $is_premium = WPSSTM_Core_API::is_premium();
+        
+            $classes = array(
+                'button'
+            );
+
+            if ( WPSSTM_Core_Track_Links::can_autolink() !== true){
+                $classes[] = 'wpsstm-freeze';
+            }
+
+            //input
+            $input_attr = array(
+                'id' =>             'wpsstm-autolink-bt',
+                'type' =>           'submit',
+                'name' =>           'wpsstm_track_autolink',
+                'class' =>          implode(' ',array_filter($classes)),
+                'value' =>          __('Autolink','wpsstm'),
+                'title' =>          __('Find links automatically for this track'),
+
+            );
+        
+            if ( !$is_premium ){
+                $input_attr['title'] .= sprintf(' [%s]',__('premium','wpsstm'));
             }
         
-            //list links
-            $post_links_url = admin_url(sprintf('edit.php?post_type=%s&post_parent=%s',wpsstm()->post_type_track_link,$wpsstm_track->post_id));
-            printf('<a href="%s" class="button">%s</a>',$post_links_url,__('Backend listing','wpsstm'));
+
+            $attr_str = wpsstm_get_html_attr($input_attr);
+            $autolink_bt = sprintf('<input %s/>',$attr_str);
+        
+            echo $autolink_bt;
 
             //add links
-            printf('<a id="wpsstm-add-link-url" href="#" class="button">%s</a>',__('Add link URL','wpsstm'));
+            printf('<a id="wpsstm-add-link-url" href="#" class="button">%s</a>',__('Add row','wpsstm'));
             ?>
         </p>
         <?php
