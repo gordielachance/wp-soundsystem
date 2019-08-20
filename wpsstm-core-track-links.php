@@ -6,11 +6,14 @@ class WPSSTM_Core_Track_Links{
     function __construct() {
         global $wpsstm_link;
 
-        //initialize global (blank) $wpsstm_link so plugin never breaks when calling it.
+        /*
+        populate single global track link.
+        Be sure it works frontend, backend, and on post-new.php page
+        */
         $wpsstm_link = new WPSSTM_Track_Link();
+        add_action( 'the_post', array($this,'populate_global_track_link_loop'),10,2);
         
         add_filter( 'query_vars', array($this,'add_query_vars_track_link') );
-        
         add_action( 'wpsstm_init_post_types', array($this,'register_track_link_post_type' ));
 
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_links_submenu' ) );
@@ -31,7 +34,6 @@ class WPSSTM_Core_Track_Links{
         /*
         QUERIES
         */
-        add_action( 'the_post', array($this,'the_track_link'),10,2);
         add_action( 'current_screen',  array($this, 'the_single_backend_link'));
         add_filter( 'pre_get_posts', array($this,'filter_backend_links_by_track_id') );
         
@@ -151,17 +153,21 @@ class WPSSTM_Core_Track_Links{
     }
     
     /*
-    Register the global $wpsstm_link obj (hooked on 'the_post' action)
+    Register the global within posts loop
     */
     
-    function the_track_link($post,$query){
+    function populate_global_track_link_loop($post,$query){
         global $wpsstm_link;
-        if ( $query->get('post_type') == wpsstm()->post_type_track_link ){
-            //set global $wpsstm_link
-            $wpsstm_link = new WPSSTM_Track_Link($post->ID);
-        }
+        
+        if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return;
+        
+        //set global
+        $is_already_populated = ($wpsstm_link && ($wpsstm_link->post_id == $post->ID) );
+        if ($is_already_populated) return;
+
+        $wpsstm_link = new WPSSTM_Track_Link($post->ID);
     }
-    
+
     function the_single_backend_link(){
         global $post;
         global $wpsstm_link;

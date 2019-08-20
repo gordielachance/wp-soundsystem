@@ -9,17 +9,20 @@ class WPSSTM_Core_Tracklists{
     function __construct() {
         global $wpsstm_tracklist;
         
-        //initialize global (blank) $wpsstm_tracklist so plugin never breaks when calling it.
+        /*
+        populate single global tracklist.
+        Be sure it works frontend, backend, and on post-new.php page
+        */
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
-        
-        add_action( 'parse_query', array($this,'populate_frontend_tracklist') );
-        add_action( 'admin_head',  array($this, 'populate_backend_tracklist'));
+        add_action( 'wp',  array($this, 'populate_global_tracklist_frontend'),1 );
+        add_action( 'admin_head',  array($this, 'populate_global_tracklist_backend'),1);
+        add_action( 'the_post', array($this,'populate_global_tracklist_loop'),10,2);
 
         //rewrite rules
         add_action( 'wpsstm_init_rewrite', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
         
-        add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2);
+        
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
         
         add_filter( 'template_include', array($this,'tracklist_template') );
@@ -429,45 +432,43 @@ class WPSSTM_Core_Tracklists{
             
         }
     }
-    
-    function populate_frontend_tracklist($query){
+
+    function populate_global_tracklist_frontend(){
         global $post;
         global $wpsstm_tracklist;
-        
-        if ( is_admin() ) return;
 
-        $success = null;
-        $post_id = $query->get( 'p' );
-        $post_type = $query->get( 'post_type' );
+        $post_id = get_the_ID();
+        $post_type = get_post_type($post_id);
 
-        if ( !$post_id ) return;
-        if ( !in_array($post_type,wpsstm()->tracklist_post_types) ) return;
-        
+        if ( !is_single() || !$post_id || !in_array($post_type,wpsstm()->tracklist_post_types) ) return;
+
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
 
+        $wpsstm_tracklist->tracklist_log("Populated global frontend tracklist");
+        
     }
     
-    /*
-    was hookend on current_screen before, but then global $post wasn't filled yet.
-    */
-    
-    function populate_backend_tracklist(){
+    function populate_global_tracklist_backend(){
         global $post;
         global $wpsstm_tracklist;
         
+        //is posts.php or post-new.php ?
         $screen = get_current_screen();
+        $is_tracklist_backend = in_array($screen->id,wpsstm()->tracklist_post_types);
+        if ( !$is_tracklist_backend  ) return;
+
+        $post_id = get_the_ID();
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
+
+        $wpsstm_tracklist->tracklist_log("Populated global backend tracklist");
         
-        if ( ( $screen->base == 'post' ) && in_array($screen->post_type,wpsstm()->tracklist_post_types)  ){
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
-        }
     }
-    
+
     /*
-    Register the global $wpsstm_tracklist obj (hooked on 'the_post' action) for tracklists
-    For single tracks, check the_track function in -core-tracks.php
+    Register the global within posts loop
     */
     
-    function populate_loop_tracklist($post,$query){
+    function populate_global_tracklist_loop($post,$query){
         global $wpsstm_tracklist;
         if ( !in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ) return;
         
@@ -780,5 +781,7 @@ class WPSSTM_Core_Tracklists{
 function wpsstm_tracklists_init(){
     new WPSSTM_Core_Tracklists();
 }
+
+
 
 add_action('wpsstm_init','wpsstm_tracklists_init');
