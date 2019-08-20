@@ -126,6 +126,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 2.9.2 =
+* fix unable to add new tracklist tracks on post-new.php
+
 = 2.9.1 =
 * Soundcloud : fix settings not saving
 * Autolink : better GUI
