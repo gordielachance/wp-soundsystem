@@ -8,14 +8,17 @@ class WPSSTM_Core_Tracklists{
 
     function __construct() {
         global $wpsstm_tracklist;
-
+        
         //initialize global (blank) $wpsstm_tracklist so plugin never breaks when calling it.
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist();
         
+        add_action( 'parse_query', array($this,'populate_frontend_tracklist') );
+        add_action( 'admin_head',  array($this, 'populate_backend_tracklist'));
+
         //rewrite rules
         add_action( 'wpsstm_init_rewrite', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
-        add_action( 'parse_query', array($this,'populate_global_tracklist') );
+        
         add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2);
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
         
@@ -40,7 +43,6 @@ class WPSSTM_Core_Tracklists{
         
 
         //tracklist queries
-        add_action( 'current_screen',  array($this, 'the_single_backend_tracklist'));
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracklists') );
         add_filter( 'posts_join', array($this,'tracklist_query_join_subtracks_table'), 10, 2 );
         add_filter( 'posts_where', array($this,'tracklist_query_where_tracklist_id'), 10, 2 );
@@ -220,19 +222,7 @@ class WPSSTM_Core_Tracklists{
         
          wp_nonce_field( 'wpsstm_tracklist_options_meta_box', 'wpsstm_tracklist_options_meta_box_nonce' );
     }
-    
-    function the_single_backend_tracklist(){ //TOUFIX TOUCHECK TOUREMOVE ?
-        global $post;
-        global $wpsstm_tracklist;
-        $screen = get_current_screen();
-        
-        if ( ( $screen->base == 'post' ) && in_array($screen->post_type,wpsstm()->tracklist_post_types)  ){
-            $post_id = isset($_GET['post']) ? $_GET['post'] : null;
-            //set global $wpsstm_link
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
-        }
-    }
-    
+
     function ajax_reload_tracklist(){
 
         $ajax_data = wp_unslash($_POST);
@@ -440,26 +430,36 @@ class WPSSTM_Core_Tracklists{
         }
     }
     
-    function populate_global_tracklist($query){
+    function populate_frontend_tracklist($query){
+        global $post;
         global $wpsstm_tracklist;
-        require_once(ABSPATH . 'wp-admin/includes/screen.php'); //FIXES crash when get_current_screen() is not defined - should investigate ?
+        
+        if ( is_admin() ) return;
 
         $success = null;
         $post_id = $query->get( 'p' );
         $post_type = $query->get( 'post_type' );
 
-        if( is_admin() && ( $screen = get_current_screen() ) ){
-            if ( $screen->base = 'post' ){ //backend singe post edit
-                $post_type = $screen->post_type;
-                $post_id = wpsstm_get_array_value('post',$_GET);
-            }
-        }
-        
         if ( !$post_id ) return;
-        if ( !in_array( get_query_var( 'post_type' ) ,wpsstm()->tracklist_post_types) ) return;
+        if ( !in_array($post_type,wpsstm()->tracklist_post_types) ) return;
         
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
 
+    }
+    
+    /*
+    was hookend on current_screen before, but then global $post wasn't filled yet.
+    */
+    
+    function populate_backend_tracklist(){
+        global $post;
+        global $wpsstm_tracklist;
+        
+        $screen = get_current_screen();
+        
+        if ( ( $screen->base == 'post' ) && in_array($screen->post_type,wpsstm()->tracklist_post_types)  ){
+            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
+        }
     }
     
     /*
@@ -469,15 +469,14 @@ class WPSSTM_Core_Tracklists{
     
     function populate_loop_tracklist($post,$query){
         global $wpsstm_tracklist;
-        if ( in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ){
-            //set global $wpsstm_tracklist
+        if ( !in_array($query->get('post_type'),wpsstm()->tracklist_post_types) ) return;
+        
+        //set global $wpsstm_tracklist
+        $is_already_populated = ($wpsstm_tracklist && ($wpsstm_tracklist->post_id == $post->ID) );
+        if ($is_already_populated) return;
 
-            $is_already_populated = ($wpsstm_tracklist && ($wpsstm_tracklist->post_id == $post->ID) );
-            if ($is_already_populated) return;
-            
-            $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
-            $wpsstm_tracklist->index = $query->current_post;
-        }
+        $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post->ID);
+        $wpsstm_tracklist->index = $query->current_post;
     }
 
     function handle_tracklist_action(){
