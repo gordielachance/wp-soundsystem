@@ -320,9 +320,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     function get_tracklist_actions(){
         
+        if (!$this->post_id) return; //eg. new tracklist
+        
         $tracklist_post_type = get_post_type($this->post_id);
         
         //no tracklist actions if this is a "track" tracklist
+        //TOUFIX TOUCHECK
         if ($tracklist_post_type == wpsstm()->post_type_track ) return;
         
         /*
@@ -1252,11 +1255,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $not_found = __('No tracks found.','wpsstm');
 
-        if (!$this->feed_url) return;
-
-
-        $refresh_el = sprintf('<a class="wpsstm-reload-bt" href="%s">%s</a>',$this->get_tracklist_action_url('refresh'),__('Refresh'));
-        $not_found .= sprintf("  %s ?",$refresh_el);
+        if ( $this->feed_url && ($this->tracklist_type === 'live' ) ){
+            $refresh_el = sprintf('<a class="wpsstm-reload-bt" href="%s">%s</a>',$this->get_tracklist_action_url('refresh'),__('Refresh'));
+            $not_found .= sprintf("  %s ?",$refresh_el);
+        }
 
         $this->add_notice('empty-tracklist', $not_found );
     }
@@ -1264,6 +1266,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function importer_notice(){
         if ( is_admin() ) return;
         if ( !$this->feed_url ) return;
+        if ( $this->tracklist_type !== 'live' ) return;
         if ( $this->track_count ) return;
         
         $post_type = get_post_type($this->post_id);

@@ -15,17 +15,21 @@ class WPSSTM_Core_Tracks{
     function __construct() {
         global $wpsstm_track;
         
-        //initialize global (blank) $wpsstm_track so plugin never breaks when calling it.
-        $wpsstm_track = new WPSSTM_Track();
-
         add_action( 'wpsstm_init_post_types', array($this,'register_track_post_type' ));
         add_action( 'wpsstm_init_post_types', array($this,'register_track_taxonomy' ));
         
-        add_filter( 'query_vars', array($this,'add_query_vars_track') );
+        /*
+        populate single global track.
+        Be sure it works frontend, backend, and on post-new.php page
+        */
+        $wpsstm_track = new WPSSTM_Track();
         add_action( 'parse_query', array($this,'populate_global_subtrack'));
-        add_action( 'parse_query', array($this,'populate_global_track'));
-        add_action( 'the_post', array($this,'populate_loop_track'),10,2);
+        add_action( 'wp',  array($this, 'populate_global_track_frontend'),1 );
+        add_action( 'admin_head',  array($this, 'populate_global_track_backend'),1);
+        add_action( 'the_post', array($this,'populate_global_track_loop'),10,2);
+
         
+        add_filter( 'query_vars', array($this,'add_query_vars_track') );
         add_action( 'wp', array($this,'handle_track_action'), 8);
 
         //rewrite rules
@@ -49,9 +53,6 @@ class WPSSTM_Core_Tracks{
         /* manager */
         add_action( 'wp', array($this,'handle_manager_action'), 8);
         add_filter( 'template_include', array($this,'manager_template'));
-
-        add_action( 'current_screen',  array($this, 'the_single_backend_track'));
-        
         
         //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
         
@@ -96,50 +97,67 @@ class WPSSTM_Core_Tracks{
     */
     function populate_global_subtrack($query){
         global $wpsstm_track;
-        $subtrack_id = $query->get( 'subtrack_id' );
+
+        if ( !$subtrack_id = $query->get( 'subtrack_id' ) ) return;
         
-        /*
-        Subtrack ID
-        */
+        $success = $wpsstm_track->populate_subtrack($subtrack_id);
         
-        if ( $subtrack_id ){
-            $success = $wpsstm_track->populate_subtrack($subtrack_id);
-            if ( is_wp_error($success) ){
-                $error_msg = $success->get_error_message();
-                $wpsstm_track->track_log($error_msg,'error populating subtrack');
-                ///
-                $query->set_404();
-                status_header( 404 );
-                nocache_headers();
-            }
+        if ( is_wp_error($success) ){
+            $error_msg = $success->get_error_message();
+            $wpsstm_track->track_log($error_msg,'error populating subtrack');
+            ///
+            $query->set_404();
+            status_header( 404 );
+            nocache_headers();
         }
 
     }
     
-
-    function populate_global_track($query){
+    function populate_global_track_frontend(){
+        global $post;
         global $wpsstm_track;
-        require_once(ABSPATH . 'wp-admin/includes/screen.php'); //FIXES crash when get_current_screen() is not defined - should investigate ?
 
-        $success = null;
-        $post_id = $query->get( 'p' );
-        $post_type = $query->get( 'post_type' );
+        $post_id = get_the_ID();
+        $post_type = get_post_type($post_id);
 
-        if( is_admin() && ( $screen = get_current_screen() ) ){
-            if ( $screen->base = 'post' ){ //backend singe post edit
-                $post_type = $screen->post_type;
-                $post_id = wpsstm_get_array_value('post',$_GET);
-            }
-        }
-        
-        if ( !$post_id ) return;
-        if ( $post_type != wpsstm()->post_type_track ) return;
+        if ( !is_single() || !$post_id || ( $post_type != wpsstm()->post_type_track ) ) return;
 
         $success = $wpsstm_track->populate_track_post($post_id);
+        $wpsstm_track->track_log("Populated global frontend track");
         
-        //TOUFIX should we 404 ?
     }
     
+    function populate_global_track_backend(){
+        global $post;
+        global $wpsstm_track;
+        
+        //is posts.php or post-new.php ?
+        $screen = get_current_screen();
+        $is_track_backend = ( $screen->id == wpsstm()->post_type_track );
+        if ( !$is_track_backend  ) return;
+
+        $post_id = get_the_ID();
+        
+        $success = $wpsstm_track->populate_track_post($post_id);
+        $wpsstm_track->track_log("Populated global backend track");
+        
+    }
+    
+    /*
+    Register the global within posts loop
+    */
+    
+    function populate_global_track_loop($post,$query){
+        global $wpsstm_track;
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return;
+        
+        //set global $wpsstm_tracklist
+        $is_already_populated = ($wpsstm_track && ($wpsstm_track->post_id == $post->ID) );
+        if ($is_already_populated) return;
+
+        $wpsstm_track = new WPSSTM_Track($post->ID);
+    }
+
     //TOUFIX needed ?
     function handle_track_action(){
         global $wpsstm_track;
@@ -178,14 +196,6 @@ class WPSSTM_Core_Tracks{
             
         }
         
-    }
-    
-    function populate_loop_track($post,$query){
-        global $wpsstm_track;
-        if ( $query->get('post_type') == wpsstm()->post_type_track ){
-            //set global $wpsstm_track
-            $wpsstm_track = new WPSSTM_Track($post->ID);
-        }
     }
 
     function handle_manager_action(){
@@ -428,16 +438,6 @@ class WPSSTM_Core_Tracks{
                 echo $published_str . $pending_str;
                 
             break;
-        }
-    }
-
-    function the_single_backend_track(){
-        global $post;
-        global $wpsstm_track;
-        $screen = get_current_screen();
-        if ( ( $screen->base == 'post' ) && ( $screen->post_type == wpsstm()->post_type_track )  ){
-            $post_id = isset($_GET['post']) ? $_GET['post'] : null;
-            $wpsstm_track = new WPSSTM_Track( $post_id );
         }
     }
 
