@@ -19,7 +19,7 @@ class WPSSTM_Core_Tracklists{
         add_action( 'the_post', array($this,'populate_loop_tracklist'),10,2);
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
         
-        add_filter( 'template_include', array($this,'tracklist_template') );
+        add_filter( 'template_include', array($this,'single_tracklist_template') );
         
         add_filter( 'the_title', array($this, 'filter_imported_playlist_title'), 9, 2 );
 
@@ -572,7 +572,7 @@ class WPSSTM_Core_Tracklists{
 
     }
 
-    function tracklist_template($template){
+    function single_tracklist_template($template){
         global $wpsstm_tracklist;
 
         //check query
