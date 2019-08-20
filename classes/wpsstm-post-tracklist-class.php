@@ -319,10 +319,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function get_tracklist_actions(){
-
+        
+        if (!$this->post_id) return; //eg. new tracklist
+        
         $tracklist_post_type = get_post_type($this->post_id);
         
         //no tracklist actions if this is a "track" tracklist
+        //TOUFIX TOUCHECK
         if ($tracklist_post_type == wpsstm()->post_type_track ) return;
         
         /*
