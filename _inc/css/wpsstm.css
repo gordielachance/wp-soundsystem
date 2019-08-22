@@ -257,32 +257,37 @@ input.wpsstm-fullwidth {
   right: 1em;
 }
 
-/* line 58, ../scss/wpsstm.scss */
+/* line 59, ../scss/wpsstm.scss */
+.wpsstm-json .wpsstm-json-input {
+  display: none;
+}
+
+/* line 64, ../scss/wpsstm.scss */
 .wpsstm-copy-link {
   text-align: center;
   margin: 2em;
 }
-/* line 61, ../scss/wpsstm.scss */
+/* line 67, ../scss/wpsstm.scss */
 .wpsstm-copy-link input[type="text"] {
   padding: .5em;
   font-size: 1.5em;
   text-align: center;
 }
 
-/* line 69, ../scss/wpsstm.scss */
+/* line 75, ../scss/wpsstm.scss */
 ul.comma-list, ul.wpsstm-track-loved-by-list, ul.wpsstm-track-parents {
   list-style: none;
   display: inline;
 }
-/* line 72, ../scss/wpsstm.scss */
+/* line 78, ../scss/wpsstm.scss */
 ul.comma-list > li, ul.wpsstm-track-loved-by-list > li, ul.wpsstm-track-parents > li {
   display: inline;
 }
-/* line 74, ../scss/wpsstm.scss */
+/* line 80, ../scss/wpsstm.scss */
 ul.comma-list > li:not(:last-child):after, ul.wpsstm-track-loved-by-list > li:not(:last-child):after, ul.wpsstm-track-parents > li:not(:last-child):after {
   content: ", ";
 }
-/* line 79, ../scss/wpsstm.scss */
+/* line 85, ../scss/wpsstm.scss */
 ul.ui-autocomplete {
   position: absolute;
   top: 100%;
@@ -306,25 +311,25 @@ ul.ui-autocomplete {
   *border-right-width: 2px;
   *border-bottom-width: 2px;
 }
-/* line 98, ../scss/wpsstm.scss */
+/* line 104, ../scss/wpsstm.scss */
 ul.ui-autocomplete li.ui-menu-item {
   padding: 0 .5em;
   line-height: 2em;
   font-size: .8em;
 }
-/* line 102, ../scss/wpsstm.scss */
+/* line 108, ../scss/wpsstm.scss */
 ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
   background: #F7F7F7;
 }
 
-/* line 117, ../scss/wpsstm.scss */
+/* line 123, ../scss/wpsstm.scss */
 .wpsstm-tracks-list > .toggle-children-link {
   text-align: center;
   padding: .5em;
   font-size: 1.2em;
 }
 
-/* line 123, ../scss/wpsstm.scss */
+/* line 129, ../scss/wpsstm.scss */
 .input-group {
   position: relative;
   display: table;
@@ -333,11 +338,11 @@ ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
   margin: .5em 0;
   border-collapse: separate;
 }
-/* line 130, ../scss/wpsstm.scss */
+/* line 136, ../scss/wpsstm.scss */
 .input-group .input-group-icon, .input-group .input-group-field {
   display: table-cell;
 }
-/* line 133, ../scss/wpsstm.scss */
+/* line 139, ../scss/wpsstm.scss */
 .input-group .input-group-field {
   background: transparent;
   position: relative;
@@ -350,13 +355,13 @@ ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
   border: none;
   box-shadow: none;
 }
-/* line 144, ../scss/wpsstm.scss */
+/* line 150, ../scss/wpsstm.scss */
 .input-group .input-group-field:focus {
   outline: none;
   border: none;
   box-shadow: none;
 }
-/* line 150, ../scss/wpsstm.scss */
+/* line 156, ../scss/wpsstm.scss */
 .input-group .input-group-icon {
   padding: 0 .5em;
   font-size: 1em;
@@ -368,32 +373,32 @@ ul.ui-autocomplete li.ui-menu-item.ui-state-focus {
   line-height: 1;
   text-align: center;
 }
-/* line 161, ../scss/wpsstm.scss */
+/* line 167, ../scss/wpsstm.scss */
 .input-group input, .input-group button {
   background: transparent;
   border: none;
   color: #444;
 }
-/* line 165, ../scss/wpsstm.scss */
+/* line 171, ../scss/wpsstm.scss */
 .input-group input:hover, .input-group button:hover {
   background: transparent;
 }
-/* line 169, ../scss/wpsstm.scss */
+/* line 175, ../scss/wpsstm.scss */
 .input-group:hover, .input-group:focus-within {
   background: rgba(0, 0, 0, 0.01);
 }
-/* line 172, ../scss/wpsstm.scss */
+/* line 178, ../scss/wpsstm.scss */
 .input-group:focus-within {
   outline: medium;
 }
 
 /*popups*/
-/* line 179, ../scss/wpsstm.scss */
+/* line 185, ../scss/wpsstm.scss */
 body.wpsstm-popup-overlay > *:not(.wpsstm-dialog) {
   opacity: .25;
 }
 
-/* line 184, ../scss/wpsstm.scss */
+/* line 190, ../scss/wpsstm.scss */
 .wpsstm-dialog {
   z-index: 11;
   background: rgba(255, 255, 255, 0.98);
@@ -403,51 +408,51 @@ body.wpsstm-popup-overlay > *:not(.wpsstm-dialog) {
   box-shadow: rgba(0, 0, 0, 0.1) 0 5px 10px;
   position: relative;
 }
-/* line 196, ../scss/wpsstm.scss */
+/* line 202, ../scss/wpsstm.scss */
 .wpsstm-dialog button.ui-dialog-titlebar-close {
   background: none;
   color: black;
 }
-/* line 201, ../scss/wpsstm.scss */
+/* line 207, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-content {
   display: -webkit-flex !important;
   display: flex !important;
 }
-/* line 203, ../scss/wpsstm.scss */
+/* line 209, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-content .wpsstm-dialog-loader {
   font-size: 3em;
 }
-/* line 208, ../scss/wpsstm.scss */
+/* line 214, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-content > * {
   margin: auto;
 }
-/* line 211, ../scss/wpsstm.scss */
+/* line 217, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-content .wpsstm-dialog-loader {
   display: none;
 }
-/* line 220, ../scss/wpsstm.scss */
+/* line 226, ../scss/wpsstm.scss */
 .wpsstm-dialog.dialog-loading .ui-dialog-content > * {
   display: none;
 }
-/* line 223, ../scss/wpsstm.scss */
+/* line 229, ../scss/wpsstm.scss */
 .wpsstm-dialog.dialog-loading .ui-dialog-content .wpsstm-dialog-loader {
   display: inherit;
 }
-/* line 230, ../scss/wpsstm.scss */
+/* line 236, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-titlebar-close {
   position: absolute;
   right: 0;
   top: 0;
 }
-/* line 236, ../scss/wpsstm.scss */
+/* line 242, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-titlebar-close .ui-icon-closethick:before {
   content: "\f00d";
 }
-/* line 240, ../scss/wpsstm.scss */
+/* line 246, ../scss/wpsstm.scss */
 .wpsstm-dialog .ui-dialog-titlebar-close .ui-button-text {
   display: none;
 }
-/* line 246, ../scss/wpsstm.scss */
+/* line 252, ../scss/wpsstm.scss */
 .wpsstm-dialog iframe {
   width: 100%;
   height: 100%;
@@ -1293,100 +1298,29 @@ wpsstm-player .player-queue:not(.active) wpsstm-track:not(.track-active) {
 /*
 mediaElementJS
 */
-/* line 4, ../scss/_pure-tree.scss */
-.pure-tree:not(.main-tree) {
-  padding-left: .5em;
-}
-/* line 7, ../scss/_pure-tree.scss */
-.pure-tree:not(.main-tree) li {
-  overflow: hidden;
-  height: 0;
-  display: block;
-}
-/* line 13, ../scss/_pure-tree.scss */
-.pure-tree li {
-  word-break: break-all;
-  word-break: break-word;
-  -moz-hyphens: auto;
-  -ms-hyphens: auto;
-  -webkit-hyphens: auto;
-  hyphens: auto;
-  margin: 0;
-}
-/* line 16, ../scss/_pure-tree.scss */
-.pure-tree li > label {
-  line-height: 1em;
-  display: inline;
-  padding-right: .5em;
-}
-/* line 21, ../scss/_pure-tree.scss */
-.pure-tree li.checkbox-tree-parent > label:before {
-  font-family: 'FontAwesome', sans-serif;
-  content: "\f114";
-  margin-right: .25em;
-}
-/* line 26, ../scss/_pure-tree.scss */
-.pure-tree li label {
-  cursor: pointer;
-  color: #717780;
-}
-/* line 33, ../scss/_pure-tree.scss */
-.pure-tree li label:hover {
-  color: #434a58;
-  border-bottom-color: #434a58;
-}
-/* line 43, ../scss/_pure-tree.scss */
-.pure-tree .pure-tree_link a {
-  padding: 1.500em 1.125em 0.750em 0;
-  display: block;
-  border-radius: .2em;
-  color: #717780;
-  text-decoration: none;
-}
-/* line 50, ../scss/_pure-tree.scss */
-.pure-tree .pure-tree_link a:hover {
-  color: #434a58;
-}
-/* line 56, ../scss/_pure-tree.scss */
-.pure-tree.nested {
-  padding-left: 1.7em;
-}
-/* line 60, ../scss/_pure-tree.scss */
-.pure-tree [type="checkbox"] {
-  display: none;
-}
-/* line 63, ../scss/_pure-tree.scss */
-.pure-tree [type="checkbox"]:checked + label:before {
-  content: "\f115";
-}
-/* line 66, ../scss/_pure-tree.scss */
-.pure-tree [type="checkbox"]:checked ~ ul > li {
-  height: auto;
-}
-
-/* line 3, ../scss/_wpsstm-backend.scss */
+/* line 1, ../scss/_wpsstm-backend.scss */
 #wpsstm-promo-notice {
   padding: .75em;
   border-bottom: 1px solid #DDD;
 }
 
-/* line 9, ../scss/_wpsstm-backend.scss */
+/* line 7, ../scss/_wpsstm-backend.scss */
 .wp-list-table .mbz-id {
   color: silver;
   font-size: 0.8em;
 }
-/* line 13, ../scss/_wpsstm-backend.scss */
+/* line 11, ../scss/_wpsstm-backend.scss */
 .wp-list-table .mbz-disambiguation {
   font-style: italic;
   font-size: 0.9em;
 }
 
-/* line 19, ../scss/_wpsstm-backend.scss */
+/* line 17, ../scss/_wpsstm-backend.scss */
 #mbid-value, #mbid-do-lookup {
   text-align: center;
 }
 
-/* line 25, ../scss/_wpsstm-backend.scss */
+/* line 23, ../scss/_wpsstm-backend.scss */
 .postbox .wpsstm-fullwidth {
   padding: 3px 8px;
   font-size: 1.7em;
@@ -1397,53 +1331,53 @@ mediaElementJS
   margin: 0 0 3px;
   background-color: #fff;
 }
-/* line 38, ../scss/_wpsstm-backend.scss */
+/* line 36, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm-metabox-track-links .wpsstm-submit-wrapper {
   text-align: center;
 }
-/* line 46, ../scss/_wpsstm-backend.scss */
+/* line 44, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata ul li span {
   font-weight: bold;
 }
-/* line 48, ../scss/_wpsstm-backend.scss */
+/* line 46, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata ul li span:after {
   content: " ";
 }
-/* line 56, ../scss/_wpsstm-backend.scss */
+/* line 54, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions {
   margin-top: 1em;
   position: relative;
   text-align: center;
 }
-/* line 61, ../scss/_wpsstm-backend.scss */
+/* line 59, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions a {
   margin: .5em auto;
   display: block;
   max-width: 75%;
 }
-/* line 67, ../scss/_wpsstm-backend.scss */
+/* line 65, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mbdata #wpsstm-metabox-mbdata-actions p.submit {
   text-align: center;
   margin: .5em 0;
   padding: 0;
 }
-/* line 83, ../scss/_wpsstm-backend.scss */
+/* line 81, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries > span {
   font-weight: bold;
 }
-/* line 87, ../scss/_wpsstm-backend.scss */
+/* line 85, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries #wpsstm-mb-section-data {
   display: none;
 }
-/* line 94, ../scss/_wpsstm-backend.scss */
+/* line 92, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries table.wp-list-table {
   border: none;
 }
-/* line 96, ../scss/_wpsstm-backend.scss */
+/* line 94, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries table.wp-list-table .column-score {
   width: 10%;
 }
-/* line 108, ../scss/_wpsstm-backend.scss */
+/* line 106, ../scss/_wpsstm-backend.scss */
 .postbox#wpsstm_mb_entries.table-mbz-summary table.wp-list-table tfoot {
   display: none;
 }

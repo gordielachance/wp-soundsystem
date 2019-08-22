@@ -91,6 +91,7 @@ This would be very appreciated — Thanks !
 = Dependencies =
 
 * [PHP Last.fm API](https://github.com/matt-oakes/PHP-Last.fm-API) - Last.fm scrobbling
+* [jQuery json-viewer](https://github.com/abodelot/jquery.json-viewer) - jQuery plugin for displaying JSON data
 
 = Contributors =
 
@@ -126,6 +127,11 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 2.9.3 =
+* importer: new 'feedback' tab, that displays the feedback of the last import.
+* renamed API route : /'import/url/?url=...' -> import/?input=...
+* GUI: jsons now displayed using [jQuery json-viewer](https://github.com/abodelot/jquery.json-viewer)
+
 = 2.9.2 =
 * fix unable to add new tracklist tracks on post-new.php
 
@@ -156,7 +162,7 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 * fixes regex not passing to API
 
 = 2.7.5 =
-* Moved all the import stuff to the API.  Now uses rest route 'wp-json/wpsstmapi/v1/import/url/?url=...' (on the API)
+* Moved all the import stuff to the API.  Now uses rest route 'wp-json/wpsstmapi/v1/import/?input=...' (on the API)
 * store artist,track & album metas as taxonomies instead of post metas; for performance issues (see https://wordpress.stackexchange.com/a/276315/70449 and https://wordpress.stackexchange.com/a/159012/70449)
 * trash orphan links option
 * trash duplicate links option
