@@ -27,51 +27,13 @@ function wpsstm_get_array_value($keys = null, $array){
 * Make a nested HTML list from a multi-dimensionnal array.
 */
 
-function wpsstm_get_list_from_array($input,$parent_slugs=array() ){
+function wpsstm_get_json_viewer($input,$parent_slugs=array() ){
     
-    $output = null;
-    $output_classes = array("pure-tree");
-    if ( empty($parent_slugs) ){
-        $output_classes[] =  'main-tree';
-    }
+    if( is_array($input) ) $input = json_encode($input);
     
-    
-   foreach($input as $key=>$value){
-        
-       //if (!$value) continue; //ignore empty values
-       
-        $data_attr = $label = null;
-        $checkbox_classes = array("checkbox-tree-checkbox");
-        $item_classes = array("checkbox-tree-item");
-       
-        if( is_array($value) ){
-            $parent_slugs[] = $key;
-            $li_value = wpsstm_get_list_from_array($value,$parent_slugs);
-
-            $item_classes[] = 'checkbox-tree-parent';
-        }else{
-            $li_value = $value;
-        }
-       
-       if (!$li_value) continue;
-       
-
-       
-        //$u_key = md5(uniqid(rand(), true));
-        $u_key = implode('-',$parent_slugs);
-        $data_attr = sprintf(' data-array-key="%s"',$key);
-
-        $checkbox_classes_str = wpsstm_get_classes_attr($checkbox_classes);
-        $item_classes_str = wpsstm_get_classes_attr($item_classes);
-        $checkbox = sprintf('<input type="checkbox" %1$s id="%2$s"><label for="%2$s" class="checkbox-tree-icon">%3$s</label>',$checkbox_classes_str,$u_key,$key);
-
-        $output.= sprintf('<li%1$s%2$s>%3$s%4$s</li>',$item_classes_str,$data_attr,$checkbox,$li_value);
-    }
-    
-    if ($output){
-        $output_classes_str = wpsstm_get_classes_attr($output_classes);
-        return sprintf('<ul %s>%s</ul>',$output_classes_str,$output);
-    }
+    $input = sprintf('<textarea class="wpsstm-json-input wpsstm-fullwidth">%s</textarea>',$input);
+    $output = sprintf('<div class="wpsstm-json-output"></div>');
+    return sprintf('<div class="wpsstm-json">%s%s</div>',$input,$output);
     
 
 }
