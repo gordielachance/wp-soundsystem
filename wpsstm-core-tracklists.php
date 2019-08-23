@@ -744,9 +744,9 @@ class WPSSTM_Core_Tracklists{
     }
     
     /*
-    Trash temporary tracklists
+    Delete temporary tracklists
     */
-    static function trash_temporary_tracklists(){
+    static function delete_temporary_tracklists(){
         
         if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
@@ -757,8 +757,8 @@ class WPSSTM_Core_Tracklists{
         if ( $flushable_ids = self::get_temporary_tracklists_ids() ){
 
             foreach( (array)$flushable_ids as $id ){
-                $success = wp_trash_post($id);
-                if ( !is_wp_error($success) ) $flushed_ids[] = $id;
+                $success = wp_delete_post($id,true);
+                if ( $success ) $flushed_ids[] = $id;
             }
         }
 

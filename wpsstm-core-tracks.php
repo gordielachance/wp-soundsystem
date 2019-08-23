@@ -1230,7 +1230,7 @@ class WPSSTM_Core_Tracks{
     /*
     Flush community tracks
     */
-    static function trash_orphan_tracks(){
+    static function delete_orphan_tracks(){
         
         if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
@@ -1241,8 +1241,8 @@ class WPSSTM_Core_Tracks{
         if ( $flushable_ids = self::get_orphan_track_ids() ){
 
             foreach( (array)$flushable_ids as $track_id ){
-                $success = wp_trash_post($track_id);
-                if ( !is_wp_error($success) ) $trashed[] = $track_id;
+                $success = wp_delete_post($track_id,true);
+                if ( $success ) $trashed[] = $track_id;
             }
         }
 

@@ -127,10 +127,11 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= 2.9.3 =
+= XXX =
 * importer: new 'feedback' tab, that displays the feedback of the last import.
 * renamed API route : /'import/url/?url=...' -> import/?input=...
 * GUI: jsons now displayed using [jQuery json-viewer](https://github.com/abodelot/jquery.json-viewer)
+* System options : delete posts instead of trashing them (will be faster to clean DB)
 
 = 2.9.2 =
 * fix unable to add new tracklist tracks on post-new.php
