@@ -128,7 +128,6 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 == Changelog ==
 
 = 2.9.4 =
-* importer: new 'feedback' tab, that displays the feedback of the last import.
 * GUI: jsons now displayed using [jQuery json-viewer](https://github.com/abodelot/jquery.json-viewer)
 * System options : delete posts instead of trashing them (will be faster to clean DB)
 

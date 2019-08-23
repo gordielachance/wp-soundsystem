@@ -11,7 +11,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
         <li><a href="#wpsstm-importer-step-feed-url"><?php _e('URLs','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-tracks"><?php _e('Tracks','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-details"><?php _e('Details','wpsstm');?></a></li>
-        <li><a href="<?php echo $wpsstm_tracklist->get_debug_url();?>"><?php _e('Debug log','wpsstm');?></a></li>
+        <!--<li><a href="<?php echo $wpsstm_tracklist->get_debug_url();?>"><?php _e('Debug log','wpsstm');?></a></li>-->
     </ul>
 
     <!--remote url-->
