@@ -1290,5 +1290,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $message .= '  '.sprintf(__("Would you like to %s?","wpsstm"),$autorship_link);
         $this->add_notice('get-autorship', $message );
     }
+    
+    function get_debug_url(){
+        $url =  get_edit_post_link( $this->post_id );
+        $url = add_query_arg(array('wpsstm_debug_importer'=>urlencode($this->feed_url)),$url) . '#wpsstm-importer-step-debug';
+        return $url;
+    }
 
 }

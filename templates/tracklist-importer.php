@@ -10,7 +10,8 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
     <ul id="wpsstm-importer-tabs">
         <li><a href="#wpsstm-importer-step-feed-url"><?php _e('URLs','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-tracks"><?php _e('Tracks','wpsstm');?></a></li>
-        <li><a href="#wpsstm-importer-step-single-track"><?php _e('Details','wpsstm');?></a></li>
+        <li><a href="#wpsstm-importer-step-details"><?php _e('Details','wpsstm');?></a></li>
+        <!--<li><a href="<?php echo $wpsstm_tracklist->get_debug_url();?>"><?php _e('Debug log','wpsstm');?></a></li>-->
     </ul>
 
     <!--remote url-->
@@ -42,8 +43,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
         printf(__('If you have an %s, you could also enter URL to those services: %s - or use your own custom import settings!','wpsstm'),$api_link,$services_list);
         ?>
         <h3 class="wpsstm-importer-section-label"><?php _e('Website URL','wpsstm');?></h3>
-        <?php _e("URL of the link that will be displayed in the tracklist header.",'wpsstm');?><br/>
-        <?php _e("If empty, the Feed URL will be used : fill it when the feed URL points to raw datas.",'wpsstm');?>
+        <?php _e("URL of the radio that will be displayed on the playlist.  If empty, the Feed URL will be used.",'wpsstm');?>
         <p>
             <input type="text" name="wpsstm_importer[website_url]" value="<?php echo $wpsstm_tracklist->website_url;?>" class="wpsstm-fullwidth" />
         </p>
@@ -98,7 +98,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
     </div>
 
     <!--track details-->
-    <div id="wpsstm-importer-step-single-track" class="wpsstm-importer-section  wpsstm-importer-section-advanced">
+    <div id="wpsstm-importer-step-details" class="wpsstm-importer-section  wpsstm-importer-section-advanced">
         <div class="wpsstm-importer-section-label">
             <h3><?php _e('Track details','wpsstm');?></h3>
             <small>
@@ -144,6 +144,36 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
             </div>
         </div>
     </div>
+   <div id="wpsstm-importer-step-debug" class="wpsstm-importer-section  wpsstm-importer-section-advanced">
+       <?php
+            
+        $input = wpsstm_get_array_value('wpsstm_debug_importer',$_GET);
+        $input = trim($input);
+
+        if ( !$input ){
+            printf('<div class="wpsstm-notice">%s</div>',__("Required URL parameter 'wpsstm_debug_importer' missing.",'wpsstm'));
+        }else{
+            $importer_options = get_post_meta($wpsstm_tracklist->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
+            $args = array(
+                'input' =>      $input,
+                'options'=>     $importer_options
+            );
+
+            $args = rawurlencode_deep( $args );
+            $api_url = add_query_arg($args,'feedback');
+            $feedback = WPSSTM_Core_API::api_request($api_url);
+
+            if ( is_wp_error($feedback) ){
+                $error_msg = $feedback->get_error_message();
+                printf('<div class="wpsstm-notice">%s</div>',$error_msg);
+            }else{
+                echo wpsstm_get_json_viewer($feedback);
+            }
+        }
+
+       ?>
+    </div>
+    
     <?php
     wp_nonce_field( 'wpsstm_tracklist_importer_meta_box', 'wpsstm_tracklist_importer_meta_box_nonce' );
     ?>

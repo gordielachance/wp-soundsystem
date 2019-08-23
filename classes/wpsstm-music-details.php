@@ -337,7 +337,7 @@ abstract class WPSSTM_Music_Data{
                                 /* 
                                 Entry data 
                                 */
-                                $list = wpsstm_get_list_from_array($music_data);
+                                $list = wpsstm_get_json_viewer($music_data);
                                 printf('<div id="wpsstm-music-data">%s</div>',$list);
                                 ?>
                             </p>

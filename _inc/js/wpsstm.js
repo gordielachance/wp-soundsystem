@@ -1,5 +1,16 @@
 var $ = jQuery.noConflict();
 
+//json
+$( ".wpsstm-json" ).each(function( index ) {
+    var container_el = $(this);
+    var input_el = container_el.find('.wpsstm-json-input');
+    var output_el = container_el.find('.wpsstm-json-output');
+    var data = input_el.val();
+    var json = JSON.parse(data);
+    output_el.jsonViewer(json,{collapsed: true,rootCollapsable:false});
+    container_el.addClass('.wpsstm-json-loaded');
+});
+
 //artist autocomplete
 $('.wpsstm-artist-autocomplete').each(function() {
     var input_el = $(this);

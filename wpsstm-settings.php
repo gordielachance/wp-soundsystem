@@ -54,20 +54,25 @@ class WPSSTM_Settings {
         //reset
         if ( self::is_settings_reset() ) return;
             
-        if( isset( $input['trash-orphan-tracks'] ) ){
-            WPSSTM_Core_Tracks::trash_orphan_tracks();
+        if( isset( $input['delete-orphan-tracks'] ) ){
+            WPSSTM_Core_Tracks::delete_orphan_tracks();
         }
         
-        if( isset( $input['trash-orphan-links'] ) ){
-            WPSSTM_Core_Track_Links::trash_orphan_links();
+        if( isset( $input['delete-orphan-links'] ) ){
+            WPSSTM_Core_Track_Links::delete_orphan_links();
         }
         
-        if( isset( $input['trash-duplicate-links'] ) ){
-            WPSSTM_Core_Track_Links::trash_duplicate_links();
+        if( isset( $input['delete-duplicate-links'] ) ){
+            WPSSTM_Core_Track_Links::delete_duplicate_links();
         }
         
-        if( isset( $input['trash-temporary-tracklists'] ) ){
-            WPSSTM_Core_Tracklists::trash_temporary_tracklists();
+        if( isset( $input['delete-temporary-tracklists'] ) ){
+            WPSSTM_Core_Tracklists::delete_temporary_tracklists();
+        }
+        
+        //delete links from excluded domains
+        if( isset( $input['delete_excluded_track_link_hosts'] ) ){
+            WPSSTM_Core_Track_Links::delete_excluded_hosts();
         }
 
         /*
@@ -100,11 +105,6 @@ class WPSSTM_Settings {
             $domains = explode(',',$input['excluded_track_link_hosts']);
             $domains = array_filter(array_unique($domains));
             $new_input['excluded_track_link_hosts'] = $domains;
-        }
-
-        //delete links from excluded domains
-        if( isset( $input['delete_excluded_track_link_hosts'] ) ){
-            WPSSTM_Core_Track_Links::trash_excluded_hosts();
         }
 
         /*
@@ -320,17 +320,17 @@ class WPSSTM_Settings {
         if ( $community_id = wpsstm()->get_options('community_user_id') ){
             
             add_settings_field(
-                'trash_temporary_tracklists', 
+                'delete_temporary_tracklists', 
                 __('Trash temporary tracklists','wpsstm'), 
-                array( $this, 'trash_temporary_tracklists_callback' ), 
+                array( $this, 'delete_temporary_tracklists_callback' ), 
                 'wpsstm-settings-page', // Page
                 'settings_system'//section
             );
 
             add_settings_field(
-                'trash_orphan_tracks', 
+                'delete_orphan_tracks', 
                 __('Trash orphan tracks','wpsstm'), 
-                array( $this, 'trash_orphan_tracks_callback' ), 
+                array( $this, 'delete_orphan_tracks_callback' ), 
                 'wpsstm-settings-page', // Page
                 'settings_system'//section
             );
@@ -338,17 +338,17 @@ class WPSSTM_Settings {
         }
         
         add_settings_field(
-            'trash_orphan_links', 
+            'delete_orphan_links', 
             __('Trash orphan links','wpsstm'), 
-            array( $this, 'trash_orphan_links_callback' ), 
+            array( $this, 'delete_orphan_links_callback' ), 
             'wpsstm-settings-page', // Page
             'settings_system'//section
         );
         
         add_settings_field(
-            'trash_duplicate_links', 
+            'delete_duplicate_links', 
             __('Trash duplicate links','wpsstm'), 
-            array( $this, 'trash_duplicate_links_callback' ), 
+            array( $this, 'delete_duplicate_links_callback' ), 
             'wpsstm-settings-page', // Page
             'settings_system'//section
         );
@@ -357,7 +357,7 @@ class WPSSTM_Settings {
             add_settings_field(
                 'trash_excluded_track_link_hosts', 
                 __('Trash excluded hosts links','wpsstm'), 
-                array( $this, 'trash_excluded_track_link_hosts_callback' ), 
+                array( $this, 'delete_excluded_track_link_hosts_callback' ), 
                 'wpsstm-settings-page', // Page
                 'settings_system'//section
             );
@@ -635,51 +635,51 @@ class WPSSTM_Settings {
         );
     }
     
-    function trash_temporary_tracklists_callback(){
+    function delete_temporary_tracklists_callback(){
         $count = count(WPSSTM_Core_Tracklists::get_temporary_tracklists_ids());
-        $desc = sprintf(__("Trash %d tracklists that were created with the community user.","wpsstm"),$count);
+        $desc = sprintf(__("Delete %d tracklists that were created with the community user.","wpsstm"),$count);
         printf(
-            '<input type="checkbox" name="%s[trash-temporary-tracklists]" value="on" %s /><label>%s</label>',
+            '<input type="checkbox" name="%s[delete-temporary-tracklists]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
             disabled($count,0,false),
             $desc
         );
     }
     
-    function trash_orphan_tracks_callback(){
+    function delete_orphan_tracks_callback(){
         $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
-        $desc = sprintf(__("Trash %d tracks that do not belong to any tracklists and have been created with the community user.","wpsstm"),$count);
+        $desc = sprintf(__("Delete %d tracks that do not belong to any tracklists and have been created with the community user.","wpsstm"),$count);
         printf(
-            '<input type="checkbox" name="%s[trash-orphan-tracks]" value="on" %s /><label>%s</label>',
+            '<input type="checkbox" name="%s[delete-orphan-tracks]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
             disabled($count,0,false),
             $desc
         );
     }
     
-    function trash_orphan_links_callback(){
+    function delete_orphan_links_callback(){
         $count = count(WPSSTM_Core_Track_Links::get_orphan_link_ids());
-        $desc = sprintf(__("Trash %d links that are not attached to a track post.","wpsstm"),$count);
+        $desc = sprintf(__("Delete %d links that are not attached to a track post.","wpsstm"),$count);
         printf(
-            '<input type="checkbox" name="%s[trash-orphan-links]" value="on" %s /><label>%s</label>',
+            '<input type="checkbox" name="%s[delete-orphan-links]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
             disabled($count,0,false),
             $desc
         );
     }
     
-    function trash_duplicate_links_callback(){
+    function delete_duplicate_links_callback(){
         $count = count(WPSSTM_Core_Track_Links::get_duplicate_link_ids());
-        $desc = sprintf(__("Trash %d duplicate links (same URL & parent post).","wpsstm"),$count);
+        $desc = sprintf(__("Delete %d duplicate links (same URL & parent post).","wpsstm"),$count);
         printf(
-            '<input type="checkbox" name="%s[trash-duplicate-links]" value="on" %s /><label>%s</label>',
+            '<input type="checkbox" name="%s[delete-duplicate-links]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
             disabled($count,0,false),
             $desc
         );
     }
     
-    function trash_excluded_track_link_hosts_callback(){
+    function delete_excluded_track_link_hosts_callback(){
             $count = count( WPSSTM_Core_Track_Links::get_excluded_host_link_ids() );
 
             printf(
