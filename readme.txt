@@ -126,6 +126,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 2.9.3 =
+* renamed API route : /'import/url/?url=...' -> import/?input=...
+
 = 2.9.2 =
 * fix unable to add new tracklist tracks on post-new.php
 
