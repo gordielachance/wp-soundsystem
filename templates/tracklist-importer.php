@@ -11,7 +11,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
         <li><a href="#wpsstm-importer-step-feed-url"><?php _e('URLs','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-tracks"><?php _e('Tracks','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-details"><?php _e('Details','wpsstm');?></a></li>
-        <li><a href="#wpsstm-importer-step-feedback"><?php _e('Feedback','wpsstm');?></a></li>
+        <li><a href="<?php echo $wpsstm_tracklist->get_debug_url();?>"><?php _e('Debug log','wpsstm');?></a></li>
     </ul>
 
     <!--remote url-->
@@ -144,26 +144,32 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
             </div>
         </div>
     </div>
-   <div id="wpsstm-importer-step-feedback" class="wpsstm-importer-section  wpsstm-importer-section-advanced">
+   <div id="wpsstm-importer-step-debug" class="wpsstm-importer-section  wpsstm-importer-section-advanced">
        <?php
-       
+            
+        $input = wpsstm_get_array_value('wpsstm_debug_importer',$_GET);
+        $input = trim($input);
+
+        if ( !$input ){
+            printf('<div class="wpsstm-notice">%s</div>',__("Required URL parameter 'wpsstm_debug_importer' missing.",'wpsstm'));
+        }else{
             $importer_options = get_post_meta($wpsstm_tracklist->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
             $args = array(
-                'input' =>      $wpsstm_tracklist->feed_url,
+                'input' =>      $input,
                 'options'=>     $importer_options
             );
 
             $args = rawurlencode_deep( $args );
             $api_url = add_query_arg($args,'feedback');
             $feedback = WPSSTM_Core_API::api_request($api_url);
-       
+
             if ( is_wp_error($feedback) ){
                 $error_msg = $feedback->get_error_message();
                 printf('<div class="wpsstm-notice">%s</div>',$error_msg);
             }else{
                 echo wpsstm_get_json_viewer($feedback);
             }
-
+        }
 
        ?>
     </div>
