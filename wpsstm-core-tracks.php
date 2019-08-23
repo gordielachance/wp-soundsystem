@@ -88,8 +88,8 @@ class WPSSTM_Core_Tracks{
         /*
         DB relationships
         */
-        add_action( 'wp_trash_post', array($this,'trash_track_links') );
-        add_action( 'wp_trash_post', array($this,'trash_subtracks') );
+        add_action( 'before_delete_post', array($this,'delete_track_links') );
+        add_action( 'before_delete_post', array($this,'unset_subtracks_track_id') );
     }
     
     /*
@@ -1160,7 +1160,7 @@ class WPSSTM_Core_Tracks{
         $this->ajax_track_autolink();
     }
 
-    function trash_track_links($post_id){
+    function delete_track_links($post_id){
         
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
         
@@ -1174,30 +1174,30 @@ class WPSSTM_Core_Tracks{
         );
         
         $links_query = $track->query_links($link_args);
-        $trashed = 0;
+        $deleted = 0;
         
         foreach($links_query->posts as $link_id){
-            if ( $success = wp_trash_post($link_id) ){
-                $trashed ++;
+            if ( $success = wp_delete_post($link_id,true) ){
+                $deleted ++;
             }
         }
 
-        if ($trashed){
-            //$track->track_log( json_encode(array('post_id'=>$post_id,'links'=>$links_query->post_count,'trashed'=>$trashed)),"WPSSTM_Post_Tracklist::trash_track_links()");
+        if ($deleted){
+            //$track->track_log( json_encode(array('post_id'=>$post_id,'links'=>$links_query->post_count,'trashed'=>$deleted)),"WPSSTM_Post_Tracklist::delete_track_links()");
         }
 
     }
     
     /*
-    Unset track occurences out of the subtracks table when it is trashed
+    Unset track ID occurences out of the subtracks table when it is trashed
     */
     
-    function trash_subtracks($post_id){
+    function unset_subtracks_track_id($post_id){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
-        $rowquerystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE track_id = '%s'",$post_id );
+        $rowquerystr = $wpdb->prepare( "UPDATE `$subtracks_table` SET track_id='' WHERE track_id = '%s'",$post_id );
         
         return $wpdb->get_results ( $rowquerystr );
     }

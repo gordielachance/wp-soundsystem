@@ -73,7 +73,7 @@ class WPSSTM_Core_Tracklists{
         DB relationships
         */
         add_action( 'before_delete_post', array($this,'unset_from_tracklist_id') );
-        add_action( 'delete_post', array($this,'delete_tracklist_subtracks') );
+        add_action( 'before_delete_post', array($this,'delete_tracklist_subtracks') );
         
         /*
         Backend
