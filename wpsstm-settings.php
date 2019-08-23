@@ -321,7 +321,7 @@ class WPSSTM_Settings {
             
             add_settings_field(
                 'delete_temporary_tracklists', 
-                __('Trash temporary tracklists','wpsstm'), 
+                __('Delete temporary tracklists','wpsstm'), 
                 array( $this, 'delete_temporary_tracklists_callback' ), 
                 'wpsstm-settings-page', // Page
                 'settings_system'//section
@@ -329,7 +329,7 @@ class WPSSTM_Settings {
 
             add_settings_field(
                 'delete_orphan_tracks', 
-                __('Trash orphan tracks','wpsstm'), 
+                __('Delete orphan tracks','wpsstm'), 
                 array( $this, 'delete_orphan_tracks_callback' ), 
                 'wpsstm-settings-page', // Page
                 'settings_system'//section
@@ -339,7 +339,7 @@ class WPSSTM_Settings {
         
         add_settings_field(
             'delete_orphan_links', 
-            __('Trash orphan links','wpsstm'), 
+            __('Delete orphan links','wpsstm'), 
             array( $this, 'delete_orphan_links_callback' ), 
             'wpsstm-settings-page', // Page
             'settings_system'//section
@@ -347,12 +347,12 @@ class WPSSTM_Settings {
         
         add_settings_field(
             'delete_duplicate_links', 
-            __('Trash duplicate links','wpsstm'), 
+            __('Delete duplicate links','wpsstm'), 
             array( $this, 'delete_duplicate_links_callback' ), 
             'wpsstm-settings-page', // Page
             'settings_system'//section
         );
-        
+
         if ( wpsstm()->get_options('excluded_track_link_hosts') ){
             add_settings_field(
                 'trash_excluded_track_link_hosts', 

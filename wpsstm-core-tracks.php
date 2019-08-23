@@ -696,7 +696,7 @@ class WPSSTM_Core_Tracks{
             'show_tagcloud'              => false,
             'capabilities'               => $capabilities,
         );
-        register_taxonomy(self::$track_taxonomy, array( wpsstm()->post_type_track ), $args );
+        register_taxonomy(WPSSTM_Core_Tracks::$track_taxonomy, array( wpsstm()->post_type_track ), $args );
 
     }
     
