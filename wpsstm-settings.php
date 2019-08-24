@@ -65,9 +65,13 @@ class WPSSTM_Settings {
         if( isset( $input['delete-duplicate-links'] ) ){
             WPSSTM_Core_Track_Links::delete_duplicate_links();
         }
-        
+
         if( isset( $input['delete-temporary-tracklists'] ) ){
             WPSSTM_Core_Tracklists::delete_temporary_tracklists();
+        }
+        
+        if( isset( $input['delete-unused-terms'] ) ){
+            WPSSTM_Core_Tracks::delete_unused_terms();
         }
         
         //delete links from excluded domains
@@ -303,9 +307,9 @@ class WPSSTM_Settings {
     function system_settings_init(){
 
         add_settings_section(
-            'settings_system', // ID
-            __('System','wpsstm'), // Title
-            array( $this, 'section_desc_empty' ), // Callback
+            'settings_maintenance', // ID
+            __('Maintenance','wpsstm'), // Title
+            array( $this, 'section_maintenance_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
@@ -314,7 +318,7 @@ class WPSSTM_Settings {
             __('Reset Options','wpsstm'), 
             array( $this, 'reset_options_callback' ), 
             'wpsstm-settings-page', // Page
-            'settings_system'//section
+            'settings_maintenance'//section
         );
         
         if ( $community_id = wpsstm()->get_options('community_user_id') ){
@@ -324,7 +328,7 @@ class WPSSTM_Settings {
                 __('Delete temporary tracklists','wpsstm'), 
                 array( $this, 'delete_temporary_tracklists_callback' ), 
                 'wpsstm-settings-page', // Page
-                'settings_system'//section
+                'settings_maintenance'//section
             );
 
             add_settings_field(
@@ -332,7 +336,7 @@ class WPSSTM_Settings {
                 __('Delete orphan tracks','wpsstm'), 
                 array( $this, 'delete_orphan_tracks_callback' ), 
                 'wpsstm-settings-page', // Page
-                'settings_system'//section
+                'settings_maintenance'//section
             );
 
         }
@@ -342,7 +346,7 @@ class WPSSTM_Settings {
             __('Delete orphan links','wpsstm'), 
             array( $this, 'delete_orphan_links_callback' ), 
             'wpsstm-settings-page', // Page
-            'settings_system'//section
+            'settings_maintenance'//section
         );
         
         add_settings_field(
@@ -350,16 +354,24 @@ class WPSSTM_Settings {
             __('Delete duplicate links','wpsstm'), 
             array( $this, 'delete_duplicate_links_callback' ), 
             'wpsstm-settings-page', // Page
-            'settings_system'//section
+            'settings_maintenance'//section
         );
-
+        
+        add_settings_field(
+            'delete_unused_terms', 
+            __('Delete unused terms','wpsstm'), 
+            array( $this, 'delete_unused_terms_callback' ), 
+            'wpsstm-settings-page', // Page
+            'settings_maintenance'//section
+        );
+        
         if ( wpsstm()->get_options('excluded_track_link_hosts') ){
             add_settings_field(
                 'trash_excluded_track_link_hosts', 
                 __('Trash excluded hosts links','wpsstm'), 
                 array( $this, 'delete_excluded_track_link_hosts_callback' ), 
                 'wpsstm-settings-page', // Page
-                'settings_system'//section
+                'settings_maintenance'//section
             );
         }
         
@@ -367,6 +379,10 @@ class WPSSTM_Settings {
     
     public static function section_desc_empty(){
         
+    }
+    
+    public static function section_maintenance_desc(){
+        _e('Please make a backup of your database before doing maintenance.','wpsstm');
     }
     
     function player_enabled_callback(){
@@ -673,6 +689,23 @@ class WPSSTM_Settings {
         $desc = sprintf(__("Delete %d duplicate links (same URL & parent post).","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[delete-duplicate-links]" value="on" %s /><label>%s</label>',
+            wpsstm()->meta_name_options,
+            disabled($count,0,false),
+            $desc
+        );
+    }
+    
+    /*
+    Delete the unused terms.
+    https://www.shawnhooper.ca/2015/10/22/cleaning-up-unused-terms-in-wordpress-database-in-mysql/
+    */
+    
+    function delete_unused_terms_callback(){
+        
+        $count = count(WPSSTM_Core_Tracks::get_unused_term_ids());
+        $desc = sprintf(__("Delete %d unused music taxonomy terms.","wpsstm"),$count);
+        printf(
+            '<input type="checkbox" name="%s[delete-unused-terms]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
             disabled($count,0,false),
             $desc

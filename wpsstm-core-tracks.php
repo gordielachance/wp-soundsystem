@@ -1223,6 +1223,7 @@ class WPSSTM_Core_Tracks{
         );
         
         $query = new WP_Query( $orphan_tracks_args );
+
         return $query->posts;
         
     }
@@ -1261,6 +1262,60 @@ class WPSSTM_Core_Tracks{
         $track = new WPSSTM_Track($post_id);
 
         return (string)$track; // = __toString()
+    }
+    
+    static function get_unused_term_ids(){
+        global $wpdb;
+
+        $unused_ids = array();
+
+        $taxonomies = array(
+            WPSSTM_Core_Tracks::$artist_taxonomy,
+            WPSSTM_Core_Tracks::$track_taxonomy,
+            WPSSTM_Core_Tracks::$album_taxonomy
+        );
+
+        foreach ($taxonomies as $taxonomy){
+
+            //update terms count
+            $querystr = $wpdb->prepare( "UPDATE wp_term_taxonomy tt SET count = (SELECT count(p.ID) FROM wp_term_relationships tr LEFT JOIN wp_posts p ON p.ID = tr.object_id WHERE tr.term_taxonomy_id = tt.term_taxonomy_id) WHERE taxonomy='%s'",$taxonomy );
+            $result = $wpdb->get_results ( $querystr );
+
+            //get unused term IDs
+            $querystr = $wpdb->prepare( "SELECT term_id FROM wp_term_taxonomy WHERE taxonomy='%s' AND count = 0 ",$taxonomy );
+            $tax_unused_ids = $wpdb->get_col($querystr);
+            $unused_ids = array_merge($unused_ids,$tax_unused_ids);
+        }
+
+        return $unused_ids;
+    }
+    
+    /*
+    we don't use $wpdb->prepare here because it adds quotes like IN('1,2,3,4'), and we don't want that.
+    https://wordpress.stackexchange.com/questions/78659/wpdb-prepare-function-remove-single-quote-for-s-in-sql-statment
+    */
+    
+    static function delete_unused_terms(){
+        global $wpdb;
+        
+        $unused_term_ids = self::get_unused_term_ids();
+        $unused_tax_ids = $wpdb->get_col( sprintf( "SELECT term_taxonomy_id FROM wp_term_taxonomy WHERE term_id IN (%s)",implode(',',$unused_term_ids) ) );
+
+        $querystr = sprintf("DELETE FROM wp_termmeta WHERE term_id IN (%s)",implode(',',$unused_term_ids) );
+        $success = $wpdb->get_results ( $querystr );
+
+        //delete term
+        $querystr = sprintf("DELETE FROM wp_terms WHERE term_id IN (%s)",implode(',',$unused_term_ids) );
+        $success = $wpdb->get_results ( $querystr );
+        
+        //delete term relationships
+        $querystr = sprintf("DELETE FROM wp_term_relationships WHERE term_taxonomy_id IN (%s)",implode(',',$unused_tax_ids) );
+        $success = $wpdb->get_results ( $querystr );
+
+        //delete term taxonomy
+        $querystr = sprintf("DELETE FROM wp_term_taxonomy WHERE term_taxonomy_id IN (%s)",implode(',',$unused_tax_ids) );
+        $success = $wpdb->get_results ( $querystr );
+
     }
     
 }
