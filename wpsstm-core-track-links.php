@@ -29,13 +29,14 @@ class WPSSTM_Core_Track_Links{
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track_link), array(__class__,'link_columns_register'), 10, 2 );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track_link), array(__class__,'link_columns_content'), 10, 2 );
 
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(__class__,'register_orphan_track_links_view') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(wpsstm(),'register_community_view') );
 
         /*
         QUERIES
         */
         add_action( 'current_screen',  array($this, 'the_single_backend_link'));
-        add_filter( 'pre_get_posts', array($this,'filter_backend_links_by_track_id') );
+        add_filter( 'pre_get_posts', array($this,'filter_track_links_by_parent') );
         
         /*
         AJAX
@@ -149,6 +150,7 @@ class WPSSTM_Core_Track_Links{
     }
     
     function add_query_vars_track_link($qvars){
+        $qvars[] = 'parent_track';
         return $qvars;
     }
     
@@ -200,16 +202,16 @@ class WPSSTM_Core_Track_Links{
     On backend links listings, allow to filter by track ID
     */
     
-    function filter_backend_links_by_track_id($query){
+    function filter_track_links_by_parent($query){
 
-        if ( !is_admin() ) return $query;
-        if ( !$query->is_main_query() ) return $query;
         if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return $query;
+        
+        $track_id = $query->get( 'parent_track' );
 
-        $track_id = ( isset($_GET['post_parent']) ) ? $_GET['post_parent'] : null;
-        
-        if ( !$track_id ) return $query;
-        
+        $track_id = is_numeric($track_id) ? (int)$track_id : null; //do not use get_query_var here
+
+        if ( $track_id === null ) return $query;
+
         $query->set('post_parent',$track_id);
     }
     
@@ -411,8 +413,8 @@ class WPSSTM_Core_Track_Links{
                     if ( $wpsstm_track->have_links() ){
 
                         //edit links bt
-                        $post_links_url = admin_url(sprintf('edit.php?post_type=%s&post_parent=%s',wpsstm()->post_type_track_link,$wpsstm_track->post_id));
-                        printf('<a href="%s" class="button">%s</a>',$post_links_url,__('Edit links','wpsstm'));
+                        $post_links_url = $wpsstm_track->get_backend_links_url();
+                        printf('<a href="%s" class="button">%s</a>',$post_links_url,__('Filter links','wpsstm'));
 
                     }
         
@@ -518,7 +520,7 @@ class WPSSTM_Core_Track_Links{
         $after['track_link_url'] = __('URL','wpsstm');
         $after['parent_track'] = __('Track','wpsstm');
         
-        if ( isset($_GET['post_parent']) ){
+        if ( isset($_GET['parent_track']) ){
             $after['order'] = __('Order','wpsstm');
         }
         
@@ -632,7 +634,7 @@ class WPSSTM_Core_Track_Links{
             'posts_per_page' => -1,
             'post_status' =>    'any',
             'fields' =>         'ids',
-            'post_parent' =>    0,
+            'parent_track' =>    0,
         );
         
         $query = new WP_Query( $query_args );
@@ -764,6 +766,30 @@ class WPSSTM_Core_Track_Links{
         return $wpdb->get_col( $querystr );
 
     }
+    
+    static function register_orphan_track_links_view($views){
+
+        $screen =                   get_current_screen();
+        $post_type =                $screen->post_type;
+        $parent_track =             get_query_var('parent_track');
+        $parent_track =             is_numeric($parent_track) ? (int)$parent_track : null;
+
+        $link = add_query_arg( array('post_type'=>$post_type,'parent_track'=>0),admin_url('edit.php') );
+        $count = count(WPSSTM_Core_Track_Links::get_orphan_link_ids());
+        
+        $attr = array(
+            'href' =>   $link,
+        );
+
+        if ($parent_track === 0){
+            $attr['class'] = 'current';
+        }
+
+        $views['orphan'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Orphan','wpsstm'),$count);
+        
+        return $views;
+    }
+    
 }
 
 function wpsstm_links_init(){

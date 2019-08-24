@@ -93,7 +93,7 @@ class WPSSTM_Track_Link{
 
         $required = array(
             'post__not_in'      => ($this->post_id) ? array($this->post_id) : null, //exclude current link
-            'post_parent'       => $this->track->post_id,
+            'parent_track'      => $this->track->post_id,
             'post_type'         => array(wpsstm()->post_type_track_link),
 
             'meta_query'        => array(
@@ -177,7 +177,7 @@ class WPSSTM_Track_Link{
             $required_args = array(
                 'post_title' =>     $this->title,
                 'post_type' =>      wpsstm()->post_type_track_link,
-                'post_parent' =>    $this->track->post_id,
+                'parent_track' =>   $this->track->post_id,
                 'meta_input' =>     array(
                     WPSSTM_Core_Track_Links::$link_url_metakey => $this->permalink_url
                 )

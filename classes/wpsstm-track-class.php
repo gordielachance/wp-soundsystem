@@ -623,7 +623,7 @@ class WPSSTM_Track{
 
         $required_args = array(
             'post_type'     => wpsstm()->post_type_track_link,
-            'post_parent'   => $this->post_id,
+            'parent_track'  => $this->post_id,
         );
         
         //we need a parent track or it will return all links; so force return nothing
@@ -1183,8 +1183,8 @@ class WPSSTM_Track{
         $links_url = admin_url('edit.php');
         $links_url = add_query_arg( 
             array(
-                'post_type'     => wpsstm()->post_type_track_link,
-                'post_parent'   => $this->post_id,
+                'post_type'         => wpsstm()->post_type_track_link,
+                'parent_track'      => $this->post_id,
                 //'post_status' => 'publish'
             ),$links_url 
         );
