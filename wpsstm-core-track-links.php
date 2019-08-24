@@ -720,30 +720,6 @@ class WPSSTM_Core_Track_Links{
     }
     
     /*
-    Delete links that have an excluded domain
-    */
-    static function delete_excluded_hosts(){
-        
-        $deleted = array();
-
-        if ( !current_user_can('manage_options') ){
-            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
-        }
-
-        if ( $flushable_ids = WPSSTM_Core_Track_Links::get_excluded_host_link_ids() ){
-
-            foreach((array)$flushable_ids as $post_id){
-                $success = wp_delete_post($post_id,true);
-                if ( $success ) $deleted[] = $post_id;
-            }
-        }
-
-        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($deleted))),"Deleted duplicate links");
-        
-        return $deleted;
-    }
-    
-    /*
     Get the duplicate links (by post parent and url)
     https://wordpress.stackexchange.com/questions/340474/sql-query-that-returns-a-list-of-duplicate-posts-ids-comparing-their-post-paren
     */

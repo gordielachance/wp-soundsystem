@@ -65,11 +65,6 @@ class WPSSTM_Settings {
         if( isset( $input['delete-unused-terms'] ) ){
             WPSSTM_Core_Tracks::batch_delete_unused_terms();
         }
-        
-        //delete links from excluded domains
-        if( isset( $input['delete_excluded_track_link_hosts'] ) ){
-            WPSSTM_Core_Track_Links::delete_excluded_hosts();
-        }
 
         /*
         Community user
@@ -340,17 +335,7 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
-        
-        if ( wpsstm()->get_options('excluded_track_link_hosts') ){
-            add_settings_field(
-                'trash_excluded_track_link_hosts', 
-                __('Trash excluded hosts links','wpsstm'), 
-                array( $this, 'delete_excluded_track_link_hosts_callback' ), 
-                'wpsstm-settings-page', // Page
-                'settings_maintenance'//section
-            );
-        }
-        
+
     }
     
     public static function section_desc_empty(){
@@ -664,17 +649,6 @@ class WPSSTM_Settings {
             disabled($count,0,false),
             $desc
         );
-    }
-    
-    function delete_excluded_track_link_hosts_callback(){
-            $count = count( WPSSTM_Core_Track_Links::get_excluded_host_link_ids() );
-
-            printf(
-                '<p><input type="checkbox" name="%s[delete_excluded_track_link_hosts]" value="on" %s /><label>%s</label></p>',
-                wpsstm()->meta_name_options,
-                disabled($count,0,false),
-                sprintf(__("Delete the %s track links matching the excluded hosts list.","wpsstm"),$count)
-            );
     }
 
 	function settings_page() {
