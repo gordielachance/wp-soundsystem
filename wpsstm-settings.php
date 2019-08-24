@@ -53,10 +53,6 @@ class WPSSTM_Settings {
         
         //reset
         if ( self::is_settings_reset() ) return;
-            
-        if( isset( $input['delete-orphan-tracks'] ) ){
-            WPSSTM_Core_Tracks::delete_orphan_tracks();
-        }
 
         if( isset( $input['delete-duplicate-links'] ) ){
             WPSSTM_Core_Track_Links::delete_duplicate_links();
@@ -323,14 +319,6 @@ class WPSSTM_Settings {
                 'delete_temporary_tracklists', 
                 __('Delete temporary tracklists','wpsstm'), 
                 array( $this, 'delete_temporary_tracklists_callback' ), 
-                'wpsstm-settings-page', // Page
-                'settings_maintenance'//section
-            );
-
-            add_settings_field(
-                'delete_orphan_tracks', 
-                __('Delete orphan tracks','wpsstm'), 
-                array( $this, 'delete_orphan_tracks_callback' ), 
                 'wpsstm-settings-page', // Page
                 'settings_maintenance'//section
             );
@@ -644,17 +632,6 @@ class WPSSTM_Settings {
         $desc = sprintf(__("Delete %d tracklists that were created with the community user.","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[delete-temporary-tracklists]" value="on" %s /><label>%s</label>',
-            wpsstm()->meta_name_options,
-            disabled($count,0,false),
-            $desc
-        );
-    }
-    
-    function delete_orphan_tracks_callback(){
-        $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
-        $desc = sprintf(__("Delete %d tracks that do not belong to any tracklists.","wpsstm"),$count);
-        printf(
-            '<input type="checkbox" name="%s[delete-orphan-tracks]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
             disabled($count,0,false),
             $desc

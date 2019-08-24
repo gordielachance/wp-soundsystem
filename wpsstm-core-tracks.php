@@ -1250,31 +1250,6 @@ class WPSSTM_Core_Tracks{
         
     }
     
-    /*
-    Flush community tracks
-    */
-    static function delete_orphan_tracks(){
-        
-        if ( !current_user_can('manage_options') ){
-            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
-        }
-
-        $trashed = array();
-        
-        if ( $flushable_ids = self::get_orphan_track_ids() ){
-
-            foreach( (array)$flushable_ids as $track_id ){
-                $success = wp_delete_post($track_id,true);
-                if ( $success ) $trashed[] = $track_id;
-            }
-        }
-
-        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan tracks");
-
-        return $trashed;
-
-    }
-    
     function the_track_post_title($title,$post_id){
 
         //post type check
