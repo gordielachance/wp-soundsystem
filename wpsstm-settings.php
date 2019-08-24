@@ -71,7 +71,7 @@ class WPSSTM_Settings {
         }
         
         if( isset( $input['delete-unused-terms'] ) ){
-            WPSSTM_Core_Tracks::delete_unused_terms();
+            WPSSTM_Core_Tracks::batch_delete_unused_terms();
         }
         
         //delete links from excluded domains

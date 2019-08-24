@@ -1295,7 +1295,7 @@ class WPSSTM_Core_Tracks{
     https://wordpress.stackexchange.com/questions/78659/wpdb-prepare-function-remove-single-quote-for-s-in-sql-statment
     */
     
-    static function delete_unused_terms(){
+    static function batch_delete_unused_terms(){
         global $wpdb;
         
         $unused_term_ids = self::get_unused_term_ids();
