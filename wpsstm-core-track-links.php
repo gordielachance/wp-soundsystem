@@ -30,6 +30,7 @@ class WPSSTM_Core_Track_Links{
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track_link), array(__class__,'link_columns_content'), 10, 2 );
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(__class__,'register_orphan_track_links_view') );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(__class__,'register_excluded_hosts_links_view') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(wpsstm(),'register_community_view') );
 
         /*
@@ -37,6 +38,7 @@ class WPSSTM_Core_Track_Links{
         */
         add_action( 'current_screen',  array($this, 'the_single_backend_link'));
         add_filter( 'pre_get_posts', array($this,'filter_track_links_by_parent') );
+        add_filter( 'pre_get_posts', array($this,'filter_track_links_by_excluded_hosts') );
         
         /*
         AJAX
@@ -151,6 +153,7 @@ class WPSSTM_Core_Track_Links{
     
     function add_query_vars_track_link($qvars){
         $qvars[] = 'parent_track';
+        $qvars[] = 'filter_link_hosts';
         return $qvars;
     }
     
@@ -213,6 +216,40 @@ class WPSSTM_Core_Track_Links{
         if ( $track_id === null ) return $query;
 
         $query->set('post_parent',$track_id);
+    }
+    
+    function filter_track_links_by_excluded_hosts($query){
+        global $wpdb;
+        
+        
+        if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return $query;
+
+        $filter_hosts = $query->get('filter_link_hosts');
+        if (!$filter_hosts) return $query;
+
+        $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts');
+        if (!$excluded_hosts) return $query;
+
+        $exclude_query = array();
+        
+        foreach((array)$excluded_hosts as $domain){
+            $exclude_query[] = sprintf( "`meta_value` LIKE '%%%s%%'",$domain);
+        }
+
+        $querystr = $wpdb->prepare( "SELECT post_id FROM `$wpdb->postmeta` WHERE `meta_key` = '%s'",'_wpsstm_link_url');
+        $querystr .= ' AND ( ' . implode(' OR ',$exclude_query) . ')';
+
+        $excluded_links_ids = $wpdb->get_col( $querystr );
+        
+        
+        if ($filter_hosts === 'only'){
+            $query->set('post__in',$excluded_links_ids);
+        }else{
+            $query->set('post__not_in',$excluded_links_ids);
+        }
+
+        return $query;
+        
     }
     
     function metabox_link_register(){
@@ -641,6 +678,21 @@ class WPSSTM_Core_Track_Links{
         return $query->posts;
 
     }
+    
+    public static function get_excluded_host_link_ids(){
+        global $wpdb;
+        
+        $query_args = array(
+            'post_type' =>      wpsstm()->post_type_track_link,
+            'posts_per_page' => -1,
+            'post_status' =>    'any',
+            'filter_link_hosts' =>   'only',
+        );
+        
+        $query = new WP_Query( $query_args );
+
+        return $query->posts;
+    }
 
     /*
     Flush duplicate links (same post parent & URL)
@@ -723,25 +775,6 @@ class WPSSTM_Core_Track_Links{
         return $duplicate_ids;
     }
     
-    static function get_excluded_host_link_ids(){
-        global $wpdb;
-        
-        $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts');
-        if (!$excluded_hosts) return;
-
-        $exclude_query = array();
-        
-        foreach((array)$excluded_hosts as $domain){
-            $exclude_query[] = sprintf( "`meta_value` LIKE '%%%s%%'",$domain);
-        }
-
-        $querystr = $wpdb->prepare( "SELECT post_id FROM `$wpdb->postmeta` WHERE `meta_key` = '%s'",'_wpsstm_link_url');
-        $querystr .= ' AND ' . implode(' OR ',$exclude_query);
-
-        return $wpdb->get_col( $querystr );
-
-    }
-    
     static function register_orphan_track_links_view($views){
 
         $screen =                   get_current_screen();
@@ -761,6 +794,27 @@ class WPSSTM_Core_Track_Links{
         }
 
         $views['orphan'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Orphan','wpsstm'),$count);
+        
+        return $views;
+    }
+    
+    static function register_excluded_hosts_links_view($views){
+        $screen =                   get_current_screen();
+        $post_type =                $screen->post_type;
+        $filter_hosts =             get_query_var('filter_link_hosts');
+
+        $link = add_query_arg( array('post_type'=>$post_type,'filter_link_hosts'=>'only'),admin_url('edit.php') );
+        $count = count(WPSSTM_Core_Track_Links::get_excluded_host_link_ids());
+        
+        $attr = array(
+            'href' =>   $link,
+        );
+
+        if ($filter_hosts === 'only'){
+            $attr['class'] = 'current';
+        }
+
+        $views['exclude_hosts'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Excluded hosts','wpsstm'),$count);
         
         return $views;
     }

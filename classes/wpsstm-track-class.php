@@ -624,6 +624,7 @@ class WPSSTM_Track{
         $required_args = array(
             'post_type'     => wpsstm()->post_type_track_link,
             'parent_track'  => $this->post_id,
+            'filter_link_hosts' => true,
         );
         
         //we need a parent track or it will return all links; so force return nothing
