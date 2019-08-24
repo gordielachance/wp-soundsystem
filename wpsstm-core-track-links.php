@@ -641,32 +641,7 @@ class WPSSTM_Core_Track_Links{
         return $query->posts;
 
     }
-    
-    /*
-    Flush orphan links (attached to no track)
-    */
-    static function delete_orphan_links(){
-        
-        if ( !current_user_can('manage_options') ){
-            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
-        }
 
-        $deleted = array();
-        
-        if ( $flushable_ids = self::get_orphan_link_ids() ){
-
-            foreach( (array)$flushable_ids as $post_id ){
-                $success = wp_delete_post($post_id,true);
-                if ( $success ) $deleted[] = $post_id;
-            }
-        }
-
-        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($deleted))),"Deleted orphan links");
-
-        return $deleted;
-
-    }
-    
     /*
     Flush duplicate links (same post parent & URL)
     */

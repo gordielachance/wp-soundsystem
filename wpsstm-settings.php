@@ -57,11 +57,7 @@ class WPSSTM_Settings {
         if( isset( $input['delete-orphan-tracks'] ) ){
             WPSSTM_Core_Tracks::delete_orphan_tracks();
         }
-        
-        if( isset( $input['delete-orphan-links'] ) ){
-            WPSSTM_Core_Track_Links::delete_orphan_links();
-        }
-        
+
         if( isset( $input['delete-duplicate-links'] ) ){
             WPSSTM_Core_Track_Links::delete_duplicate_links();
         }
@@ -340,15 +336,7 @@ class WPSSTM_Settings {
             );
 
         }
-        
-        add_settings_field(
-            'delete_orphan_links', 
-            __('Delete orphan links','wpsstm'), 
-            array( $this, 'delete_orphan_links_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings_maintenance'//section
-        );
-        
+
         add_settings_field(
             'delete_duplicate_links', 
             __('Delete duplicate links','wpsstm'), 
@@ -672,18 +660,7 @@ class WPSSTM_Settings {
             $desc
         );
     }
-    
-    function delete_orphan_links_callback(){
-        $count = count(WPSSTM_Core_Track_Links::get_orphan_link_ids());
-        $desc = sprintf(__("Delete %d links that are not attached to a track post.","wpsstm"),$count);
-        printf(
-            '<input type="checkbox" name="%s[delete-orphan-links]" value="on" %s /><label>%s</label>',
-            wpsstm()->meta_name_options,
-            disabled($count,0,false),
-            $desc
-        );
-    }
-    
+
     function delete_duplicate_links_callback(){
         $count = count(WPSSTM_Core_Track_Links::get_duplicate_link_ids());
         $desc = sprintf(__("Delete %d duplicate links (same URL & parent post).","wpsstm"),$count);
