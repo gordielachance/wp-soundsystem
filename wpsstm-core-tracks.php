@@ -45,6 +45,7 @@ class WPSSTM_Core_Tracks{
         
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'tracks_columns_register') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content') );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(__class__,'register_orphan_tracks_view') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_community_view') );
 
         //track shortcode
@@ -439,6 +440,28 @@ class WPSSTM_Core_Tracks{
                 
             break;
         }
+    }
+    
+    static function register_orphan_tracks_view($views){
+
+        $screen =                   get_current_screen();
+        $post_type =                $screen->post_type;
+        $subtracks_exclude =        get_query_var('exclude_subtracks');
+        
+        $link = add_query_arg( array('post_type'=>$post_type,'exclude_subtracks'=>true),admin_url('edit.php') );
+        $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
+        
+        $attr = array(
+            'href' =>   $link,
+        );
+        
+        if ($subtracks_exclude === true){
+            $attr['class'] = 'current';
+        }
+
+        $views['orphan'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Orphan','wpsstm'),$count);
+        
+        return $views;
     }
 
     function tracks_query_left_join_subtracks($join,$query){
@@ -1203,7 +1226,7 @@ class WPSSTM_Core_Tracks{
     }
 
     /*
-    Get tracks that have been created by the community user and that do not belong to any playlists
+    Get tracks that do not belong to any playlists
     //TOUFIX very slow query, freezes de settings page when there is a lot of tracks.
     //store in transient ? Do in it two steps (query links - delete links) ?
     */
