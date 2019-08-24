@@ -627,9 +627,16 @@ class WPSSTM_Core_Track_Links{
     public static function get_orphan_link_ids(){
         global $wpdb;
         
-        $querystr = $wpdb->prepare( "SELECT child.ID FROM `$wpdb->posts` AS child LEFT JOIN `$wpdb->posts` AS parent ON child.post_parent = parent.ID WHERE child.post_type = '%s' AND (child.post_status <> 'trash' AND child.post_status <> 'auto-draft') AND parent.ID is NULL", wpsstm()->post_type_track_link );
-
-        return $wpdb->get_col( $querystr);
+        $query_args = array(
+            'post_type' =>      wpsstm()->post_type_track_link,
+            'posts_per_page' => -1,
+            'post_status' =>    'any',
+            'fields' =>         'ids',
+            'post_parent' =>    0,
+        );
+        
+        $query = new WP_Query( $query_args );
+        return $query->posts;
 
     }
     
