@@ -251,13 +251,16 @@ class WPSSTM_Core_Track_Links{
         ?>
         <div style="text-align:center">
             <?php
-                $track = new WPSSTM_Track($post->post_parent);
-                if ($track->post_id){
+        
+                $parent_id = ( $post->post_parent && ( get_post_type( $post->post_parent ) === wpsstm()->post_type_track_link ) ) ? $post->post_parent : 0;
+                
+                if ($parent_id){
+                    $track = new WPSSTM_Track($parent_id);
                     printf('<p><strong>%s</strong> — %s</p>',$track->artist,$track->title);
                 }
             ?>
         <label class="screen-reader-text" for="wpsstm_link_parent_id"><?php _e('Parent') ?></label>
-        <input name="wpsstm_link_parent_id" type="number" value="<?php echo $post->post_parent;?>" />
+        <input name="wpsstm_link_parent_id" type="number" value="<?php echo $parent_id;?>" />
         </div>
         <?php
         wp_nonce_field( 'wpsstm_track_parent_meta_box', 'wpsstm_track_parent_meta_box_nonce' );
