@@ -1215,7 +1215,6 @@ class WPSSTM_Core_Tracks{
         //get community tracks
         $orphan_tracks_args = array(
             'post_type' =>              wpsstm()->post_type_track,
-            'author' =>                 $community_id,
             'post_status' =>            'any',
             'posts_per_page'=>          -1,
             'fields' =>                 'ids',
