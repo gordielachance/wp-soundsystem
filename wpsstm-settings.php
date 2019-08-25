@@ -10,7 +10,7 @@ class WPSSTM_Settings {
 		add_action( 'admin_menu', array( $this, 'create_admin_menu' ), 8 );
         add_action( 'admin_init', array( $this, 'settings_init' ), 5 );
         add_action( 'admin_init', array( $this, 'system_settings_init' ), 15 );
-        add_action( 'current_screen', array( $this, 'clear_settings_transients' ) );
+        add_action( 'current_screen', array( $this, 'clear_settings_transients' ), 5 );
 	}
 
     function create_admin_menu(){
@@ -93,9 +93,15 @@ class WPSSTM_Settings {
         $new_input['autolink'] = isset($input['autolink']);
         
         if ( isset($input['excluded_track_link_hosts']) ){
+
             $domains = explode(',',$input['excluded_track_link_hosts']);
             $domains = array_filter(array_unique($domains));
             $new_input['excluded_track_link_hosts'] = $domains;
+            
+            //rebuild cache ?
+            if ( $domains != wpsstm()->get_options('excluded_track_link_hosts') ){
+                WPSSTM_Core_Track_Links::rebuild_excluded_hosts_cache();
+            }
         }
 
         /*

@@ -1,8 +1,9 @@
 <?php
-
 class WPSSTM_Core_Track_Links{
     static $link_url_metakey = '_wpsstm_link_url';
     static $autolink_time_metakey = '_wpsstm_autolink_time'; //to store the musicbrainz datas
+    static $excluded_hosts_link_ids_transient_name = '_wpsstm_excluded_hosts_link_ids';
+    
     function __construct() {
         global $wpsstm_link;
 
@@ -30,8 +31,11 @@ class WPSSTM_Core_Track_Links{
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track_link), array(__class__,'link_columns_content'), 10, 2 );
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(__class__,'register_orphan_track_links_view') );
-        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(__class__,'register_excluded_hosts_links_view') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(wpsstm(),'register_community_view') );
+        
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(__class__,'register_excluded_hosts_links_view') );
+        add_action( 'current_screen', array( $this, 'build_excluded_hosts_cache_bt' ) );
+        add_action('admin_notices', array(__class__,'build_excluded_hosts_cache_notice') );
 
         /*
         QUERIES
@@ -229,21 +233,9 @@ class WPSSTM_Core_Track_Links{
         $only_excluded_hosts = $query->get('only_excluded_hosts');
         if (!$no_excluded_hosts && !$only_excluded_hosts) return $query;
 
-        $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts');
-        if (!$excluded_hosts) return $query;
+        $excluded_links_ids = self::get_excluded_hosts_link_ids();
+        if ( !$excluded_links_ids ) return $query;
 
-        $exclude_query = array();
-        
-        foreach((array)$excluded_hosts as $domain){
-            $exclude_query[] = sprintf( "`meta_value` LIKE '%%%s%%'",$domain);
-        }
-
-        $querystr = $wpdb->prepare( "SELECT post_id FROM `$wpdb->postmeta` WHERE `meta_key` = '%s'",'_wpsstm_link_url');
-        $querystr .= ' AND ( ' . implode(' OR ',$exclude_query) . ')';
-
-        $excluded_links_ids = $wpdb->get_col( $querystr );
-        
-        
         if ($no_excluded_hosts){
             $query->set('post__not_in',$excluded_links_ids);
         }elseif ($only_excluded_hosts){
@@ -776,19 +768,81 @@ class WPSSTM_Core_Track_Links{
         return $views;
     }
     
-    static function register_excluded_hosts_links_view($views){
-        $screen =                   get_current_screen();
-        $post_type =                $screen->post_type;
-        $filter_hosts =             get_query_var('only_excluded_hosts');
+    static function get_excluded_hosts_link_ids(){
+        global $wpdb;
+        
+        $link_ids = get_transient( self::$excluded_hosts_link_ids_transient_name );
 
-        $link = add_query_arg( array('post_type'=>$post_type,'only_excluded_hosts'=>true),admin_url('edit.php') );
+        if (false === $link_ids){
+            
+            if ( $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ){
+                
+                $exclude_query = array();
+
+                foreach((array)$excluded_hosts as $domain){
+                    $exclude_query[] = sprintf( "`meta_value` LIKE '%%%s%%'",$domain);
+                }
+
+                $querystr = $wpdb->prepare( "SELECT post_id FROM `$wpdb->postmeta` WHERE `meta_key` = '%s'",'_wpsstm_link_url');
+                $querystr .= ' AND ( ' . implode(' OR ',$exclude_query) . ')';
+
+                $link_ids = $wpdb->get_col( $querystr );
+                
+            }
+            
+            set_transient( self::$excluded_hosts_link_ids_transient_name, $link_ids, 1 * WEEK_IN_SECONDS );
+            
+            WP_SoundSystem::debug_log(array('hosts'=>count($excluded_hosts),'matches'=>count($link_ids)),"Has built excluded hosts link cache");
+
+        }
+        
+        return $link_ids;
+    }
+    
+    static function rebuild_excluded_hosts_cache(){
+        delete_transient( self::$excluded_hosts_link_ids_transient_name );
+        self::get_excluded_hosts_link_ids();
+    }
+
+    function build_excluded_hosts_cache_bt($screen){
+        if ( ($screen->base != 'edit') || ($screen->post_type != wpsstm()->post_type_track_link) ) return;
+        if ( !$is_cache_build = wpsstm_get_array_value('build_excluded_hosts_cache',$_GET) ) return;
+
+        self::rebuild_excluded_hosts_cache();
+    }
+    
+    static function build_excluded_hosts_cache_notice(){
+        
+        $screen =                   get_current_screen();
+        
+        if ( ($screen->base != 'edit') || ($screen->post_type != wpsstm()->post_type_track_link) ) return;
+        if (!$excluded_hosts = get_query_var('only_excluded_hosts') ) return;
+        if ( $is_cache_build = wpsstm_get_array_value('build_excluded_hosts_cache',$_GET) ) return;
+        
+        $link_url = add_query_arg(
+            array(
+                'post_type' =>                  wpsstm()->post_type_track_link,
+                'only_excluded_hosts' =>        true,
+                'build_excluded_hosts_cache' => true,
+            ),
+            admin_url('edit.php')
+        );
+        $link_el = sprintf('<a class="button" href="%s">%s</a>',$link_url,__('Rebuild cache','wpsstm'));
+        $notice = __('In order to accelerate queries, a cache of track links matching excluded hosts is built every week.','wpsstm') . '  ' . $link_el;
+        printf('<div class="notice notice-warning is-dismissible"><p>%s</p></div>',$notice);
+    }
+    
+    static function register_excluded_hosts_links_view($views){
+        $excluded_hosts =           get_query_var('only_excluded_hosts');
+
+        $link = add_query_arg( array('post_type'=>wpsstm()->post_type_track_link,'only_excluded_hosts'=>true),admin_url('edit.php') );
         $count = count(WPSSTM_Core_Track_Links::get_excluded_host_link_ids());
         
         $attr = array(
             'href' =>   $link,
         );
 
-        if ($filter_hosts){
+        if ($excluded_hosts){
             $attr['class'] = 'current';
         }
 
