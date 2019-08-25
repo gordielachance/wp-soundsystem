@@ -1,5 +1,5 @@
 <?php
-define('WPSSTM_API_URL','https://api.spiff-radio.org/wordpress/wp-json/');
+define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/');
 define('WPSSTM_API_NAMESPACE','wpsstmapi/v1');
 define('WPSSTM_API_REGISTER_URL','https://api.spiff-radio.org/?p=10');
 
@@ -114,30 +114,45 @@ class WPSSTM_Core_API {
 
         WP_SoundSystem::debug_log(array('url'=>$url,'token'=>$token),'query API...');
 
+        $error = null;
         $request = wp_remote_get($url,$api_args);
-        if (is_wp_error($request)) return $request;
-
         $response = wp_remote_retrieve_body( $request );
-        if (is_wp_error($response)) return $response;
-        
-        $response = json_decode($response, true);
+        $headers = wp_remote_retrieve_headers($request);
 
-        //check for errors
-        $code = wpsstm_get_array_value('code',$response);
-        $message = wpsstm_get_array_value('message',$response);
-        $data = wpsstm_get_array_value('data',$response);
-        $status = wpsstm_get_array_value(array('data','status'),$response);
+        //TOUFIX URGENT
+        /*
+        a 404 API request (wrong URL, etc.) should return an error here, but is not !
+        print_r("<xmp>".json_encode($headers)."<xmp>");die();
+        */
 
-        if ( $code && $message && ($status >= 400) ){
-
-            $message = sprintf(__('WPSSTMAPI error: %s','wpsstm'),$message);
-            $error = new WP_Error($code,$message,$data );
+        if ( is_wp_error($response) ){
             
-            WP_SoundSystem::debug_log($error,'api_request');
+            $error = $response;
+            
+        }else{
+            
+            $response = wp_remote_retrieve_body( $request );
 
-            return $error;
+            $response = json_decode($response, true);
+
+            //check for errors
+            $code = wpsstm_get_array_value('code',$response);
+            $message = wpsstm_get_array_value('message',$response);
+            $data = wpsstm_get_array_value('data',$response);
+            $status = wpsstm_get_array_value(array('data','status'),$response);
+
+            if ( $code && $message && ($status >= 400) ){
+                $error = new WP_Error($code,$message,$data );
+                return $error;
+            }
+            
         }
         
+        if ($error){
+            $this->track_log($error->get_error_message(),'WPSSTMAPI error');
+            return $error;
+        }
+
         return $response;
 
     }

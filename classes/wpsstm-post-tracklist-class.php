@@ -674,7 +674,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         );
         
         if ( $refresh_now ){
-            $this->sync_radio();
+            $synced = $this->sync_radio();
+            if ( is_wp_error($synced) ) return $synced;
         }
 
         //get static subtracks
@@ -694,18 +695,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //check feed URL
         if ( !$this->feed_url ){
-                $tracks = new WP_Error( 'wpsstm_missing_feed_url', __('Please add a Feed URL in the radio settings.','wpsstm') );
-                $error_msg = $tracks->get_error_message();
-                $this->add_notice('refresh_radio',$error_msg );
-                return;
+                $error = new WP_Error( 'wpsstm_missing_feed_url', __('Please add a Feed URL in the radio settings.','wpsstm') );
+                $this->add_notice('refresh_radio',$error->get_error_message() );
+                return $error;
         }
         
         //check bot user
         $bot_ready = wpsstm()->is_bot_ready();
         if ( is_wp_error($bot_ready) ){
-            $error_msg = $bot_ready->get_error_message();
-            $this->add_notice('refresh_radio',$error_msg );
-            return;
+            $this->add_notice('refresh_radio',$bot_ready->get_error_message() );
+            return $bot_ready;
         }
             
         $this->tracklist_log("refresh radio...");
