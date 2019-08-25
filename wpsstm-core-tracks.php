@@ -46,7 +46,7 @@ class WPSSTM_Core_Tracks{
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'tracks_columns_register') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(__class__,'register_orphan_tracks_view') );
-        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_community_view') );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_imported_view') );
 
         //track shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
@@ -1232,10 +1232,10 @@ class WPSSTM_Core_Tracks{
     */
     static function get_orphan_track_ids(){
         global $wpdb;
-        $community_id = wpsstm()->get_options('community_user_id');
-        if ( !$community_id ) return;
+        $bot_id = wpsstm()->get_options('community_user_id');
+        if ( !$bot_id ) return;
 
-        //get community tracks
+        //get bot tracks
         $orphan_tracks_args = array(
             'post_type' =>              wpsstm()->post_type_track,
             'post_status' =>            'any',

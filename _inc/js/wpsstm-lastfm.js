@@ -118,13 +118,13 @@ class WpsstmLastFM {
         return success.promise();
     }
     
-    community_scrobble(track_obj){
+    bot_scrobble(track_obj){
         
         var self = this;
         var success = $.Deferred();
 
         var ajax_data = {
-            action:             'wpsstm_lastfm_scrobble_community_track',
+            action:             'wpsstm_lastfm_scrobble_bot_track',
             track:              track_obj.to_ajax(),
             playback_start:     Math.round( $.now() /1000), //time in sec
         };
@@ -231,7 +231,7 @@ $(document).on( "wpsstmSourceInit", function( event, link ) {
         
         //bot scrobble
         if (wpsstm_lastfm.lastfm_scrobble_along){
-            wpsstm_lastfm.community_scrobble(track);
+            wpsstm_lastfm.bot_scrobble(track);
         }
 
     }

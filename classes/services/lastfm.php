@@ -65,9 +65,9 @@ class WPSSTM_LastFM{
         //scrobble user
         add_action('wp_ajax_wpsstm_lastfm_scrobble_user_track', array($this,'ajax_lastfm_scrobble_track'));
         
-        //scrobble community
-        add_action('wp_ajax_wpsstm_lastfm_scrobble_community_track', array($this,'ajax_lastfm_scrobble_community_track'));
-        add_action('wp_ajax_nopriv_wpsstm_lastfm_scrobble_community_track', array($this,'ajax_lastfm_scrobble_community_track'));
+        //scrobble bot
+        add_action('wp_ajax_wpsstm_lastfm_scrobble_bot_track', array($this,'ajax_lastfm_scrobble_bot_track'));
+        add_action('wp_ajax_nopriv_wpsstm_lastfm_scrobble_bot_track', array($this,'ajax_lastfm_scrobble_bot_track'));
 
     }
     
@@ -237,8 +237,8 @@ class WPSSTM_LastFM{
         */
 
         $help = array();
-        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble it along with the community user.","wpsstm");
-        $help[]= sprintf('<br/><small>%s</small>',__("To enable this option, you have to login with the community user, activate the scrobbler and follow the instructions.","wpsstm"));
+        $help[]= __("Each time a user scrobbles a song to Last.fm, do scrobble it along with the bot user.","wpsstm");
+        $help[]= sprintf('<br/><small>%s</small>',__("To enable this option, you have to login with the bot user, activate the scrobbler and follow the instructions.","wpsstm"));
         
         $el = sprintf(
             '<input type="checkbox" value="on" disabled="disabled" %s /> %s',
@@ -560,19 +560,19 @@ class WPSSTM_LastFM{
         
     }
 
-    function ajax_lastfm_scrobble_community_track(){
+    function ajax_lastfm_scrobble_bot_track(){
         
         $ajax_data = wp_unslash($_POST);
-        $community_id = wpsstm()->get_options('community_user_id');
+        $bot_id = wpsstm()->get_options('community_user_id');
 
         $result = array(
             'input' =>              $ajax_data,
             'message' =>            null,
             'success' =>            false,
-            'community_user_id' =>  $community_id
+            'community_user_id' =>  $bot_id
         );
         
-        if ( $community_id ){
+        if ( $bot_id ){
             
             $start_timestamp = $result['playback_start'] = wpsstm_get_array_value(array('playback_start'),$ajax_data);
             
@@ -581,8 +581,8 @@ class WPSSTM_LastFM{
             $track->from_array($ajax_data['track']);
             $result['track'] = $track->to_array();
 
-            $community_user = new WPSSTM_LastFM_User($community_id);
-            $success = $community_user->scrobble_lastfm_track($track,$start_timestamp);
+            $bot = new WPSSTM_LastFM_User($bot_id);
+            $success = $bot->scrobble_lastfm_track($track,$start_timestamp);
 
             if ( $success ){
                 if ( is_wp_error($success) ){
@@ -636,14 +636,14 @@ class WPSSTM_LastFM{
     
     public function can_scrobble_along(){
 
-        $community_id = wpsstm()->get_options('community_user_id');
-        if (!$community_id){
-            return new WP_Error( 'wpsstm_lastfm_community_scrobble',__('Scrobble Along requires a community user.','wpsstm') );   
+        $bot_id = wpsstm()->get_options('community_user_id');
+        if (!$bot_id){
+            return new WP_Error( 'wpsstm_lastfm_bot_scrobble',__('Scrobble Along requires a bot user.','wpsstm') );   
         }
 
-        $community_user = new WPSSTM_LastFM_User($community_id);
+        $bot = new WPSSTM_LastFM_User($bot_id);
 
-        return ( $community_user->is_user_connected() === true);
+        return ( $bot->is_user_connected() === true);
     }
 
     function register_lastfm_bang_links($links){

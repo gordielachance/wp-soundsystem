@@ -31,7 +31,7 @@ class WPSSTM_Core_Track_Links{
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track_link), array(__class__,'link_columns_content'), 10, 2 );
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(__class__,'register_orphan_track_links_view') );
-        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(wpsstm(),'register_community_view') );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(wpsstm(),'register_imported_view') );
         
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(__class__,'register_excluded_hosts_links_view') );
         add_action( 'current_screen', array( $this, 'build_excluded_hosts_cache_bt' ) );
@@ -633,9 +633,9 @@ class WPSSTM_Core_Track_Links{
     static function can_autolink(){
         global $wpsstm_spotify;
         
-        //check community user
-        $can_community = wpsstm()->is_community_user_ready();
-        if ( is_wp_error($can_community) ) return $can_community;
+        //check bot user
+        $bot_ready = wpsstm()->is_bot_ready();
+        if ( is_wp_error($bot_ready) ) return $bot_ready;
 
         //Spotify API
         $has_spotify_api = $wpsstm_spotify->can_spotify_api();

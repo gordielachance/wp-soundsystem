@@ -11,7 +11,7 @@ class WPSSTM_Core_Importer{
         add_action( 'wp', array($this,'handle_frontend_importer' ) );
         add_action( 'wp_enqueue_scripts', array( $this, 'importer_register_scripts_styles' ) );
         add_filter( 'the_content', array($this,'frontend_importer_content'));
-        add_filter( 'pre_get_posts', array($this,'pre_get_posts_ignore_community_tracklists') );
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_ignore_bot_tracklists') );
 
         //backend
         add_action( 'add_meta_boxes', array($this, 'metabox_importer_register'), 11 );
@@ -22,11 +22,11 @@ class WPSSTM_Core_Importer{
     }
 
     /*
-    Usually, we don't want community playlists; it's only used by the importer.
+    Usually, we don't want bot playlists; it's only used by the importer.
     So ignore those playlists frontend.
     */
     
-    function pre_get_posts_ignore_community_tracklists( $query ){
+    function pre_get_posts_ignore_bot_tracklists( $query ){
 
         //main query check
         if ( !$query->is_main_query() ) return $query;
@@ -41,11 +41,11 @@ class WPSSTM_Core_Importer{
         //we HAVE an author query
         if ( $query->get('author') || $query->get('author_name') || $query->get('author__in') ) return $query;
 
-        if ( !$community_id = wpsstm()->get_options('community_user_id') ) return $query;
+        if ( !$bot_id = wpsstm()->get_options('community_user_id') ) return $query;
 
-        //ignore community posts
+        //ignore bot posts
         $author_not_in = $query->get('author__not_in');
-        $author_not_in[] = $community_id;
+        $author_not_in[] = $bot_id;
         $query->set('author__not_in',$author_not_in);
 
         return $query;
@@ -58,10 +58,10 @@ class WPSSTM_Core_Importer{
     function frontend_importer_content($content){
         if ( !is_page(wpsstm()->get_options('frontend_scraper_page_id')) ) return $content;
         
-        //check community user
-        $can_community = wpsstm()->is_community_user_ready();
-        if ( is_wp_error($can_community) ){
-            WP_SoundSystem::debug_log('Community user not ready','Frontend import template' );
+        //check bot user
+        $bot_ready = wpsstm()->is_bot_ready();
+        if ( is_wp_error($bot_ready) ){
+            WP_SoundSystem::debug_log('Bot user not ready','Frontend import template' );
             return $content;
         }
         
@@ -180,7 +180,7 @@ class WPSSTM_Core_Importer{
 
     /*
     Create a tracklist from the frontend wizard search input and redirect to it.
-    Set the community user as post author so we can detect it as a wizard tracklist.
+    Set the bot user as post author so we can detect it as a wizard tracklist.
     */
 
     function handle_frontend_importer(){
@@ -192,13 +192,13 @@ class WPSSTM_Core_Importer{
         $url = wpsstm_get_array_value('wpsstm_frontend_wizard_url',$_POST);
         if (!$url) return;
 
-        //check community user
-        $can_community = wpsstm()->is_community_user_ready();
-        if ( is_wp_error($can_community) ){
-            WP_SoundSystem::debug_log('Community user not ready','Frontend import URL' );
+        //check bot user
+        $bot_ready = wpsstm()->is_bot_ready();
+        if ( is_wp_error($bot_ready) ){
+            WP_SoundSystem::debug_log('Bot user not ready','Frontend import URL' );
             return;
         }
-        $community_id = wpsstm()->get_options('community_user_id');
+        $bot_id = wpsstm()->get_options('community_user_id');
 
         
         $duplicate_args = array(
@@ -231,13 +231,13 @@ class WPSSTM_Core_Importer{
 
 
         /*
-        Check for radio duplicates, by community user ID
+        Check for radio duplicates, by bot user ID
         */
 
-        $community_duplicate_args = $duplicate_args;
-        $community_duplicate_args['post_author'] = $community_id;
+        $bot_duplicate_args = $duplicate_args;
+        $bot_duplicate_args['post_author'] = $bot_id;
 
-        $duplicate_query = new WP_Query( $community_duplicate_args );
+        $duplicate_query = new WP_Query( $bot_duplicate_args );
         if ( $duplicate_query->have_posts() ){
             $existing_id = $duplicate_query->posts[0];
             $link = get_permalink($existing_id);
@@ -249,12 +249,12 @@ class WPSSTM_Core_Importer{
         Create a new temporary radio and redirect to it
         */
 
-        //store as wizard tracklist (author = community user / ->is_wizard_tracklist_metakey = true)
+        //store as wizard tracklist (author = bot user / ->is_wizard_tracklist_metakey = true)
 
         $post_args = array(
             'post_type' =>      wpsstm()->post_type_live_playlist,
             'post_status' =>    'publish',
-            'post_author' =>    $community_id,
+            'post_author' =>    $bot_id,
             'meta_input' =>     array(
                 WPSSTM_Post_Tracklist::$feed_url_meta_name => $url,
                 self::$is_wizard_tracklist_metakey  => true,

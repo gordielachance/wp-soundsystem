@@ -393,21 +393,21 @@ class WPSSTM_Track{
 
     }
 
-    public function insert_community_track($args = null){
+    public function insert_bot_track($args = null){
         
         $valid = $this->validate_track();
         if ( is_wp_error( $valid ) ) return $valid;
         
-        //check community user
-        $can_community = wpsstm()->is_community_user_ready();
-        if ( is_wp_error($can_community) ) return $can_community;
-        $community_id = wpsstm()->get_options('community_user_id');
+        //check bot user
+        $bot_ready = wpsstm()->is_bot_ready();
+        if ( is_wp_error($bot_ready) ) return $bot_ready;
+        $bot_id = wpsstm()->get_options('community_user_id');
 
         $post_id = null;
 
         $args_default = array(
             'post_status'   => 'publish',
-            'post_author'   => $community_id,
+            'post_author'   => $bot_id,
         );
         
         $args = (!$args) ? $args_default : wp_parse_args($args,$args_default);
@@ -707,15 +707,15 @@ class WPSSTM_Track{
         if ( is_wp_error($valid) ) return $valid;
         
         /*
-        Create community post if track does not exists yet, since we need to store some datas, including the autolink time.
+        Create bot post if track does not exists yet, since we need to store some datas, including the autolink time.
         */
         if(!$this->post_id){
 
-            $track_id = $this->insert_community_track();
+            $track_id = $this->insert_bot_track();
 
             if ( is_wp_error($track_id) ){
                 $error_msg = $track_id->get_error_message();
-                $this->track_log($error_msg,'Error while creating community track');
+                $this->track_log($error_msg,'Error while creating bot track');
                 return $track_id;
             }
 
@@ -740,7 +740,7 @@ class WPSSTM_Track{
             $link->from_array( $args );
             
             $link->track = $this;
-            $link->is_community = true;
+            $link->is_bot = true;
 
             $new_links[] = $link;
 

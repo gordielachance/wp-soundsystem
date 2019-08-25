@@ -726,14 +726,14 @@ class WPSSTM_Core_Tracklists{
         
     }
 
-    static function get_temporary_tracklists_ids(){
-        $community_id = wpsstm()->get_options('community_user_id');
-        if ( !$community_id ) return;
+    static function get_bot_tracklists_ids(){
+        $bot_id = wpsstm()->get_options('community_user_id');
+        if ( !$bot_id ) return;
 
-        //get community tracks
+        //get bot tracks
         $args = array(
             'post_type' =>              wpsstm()->tracklist_post_types,
-            'author' =>                 $community_id,
+            'author' =>                 $bot_id,
             'post_status' =>            'any',
             'posts_per_page'=>          -1,
             'fields' =>                 'ids',
@@ -754,7 +754,7 @@ class WPSSTM_Core_Tracklists{
 
         $flushed_ids = array();
         
-        if ( $flushable_ids = self::get_temporary_tracklists_ids() ){
+        if ( $flushable_ids = self::get_bot_tracklists_ids() ){
 
             foreach( (array)$flushable_ids as $id ){
                 $success = wp_delete_post($id,true);

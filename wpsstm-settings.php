@@ -67,12 +67,12 @@ class WPSSTM_Settings {
         }
 
         /*
-        Community user
+        Bot user
         */
 
         //user id
-        if ( isset ($input['community_user_id']) && ctype_digit($input['community_user_id']) ){
-            $new_input['community_user_id'] = $input['community_user_id'];
+        if ( isset ($input['bot_user_id']) && ctype_digit($input['bot_user_id']) ){
+            $new_input['bot_user_id'] = $input['bot_user_id'];
         }
 
         /*
@@ -183,21 +183,21 @@ class WPSSTM_Settings {
         );
 
         /*
-        Community user
+        Bot user
         */
         add_settings_section(
-            'community_user_settings', // ID
-            __('Community user','wpsstm'), // Title
-            array( $this, 'section_community_user_desc' ), // Callback
+            'bot_user_settings', // ID
+            __('Import bot user','wpsstm'), // Title
+            array( $this, 'section_bot_user_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
         
         add_settings_field(
-            'community_user_id', 
-            __('Community user ID','wpsstm'), 
-            array( $this, 'community_user_id_callback' ), 
+            'bot_user_id', 
+            __('Bot user ID','wpsstm'), 
+            array( $this, 'bot_user_id_callback' ), 
             'wpsstm-settings-page', 
-            'community_user_settings'
+            'bot_user_settings'
         );
         
         /*
@@ -314,7 +314,7 @@ class WPSSTM_Settings {
             'settings_maintenance'//section
         );
         
-        if ( $community_id = wpsstm()->get_options('community_user_id') ){
+        if ( $bot_id = wpsstm()->get_options('community_user_id') ){
             
             add_settings_field(
                 'delete_temporary_tracklists', 
@@ -430,10 +430,10 @@ class WPSSTM_Settings {
 
     }
 
-    function section_community_user_desc(){
+    function section_bot_user_desc(){
         $desc = array();
         
-        $desc[]= __("The plugin requires a community user with specific capabitilies to enable some of the plugin's features; like autolink and tracklist importer.","wpsstm");
+        $desc[]= __("Importing data requires a bot user with specific capabitilies.","wpsstm");
         
         $faq_url = 'https://github.com/gordielachance/wp-soundsystem/wiki/Frequently-Asked-Questions';
         $plugin_link = sprintf('<a href="%s" target="_blank">%s</a>',$faq_url,__('FAQ','wpsstm'));
@@ -583,27 +583,27 @@ class WPSSTM_Settings {
         );
     }
     
-    function community_user_id_callback(){
-        $community_id = wpsstm()->get_options('community_user_id');
-        $can_community = wpsstm()->is_community_user_ready();
+    function bot_user_id_callback(){
+        $bot_id = wpsstm()->get_options('community_user_id');
+        $bot_ready = wpsstm()->is_bot_ready();
 
-        if ( is_wp_error($can_community) ){
-            add_settings_error('community_user',$can_community->get_error_code(),$can_community->get_error_message(),'inline');
+        if ( is_wp_error($bot_ready) ){
+            add_settings_error('bot_user',$bot_ready->get_error_code(),$bot_ready->get_error_message(),'inline');
         }
 
         /*
         form
         */
         printf(
-            '<input type="number" name="%s[community_user_id]" size="4" min="0" value="%s" />',
+            '<input type="number" name="%s[bot_user_id]" size="4" min="0" value="%s" />',
             wpsstm()->meta_name_options,
-            $community_id
+            $bot_id
         );
         
         /*
         errors
         */
-        settings_errors('community_user');
+        settings_errors('bot_user');
     }
 
     /*
@@ -619,8 +619,8 @@ class WPSSTM_Settings {
     }
     
     function delete_temporary_tracklists_callback(){
-        $count = count(WPSSTM_Core_Tracklists::get_temporary_tracklists_ids());
-        $desc = sprintf(__("Delete %d tracklists that were created with the community user.","wpsstm"),$count);
+        $count = count(WPSSTM_Core_Tracklists::get_bot_tracklists_ids());
+        $desc = sprintf(__("Delete %d tracklists that were created with the bot user.","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[delete-temporary-tracklists]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,

@@ -8,7 +8,7 @@ class WPSSTM_Track_Link{
     var $title_artist; //if available, the artist name
     var $title_track; //if available, the track name
     
-    var $is_community; //TRUE if link was populated automatically
+    var $is_bot; //TRUE if link was populated automatically
     var $permalink_url; //link URL
     var $stream_url;
     var $download_url;
@@ -54,7 +54,7 @@ class WPSSTM_Track_Link{
             'index',
             'permalink_url',
             'title',
-            'is_community',
+            'is_bot',
         );
         
         //set properties from args input
@@ -152,11 +152,11 @@ class WPSSTM_Track_Link{
             return new WP_Error( 'wpsstm_link_exists', __('This link already exists, do not create it','wpsstm'), array('url'=>$this->permalink_url,'existing'=>$link_id) );
         }else{
             
-            if ($this->is_community){
+            if ($this->is_bot){
                 
-                //check community user
-                $can_community = wpsstm()->is_community_user_ready();
-                if ( is_wp_error($can_community) ) return $can_community;
+                //check bot user
+                $bot_ready = wpsstm()->is_bot_ready();
+                if ( is_wp_error($bot_ready) ) return $bot_ready;
                 $post_author = wpsstm()->get_options('community_user_id');
                 
             }else{
@@ -223,7 +223,6 @@ class WPSSTM_Track_Link{
             'data-wpsstm-link-id' =>            $this->post_id,
             'data-wpsstm-link-domain' =>        wpsstm_get_url_domain($this->permalink_url),
             'data-wpsstm-link-idx' =>           $this->track->current_link,
-            'data-wpsstm-community-link' =>     (int)wpsstm_is_community_post($this->post_id),
             'class' =>                          implode( ' ',$this->get_link_class() ),
             'wpsstm-playable' =>                $this->is_playable_link(),
         );
@@ -384,7 +383,7 @@ class WPSSTM_Track_Link{
             'title_artist' =>   $this->title_artist,
             'title_track' =>    $this->title_track,
 
-            'is_community' =>   $this->is_community,
+            'is_bot' =>   $this->is_bot,
             'permalink_url' =>  $this->permalink_url,
             'stream_url' =>     $this->stream_url,
             'download_url' =>   $this->download_url,

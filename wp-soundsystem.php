@@ -448,7 +448,7 @@ class WP_SoundSystem {
                 
             }else{
                 
-                $track_id = $track->insert_community_track();
+                $track_id = $track->insert_bot_track();
                 
                 if ( !is_wp_error($track_id) ){
                     
@@ -568,14 +568,14 @@ class WP_SoundSystem {
         error_log($prefix . $data);
     }
     
-    function register_community_view($views){
+    function register_imported_view($views){
         
-        if ( !$community_id = $this->get_options('community_user_id') ) return $views;
+        if ( !$bot_id = $this->get_options('community_user_id') ) return $views;
         
         $screen = get_current_screen();
         $post_type = $screen->post_type;
 
-        $link = add_query_arg( array('post_type'=>$post_type,'author'=>$community_id),admin_url('edit.php') );
+        $link = add_query_arg( array('post_type'=>$post_type,'author'=>$bot_id),admin_url('edit.php') );
         
         $attr = array(
             'href' =>   $link,
@@ -583,13 +583,13 @@ class WP_SoundSystem {
         
         $author_id = isset($_REQUEST['author']) ? $_REQUEST['author'] : null;
         
-        if ($author_id==$community_id){
+        if ($author_id==$bot_id){
             $attr['class'] = 'current';
         }
         
-        $count = count_user_posts( $community_id , $post_type  );
+        $count = count_user_posts( $bot_id , $post_type  );
 
-        $views['community'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Community','wpsstm'),$count);
+        $views['imported'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Imported','wpsstm'),$count);
         
         return $views;
     }
@@ -707,34 +707,34 @@ class WP_SoundSystem {
         return implode("\n",$output);
     }
 
-    public function is_community_user_ready(){
+    public function is_bot_ready(){
         
-        //community user
-        $community_id = $this->get_options('community_user_id');
+        //bot
+        $bot_id = $this->get_options('community_user_id');
         
-        if ( !$community_id ){
-            return new WP_Error( 'wpsstm_missing_community_user', __("Missing community user.",'wpsstm'));
+        if ( !$bot_id ){
+            return new WP_Error( 'wpsstm_missing_bot', __("Missing bot user.",'wpsstm'));
         }
         
-        if ( !$userdatas = get_userdata($community_id) ) {
-            return new WP_Error( 'wpsstm_invalid_community_user', __("Invalid community user.",'wpsstm'));
+        if ( !$userdatas = get_userdata($bot_id) ) {
+            return new WP_Error( 'wpsstm_invalid_bot', __("Invalid bot user.",'wpsstm'));
         }
         
         //check can create radios
-        if ( !user_can($community_id,'create_live_playlists') ){
-            return new WP_Error( 'wpsstm_missing_capability', __("The community user requires the 'create_live_playlists' capability.",'wpsstm'));
+        if ( !user_can($bot_id,'create_live_playlists') ){
+            return new WP_Error( 'wpsstm_missing_capability', __("The bot user requires the 'create_live_playlists' capability.",'wpsstm'));
         }
         
         //check can create tracks
-        if ( !user_can($community_id,'create_tracks') ){
-            return new WP_Error( 'wpsstm_missing_capability', __("The community user requires the 'create_tracks' capability.",'wpsstm') );
+        if ( !user_can($bot_id,'create_tracks') ){
+            return new WP_Error( 'wpsstm_missing_capability', __("The bot user requires the 'create_tracks' capability.",'wpsstm') );
         }
         
         //check can create track links
         //commented since it is the same capability than for tracks.
         /*
-        if ( !user_can($community_id,'create_tracks') ){
-            return new WP_Error( 'wpsstm_missing_capability', __("The community user requires the 'create_tracks' capability.",'wpsstm'));
+        if ( !user_can($bot_id,'create_tracks') ){
+            return new WP_Error( 'wpsstm_missing_capability', __("The bot user requires the 'create_tracks' capability.",'wpsstm'));
         }
         */
         

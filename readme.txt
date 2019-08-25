@@ -128,7 +128,11 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 == Changelog ==
 
 = XXX =
-* New maintenance option : delete unused music terms 
+* New maintenance option : delete unused music terms
+* cache (transient) for excluded track links
+* Removed setting 'Trash excluded hosts links' + new 'Excluded hosts' track links view
+* Removed setting 'Trash orphan links' + new'Orphan' track links view
+* Removed setting 'Trash orphan tracks' + new'Orphan' tracks view
 
 = 2.9.4 =
 * GUI: jsons now displayed using [jQuery json-viewer](https://github.com/abodelot/jquery.json-viewer)
@@ -149,12 +153,12 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 * JS: Abord tracklist reload when pressing ESC
 * JS: Ability to add more than one track at once when editing a tracklist
 * Queue subtracks bug fix
-* Improve community user code
+* Improve bot user code
 
 = 2.8.5 =
 * WPSSTM_Spotify_Endpoints & WPSSTM_Musicbrainz_Endpoints moved from API so we don't need two requests
 * new metabox 'Tracklist options'
-* ignore community tracklists unless author is set in query
+* ignore bot tracklists unless author is set in query
 * JS bugfixes
 
 = 2.8.0 =

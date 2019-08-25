@@ -515,7 +515,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     /*
-    Get autorship for a community tracklist (created through wizard)
+    Get autorship for a bot tracklist (created through wizard)
     */
     
     function get_autorship(){
@@ -540,8 +540,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist.",'wpsstm') );
         }
         
-        //community (TOUFIX just for live ?)
-        if ( wpsstm_is_community_post($this->post_id) ){
+        //bot (TOUFIX just for live ?)
+        if ( wpsstm_is_bot_post($this->post_id) ){
             $got_autorship = $this->get_autorship();
             if ( is_wp_error($got_autorship) ) return $got_autorship;
         }
@@ -604,8 +604,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_invalid_post_type', __('Invalid tracklist post type.','wpsstm') );
         }
         
-        if ( !wpsstm_is_community_post($this->post_id) ){
-            return new WP_Error( 'wpsstm_not_community_post', __('This is not a community post.','wpsstm') );
+        if ( !wpsstm_is_bot_post($this->post_id) ){
+            return new WP_Error( 'wpsstm_not_bot_post', __('This is not a bot post.','wpsstm') );
         }
             
         //capability check
@@ -700,10 +700,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 return;
         }
         
-        //check community user
-        $can_community = wpsstm()->is_community_user_ready();
-        if ( is_wp_error($can_community) ){
-            $error_msg = $can_community->get_error_message();
+        //check bot user
+        $bot_ready = wpsstm()->is_bot_ready();
+        if ( is_wp_error($bot_ready) ){
+            $error_msg = $bot_ready->get_error_message();
             $this->add_notice('refresh_radio',$error_msg );
             return;
         }
@@ -920,9 +920,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        //check community user
-        $can_community = wpsstm()->is_community_user_ready();
-        if ( is_wp_error($can_community) ) return $can_community;
+        //check bot user
+        $bot_ready = wpsstm()->is_bot_ready();
+        if ( is_wp_error($bot_ready) ) return $bot_ready;
         
         //delete actual subtracks
         $this->tracklist_log('delete current tracklist subtracks...'); 
@@ -1091,7 +1091,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         
         if (!$track->post_id){
-            $track_id = $track->insert_community_track();
+            $track_id = $track->insert_bot_track();
             
             if ( is_wp_error($track_id) ){
                 return $track_id;
@@ -1282,7 +1282,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function autorship_notice(){
         if ( !$this->track_count ) return;
         if  ( !$this->user_can_get_tracklist_autorship() === true ) return;
-        if ( !wpsstm_is_community_post($this->post_id) ) return;
+        if ( !wpsstm_is_bot_post($this->post_id) ) return;
         
         $autorship_url = $this->get_tracklist_action_url('get-autorship');
         $autorship_link = sprintf('<a href="%s">%s</a>',$autorship_url,__("add it to your profile","wpsstm"));
