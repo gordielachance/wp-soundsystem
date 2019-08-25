@@ -153,7 +153,8 @@ class WPSSTM_Core_Track_Links{
     
     function add_query_vars_track_link($qvars){
         $qvars[] = 'parent_track';
-        $qvars[] = 'filter_link_hosts';
+        $qvars[] = 'no_excluded_hosts';
+        $qvars[] = 'only_excluded_hosts';
         return $qvars;
     }
     
@@ -224,8 +225,9 @@ class WPSSTM_Core_Track_Links{
         
         if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return $query;
 
-        $filter_hosts = $query->get('filter_link_hosts');
-        if (!$filter_hosts) return $query;
+        $no_excluded_hosts = $query->get('no_excluded_hosts');
+        $only_excluded_hosts = $query->get('only_excluded_hosts');
+        if (!$no_excluded_hosts && !$only_excluded_hosts) return $query;
 
         $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts');
         if (!$excluded_hosts) return $query;
@@ -242,10 +244,10 @@ class WPSSTM_Core_Track_Links{
         $excluded_links_ids = $wpdb->get_col( $querystr );
         
         
-        if ($filter_hosts === 'only'){
-            $query->set('post__in',$excluded_links_ids);
-        }else{
+        if ($no_excluded_hosts){
             $query->set('post__not_in',$excluded_links_ids);
+        }elseif ($only_excluded_hosts){
+            $query->set('post__in',$excluded_links_ids);
         }
 
         return $query;
@@ -683,10 +685,10 @@ class WPSSTM_Core_Track_Links{
         global $wpdb;
         
         $query_args = array(
-            'post_type' =>      wpsstm()->post_type_track_link,
-            'posts_per_page' => -1,
-            'post_status' =>    'any',
-            'filter_link_hosts' =>   'only',
+            'post_type' =>              wpsstm()->post_type_track_link,
+            'posts_per_page' =>         -1,
+            'post_status' =>            'any',
+            'only_excluded_hosts' =>    true,
         );
         
         $query = new WP_Query( $query_args );
@@ -777,16 +779,16 @@ class WPSSTM_Core_Track_Links{
     static function register_excluded_hosts_links_view($views){
         $screen =                   get_current_screen();
         $post_type =                $screen->post_type;
-        $filter_hosts =             get_query_var('filter_link_hosts');
+        $filter_hosts =             get_query_var('only_excluded_hosts');
 
-        $link = add_query_arg( array('post_type'=>$post_type,'filter_link_hosts'=>'only'),admin_url('edit.php') );
+        $link = add_query_arg( array('post_type'=>$post_type,'only_excluded_hosts'=>true),admin_url('edit.php') );
         $count = count(WPSSTM_Core_Track_Links::get_excluded_host_link_ids());
         
         $attr = array(
             'href' =>   $link,
         );
 
-        if ($filter_hosts === 'only'){
+        if ($filter_hosts){
             $attr['class'] = 'current';
         }
 
