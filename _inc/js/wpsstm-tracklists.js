@@ -212,7 +212,6 @@ class WpsstmTracklist extends HTMLElement{
         */
 
         var tracks = $(tracklist).find('wpsstm-track');
-        var playableTracks = tracks.filter('[wpsstm-playable]');
 
         //sort subtracks
         var startSortIdx, endSortIdx;
@@ -237,10 +236,6 @@ class WpsstmTracklist extends HTMLElement{
 
             }
         });
-        
-        if (!playableTracks.length){
-            tracklist.playable = false;
-        }
 
         tracklist.debug("Tracklist ready");
         

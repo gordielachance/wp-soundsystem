@@ -95,7 +95,7 @@ class WpsstmTrack extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['trackstatus','wpsstm-playable','didautolink'];
+        return ['trackstatus','wpsstm-playable','can-autolink'];
     }
     
     get status() {
@@ -119,16 +119,16 @@ class WpsstmTrack extends HTMLElement{
         }
     }
     
-    get didautolink() {
-        return this.hasAttribute('didautolink');
+    get can_autolink() {
+        return this.hasAttribute('can-autolink');
     }
 
-    set didautolink(value) {
+    set can_autolink(value) {
         const isChecked = Boolean(value);
         if (isChecked) {
-            this.setAttribute('didautolink', '');
+            this.setAttribute('can-autolink', '');
         } else {
-            this.removeAttribute('didautolink');
+            this.removeAttribute('can-autolink');
         }
     }
     
@@ -159,7 +159,7 @@ class WpsstmTrack extends HTMLElement{
         var sourceCountEl = $(track).find('.wpsstm-track-action-toggle-links .wpsstm-sources-count');
         sourceCountEl.text( sourceLinks.length );
         
-        if (!sourceLinks.length && track.didautolink){
+        if (!sourceLinks.length && !track.can_autolink){
             track_instances.prop('playable',false);
         }else{
              track_instances.prop('playable',true);
@@ -317,7 +317,7 @@ class WpsstmTrack extends HTMLElement{
                 track_instances.prop('playable', false);
             }
             
-            track_instances.prop('didautolink', true); //use prop and not attr here - https://stackoverflow.com/a/12940759/782013
+            track_instances.prop('can-autolink', false); //use prop and not attr here - https://stackoverflow.com/a/12940759/782013
             
         })
         .fail(function() {
@@ -586,7 +586,7 @@ class WpsstmTrack extends HTMLElement{
 
         //remove those that already been autolinked
         tracks_slice = tracks_slice.filter(function (index) {
-            return !this.didautolink;
+            return this.can_autolink;
         });
         
         /*

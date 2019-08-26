@@ -188,7 +188,7 @@ class WPSSTM_Settings {
         
         add_settings_field(
             'bot_user_id', 
-            __('Bot user ID','wpsstm'), 
+            __('User ID','wpsstm'), 
             array( $this, 'bot_user_id_callback' ), 
             'wpsstm-settings-page', 
             'bot_user_settings'
@@ -225,7 +225,7 @@ class WPSSTM_Settings {
         
         add_settings_field(
             'player_enabled', 
-            __('Audio Player','wpsstm'), 
+            __('Enabled','wpsstm'), 
             array( $this, 'player_enabled_callback' ), 
             'wpsstm-settings-page', 
             'player_settings'
@@ -348,7 +348,15 @@ class WPSSTM_Settings {
 
     function autolink_callback(){
         
-        $enabled = wpsstm()->get_options('autolink');
+        if ( $enabled = wpsstm()->get_options('autolink') ){
+            
+            $can_autolink = WPSSTM_Core_Track_Links::can_autolink();
+            
+            if ( is_wp_error($can_autolink) ){
+                add_settings_error('autolink',$can_autolink->get_error_code(),$can_autolink->get_error_message(),'inline');
+            }
+            
+        }
 
         /*
         form
@@ -360,8 +368,9 @@ class WPSSTM_Settings {
             checked( $enabled, true, false ),
             __("Try to get track links (stream URLs, ...) automatically if none have been set.","wpsstm")
         );
-        printf('<p style="color:red">%s</p>',__('Requires the Spotify API settings, and WP SoundSystem API premium.','wpsstm'));
-
+        
+        //display errors
+        settings_errors('autolink');
     }
     
     function playlists_manager_callback(){

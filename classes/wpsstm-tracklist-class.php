@@ -151,7 +151,9 @@ class WPSSTM_Tracklist{
 			do_action_ref_array( 'wpsstm_tracks_loop_end', array( &$this ) );
 			// Do some cleaning up after the loop
 			$this->rewind_tracks();
-		}
+		} elseif ( 0 === $this->track_count ) {
+            do_action( 'tracks_loop_no_results', $this );
+        }
 
 		$this->in_subtracks_loop = false;
 		return false;

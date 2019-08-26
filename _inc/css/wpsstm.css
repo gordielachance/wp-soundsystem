@@ -933,7 +933,7 @@ wpsstm-track.track-playing .wpsstm-track-action-play:before {
   content: "\f04c";
 }
 /* line 116, ../scss/_wpsstm-tracks.scss */
-wpsstm-track[didautolink]:not([wpsstm-playable]) .wpsstm-track-action-play:before {
+wpsstm-track:not([can-autolink]):not([wpsstm-playable]) .wpsstm-track-action-play:before {
   content: "\f071";
 }
 /* line 121, ../scss/_wpsstm-tracks.scss */

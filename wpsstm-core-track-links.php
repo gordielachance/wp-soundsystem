@@ -228,6 +228,7 @@ class WPSSTM_Core_Track_Links{
         
         
         if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return $query;
+        if ( !$excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ) return $query;
 
         $no_excluded_hosts = $query->get('no_excluded_hosts');
         $only_excluded_hosts = $query->get('only_excluded_hosts');
@@ -633,6 +634,11 @@ class WPSSTM_Core_Track_Links{
     static function can_autolink(){
         global $wpsstm_spotify;
         
+        //check enabled
+        if ( !$enabled = wpsstm()->get_options('autolink') ){
+            return new WP_Error( 'wpsstm_autolink_disabled', __("Autolink is disabled.",'wpsstm'));
+        }
+        
         //check bot user
         $bot_ready = wpsstm()->is_bot_ready();
         if ( is_wp_error($bot_ready) ) return $bot_ready;
@@ -641,14 +647,14 @@ class WPSSTM_Core_Track_Links{
         $has_spotify_api = $wpsstm_spotify->can_spotify_api();
 
         if ( $has_spotify_api !== true ){
-            return new WP_Error( 'wpsstm_spotify_api_missing',__('This requires a Spotify API key & secret.','wpsstm') );
+            return new WP_Error( 'wpsstm_spotify_api_missing',__('This requires a Spotify Client ID & Client Secret.','wpsstm') );
         }
         
         //wpssstm API
         $is_premium = WPSSTM_Core_API::is_premium();
         
         if ( $is_premium !== true ){
-            return new WP_Error( 'wpsstm_premium_missing',__('This requires you to be premium.','wpsstm') );
+            return new WP_Error( 'wpsstm_premium_missing',__('This requires you to be Premium.','wpsstm') );
         }
 
         //TOFIXKKK TO CHECK has links providers ?
@@ -815,6 +821,7 @@ class WPSSTM_Core_Track_Links{
         
         $screen =                   get_current_screen();
         
+        if ( !$excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ) return;
         if ( ($screen->base != 'edit') || ($screen->post_type != wpsstm()->post_type_track_link) ) return;
         if (!$excluded_hosts = get_query_var('only_excluded_hosts') ) return;
         if ( $is_cache_build = wpsstm_get_array_value('build_excluded_hosts_cache',$_GET) ) return;
@@ -833,6 +840,9 @@ class WPSSTM_Core_Track_Links{
     }
     
     static function register_excluded_hosts_links_view($views){
+        
+        if ( !$excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ) return $views;
+        
         $excluded_hosts =           get_query_var('only_excluded_hosts');
 
         $link = add_query_arg( array('post_type'=>wpsstm()->post_type_track_link,'only_excluded_hosts'=>true),admin_url('edit.php') );

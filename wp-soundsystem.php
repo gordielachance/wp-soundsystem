@@ -100,6 +100,7 @@ class WP_SoundSystem {
         $this->plugin_url = plugin_dir_url ( $this->file );
 
         $options_default = array(
+            'player_enabled'                    => true,
             'importer_page_id'                  => null,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'bot_user_id'                       => null,
@@ -439,6 +440,8 @@ class WP_SoundSystem {
         );
         $page_id = wp_insert_post( $post_details );
         if ( is_wp_error($page_id) ) return $page_id;
+        
+        self::debug_log($page_id,'created importer page');
         
         return $this->update_option( 'importer_page_id', $page_id );
     }

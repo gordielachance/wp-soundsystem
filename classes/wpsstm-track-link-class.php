@@ -177,7 +177,7 @@ class WPSSTM_Track_Link{
             $required_args = array(
                 'post_title' =>     $this->title,
                 'post_type' =>      wpsstm()->post_type_track_link,
-                'parent_track' =>   $this->track->post_id,
+                'post_parent' =>    $this->track->post_id,
                 'meta_input' =>     array(
                     WPSSTM_Core_Track_Links::$link_url_metakey => $this->permalink_url
                 )

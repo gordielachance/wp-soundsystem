@@ -641,7 +641,9 @@ class WPSSTM_Track{
     
     public function populate_links(){
         
-        $this->links = array(); //reset
+        //reset
+        $this->links = array();
+        $this->link_count = 0;
 
         if ($this->post_id){
             $args = array(
@@ -690,37 +692,18 @@ class WPSSTM_Track{
         $new_links = array();
         $links_auto = array();
 
-        if ( !wpsstm()->get_options('autolink') ){
-            return new WP_Error( 'wpsstm_autolink_disabled', __("Track autolink is disabled.",'wpsstm') );
-        }
+        $can_autolink = WPSSTM_Core_Track_Links::can_autolink();
+        if ( $can_autolink !== true ) return $can_autolink;
         
         if ( $this->did_autolink ) {
             return new WP_Error( 'wpsstm_autolink_disabled', __("Track has already been autolinkd recently.",'wpsstm') );
         }
         
         $this->track_log("start autolink...");
-        
-        $can_autolink = WPSSTM_Core_Track_Links::can_autolink();
-        if ( $can_autolink !== true ) return $can_autolink;
 
         $valid = $this->validate_track();
         if ( is_wp_error($valid) ) return $valid;
-        
-        /*
-        Create bot post if track does not exists yet, since we need to store some datas, including the autolink time.
-        */
-        if(!$this->post_id){
 
-            $track_id = $this->insert_bot_track();
-
-            if ( is_wp_error($track_id) ){
-                $error_msg = $track_id->get_error_message();
-                $this->track_log($error_msg,'Error while creating bot track');
-                return $track_id;
-            }
-
-        }
-        
         /*
         save autolink time so we won't query autolinks again too soon
         */
@@ -1019,6 +1002,7 @@ class WPSSTM_Track{
     
     function get_track_attr($args=array()){
         global $wpsstm_tracklist;
+        $can_autolink = ( WPSSTM_Core_Track_Links::can_autolink() === true);
 
         $attr = array(
             'itemscope' =>                      true,
@@ -1028,7 +1012,7 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
-            'didautolink' =>                    $this->did_autolink,
+            'can-autolink' =>                   ( $can_autolink && !$this->did_autolink),
             'wpsstm-playable' =>                wpsstm()->get_options('player_enabled'),
         );
 
@@ -1139,6 +1123,7 @@ class WPSSTM_Track{
 	 * @return bool True if links are available, false if end of loop.
 	 */
 	public function have_links() {
+        
 		if ( $this->current_link + 1 < $this->link_count ) {
 			return true;
 		} elseif ( $this->current_link + 1 == $this->link_count && $this->link_count > 0 ) {
@@ -1152,7 +1137,9 @@ class WPSSTM_Track{
 			do_action_ref_array( 'wpsstm_links_loop_end', array( &$this ) );
 			// Do some cleaning up after the loop
 			$this->rewind_links();
-		}
+		} elseif ( 0 === $this->link_count ) {
+            do_action( 'links_loop_no_results', $this );
+        }
 
 		$this->in_link_loop = false;
 		return false;
