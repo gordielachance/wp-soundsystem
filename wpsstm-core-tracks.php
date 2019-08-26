@@ -91,8 +91,10 @@ class WPSSTM_Core_Tracks{
         */
         add_action( 'before_delete_post', array($this,'delete_track_links') );
         add_action( 'before_delete_post', array($this,'delete_subtracks') );
+        add_action( 'before_delete_post', array($this,'delete_empty_music_terms') );
+
     }
-    
+
     /*
     Set global $wpsstm_track 
     */
@@ -1223,6 +1225,37 @@ class WPSSTM_Core_Tracks{
         $rowquerystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE track_id = '%s'",$post_id );
         
         return $wpdb->get_results ( $rowquerystr );
+    }
+    
+    /*
+    When deleting a post, remove the terms attached to it if they are attached only to this post.
+    */
+    
+    function delete_empty_music_terms($post_id){
+        global $wpdb;
+        
+        $allowed_types = array(
+            wpsstm()->post_type_artist,
+            wpsstm()->post_type_album,
+            wpsstm()->post_type_track,
+        );
+        
+        $taxonomies = array(
+            WPSSTM_Core_Tracks::$artist_taxonomy,
+            WPSSTM_Core_Tracks::$track_taxonomy,
+            WPSSTM_Core_Tracks::$album_taxonomy
+        );
+        
+        if ( !in_array(get_post_type($post_id),$allowed_types ) ) return;
+
+        $args = array();
+        $terms = wp_get_post_terms( $post_id, $taxonomies, $args );
+        
+        foreach((array)$terms as $term){
+            if ( $term->count <= 1 ){ //since post has not been deleted yet
+                wp_delete_term( $term->term_id, $term->taxonomy );
+            }
+        }
     }
 
     /*
