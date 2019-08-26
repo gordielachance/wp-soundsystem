@@ -829,7 +829,7 @@ class WPSSTM_Core_Track_Links{
         );
         $link_el = sprintf('<a class="button" href="%s">%s</a>',$link_url,__('Rebuild cache','wpsstm'));
         $notice = __('In order to accelerate queries, a cache of track links matching excluded hosts is built every week.','wpsstm') . '  ' . $link_el;
-        printf('<div class="notice notice-warning is-dismissible"><p>%s</p></div>',$notice);
+        printf('<div class="notice notice-warning"><p>%s</p></div>',$notice);
     }
     
     static function register_excluded_hosts_links_view($views){

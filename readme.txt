@@ -134,7 +134,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 * Removed setting 'Trash orphan links' + new'Orphan' track links view
 * Removed setting 'Trash orphan tracks' + new'Orphan' tracks view
 * Removed setting 'Trash temporary tracklists'
-* Programmatically create bot user at installation 
+* Programmatically create bot user at installation + migrate old setting
+* Programmatically create import page at installation + migrate old setting
+* database v211
 
 = 2.9.4 =
 * GUI: jsons now displayed using [jQuery json-viewer](https://github.com/abodelot/jquery.json-viewer)
