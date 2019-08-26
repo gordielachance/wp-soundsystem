@@ -41,7 +41,7 @@ class WPSSTM_Core_Importer{
         //we HAVE an author query
         if ( $query->get('author') || $query->get('author_name') || $query->get('author__in') ) return $query;
 
-        if ( !$bot_id = wpsstm()->get_options('community_user_id') ) return $query;
+        if ( !$bot_id = wpsstm()->get_options('bot_user_id') ) return $query;
 
         //ignore bot posts
         $author_not_in = $query->get('author__not_in');
@@ -198,7 +198,7 @@ class WPSSTM_Core_Importer{
             WP_SoundSystem::debug_log('Bot user not ready','Frontend import URL' );
             return;
         }
-        $bot_id = wpsstm()->get_options('community_user_id');
+        $bot_id = wpsstm()->get_options('bot_user_id');
 
         
         $duplicate_args = array(

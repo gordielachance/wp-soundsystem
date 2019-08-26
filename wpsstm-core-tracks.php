@@ -1232,7 +1232,7 @@ class WPSSTM_Core_Tracks{
     */
     static function get_orphan_track_ids(){
         global $wpdb;
-        $bot_id = wpsstm()->get_options('community_user_id');
+        $bot_id = wpsstm()->get_options('bot_user_id');
         if ( !$bot_id ) return;
 
         //get bot tracks

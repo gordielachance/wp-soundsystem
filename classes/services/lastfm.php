@@ -563,13 +563,13 @@ class WPSSTM_LastFM{
     function ajax_lastfm_scrobble_bot_track(){
         
         $ajax_data = wp_unslash($_POST);
-        $bot_id = wpsstm()->get_options('community_user_id');
+        $bot_id = wpsstm()->get_options('bot_user_id');
 
         $result = array(
             'input' =>              $ajax_data,
             'message' =>            null,
             'success' =>            false,
-            'community_user_id' =>  $bot_id
+            'bot_user_id' =>  $bot_id
         );
         
         if ( $bot_id ){
@@ -636,7 +636,7 @@ class WPSSTM_LastFM{
     
     public function can_scrobble_along(){
 
-        $bot_id = wpsstm()->get_options('community_user_id');
+        $bot_id = wpsstm()->get_options('bot_user_id');
         if (!$bot_id){
             return new WP_Error( 'wpsstm_lastfm_bot_scrobble',__('Scrobble Along requires a bot user.','wpsstm') );   
         }

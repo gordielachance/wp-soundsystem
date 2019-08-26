@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '210';
+    public $db_version = '211';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -102,7 +102,7 @@ class WP_SoundSystem {
         $options_default = array(
             'frontend_scraper_page_id'          => null,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
-            'community_user_id'                 => null,
+            'bot_user_id'                       => null,
             'autolink'                          => true,
             'autolink_lock_hours'               => 48,
             'limit_autolinks'                   => 5,
@@ -265,6 +265,7 @@ class WP_SoundSystem {
         if(!$current_version){ //not installed
 
             $this->setup_subtracks_table();
+            $this->create_bot_user();
 
         }else{
 
@@ -391,11 +392,37 @@ class WP_SoundSystem {
                 }
                 
             }
+            
+            if ($current_version < 211){
+                //migrate community user
+                if ( $community_id = $this->get_options('community_user_id') ){
+                    $success = $this->update_option( 'bot_user_id', $community_id );
+                }
+            }
 
         }
         
         //update DB version
         update_option("_wpsstm-db_version", $this->db_version );
+    }
+    
+    function create_bot_user(){
+
+        $bot_id = wp_create_user( 
+            'wpsstm bot',
+            wp_generate_password()
+        );
+        if ( is_wp_error($bot_id) ) return $bot_id;
+        
+        $this->update_option( 'bot_user_id', $bot_id );
+        self::debug_log($bot_id,'created bot user');
+
+        $user = new WP_User( $bot_id );
+        
+        //TOFIX URGENT should be caps instead of role ?
+        $success = $user->set_role( 'author' );
+
+        return $success;
     }
 
     
@@ -470,6 +497,12 @@ class WP_SoundSystem {
 
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
+    }
+    
+    function update_option($key, $value){
+        $db_option = get_option( $this->meta_name_options);
+        $db_option[$key] = $value;
+        return update_option( $this->meta_name_options, $db_option );
     }
 
     function register_scripts_styles(){
@@ -570,7 +603,7 @@ class WP_SoundSystem {
     
     function register_imported_view($views){
         
-        if ( !$bot_id = $this->get_options('community_user_id') ) return $views;
+        if ( !$bot_id = $this->get_options('bot_user_id') ) return $views;
         
         $screen = get_current_screen();
         $post_type = $screen->post_type;
@@ -710,7 +743,7 @@ class WP_SoundSystem {
     public function is_bot_ready(){
         
         //bot
-        $bot_id = $this->get_options('community_user_id');
+        $bot_id = $this->get_options('bot_user_id');
         
         if ( !$bot_id ){
             return new WP_Error( 'wpsstm_missing_bot', __("Missing bot user.",'wpsstm'));

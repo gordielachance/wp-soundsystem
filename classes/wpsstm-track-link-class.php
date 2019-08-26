@@ -157,7 +157,7 @@ class WPSSTM_Track_Link{
                 //check bot user
                 $bot_ready = wpsstm()->is_bot_ready();
                 if ( is_wp_error($bot_ready) ) return $bot_ready;
-                $post_author = wpsstm()->get_options('community_user_id');
+                $post_author = wpsstm()->get_options('bot_user_id');
                 
             }else{
                 

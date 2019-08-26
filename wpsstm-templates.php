@@ -159,7 +159,7 @@ function wpsstm_get_datetime($timestamp){
 function wpsstm_is_bot_post($post_id = null){
     global $post;
     
-    if ( !$bot_id = wpsstm()->get_options('community_user_id') ) return false;
+    if ( !$bot_id = wpsstm()->get_options('bot_user_id') ) return false;
 
     if (!$post_id && $post) $post_id = $post->ID;
     $post_author_id = get_post_field( 'post_author', $post_id );

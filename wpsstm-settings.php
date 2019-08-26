@@ -314,7 +314,7 @@ class WPSSTM_Settings {
             'settings_maintenance'//section
         );
         
-        if ( $bot_id = wpsstm()->get_options('community_user_id') ){
+        if ( $bot_id = wpsstm()->get_options('bot_user_id') ){
             
             add_settings_field(
                 'delete_temporary_tracklists', 
@@ -584,7 +584,7 @@ class WPSSTM_Settings {
     }
     
     function bot_user_id_callback(){
-        $bot_id = wpsstm()->get_options('community_user_id');
+        $bot_id = wpsstm()->get_options('bot_user_id');
         $bot_ready = wpsstm()->is_bot_ready();
 
         if ( is_wp_error($bot_ready) ){
@@ -599,6 +599,13 @@ class WPSSTM_Settings {
             wpsstm()->meta_name_options,
             $bot_id
         );
+        
+        if ( $bot_id = wpsstm()->get_options('bot_user_id') ){
+            $userdata = get_userdata( $bot_id );
+            $edit_url = get_edit_user_link($bot_id);
+            $edit_link = sprintf('<a href="%s">%s</a>',$edit_url,__('Edit'));
+            printf('<p>username: %s | %s</p>',$userdata->user_login,$edit_link);
+        }
         
         /*
         errors

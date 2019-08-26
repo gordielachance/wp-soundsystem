@@ -401,7 +401,7 @@ class WPSSTM_Track{
         //check bot user
         $bot_ready = wpsstm()->is_bot_ready();
         if ( is_wp_error($bot_ready) ) return $bot_ready;
-        $bot_id = wpsstm()->get_options('community_user_id');
+        $bot_id = wpsstm()->get_options('bot_user_id');
 
         $post_id = null;
 

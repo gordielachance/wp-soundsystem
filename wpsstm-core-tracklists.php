@@ -727,7 +727,7 @@ class WPSSTM_Core_Tracklists{
     }
 
     static function get_bot_tracklists_ids(){
-        $bot_id = wpsstm()->get_options('community_user_id');
+        $bot_id = wpsstm()->get_options('bot_user_id');
         if ( !$bot_id ) return;
 
         //get bot tracks
