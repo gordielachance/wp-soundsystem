@@ -937,19 +937,37 @@ class WPSSTM_Core_Tracks{
 
             break;
         }
+        
+        
 
+    }
+
+    private static function save_track_music_term($post_id, $taxonomy, $value = null){
+        
+        $old_term = null;
+        
+        if ( $old_terms = wp_get_post_terms( $post_id, $taxonomy ) ){
+            $old_term = $old_terms[0];
+        }
+
+        //delete previous term if unique
+        if ( $old_term && ($value !== $old_term->name) && $old_term->count <= 1 ){
+            wp_delete_term( $old_term->term_id, $taxonomy );
+        }
+
+        return wp_set_post_terms( $post_id,$value, $taxonomy);
     }
     
     static function save_track_title($post_id, $value = null){
-        return wp_set_post_terms( $post_id,$value, WPSSTM_Core_Tracks::$track_taxonomy);
+        return self::save_track_music_term($post_id,WPSSTM_Core_Tracks::$track_taxonomy,$value);
     }
     
     static function save_track_artist($post_id, $value = null){
-        return wp_set_post_terms( $post_id,$value, WPSSTM_Core_Tracks::$artist_taxonomy);
+        return self::save_track_music_term($post_id,WPSSTM_Core_Tracks::$artist_taxonomy,$value);
     }
     
     static function save_track_album($post_id, $value = null){
-        return wp_set_post_terms( $post_id,$value, WPSSTM_Core_Tracks::$album_taxonomy);
+        return self::save_track_music_term($post_id,WPSSTM_Core_Tracks::$album_taxonomy,$value);
     }
     
     static function save_track_length($post_id, $value = null){
@@ -1252,7 +1270,8 @@ class WPSSTM_Core_Tracks{
         $terms = wp_get_post_terms( $post_id, $taxonomies, $args );
         
         foreach((array)$terms as $term){
-            if ( $term->count <= 1 ){ //since post has not been deleted yet
+            if ( $term->count <= 0 ){
+                WP_SoundSystem::debug_log($term,'delete unique term');
                 wp_delete_term( $term->term_id, $term->taxonomy );
             }
         }
