@@ -19,6 +19,9 @@ class WPSSTM_Core_Live_Playlists{
         add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
         add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
 
+        
+        //backend
+        add_action('admin_notices', array(__class__,'radios_notice') );
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_imported_view') );
 
@@ -194,6 +197,14 @@ class WPSSTM_Core_Live_Playlists{
         
 
         return $query;
+    }
+    
+    static function radios_notice(){
+        $screen =                   get_current_screen();
+        if ( ($screen->base != 'edit') || ($screen->post_type != wpsstm()->post_type_live_playlist) ) return;
+
+        $notice = __("Radios are how we call 'live playlists'. Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are synced seamlessly after a user-defined delay.  Use the 'Tracklist Importer' metabox to setup your radio.",'wpsstm');
+        printf('<div class="notice notice-warning is-dismissible"><p>%s</p></div>',$notice);
     }
 
 }
