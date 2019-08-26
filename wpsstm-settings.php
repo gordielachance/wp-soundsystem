@@ -58,10 +58,6 @@ class WPSSTM_Settings {
             WPSSTM_Core_Track_Links::delete_duplicate_links();
         }
 
-        if( isset( $input['delete-temporary-tracklists'] ) ){
-            WPSSTM_Core_Tracklists::delete_temporary_tracklists();
-        }
-        
         if( isset( $input['delete-unused-terms'] ) ){
             WPSSTM_Core_Tracks::batch_delete_unused_terms();
         }
@@ -313,18 +309,6 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
-        
-        if ( $bot_id = wpsstm()->get_options('bot_user_id') ){
-            
-            add_settings_field(
-                'delete_temporary_tracklists', 
-                __('Delete temporary tracklists','wpsstm'), 
-                array( $this, 'delete_temporary_tracklists_callback' ), 
-                'wpsstm-settings-page', // Page
-                'settings_maintenance'//section
-            );
-
-        }
 
         add_settings_field(
             'delete_duplicate_links', 
@@ -622,17 +606,6 @@ class WPSSTM_Settings {
             '<input type="checkbox" name="%s[reset_options]" value="on"/><label>%s</label>',
             wpsstm()->meta_name_options,
             __("Reset options to their default values.","wpsstm")
-        );
-    }
-    
-    function delete_temporary_tracklists_callback(){
-        $count = count(WPSSTM_Core_Tracklists::get_bot_tracklists_ids());
-        $desc = sprintf(__("Delete %d tracklists that were created with the bot user.","wpsstm"),$count);
-        printf(
-            '<input type="checkbox" name="%s[delete-temporary-tracklists]" value="on" %s /><label>%s</label>',
-            wpsstm()->meta_name_options,
-            disabled($count,0,false),
-            $desc
         );
     }
 

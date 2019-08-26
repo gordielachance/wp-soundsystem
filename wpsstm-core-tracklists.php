@@ -742,32 +742,7 @@ class WPSSTM_Core_Tracklists{
         $query = new WP_Query( $args );
         return $query->posts;
     }
-    
-    /*
-    Delete temporary tracklists
-    */
-    static function delete_temporary_tracklists(){
-        
-        if ( !current_user_can('manage_options') ){
-            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
-        }
 
-        $flushed_ids = array();
-        
-        if ( $flushable_ids = self::get_bot_tracklists_ids() ){
-
-            foreach( (array)$flushable_ids as $id ){
-                $success = wp_delete_post($id,true);
-                if ( $success ) $flushed_ids[] = $id;
-            }
-        }
-
-        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'flushed'=>count($flushed_ids))),"Deleted temporary tracklists");
-
-        return $flushed_ids;
-
-    }
-    
     //TOUFIX TOUIMPROVE we woudl like to have that title in the input title backend, too.
     function filter_imported_playlist_title( $title, $post_id = null ) {
         if ( in_array(get_post_type($post_id),wpsstm()->tracklist_post_types) ){
