@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 2.9.4
+Version: 2.9.5
 License: GPL2
 */
 
@@ -404,6 +404,8 @@ class WP_SoundSystem {
                 if ( $page_id = $this->get_options('frontend_scraper_page_id') ){
                     $success = $this->update_option( 'importer_page_id', $page_id );
                 }
+                //remove unused music terms since we hadn't cleanup functions before this version
+                $this->remove_unused_music_terms();
             }
 
         }
@@ -445,7 +447,6 @@ class WP_SoundSystem {
         
         return $this->update_option( 'importer_page_id', $page_id );
     }
-
     
     function setup_subtracks_table(){
         global $wpdb;
@@ -465,6 +466,40 @@ class WP_SoundSystem {
 
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
         return dbDelta( $sql );
+    }
+    
+    /*
+    we don't use $wpdb->prepare here because it adds quotes like IN('1,2,3,4'), and we don't want that.
+    https://wordpress.stackexchange.com/questions/78659/wpdb-prepare-function-remove-single-quote-for-s-in-sql-statment
+    */
+    
+    private static function remove_unused_music_terms(){
+        global $wpdb;
+
+        $unused_terms = array();
+
+        $taxonomies = array(
+            WPSSTM_Core_Tracks::$artist_taxonomy,
+            WPSSTM_Core_Tracks::$track_taxonomy,
+            WPSSTM_Core_Tracks::$album_taxonomy
+        );
+
+        foreach ($taxonomies as $taxonomy){
+
+            //update music terms count
+            $querystr = $wpdb->prepare( "UPDATE wp_term_taxonomy tt SET count = (SELECT count(p.ID) FROM wp_term_relationships tr LEFT JOIN wp_posts p ON p.ID = tr.object_id WHERE tr.term_taxonomy_id = tt.term_taxonomy_id) WHERE taxonomy='%s'",$taxonomy );
+            $result = $wpdb->get_results ( $querystr );
+
+            //get unused term IDs
+            $querystr = $wpdb->prepare( "SELECT term_id,taxonomy FROM wp_term_taxonomy WHERE taxonomy='%s' AND count = 0 ",$taxonomy );
+            $terms = $wpdb->get_results($querystr);
+            $unused_terms = array_merge($unused_terms,$terms);
+        }
+        
+        foreach($unused_terms as $term){
+            wp_delete_term( $term->term_id, $term->taxonomy );
+        }
+
     }
 
     /*

@@ -58,10 +58,6 @@ class WPSSTM_Settings {
             WPSSTM_Core_Track_Links::delete_duplicate_links();
         }
 
-        if( isset( $input['delete-unused-terms'] ) ){
-            WPSSTM_Core_Tracks::batch_delete_unused_terms();
-        }
-
         /*
         Bot user
         */
@@ -312,14 +308,6 @@ class WPSSTM_Settings {
             'delete_duplicate_links', 
             __('Delete duplicate links','wpsstm'), 
             array( $this, 'delete_duplicate_links_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings_maintenance'//section
-        );
-        
-        add_settings_field(
-            'delete_unused_terms', 
-            __('Delete unused terms','wpsstm'), 
-            array( $this, 'delete_unused_terms_callback' ), 
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
@@ -624,23 +612,6 @@ class WPSSTM_Settings {
         $desc = sprintf(__("Delete %d duplicate links (same URL & parent post).","wpsstm"),$count);
         printf(
             '<input type="checkbox" name="%s[delete-duplicate-links]" value="on" %s /><label>%s</label>',
-            wpsstm()->meta_name_options,
-            disabled($count,0,false),
-            $desc
-        );
-    }
-    
-    /*
-    Delete the unused terms.
-    https://www.shawnhooper.ca/2015/10/22/cleaning-up-unused-terms-in-wordpress-database-in-mysql/
-    */
-    
-    function delete_unused_terms_callback(){
-        
-        $count = count(WPSSTM_Core_Tracks::get_unused_term_ids());
-        $desc = sprintf(__("Delete %d unused music taxonomy terms.","wpsstm"),$count);
-        printf(
-            '<input type="checkbox" name="%s[delete-unused-terms]" value="on" %s /><label>%s</label>',
             wpsstm()->meta_name_options,
             disabled($count,0,false),
             $desc
