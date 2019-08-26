@@ -259,6 +259,9 @@ class WP_SoundSystem {
     function upgrade(){
 
         global $wpdb;
+        
+        //TOFIX URGENT TO REMOVE
+        self::batch_delete_orphan_tracks();
 
         $current_version = get_option("_wpsstm-db_version");
 
@@ -405,7 +408,7 @@ class WP_SoundSystem {
                     $success = $this->update_option( 'importer_page_id', $page_id );
                 }
                 //remove unused music terms since we hadn't cleanup functions before this version
-                $this->remove_unused_music_terms();
+                $this->batch_delete_unused_music_terms();
             }
 
         }
@@ -473,7 +476,7 @@ class WP_SoundSystem {
     https://wordpress.stackexchange.com/questions/78659/wpdb-prepare-function-remove-single-quote-for-s-in-sql-statment
     */
     
-    private static function remove_unused_music_terms(){
+    private static function batch_delete_unused_music_terms(){
         global $wpdb;
 
         $unused_terms = array();
@@ -499,6 +502,28 @@ class WP_SoundSystem {
         foreach($unused_terms as $term){
             wp_delete_term( $term->term_id, $term->taxonomy );
         }
+
+    }
+    
+    static function batch_delete_orphan_tracks(){
+        
+        if ( !current_user_can('manage_options') ){
+            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
+        }
+
+        $trashed = array();
+        
+        if ( $flushable_ids = WPSSTM_Core_Tracks::get_orphan_track_ids() ){
+
+            foreach( (array)$flushable_ids as $track_id ){
+                $success = wp_delete_post($track_id,true);
+                if ( $success ) $trashed[] = $track_id;
+            }
+        }
+
+        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan tracks");
+
+        return $trashed;
 
     }
 
