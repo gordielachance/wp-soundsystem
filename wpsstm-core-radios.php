@@ -23,7 +23,7 @@ class WPSSTM_Core_Live_Playlists{
         //backend
         add_action('admin_notices', array(__class__,'radios_notice') );
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
-        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_imported_view') );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_imported_view'), 5 );
 
     }
 

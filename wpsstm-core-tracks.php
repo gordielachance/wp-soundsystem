@@ -46,7 +46,7 @@ class WPSSTM_Core_Tracks{
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'tracks_columns_register') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(__class__,'register_orphan_tracks_view') );
-        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_imported_view') );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_imported_view'), 5 );
 
         //track shortcode
         add_shortcode( 'wpsstm-track',  array($this, 'shortcode_track'));
