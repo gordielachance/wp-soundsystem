@@ -604,7 +604,7 @@ class WPSSTM_Settings {
             $userdata = get_userdata( $bot_id );
             $edit_url = get_edit_user_link($bot_id);
             $edit_link = sprintf('<a href="%s">%s</a>',$edit_url,__('Edit'));
-            printf('<p>username: %s | %s</p>',$userdata->user_login,$edit_link);
+            printf('<p>%s | %s</p>',$userdata->user_login,$edit_link);
         }
         
         /*
