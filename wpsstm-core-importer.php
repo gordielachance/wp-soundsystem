@@ -56,7 +56,7 @@ class WPSSTM_Core_Importer{
     */
     
     function frontend_importer_content($content){
-        if ( !get_post_type(wpsstm()->get_options('importer_page_id')) ) return $content;
+        if ( !is_page(wpsstm()->get_options('importer_page_id')) ) return $content;
         
         //check bot user
         $bot_ready = wpsstm()->is_bot_ready();
