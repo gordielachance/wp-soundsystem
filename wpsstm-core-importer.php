@@ -56,7 +56,7 @@ class WPSSTM_Core_Importer{
     */
     
     function frontend_importer_content($content){
-        if ( !is_page(wpsstm()->get_options('frontend_scraper_page_id')) ) return $content;
+        if ( !get_post_type(wpsstm()->get_options('importer_page_id')) ) return $content;
         
         //check bot user
         $bot_ready = wpsstm()->is_bot_ready();
@@ -187,7 +187,7 @@ class WPSSTM_Core_Importer{
         
         global $wpsstm_tracklist;
 
-        if ( !wpsstm()->get_options('frontend_scraper_page_id') ) return;
+        if ( !wpsstm()->get_options('importer_page_id') ) return;
         
         $url = wpsstm_get_array_value('wpsstm_frontend_wizard_url',$_POST);
         if (!$url) return;
@@ -264,7 +264,7 @@ class WPSSTM_Core_Importer{
         $success = wp_insert_post( $post_args, true );
 
         if ( is_wp_error($success) ){
-            $link = get_permalink(wpsstm()->get_options('frontend_scraper_page_id'));
+            $link = get_permalink(wpsstm()->get_options('importer_page_id'));
             $link = add_query_arg(array('wizard_error'=>$success->get_error_code()),$link);
             wp_safe_redirect($link);
             exit;

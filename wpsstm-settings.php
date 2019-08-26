@@ -104,13 +104,11 @@ class WPSSTM_Settings {
         Importer
         */
 
-        //scraper wizard page ID
-        if ( isset ($input['frontend_scraper_page_id']) && ctype_digit($input['frontend_scraper_page_id']) ){
-            if ( is_string( get_post_status( $input['frontend_scraper_page_id'] ) ) ){ //check page exists
-                $new_input['frontend_scraper_page_id'] = $input['frontend_scraper_page_id'];
-                flush_rewrite_rules(); //because of function frontend_wizard_rewrite()
+        //importer page ID
+        if ( isset ($input['importer_page_id']) && ctype_digit($input['importer_page_id']) ){
+            if ( get_post_type($input['importer_page_id'] ) ){ //check page exists
+                $new_input['importer_page_id'] = $input['importer_page_id'];
             }
-
         }
 
         /*
@@ -197,6 +195,25 @@ class WPSSTM_Settings {
         );
         
         /*
+        Importer page
+        */
+
+        add_settings_section(
+            'tracklist_importer', // ID
+            __('Import page','wpsstm'), // Title
+            array( $this, 'section_importer_page_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+
+        add_settings_field(
+            'importer_page_id', 
+            __('Page ID','wpsstm'), 
+            array( $this, 'importer_page_callback' ), 
+            'wpsstm-settings-page', 
+            'tracklist_importer'
+        );
+        
+        /*
         Player
         */
         add_settings_section(
@@ -212,25 +229,6 @@ class WPSSTM_Settings {
             array( $this, 'player_enabled_callback' ), 
             'wpsstm-settings-page', 
             'player_settings'
-        );
-
-        /*
-        Tracklist Importer
-        */
-
-        add_settings_section(
-            'tracklist_importer', // ID
-            __('Tracklist Importer','wpsstm'), // Title
-            array( $this, 'section_importer_desc' ), // Callback
-            'wpsstm-settings-page' // Page
-        );
-
-        add_settings_field(
-            'frontend_scraper_page_id', 
-            __('Frontend Tracklist Importer','wpsstm'), 
-            array( $this, 'frontend_importer_callback' ), 
-            'wpsstm-settings-page', 
-            'tracklist_importer'
         );
         
         /*
@@ -521,8 +519,8 @@ class WPSSTM_Settings {
 
     }
 
-    function section_importer_desc(){
-        $desc[] = __('This module adds a new metabox to import tracks from various services like Spotify, or any webpage where a tracklist is displayed.','wppstm');
+    function section_importer_page_desc(){
+        $desc[] = __('Page used as placeholder to import tracklists frontend.','wppstm');
         
         //wrap
         $desc = array_map(
@@ -551,20 +549,22 @@ class WPSSTM_Settings {
         
     }
 
-    function frontend_importer_callback(){
-        $option = wpsstm()->get_options('frontend_scraper_page_id');
+    function importer_page_callback(){
+        $page_id = wpsstm()->get_options('importer_page_id');
 
-        $help = array();
-        $help[]= __("ID of the page used to display the frontend Tracklist Importer.","wpsstm");
-        $help[]= __("0 = Disabled.","wpsstm");
-        $help = sprintf("<small>%s</small>",implode('  ',$help));
-        
         printf(
-            '<input type="number" name="%s[frontend_scraper_page_id]" size="4" min="0" value="%s"/><br/>%s',
+            '<input type="number" name="%s[importer_page_id]" size="4" min="0" value="%s"/>',
             wpsstm()->meta_name_options,
-            $option,
-            $help
+            $page_id
         );
+        
+        if ( get_post_type($page_id) ){
+            $page_title = get_the_title( $page_id );
+            $edit_url = get_edit_post_link($page_id);
+            $link_txt = sprintf(__('Edit page %s','wpsstm'),'<em>' . $page_title . '</em>');
+            printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
+        }
+        
     }
     
     function bot_user_id_callback(){
@@ -587,8 +587,9 @@ class WPSSTM_Settings {
         if ( $bot_id = wpsstm()->get_options('bot_user_id') ){
             $userdata = get_userdata( $bot_id );
             $edit_url = get_edit_user_link($bot_id);
-            $edit_link = sprintf('<a href="%s">%s</a>',$edit_url,__('Edit'));
-            printf('<p>%s | %s</p>',$userdata->user_login,$edit_link);
+            $link_txt = sprintf(__('Edit user %s','wpsstm'),'<em>' . $userdata->user_login . '</em>');
+            printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
+            
         }
         
         /*

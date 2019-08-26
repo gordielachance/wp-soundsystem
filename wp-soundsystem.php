@@ -100,7 +100,7 @@ class WP_SoundSystem {
         $this->plugin_url = plugin_dir_url ( $this->file );
 
         $options_default = array(
-            'frontend_scraper_page_id'          => null,
+            'importer_page_id'                  => null,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'bot_user_id'                       => null,
             'autolink'                          => true,
@@ -266,6 +266,7 @@ class WP_SoundSystem {
 
             $this->setup_subtracks_table();
             $this->create_bot_user();
+            $this->create_import_page();
 
         }else{
 
@@ -398,6 +399,10 @@ class WP_SoundSystem {
                 if ( $community_id = $this->get_options('community_user_id') ){
                     $success = $this->update_option( 'bot_user_id', $community_id );
                 }
+                //migrate frontend importer
+                if ( $page_id = $this->get_options('frontend_scraper_page_id') ){
+                    $success = $this->update_option( 'importer_page_id', $page_id );
+                }
             }
 
         }
@@ -406,7 +411,7 @@ class WP_SoundSystem {
         update_option("_wpsstm-db_version", $this->db_version );
     }
     
-    function create_bot_user(){
+    private function create_bot_user(){
 
         $bot_id = wp_create_user( 
             'wpsstm bot',
@@ -423,6 +428,19 @@ class WP_SoundSystem {
         $success = $user->set_role( 'author' );
 
         return $success;
+    }
+    
+    private function create_import_page(){
+        $post_details = array(
+            'post_title' =>     __('Tracklist importer','wpsstm'),
+            'post_status' =>    'publish',
+            'post_author' =>    get_current_user_id(),
+            'post_type' =>      'page'
+        );
+        $page_id = wp_insert_post( $post_details );
+        if ( is_wp_error($page_id) ) return $page_id;
+        
+        return $this->update_option( 'importer_page_id', $page_id );
     }
 
     
