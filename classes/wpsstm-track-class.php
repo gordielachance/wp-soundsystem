@@ -624,7 +624,7 @@ class WPSSTM_Track{
         $required_args = array(
             'post_type'     =>      wpsstm()->post_type_track_link,
             'parent_track'  =>      $this->post_id,
-            'no_excluded_hosts'=>   true, //TOFIX URGENT slows down queries a lot.
+            'no_excluded_hosts'=>   true,
         );
         
         //we need a parent track or it will return all links; so force return nothing

@@ -127,7 +127,7 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= XXX =
+= 2.9.5 =
 * New maintenance option : delete unused music terms
 * cache (transient) for excluded track links
 * Removed setting 'Trash excluded hosts links' + new 'Excluded hosts' track links view
@@ -136,6 +136,8 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 * Removed setting 'Trash temporary tracklists'
 * Programmatically create bot user at installation + migrate old setting
 * Programmatically create import page at installation + migrate old setting
+* When updating track artist/album/title, remove old music term if unique
+* When deleting a post, remove the music terms attached to it if unique
 * database v211
 
 = 2.9.4 =
