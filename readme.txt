@@ -128,7 +128,10 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 == Changelog ==
 
 = 2.9.5 =
-* New maintenance option : delete unused music terms
+* renamed API route : /'import/url/?url=...' -> import/?input=...
+* fix unable to add new tracklist tracks on post-new.php
+* Soundcloud : fix settings not saving
+* Autolink : better GUI
 * cache (transient) for excluded track links
 * Removed setting 'Trash excluded hosts links' + new 'Excluded hosts' track links view
 * Removed setting 'Trash orphan links' + new'Orphan' track links view
@@ -138,21 +141,7 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 * Programmatically create import page at installation + migrate old setting
 * When updating track artist/album/title, remove old music term if unique
 * When deleting a post, remove the music terms attached to it if unique
-* database v211
-
-= 2.9.4 =
 * GUI: jsons now displayed using [jQuery json-viewer](https://github.com/abodelot/jquery.json-viewer)
-* System options : delete posts instead of trashing them (will be faster to clean DB)
-
-= 2.9.3 =
-* renamed API route : /'import/url/?url=...' -> import/?input=...
-
-= 2.9.2 =
-* fix unable to add new tracklist tracks on post-new.php
-
-= 2.9.1 =
-* Soundcloud : fix settings not saving
-* Autolink : better GUI
 
 = 2.9.0 =
 * Removed registration call to action (should be handled by a theme, not by this plugin)
