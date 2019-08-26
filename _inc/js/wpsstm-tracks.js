@@ -111,9 +111,9 @@ class WpsstmTrack extends HTMLElement{
     }
     
     set playable(value) {
-        const isChecked = Boolean(value);
+        var isChecked = Boolean(value);
         if (isChecked) {
-            this.setAttribute('wpsstm-playable', '');
+            this.setAttribute('wpsstm-playable',true);
         } else {
             this.removeAttribute('wpsstm-playable');
         }
@@ -124,9 +124,9 @@ class WpsstmTrack extends HTMLElement{
     }
 
     set can_autolink(value) {
-        const isChecked = Boolean(value);
+        var isChecked = Boolean(value);
         if (isChecked) {
-            this.setAttribute('can-autolink', '');
+            this.setAttribute('can-autolink',true);
         } else {
             this.removeAttribute('can-autolink');
         }
@@ -160,9 +160,9 @@ class WpsstmTrack extends HTMLElement{
         sourceCountEl.text( sourceLinks.length );
         
         if (!sourceLinks.length && !track.can_autolink){
-            track_instances.prop('playable',false);
+            track_instances.removeAttr("wpsstm-playable");
         }else{
-             track_instances.prop('playable',true);
+            track_instances.attr("wpsstm-playable",true);
         }
 
         track_instances.attr('data-sources-count',sourceLinks.length);
@@ -314,15 +314,15 @@ class WpsstmTrack extends HTMLElement{
                 
             }else{
                 track.debug(ajax_data,"autolink failed");
-                track_instances.prop('playable', false);
+                track_instances.removeAttr("wpsstm-playable");
             }
             
-            track_instances.prop('can-autolink', false); //use prop and not attr here - https://stackoverflow.com/a/12940759/782013
-            
+            track_instances.removeAttr("can-autolink");
+
         })
         .fail(function() {
             track.debug(ajax_data,"autolink ajax request failed");
-            track_instances.prop('playable', false);
+            track_instances.removeAttr("wpsstm-playable");
         })
         .always(function() {
             track_instances.removeClass('track-links-loading');
