@@ -26,12 +26,6 @@ abstract class WPSSTM_Music_Data{
         */
         add_action( 'add_meta_boxes', array($this, 'music_datas_metabox_register'),50);
         add_action( 'save_post', array($this,'music_datas_metabox_save'), 7);
-        
-        //items list
-        foreach( (array)$this->get_supported_post_types() as $post_type ){
-            add_filter( sprintf('manage_%s_posts_columns',$post_type), array($this,'music_datas_columns_register'), 10, 2 );
-            add_action( sprintf('manage_%s_posts_custom_column',$post_type), array($this,'music_datas_columns_content'), 10, 2 );
-        }
 
         /*DB*/
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_music_data_id') );
@@ -198,28 +192,7 @@ abstract class WPSSTM_Music_Data{
             break;
         }
     }
-    
-    public static function music_datas_columns_register($defaults) {
-        $defaults['music-id'] = __('ID','wpsstm');
-        return $defaults;
-    }
-    
-    public static function music_datas_columns_content($column,$post_id){
-        global $post;
-        
-        switch ( $column ) {
-            case 'music-id':
-                
-                if (!$link = $this->get_music_item_link($post_id) ){
-                    $link = '—';
-                }
-                
-                echo $link;
-                
-            break;
-        }
-    }
-            
+      
     //TOUFIX TOUCHECK is this right ?
     function xspf_track_identifier($output,$track){
         if ( $url = $this->get_music_item_url($track->post_id) ){
