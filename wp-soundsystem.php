@@ -259,9 +259,6 @@ class WP_SoundSystem {
     function upgrade(){
 
         global $wpdb;
-        
-        //TOFIX URGENT TO REMOVE
-        self::batch_delete_orphan_tracks();
 
         $current_version = get_option("_wpsstm-db_version");
 
@@ -399,6 +396,7 @@ class WP_SoundSystem {
             }
             
             if ($current_version < 211){
+                
                 //migrate community user
                 if ( $community_id = $this->get_options('community_user_id') ){
                     $success = $this->update_option( 'bot_user_id', $community_id );
@@ -407,8 +405,11 @@ class WP_SoundSystem {
                 if ( $page_id = $this->get_options('frontend_scraper_page_id') ){
                     $success = $this->update_option( 'importer_page_id', $page_id );
                 }
+
+                self::batch_delete_orphan_tracks();
+                
                 //remove unused music terms since we hadn't cleanup functions before this version
-                $this->batch_delete_unused_music_terms();
+                self::batch_delete_unused_music_terms();
             }
 
         }
@@ -505,7 +506,7 @@ class WP_SoundSystem {
 
     }
     
-    static function batch_delete_orphan_tracks(){
+    private static function batch_delete_orphan_tracks(){
         
         if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
