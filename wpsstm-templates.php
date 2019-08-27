@@ -110,8 +110,8 @@ function wpsstm_get_blank_action(){
         'desc' =>           null,
         'href' =>           '#',
         'classes' =>        array(),
-        'has_cap' =>        true,
         'target' =>         null,
+        'rel' =>            'nofollow',
     );
 }
 
@@ -124,21 +124,20 @@ function get_actions_list($actions,$prefix){
         //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
 
         $action = wp_parse_args($action,$default_action);
+        
         $classes = $action['classes'];
         $classes[] = 'wpsstm-action';
         $classes[] = sprintf('wpsstm-%s-action',$prefix);
         $classes[] = sprintf('wpsstm-%s-action-%s',$prefix,$slug);
         $classes = array_unique($classes);
-
-        $link_attr = array(
-            'title' =>      ($action['desc']) ?$action['desc'] : $action['text'],
-            'href' =>       $action['href'],
-            'target' =>     $action['target'],
-            'class' =>      implode(" ",$classes),
-        );
-        $link_attr = array_filter($link_attr);
         
-        $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($link_attr),$action['text']);
+        $action['title'] =  ($action['desc']) ?$action['desc'] : $action['text'];
+        $action['class'] =  implode(' ',$classes);
+        
+        //cleanup - TO FIX we should filter attributes within wpsstm_get_html_attr() ?
+        unset($action['classes'],$action['desc']);
+
+        $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($action),$action['text']);
         $track_actions_list[] = $link;
     }
 
