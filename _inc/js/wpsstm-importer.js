@@ -27,4 +27,46 @@ $( document ).ready(function() {
         var advanced_row = selector_row.find('.wpsstm-importer-selector-advanced');
         advanced_row.toggleClass('active');
     });
+    
+});
+
+
+//load debug
+$(document).on('click', '[data-wpsstm-debug-id]', function(e) {
+    var bt = $(this);
+    var container = bt.parents('#wpsstm-metabox-importer');
+    var output = container.find('#wpsstm-importer-step-debug');
+    var ajax_data = {
+        action:         'wpsstm_get_tracklist_debug',
+        tracklist_id:   bt.get(0).getAttribute('data-wpsstm-debug-id')
+    };
+    
+    bt.addClass('wpsstm-loading');
+    output.text('');
+
+    var request = $.ajax({
+        type:       "post",
+        url:        wpsstmL10n.ajaxurl,
+        data:       ajax_data,
+        dataType:   'json',
+    })
+
+    request.done(function(data) {
+
+        if ( data.success && data.json ){
+            var json = JSON.parse(data.json);
+            output.jsonViewer(json,{collapsed: true,rootCollapsable:false});
+
+        }else{
+            console.log(data);
+        }
+
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        wpsstm_debug(errorThrown,"get debug request failed");
+
+    })
+    .always(function() {
+        bt.removeClass('wpsstm-loading');
+    });
 });

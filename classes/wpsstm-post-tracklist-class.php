@@ -1,8 +1,8 @@
 <?php
-
 class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
-    var $post_id = 0; //tracklist ID (can be an album, playlist or radio)
+    var $post_id = null; //tracklist ID (can be an album, playlist or radio)
+    var $import_id = null;
     var $index = -1;
     var $tracklist_type = 'static';
     
@@ -33,6 +33,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     static $importer_options_meta_name = '_wpsstm_scraper_options';
     static $feed_url_meta_name = '_wpsstm_scraper_url';
     static $website_url_meta_name = '_wpsstm_website_url';
+    static $import_id_meta_name = '_wpsstm_import_id';
     private static $remote_title_meta_name = 'wpsstm_remote_title';
     public $feed_url = null;
     public $website_url = null;
@@ -102,6 +103,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->feed_url =       get_post_meta($this->post_id, self::$feed_url_meta_name, true );
         $this->website_url =    get_post_meta($this->post_id, self::$website_url_meta_name, true );        
         $this->date_timestamp = (int)get_post_modified_time( 'U', true, $this->post_id, true );
+        $this->import_id =      get_post_meta($this->post_id,self::$import_id_meta_name, true);
 
         //importer options
         if ( $this->tracklist_type === 'live' ){
@@ -751,14 +753,18 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 'input' =>      $feed_url,
                 'options'=>     $importer_options
             );
+            
+            /*
+            get import ID
+            */
 
             $args = rawurlencode_deep( $args );
             $api_url = add_query_arg($args,'import');
-            $xspf = WPSSTM_Core_API::api_request($api_url);
+            $import_id = WPSSTM_Core_API::api_request($api_url);
 
-            if ( is_wp_error($xspf) ){
-                $error_code = $xspf->get_error_code();
-                $error_message = $xspf->get_error_message();
+            if ( is_wp_error($import_id) ){
+                $error_code = $import_id->get_error_code();
+                $error_message = $import_id->get_error_message();
 
                 if($error_code == 'rest_forbidden'){
 
@@ -771,8 +777,22 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                     $this->add_notice('wpsstm-api-error',$error_message  );
                 }
 
-                return $xspf;
+                return $import_id;
             }
+            
+            /*
+            save import ID
+            */
+            $success = update_post_meta($this->post_id,WPSSTM_Post_Tracklist::$import_id_meta_name, $import_id);
+
+            /*
+            get XSPF
+            */
+            $xspf_url = WPSSTM_API_CACHE . sprintf('%s.xspf',$import_id);
+            $response = wp_remote_get( $xspf_url );
+            $xspf = wp_remote_retrieve_body( $response );
+
+            return $xspf;
 
         }
 
@@ -1291,9 +1311,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function get_debug_url(){
-        $url =  get_edit_post_link( $this->post_id );
-        $url = add_query_arg(array('wpsstm_debug_importer'=>urlencode($this->feed_url)),$url) . '#wpsstm-importer-step-debug';
-        return $url;
+        if (!$this->import_id) return;
+        return $xspf_url = WPSSTM_API_CACHE . sprintf('%s-feedback.json',$this->import_id);
     }
 
 }

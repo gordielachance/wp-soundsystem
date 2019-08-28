@@ -18,6 +18,11 @@ class WPSSTM_Core_Importer{
         add_action( 'save_post', array($this,'metabox_save_importer_settings') );
 
         add_action( 'admin_enqueue_scripts', array( $this, 'importer_register_scripts_styles' ) );
+        
+        /*
+        AJAX
+        */
+        add_action('wp_ajax_wpsstm_get_tracklist_debug', array($this,'ajax_tracklist_debug'));
 
     }
 
@@ -558,6 +563,47 @@ class WPSSTM_Core_Importer{
         }
         
         return $services;
+    }
+    
+    function ajax_tracklist_debug(){
+        $ajax_data = wp_unslash($_POST);
+        $post_id = wpsstm_get_array_value('tracklist_id',$ajax_data);
+        $tracklist = new WPSSTM_Post_Tracklist($post_id);
+        
+        $result = array(
+            'input' =>          $ajax_data,
+            'error_code' =>     null,
+            'message' =>        null,
+            'success' =>        false,
+            'json_url' =>       null,
+            'json' =>           null,
+            'tracklist' =>      $tracklist->to_array(),
+        );
+                                          
+        /*
+        get JSON
+        */
+        
+        if (!$tracklist->import_id){
+            $json = new WP_Error('wpsstm_missing_import_id',__('Missing import ID','wpsstm'));
+        }else{
+            $json_url = WPSSTM_API_CACHE . sprintf('%s-feedback.json',$tracklist->import_id);
+            $result['json_url'] = $json_url;
+            $response = wp_remote_get( $json_url );
+            $json = wp_remote_retrieve_body( $response );
+        }
+        
+        if ( is_wp_error($json) ){
+            $result['error_code'] = $json->get_error_code();
+            $result['message'] = $json->get_error_message();
+        }else{
+            $result['success'] = true;
+            $result['json'] = $json;
+        }
+
+        header('Content-type: application/json');
+        wp_send_json( $result );
+        
     }
 
 }

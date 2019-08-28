@@ -265,7 +265,7 @@ class WpsstmTracklist extends HTMLElement{
         
         var ajax_data = {
             action:     'wpsstm_reload_tracklist',
-            tracklist:      tracklist.to_ajax(),   
+            tracklist:      tracklist.to_ajax(),
         };
         
         var abord_reload = function(e) {
