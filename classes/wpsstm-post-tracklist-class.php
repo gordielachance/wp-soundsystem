@@ -781,9 +781,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             }
             
             /*
-            save import ID
+            update post
             */
-            $success = update_post_meta($this->post_id,WPSSTM_Post_Tracklist::$import_id_meta_name, $import_id);
+            $now =              current_time( 'timestamp', true );
+            $success =          update_post_meta($this->post_id,WPSSTM_Post_Tracklist::$import_id_meta_name, $import_id);
+            $updated_time =     update_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,$now);
+            $this->populate_tracklist_post();
 
             /*
             get XSPF
@@ -989,7 +992,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
         $now = current_time( 'timestamp', true );
 
-        return $expiration_time - $now;
+        $seconds = $expiration_time - $now;
+
+        return $seconds;
     }
     
     function remove_cache_timestamp(){
@@ -1203,6 +1208,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             expiration time
             */
             $seconds = $this->seconds_before_refresh();
+
             if ($seconds !== false){
                 //if no real cache is set; let's say tracklist is already expired at load!
                 $metas['wpsstmRefreshTimer'] = $seconds;
