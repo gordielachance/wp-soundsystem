@@ -94,7 +94,7 @@ class WPSSTM_Track_Link{
         $required = array(
             'post__not_in'      => ($this->post_id) ? array($this->post_id) : null, //exclude current link
             'parent_track'      => $this->track->post_id,
-            'post_type'         => array(wpsstm()->post_type_track_link),
+            'post_type'         => wpsstm()->post_type_track_link,
 
             'meta_query'        => array(
                 //by link URL
@@ -126,7 +126,9 @@ class WPSSTM_Track_Link{
         $this->title = trim($this->title);
     }
 
-    function create_link(){
+    function attach_track_link($track){
+        
+        $this->track = $track;
         
         $validated = $this->validate_link();
         if ( is_wp_error($validated) ) return $validated;

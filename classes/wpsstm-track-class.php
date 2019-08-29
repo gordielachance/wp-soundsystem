@@ -450,8 +450,7 @@ class WPSSTM_Track{
         wp_set_post_terms( $post_id,$this->artist, WPSSTM_Core_Tracks::$artist_taxonomy );
         wp_set_post_terms( $post_id,$this->title, WPSSTM_Core_Tracks::$track_taxonomy );
         wp_set_post_terms( $post_id,$this->album, WPSSTM_Core_Tracks::$album_taxonomy );
-        
-        
+
         //repopulate datas
         $this->populate_track_post($post_id);
 
@@ -765,9 +764,15 @@ class WPSSTM_Track{
         foreach((array)$this->links as $link){
 
             if ($link->post_id) continue;
-            $link_id = $link->create_link();
+            $link_id = $link->attach_track_link($this);
+            
+            if ( is_wp_error($link_id) ){
+                $code = $link_id->get_error_code();
+                $error_msg = $link_id->get_error_message($code);
+                $link->link_log($error_msg,"Unable to create link");
+                continue;
+            }
 
-            if ( is_wp_error($link_id) ) continue;
             $inserted[] = $link_id;
 
         }

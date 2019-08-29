@@ -842,6 +842,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             //links
             //when there are several links, it is an array; while it is a string for a single link.  So force array.
             if ( $links = wpsstm_get_array_value('link',$xspf_track) ){
+
                 $links = (array)$links;
 
                 foreach($links as $url){
@@ -895,7 +896,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
         
-        $this->tracklist_log('start updating live playlist...'); 
+        $this->tracklist_log('start updating live playlist...');
 
         /*
         subtracks
@@ -1105,7 +1106,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if (!$track->post_id){
             $track->local_track_lookup();
         }
-        
+
         if (!$track->post_id){
             $track_id = $track->insert_bot_track();
             
