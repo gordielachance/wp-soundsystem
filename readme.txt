@@ -41,7 +41,7 @@ It will search for remote links and attach them to your tracks automatically.
 = Radios =
 
 Radios are how we call *live playlists*. 
-Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are synced seamlessly after a user-defined delay.
+Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are refreshing seamlessly after a user-defined delay.
 
 [Check some Radios on Spiff Radio](http://spiff-radio.org/?post_type=wpsstm_live_playlist&tag=editors-pick&author=1)
 
@@ -126,6 +126,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 8. Music menu on a BuddyPress profile
 
 == Changelog ==
+
+= 2.9.7 =
+* Tracklist importer : new 'Debug log' tab
 
 = 2.9.5 =
 * renamed API route : /'import/url/?url=...' -> import/?input=...
