@@ -170,6 +170,19 @@
         
     }
     
+    .wpsstm-debug-log-bt{
+        .wpsstm-debug-log-icon{
+            @extend .wpsstm-icon;
+            @extend .wpsstm-no-underline;
+        }
+        &.wpsstm-loading{
+            .wpsstm-debug-log-icon{
+                @extend .wpsstm-loading-icon;
+                @extend .wpsstm-freeze;
+            }
+        }
+    }
+    
 }
 
 //tabs

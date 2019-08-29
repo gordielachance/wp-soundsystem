@@ -1,5 +1,6 @@
 <?php
 define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/');
+define('WPSSTM_API_CACHE','https://api.spiff-radio.org/wordpress/wp-content/uploads/wpsstmapi/');
 define('WPSSTM_API_NAMESPACE','wpsstmapi/v1');
 define('WPSSTM_API_REGISTER_URL','https://api.spiff-radio.org/?p=10');
 
@@ -50,7 +51,7 @@ class WPSSTM_Core_API {
                 $message = sprintf(__('TOKEN error: %s','wpsstm'),$message);
                 $response = new WP_Error($code,$message,$data );
             }
-            
+
             set_transient( self::$valid_token_transient_name, $valid, 1 * DAY_IN_SECONDS );
             
             if ( is_wp_error($response) ){
@@ -63,17 +64,23 @@ class WPSSTM_Core_API {
     }
     
     public static function get_premium_datas(){
-        
+
         $valid_token = self::has_valid_api_token();
+        
         if ( !$valid_token || is_wp_error($valid_token) ) return $valid_token;
         
         if ( false === ( $datas = get_transient(self::$premium_expiry_transient_name ) ) ) {
+            
+            WP_SoundSystem::debug_log('check is premium...');
+            
             $datas = WPSSTM_Core_API::api_request('premium/get');
+
             if ( is_wp_error($datas) ){
-                return $datas;
+                $datas = false;
             }
             
             set_transient( self::$premium_expiry_transient_name, $datas, 1 * DAY_IN_SECONDS );
+
         }
         
         return $datas;
@@ -103,7 +110,7 @@ class WPSSTM_Core_API {
         );
         
         $token = self::has_valid_api_token() ? wpsstm()->get_options('wpsstmapi_token') : null;
-        
+
         //token
         if ( $token ){
             $api_args['headers']['Authorization'] = sprintf('Bearer %s',$token);
@@ -112,7 +119,7 @@ class WPSSTM_Core_API {
         //build URL
         $url = WPSSTM_API_URL . $namespace . '/' .$endpoint;
 
-        WP_SoundSystem::debug_log(array('url'=>$url,'token'=>$token),'query API...');
+        WP_SoundSystem::debug_log(array('url'=>$url,'args'=>$api_args),'query API...');
 
         $error = null;
         $request = wp_remote_get($url,$api_args);

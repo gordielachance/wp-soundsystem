@@ -727,25 +727,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $this->tracklist_log("...is an XSPF url, do not query WPSSTM API.");
 
             $response = wp_remote_get( $xspf_url );
-            $xml = wp_remote_retrieve_body( $response );
-
-            if ( is_wp_error($xml) ){
-                $error_code = $xml->get_error_code();
-                $error_message = $xml->get_error_message();
-
-                $this->add_notice('wpsstm-xspf-error',sprintf(__('Error while importing the XSPF file: [%s] %s','wpsstm'),$error_code,$error_message)  );
-
-                return $xml;
-            }
-
-            //convert to array
-
-            $xml = simplexml_load_string($xml, "SimpleXMLElement", LIBXML_NOCDATA);
-            $json = json_encode($xml);
-            $xspf = json_decode($json,TRUE);
-
-            $this->tracklist_log("...succeeded loading XSPF");
-
+            $xspf = wp_remote_retrieve_body( $response );
 
         }else{
             $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
@@ -779,14 +761,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
                 return $import_id;
             }
-            
-            /*
-            update post
-            */
-            $now =              current_time( 'timestamp', true );
-            $success =          update_post_meta($this->post_id,WPSSTM_Post_Tracklist::$import_id_meta_name, $import_id);
-            $updated_time =     update_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,$now);
-            $this->populate_tracklist_post();
+
+            $this->import_id = $import_id;
 
             /*
             get XSPF
@@ -794,10 +770,25 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $xspf_url = WPSSTM_API_CACHE . sprintf('%s.xspf',$import_id);
             $response = wp_remote_get( $xspf_url );
             $xspf = wp_remote_retrieve_body( $response );
+        }
+        
+        if ( is_wp_error($xspf) ){
+            $error_code = $xspf->get_error_code();
+            $error_message = $xspf->get_error_message();
+
+            $this->add_notice('wpsstm-xspf-error',sprintf(__('Error while importing the XSPF file: [%s] %s','wpsstm'),$error_code,$error_message)  );
 
             return $xspf;
-
         }
+        
+        /*
+        convert XSPF to array
+        */
+        $xspf = simplexml_load_string($xspf, "SimpleXMLElement", LIBXML_NOCDATA);
+        $json = json_encode($xspf);
+        $xspf = json_decode($json,TRUE);
+
+        $this->tracklist_log("...succeeded loading XSPF");
 
         /*
         Create playlist from the XSPF array
@@ -920,6 +911,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             self::$remote_title_meta_name =>                            $input_tracklist->title,
             WPSSTM_Core_Live_Playlists::$remote_author_meta_name =>     $input_tracklist->author,
             WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>      $input_tracklist->date_timestamp,
+            WPSSTM_Post_Tracklist::$import_id_meta_name =>              $this->import_id,
         );
 
         $tracklist_post = array(

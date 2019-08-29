@@ -6,12 +6,12 @@ $wpsstm_tracklist = new WPSSTM_Post_Tracklist(get_the_ID());
 $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
 
 ?>
-<div id="wpsstm-importer">
+<div id="wpsstm-importer" data-wpsstm-tracklist-id="<?php echo get_the_ID();?>">
     <ul id="wpsstm-importer-tabs">
         <li><a href="#wpsstm-importer-step-feed-url"><?php _e('URLs','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-tracks"><?php _e('Tracks','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-details"><?php _e('Details','wpsstm');?></a></li>
-        <li><a href="#wpsstm-importer-step-debug" data-wpsstm-debug-id="<?php echo get_the_ID();?>" target="_blank"><?php _e('Debug log','wpsstm');?></a></li>
+        <li><a href="#wpsstm-importer-step-debug" class="wpsstm-debug-log-bt" target="_blank"><span class="wpsstm-debug-log-icon"></span><?php _e('Debug log','wpsstm');?></a></li>
     </ul>
 
     <!--remote url-->
@@ -145,7 +145,11 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
         </div>
     </div>
    <div id="wpsstm-importer-step-debug" class="wpsstm-importer-section  wpsstm-importer-section-advanced">
-       <!--ajax filled-->
+       <?php
+        $notice = __("This is the last debug log.  Click on the tab title to update it.",'wpsstm');
+        printf('<div class="notice notice-warning inline is-dismissible"><p>%s</p></div>',$notice);
+       ?>
+       <div id="wpsstm-debug-json"><!--ajax filled--></div>
     </div>
     
     <?php

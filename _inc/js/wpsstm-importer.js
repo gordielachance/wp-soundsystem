@@ -32,13 +32,13 @@ $( document ).ready(function() {
 
 
 //load debug
-$(document).on('click', '[data-wpsstm-debug-id]', function(e) {
+$(document).on('click', '.wpsstm-debug-log-bt', function(e) {
     var bt = $(this);
-    var container = bt.parents('#wpsstm-metabox-importer');
-    var output = container.find('#wpsstm-importer-step-debug');
+    var container = bt.parents('#wpsstm-importer');
+    var output = container.find('#wpsstm-debug-json');
     var ajax_data = {
-        action:         'wpsstm_get_tracklist_debug',
-        tracklist_id:   bt.get(0).getAttribute('data-wpsstm-debug-id')
+        action:         'wpsstm_get_importer_debug',
+        tracklist_id:   container.get(0).getAttribute('data-wpsstm-tracklist-id')
     };
     
     bt.addClass('wpsstm-loading');
@@ -56,7 +56,6 @@ $(document).on('click', '[data-wpsstm-debug-id]', function(e) {
         if ( data.success && data.json ){
             var json = JSON.parse(data.json);
             output.jsonViewer(json,{collapsed: true,rootCollapsable:false});
-
         }else{
             console.log(data);
         }
