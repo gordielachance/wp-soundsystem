@@ -22,7 +22,7 @@ class WPSSTM_Core_Importer{
         /*
         AJAX
         */
-        add_action('wp_ajax_wpsstm_get_tracklist_debug', array($this,'ajax_tracklist_debug'));
+        add_action('wp_ajax_wpsstm_get_importer_debug', array($this,'ajax_importer_debug'));
 
     }
 
@@ -565,7 +565,7 @@ class WPSSTM_Core_Importer{
         return $services;
     }
     
-    function ajax_tracklist_debug(){
+    function ajax_importer_debug(){
         $ajax_data = wp_unslash($_POST);
         $post_id = wpsstm_get_array_value('tracklist_id',$ajax_data);
         $tracklist = new WPSSTM_Post_Tracklist($post_id);

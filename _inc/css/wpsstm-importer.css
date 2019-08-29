@@ -99,7 +99,7 @@ input.wpsstm-fullwidth {
 }
 
 /* line 80, ../scss/_wpsstm-shared.scss */
-.wpsstm-no-underline {
+.wpsstm-no-underline, #wpsstm-importer .wpsstm-debug-log-bt .wpsstm-debug-log-icon {
   text-decoration: none;
   border-bottom: none !important;
 }
@@ -111,14 +111,14 @@ input.wpsstm-fullwidth {
 }
 
 /* line 90, ../scss/_wpsstm-shared.scss */
-.wpsstm-freeze, input.input-loading, input[type='checkbox'][readonly] {
+.wpsstm-freeze, input.input-loading, input[type='checkbox'][readonly], #wpsstm-importer .wpsstm-debug-log-bt.wpsstm-loading .wpsstm-debug-log-icon {
   pointer-events: none;
   filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50);
   opacity: 0.5;
 }
 
 /* line 96, ../scss/_wpsstm-shared.scss */
-.wpsstm-icon:before, .wpsstm-loading-icon:before, .wpsstm-action-icon a:before {
+.wpsstm-icon:before, .wpsstm-loading-icon:before, #wpsstm-importer .wpsstm-debug-log-bt.wpsstm-loading .wpsstm-debug-log-icon:before, .wpsstm-action-icon a:before, #wpsstm-importer .wpsstm-debug-log-bt .wpsstm-debug-log-icon:before {
   font-weight: normal;
   font-style: normal;
   font-family: 'FontAwesome';
@@ -128,7 +128,7 @@ input.wpsstm-fullwidth {
 }
 
 /* line 108, ../scss/_wpsstm-shared.scss */
-.wpsstm-loading-icon:before {
+.wpsstm-loading-icon:before, #wpsstm-importer .wpsstm-debug-log-bt.wpsstm-loading .wpsstm-debug-log-icon:before {
   animation: spin 2s linear infinite;
   content: "" !important;
 }
@@ -363,75 +363,75 @@ input.wpsstm-fullwidth {
   background: #FFF;
 }
 
-/* line 177, ../scss/wpsstm-importer.scss */
+/* line 190, ../scss/wpsstm-importer.scss */
 .ui-tabs ul.ui-tabs-nav {
   margin: 0px;
   padding: 0px;
   list-style: none;
 }
-/* line 181, ../scss/wpsstm-importer.scss */
+/* line 194, ../scss/wpsstm-importer.scss */
 .ui-tabs ul.ui-tabs-nav li.ui-state-default {
   margin-bottom: 0;
   padding: 10px 15px;
   display: inline-block;
 }
-/* line 189, ../scss/wpsstm-importer.scss */
+/* line 202, ../scss/wpsstm-importer.scss */
 .ui-tabs .ui-tabs-panel {
   display: none;
   padding: 15px;
 }
-/* line 192, ../scss/wpsstm-importer.scss */
+/* line 205, ../scss/wpsstm-importer.scss */
 .ui-tabs .ui-tabs-panel.current {
   display: inherit;
 }
 
-/* line 200, ../scss/wpsstm-importer.scss */
+/* line 213, ../scss/wpsstm-importer.scss */
 #frontend-importer #wpsstm-importer-services ul {
   margin: 0;
   padding: 0;
 }
-/* line 203, ../scss/wpsstm-importer.scss */
+/* line 216, ../scss/wpsstm-importer.scss */
 #frontend-importer #wpsstm-importer-services ul li {
   width: 100px;
   height: 100px;
   display: inline-block;
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
-/* line 208, ../scss/wpsstm-importer.scss */
+/* line 221, ../scss/wpsstm-importer.scss */
 #frontend-importer #wpsstm-importer-services ul li img {
   width: 100%;
   height: auto;
 }
-/* line 219, ../scss/wpsstm-importer.scss */
+/* line 232, ../scss/wpsstm-importer.scss */
 #frontend-importer #wpsstm-importer-bangs ul {
   list-style: none;
 }
-/* line 224, ../scss/wpsstm-importer.scss */
+/* line 237, ../scss/wpsstm-importer.scss */
 #frontend-importer #wpsstm-importer-bangs > ul > li {
   margin-top: 1em;
 }
-/* line 228, ../scss/wpsstm-importer.scss */
+/* line 241, ../scss/wpsstm-importer.scss */
 #frontend-importer #wpsstm-importer-bangs .wpsstm-bang-desc {
   font-size: .8em;
 }
-/* line 234, ../scss/wpsstm-importer.scss */
+/* line 247, ../scss/wpsstm-importer.scss */
 #frontend-importer #wpsstm-frontend-importer-recent ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-/* line 238, ../scss/wpsstm-importer.scss */
+/* line 251, ../scss/wpsstm-importer.scss */
 #frontend-importer #wpsstm-frontend-importer-recent ul li {
   position: relative;
   line-height: 1em;
   line-height: 1.5em;
 }
-/* line 242, ../scss/wpsstm-importer.scss */
+/* line 255, ../scss/wpsstm-importer.scss */
 #frontend-importer #wpsstm-frontend-importer-recent ul li a {
   display: -webkit-flex;
   display: flex;
 }
-/* line 244, ../scss/wpsstm-importer.scss */
+/* line 257, ../scss/wpsstm-importer.scss */
 #frontend-importer #wpsstm-frontend-importer-recent ul li a strong {
   margin-right: .25em;
 }

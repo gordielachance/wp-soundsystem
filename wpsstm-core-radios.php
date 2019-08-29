@@ -203,7 +203,7 @@ class WPSSTM_Core_Live_Playlists{
         $screen =                   get_current_screen();
         if ( ($screen->base != 'edit') || ($screen->post_type != wpsstm()->post_type_live_playlist) ) return;
 
-        $notice = __("Radios are how we call 'live playlists'. Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are synced seamlessly after a user-defined delay.  Use the 'Tracklist Importer' metabox to setup your radio.",'wpsstm');
+        $notice = __("Radios are how we call 'live playlists'. Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are refreshing seamlessly after a user-defined delay.  Setup the 'Tracklist Importer' metabox while editing a radio.",'wpsstm');
         printf('<div class="notice notice-warning is-dismissible"><p>%s</p></div>',$notice);
     }
 

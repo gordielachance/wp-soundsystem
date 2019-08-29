@@ -10,7 +10,7 @@ class WPSSTM_Settings {
 		add_action( 'admin_menu', array( $this, 'create_admin_menu' ), 8 );
         add_action( 'admin_init', array( $this, 'settings_init' ), 5 );
         add_action( 'admin_init', array( $this, 'system_settings_init' ), 15 );
-        add_action( 'current_screen', array( $this, 'clear_settings_transients' ), 5 );
+        add_action( 'current_screen', array( $this, 'clear_premium_transients' ), 5 );
 	}
 
     function create_admin_menu(){
@@ -121,10 +121,10 @@ class WPSSTM_Settings {
 
     }
     
-    function clear_settings_transients(){
+    function clear_premium_transients(){
         //force API checks by deleting some transients
         if ( !WP_SoundSystem::is_settings_page() ) return;
-        WP_SoundSystem::debug_log('deleted settings transients...');
+        WP_SoundSystem::debug_log('deleted premium transients...');
         delete_transient( WPSSTM_Core_Importer::$importer_links_transient_name );
         delete_transient( WPSSTM_Core_API::$valid_token_transient_name );
         delete_transient( WPSSTM_Core_API::$premium_expiry_transient_name );
