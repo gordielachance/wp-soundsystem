@@ -221,6 +221,8 @@ class WPSSTM_Core_Track_Links{
         if ( $track_id === null ) return $query;
 
         $query->set('post_parent',$track_id);
+        
+        return $query;
     }
     
     function filter_track_links_by_excluded_hosts($query){
@@ -285,8 +287,8 @@ class WPSSTM_Core_Track_Links{
         ?>
         <div style="text-align:center">
             <?php
-        
-                $parent_id = ( $post->post_parent && ( get_post_type( $post->post_parent ) === wpsstm()->post_type_track_link ) ) ? $post->post_parent : 0;
+
+                $parent_id = ( $post->post_parent && ( get_post_type( $post->post_parent ) === wpsstm()->post_type_track ) ) ? $post->post_parent : 0;
                 
                 if ($parent_id){
                     $track = new WPSSTM_Track($parent_id);
