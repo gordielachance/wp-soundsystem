@@ -1271,7 +1271,7 @@ class WPSSTM_Core_Tracks{
         
         foreach((array)$terms as $term){
             if ( $term->count <= 0 ){
-                WP_SoundSystem::debug_log($term,'delete unique term');
+                //WP_SoundSystem::debug_log($term,'delete unique term');
                 wp_delete_term( $term->term_id, $term->taxonomy );
             }
         }

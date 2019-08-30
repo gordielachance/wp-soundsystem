@@ -127,6 +127,10 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 2.9.9 =
+* fix links imported not properly created
+* JS: do not autolink a track that has playable links
+
 = 2.9.7 =
 * REST route 'import/?input=…' now returns an import ID, that we then use to get the cached XSPF file API side.
 * Tracklist importer : new 'Debug log' tab
