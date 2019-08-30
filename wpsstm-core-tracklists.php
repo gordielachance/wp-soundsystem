@@ -26,8 +26,6 @@ class WPSSTM_Core_Tracklists{
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
         
         add_filter( 'template_include', array($this,'single_tracklist_template') );
-        
-        add_filter( 'the_title', array($this, 'filter_imported_playlist_title'), 9, 2 );
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ), 9 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ) );
@@ -52,6 +50,7 @@ class WPSSTM_Core_Tracklists{
         add_filter( 'posts_where', array($this,'tracklist_query_where_track_id'), 10, 2 );
 
         //post content
+        add_filter( 'the_title', array($this, 'filter_imported_playlist_title'), 9, 2 );
         add_filter( 'the_title', array($this, 'filter_tracklist_empty_title'), 10, 2 );
         add_filter( 'the_content', array($this,'content_append_tracklist_html') );
         

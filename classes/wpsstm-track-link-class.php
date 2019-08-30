@@ -126,16 +126,20 @@ class WPSSTM_Track_Link{
         $this->title = trim($this->title);
     }
 
-    function attach_track_link($track){
+    function create_track_link($track){
         
         $this->track = $track;
         
-        $validated = $this->validate_link();
-        if ( is_wp_error($validated) ) return $validated;
+        if ($this->post_id){
+            return new WP_Error( 'wpsstm_link_has_post_id', __('This link already exists.','wpsstm') );
+        }
         
         if (!$this->track->post_id){
             return new WP_Error( 'wpsstm_missing_post_id', __('Unable to validate link: missing track ID','wpsstm') );
         }
+        
+        $validated = $this->validate_link();
+        if ( is_wp_error($validated) ) return $validated;
         
         //exclude some hosts
         if ( $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ){
@@ -186,12 +190,7 @@ class WPSSTM_Track_Link{
             );
 
             $args = wp_parse_args($required_args,$args);
-
-            if (!$this->post_id){
-                $success = wp_insert_post( $args, true );
-            }else{
-                $success = wp_update_post( $args, true );
-            }
+            $success = wp_insert_post( $args, true );
 
             if ( is_wp_error($success) ) return $success;
             $this->post_id = $success;
@@ -377,21 +376,20 @@ class WPSSTM_Track_Link{
     function to_array(){
 
         $arr = array(
+            'track_id' =>       $this->track->post_id,
             'post_id' =>        $this->post_id,
-
             'index' =>          $this->index,
 
             'title' =>          $this->title,
             'title_artist' =>   $this->title_artist,
             'title_track' =>    $this->title_track,
 
-            'is_bot' =>   $this->is_bot,
+            'is_bot' =>         $this->is_bot,
             'permalink_url' =>  $this->permalink_url,
             'stream_url' =>     $this->stream_url,
             'download_url' =>   $this->download_url,
             'mime_type' =>      $this->mime_type,
             'duration' =>       $this->duration,
-            'trackt_id' =>      $this->track->post_id,
         );
         return array_filter($arr);
     }

@@ -760,16 +760,18 @@ class WPSSTM_Track{
 
         //insert links
         $inserted = array();
+        
 
         foreach((array)$this->links as $link){
 
-            if ($link->post_id) continue;
-            $link_id = $link->attach_track_link($this);
+            $link_id = $link->create_track_link($this);
+            
+            //$link->link_log(array('response'=>$link_id,'track'=>(string)$this,'link'=>$link),"...creating link");
             
             if ( is_wp_error($link_id) ){
                 $code = $link_id->get_error_code();
                 $error_msg = $link_id->get_error_message($code);
-                $link->link_log($error_msg,"Unable to create link");
+                $link->link_log($error_msg,"...Unable to create link");
                 continue;
             }
 
