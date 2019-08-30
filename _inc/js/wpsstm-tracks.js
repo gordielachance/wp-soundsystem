@@ -584,9 +584,10 @@ class WpsstmTrack extends HTMLElement{
         //consider only the next X tracks
         var tracks_slice = next_tracks.slice( 0, max_items );
 
-        //remove those that already been autolinked
+        //keep only tracks that needs to be autolinked
         tracks_slice = tracks_slice.filter(function (index) {
-            return this.can_autolink;
+            var playable_links = $(this).find('wpsstm-track-link[wpsstm-playable]');
+            return ( this.can_autolink && !playable_links.length );
         });
         
         /*
