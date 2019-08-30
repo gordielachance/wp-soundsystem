@@ -65,7 +65,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     static function get_tracklist_title($post_id){
         //title
         if ( $title = get_post_field( 'post_title', $post_id ) ) return $title;
-        return self::get_cached_title($post_id);
+        if ( $cached = self::get_cached_title($post_id) ) return $cached;
+        return '';
     }
     
     static public function get_cached_title($post_id){
