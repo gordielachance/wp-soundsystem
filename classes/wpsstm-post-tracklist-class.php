@@ -831,20 +831,21 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             //duration
             $track->duration = wpsstm_get_array_value('duration',$xspf_track);
 
-
             //links
             //when there are several links, it is an array; while it is a string for a single link.  So force array.
-            if ( $links = wpsstm_get_array_value('link',$xspf_track) ){
+            if ( $link_urls = wpsstm_get_array_value('link',$xspf_track) ){
 
-                $links = (array)$links;
+                $link_urls = (array)$link_urls;
+                $addlinks = array();
 
-                foreach($links as $url){
+                foreach($link_urls as $url){
                     $link = new WPSSTM_Track_Link();
                     $link->permalink_url = $url;
                     $addlinks[] = $link;
                 }
 
                 $track->add_links($addlinks);
+
             }
 
 
