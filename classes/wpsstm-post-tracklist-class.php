@@ -686,8 +686,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
     }
     
-    private function sync_radio(){
-
+    private function import_xspf(){
+        
+        $this->tracklist_log("import XSPF...");
+        
         //check feed URL
         if ( !$this->feed_url ){
                 $error = new WP_Error( 'wpsstm_missing_feed_url', __('Please add a Feed URL in the radio settings.','wpsstm') );
@@ -695,15 +697,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 return $error;
         }
         
-        //check bot user
-        $bot_ready = wpsstm()->is_bot_ready();
-        if ( is_wp_error($bot_ready) ){
-            $this->add_notice('refresh_radio',$bot_ready->get_error_message() );
-            return $bot_ready;
-        }
-            
-        $this->tracklist_log("refresh radio...");
-
         /*
         redirect URL
         Hook to filter bangs, etc.
@@ -859,13 +852,19 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         $playlist->add_tracks($playlist_tracks);
-
-        /*
-        Update
-        */
+        
+        return $playlist;
+        
+    }
+    
+    private function sync_radio(){
+ 
+        $this->tracklist_log("sync radio...");
+        
+        $playlist = $this->import_xspf();
+        if ( is_wp_error($playlist) ) return $playlist;
 
         $updated = $this->update_radio_data($playlist);
-
 
         $this->tracklist_log(
             array(
