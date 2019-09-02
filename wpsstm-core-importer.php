@@ -108,7 +108,18 @@ class WPSSTM_Core_Importer{
 
     function metabox_importer_display(){
         global $wpsstm_tracklist;
-        wpsstm_locate_template( 'tracklist-importer.php', true );
+
+        //TOUFIX we should be able to import (append) tracks to a static playlist without having to create a radio first.
+        
+        if ($wpsstm_tracklist->tracklist_type=='live'){
+            wpsstm_locate_template( 'tracklist-importer.php', true );
+        }else{
+            $notice = __("For now, the only way to import a tracklist is to create a new Radio (not a Playlist), fill the 'Tracklist Importer' metabox, then click the 'Stop Sync' button under the Radio header.  This will convert the Radio to a Playlist.",'wpsstm');
+            printf('<div class="notice notice-warning inline"><p>%s</p></div>',$notice);
+        }
+        
+        
+        
     }
     
     function metabox_save_importer_settings( $post_id ) {
