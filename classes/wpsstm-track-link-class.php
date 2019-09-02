@@ -64,7 +64,7 @@ class WPSSTM_Track_Link{
             
             switch($key){
                 default:
-                    if ( !isset($args[$key]) ) continue; //value has not been set
+                    if ( !isset($args[$key]) ) break; //value has not been set
                     $this->$key = $args[$key];
                 break;
             }
