@@ -167,7 +167,7 @@ class WPSSTM_Core_Importer{
         if ($importer_options != $importer_data){
             //TOUFIX OR if cache time has been updated ?
             WP_SoundSystem::debug_log('scraper settings have been updated, clear tracklist cache','Save wizard' );
-            $tracklist->remove_cache_timestamp();
+            $tracklist->remove_import_timestamp();
         }
 
         if (!$importer_data){

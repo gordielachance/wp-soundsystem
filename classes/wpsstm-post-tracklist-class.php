@@ -662,15 +662,18 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $tracks = array();
 
         //refresh radio ?
-        $refresh_now = ( $this->is_expired && ( 
-                ( wpsstm()->get_options('ajax_tracks') && wp_doing_ajax() ) || 
-                ( !wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() ) 
-            ) 
-        );
         
-        if ( $refresh_now ){
-            $synced = $this->sync_radio();
-            if ( is_wp_error($synced) ) return $synced;
+        if ( $this->tracklist_type === 'live' ){
+            $refresh_now = ( $this->is_expired && (
+                    ( wpsstm()->get_options('ajax_tracks') && wp_doing_ajax() ) || 
+                    ( !wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() ) 
+                ) 
+            );
+
+            if ( $refresh_now ){
+                $synced = $this->sync_radio();
+                if ( is_wp_error($synced) ) return $synced;
+            }
         }
 
         //get static subtracks
@@ -983,7 +986,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $seconds;
     }
     
-    function remove_cache_timestamp(){
+    function remove_import_timestamp(){
         if ( !$last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ) return;
         if ( !$success = delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name) ) return;
         $this->is_expired = true;

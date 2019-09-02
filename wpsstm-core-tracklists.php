@@ -231,7 +231,7 @@ class WPSSTM_Core_Tracklists{
         $post_id = wpsstm_get_array_value(array('tracklist','post_id'),$ajax_data);
         
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
-        $tracklist->remove_cache_timestamp();
+        $tracklist->remove_import_timestamp();
         
         $html = $tracklist->get_tracklist_html();
 
@@ -538,7 +538,7 @@ class WPSSTM_Core_Tracklists{
             break;
             case 'refresh':
                 //remove updated time
-                $success = $wpsstm_tracklist->remove_cache_timestamp();
+                $success = $wpsstm_tracklist->remove_import_timestamp();
             break;
             case 'get-autorship':
                 $success = $wpsstm_tracklist->get_autorship();
