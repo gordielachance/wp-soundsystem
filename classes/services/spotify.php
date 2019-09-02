@@ -19,11 +19,11 @@ class WPSSTM_Spotify{
         add_action( 'rest_api_init', array($this,'register_endpoints') );
         
         if ( $this->can_spotify_api() === true ){
-            
             //music details
             add_filter( 'wpsstm_get_music_detail_engines',array($this,'register_details_engine') );
             
             //presets
+            //TOUFIX should be WPSSTMAPI stuff
             add_filter('wpsstm_feed_url', array($this, 'spotify_playlist_bang_to_url'));
             add_filter('wpsstm_importer_bang_links',array($this,'register_spotify_bang_links'));
             

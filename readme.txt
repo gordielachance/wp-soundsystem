@@ -127,6 +127,10 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 3.0.1 =
+* Playlists : notice in the Tracklist Importer
+* new fn import_xspf() - extracted out of sync_radio()
+
 = 3.0.0 =
 * fix links imported not properly created
 * JS: do not autolink a track that has playable links
