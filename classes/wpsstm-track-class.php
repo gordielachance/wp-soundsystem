@@ -121,10 +121,10 @@ class WPSSTM_Track{
                     $this->add_links($links);
                 break;
                 case 'album';
-                   if ($value == '_') continue;
+                   if ($value == '_') break;
                 default:
-                    if ( !property_exists($this,$key) )  continue;
-                    if ( !isset($args[$key]) ) continue; //value has not been set
+                    if ( !property_exists($this,$key) )  break;
+                    if ( !isset($args[$key]) ) break; //value has not been set
                     $this->$key = $value;
                 break;
             }
