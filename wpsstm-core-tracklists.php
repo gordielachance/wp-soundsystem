@@ -182,8 +182,8 @@ class WPSSTM_Core_Tracklists{
         
         //cache time
         $cache_min = wpsstm_get_array_value('cache_min',$input_data);
-        
-        if ($cache_min){
+
+        if ( is_numeric($cache_min) ){
             update_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name,$cache_min);
         }else{
             delete_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name);
@@ -227,7 +227,7 @@ class WPSSTM_Core_Tracklists{
             $option = $wpsstm_tracklist->get_options('cache_min');
 
             $input = sprintf(
-                '<input type="number" name="%s[cache_min]" size="4" min="1" value="%s" />',
+                '<input type="number" name="%s[cache_min]" size="4" min="0" value="%s" />',
                 'wpsstm_tracklist_options',
                 $option
             );

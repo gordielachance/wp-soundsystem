@@ -87,7 +87,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //options
         $db_options = (array)get_post_meta($this->post_id,self::$tracklist_options_meta_name,true);
 
-        if( $cache_min = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true) ){
+        $cache_min = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true);
+        if( is_numeric($cache_min) ){
             $db_options['cache_min'] = $cache_min;
         }
 
