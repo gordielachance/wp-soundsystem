@@ -692,7 +692,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     private function import_xspf(){
         
         $this->tracklist_log("import XSPF...");
-        
+
         //check feed URL
         if ( !$this->feed_url ){
                 $error = new WP_Error( 'wpsstm_missing_feed_url', __('Please add a Feed URL in the radio settings.','wpsstm') );
@@ -711,11 +711,23 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         http://xspf.org
         */
 
-        if ( $xspf_url = wpsstm_is_xpsf_url($feed_url) ){
+        if ( wpsstm_is_xpsf_url($feed_url) ){
 
             $this->tracklist_log("...is an XSPF url, do not query WPSSTM API.");
+            
+            //check is local file
+            //holy mole ! Please get premium instead of hacking my plugin !
+            if ( !WPSSTM_Core_API::is_premium() && !wpsstm_is_local_file($feed_url) ) {
+                $error = new WP_Error( 'missing_api_key', __('Importing remote files requires an API key.','wpsstm') );
+                
+                if ( current_user_can('manage_options') ){
+                    $this->add_notice('missing_api_key',$error->get_error_message() );
+                }
+                
+                return $error;
+            }
 
-            $response = wp_remote_get( $xspf_url );
+            $response = wp_remote_get( $feed_url );
             $xspf = wp_remote_retrieve_body( $response );
 
         }else{

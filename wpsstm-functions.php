@@ -82,6 +82,30 @@ function wpsstm_get_url_domain($url){
     return false;
 }
 
+function wpsstm_is_local_file($url){
+    $domain = wpsstm_get_url_domain( get_site_url() );
+    $file_domain = wpsstm_get_url_domain($url);
+    return ($domain == $file_domain);
+}
+
+/*
+Simple check for XSPF urls; by URL extension.
+//TOUFIX TOUCHECK should we rather check for a mime? But sometimes xspf mimetype is set wrongly.
+*/
+function wpsstm_is_xpsf_url($url){
+
+    $ext = null;
+
+    //we don't want url parameters
+    if ( $url = parse_url($url) ) { 
+       $ext = pathinfo($url['path'], PATHINFO_EXTENSION);
+    }
+
+    $bool = ($ext === 'xspf');
+
+    return apply_filters('wpsstm_xpsf_url',$bool);
+}
+
 //https://gist.github.com/boonebgorges/5510970
 function wpsstm_recursive_parse_args( &$a, $b ) {
     $a = (array) $a;
@@ -113,19 +137,6 @@ function wpsstm_shorten_text($str,$skiptext = ' ... '){
     }else{
         return $str;
     }
-}
-
-/*
-Simple check for XSPF urls; by URL extension.
-Could eventually be filtered for advanced uses (check request, mime type, ...); but we'll let developpers do that for their own cases; since we have the WPSSTM API for complex imports - and don't want an extra request which would slow down our imports.
-*/
-function wpsstm_is_xpsf_url($feed_url){
-    
-    $ext = pathinfo($feed_url, PATHINFO_EXTENSION);
-    
-    $feed_url = ($ext === 'xspf') ? $feed_url : null;
-    
-    return apply_filters('wpsstm_xpsf_url',$feed_url);
 }
 
 function wpsstm_get_notice($msg){
