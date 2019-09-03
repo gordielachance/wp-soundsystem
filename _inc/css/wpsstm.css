@@ -1024,46 +1024,50 @@ wpsstm-track.track-links-loading {
   content: "\f1f8";
 }
 /* line 208, ../scss/_wpsstm-tracks.scss */
+.wpsstm-track-action.wpsstm-track-action-share:before {
+  content: "\f1e0";
+}
+/* line 211, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-dequeue:before {
   content: "\f127";
 }
-/* line 211, ../scss/_wpsstm-tracks.scss */
+/* line 214, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-links:before {
   content: "\f0c2";
 }
-/* line 214, ../scss/_wpsstm-tracks.scss */
+/* line 217, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-move:before {
   content: "\f07d";
 }
-/* line 217, ../scss/_wpsstm-tracks.scss */
+/* line 220, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-toggle-tracklists:before {
   content: "\f03a";
 }
-/* line 220, ../scss/_wpsstm-tracks.scss */
+/* line 223, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-edit:before {
   content: "\f040";
 }
-/* line 223, ../scss/_wpsstm-tracks.scss */
+/* line 226, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-edit-backend:before {
   content: "\f084";
 }
-/* line 226, ../scss/_wpsstm-tracks.scss */
+/* line 229, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-favorite:before {
   content: "\f08a";
 }
-/* line 230, ../scss/_wpsstm-tracks.scss */
+/* line 233, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-toggle-links .wpsstm-sources-count {
   display: inline;
 }
-/* line 233, ../scss/_wpsstm-tracks.scss */
+/* line 236, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-toggle-links:before {
   content: "\f078";
 }
-/* line 236, ../scss/_wpsstm-tracks.scss */
+/* line 239, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-toggle-links.active:before {
   content: "\f077";
 }
-/* line 239, ../scss/_wpsstm-tracks.scss */
+/* line 242, ../scss/_wpsstm-tracks.scss */
 .wpsstm-track-action.wpsstm-track-action-toggle-links .wpsstm-sources-count {
   font-weight: bold;
   font-size: .8em;

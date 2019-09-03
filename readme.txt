@@ -127,6 +127,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= XXX =
+* playlists : share track link (autoplay)
+
 = 3.0.1 =
 * Playlists : notice in the Tracklist Importer
 * new fn import_xspf() - extracted out of sync_radio()

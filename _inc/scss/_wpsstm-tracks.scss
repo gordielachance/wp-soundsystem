@@ -205,6 +205,9 @@ wpsstm-track{
     &.wpsstm-track-action-trash:before{
         content: "\f1f8";//.fa-trash;
     }
+    &.wpsstm-track-action-share:before{
+        content: "\f1e0";//.fa-share-alt;
+    }
     &.wpsstm-track-action-dequeue:before{
         content: "\f127";//.fa-chain-broken;
     }
