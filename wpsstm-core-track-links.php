@@ -376,7 +376,7 @@ class WPSSTM_Core_Track_Links{
                 //has been autolinked notice
                 if ( $sleeping ){
                     $now = current_time( 'timestamp' );
-                    $next_refresh = $now + ( wpsstm()->get_options('autolink_lock_hours') * HOUR_IN_SECONDS);
+                    $next_refresh = $now + wpsstm()->get_options('autolink_timeout');
 
                     $refreshed = human_time_diff( $now, $next_refresh );
                     $refreshed = sprintf(__('This track has been autolinked already.  Wait %s before next request.','wpsstm'),$refreshed);

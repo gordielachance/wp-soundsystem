@@ -105,10 +105,10 @@ class WP_SoundSystem {
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'bot_user_id'                       => null,
             'autolink'                          => true,
-            'autolink_lock_hours'               => 48,
-            'limit_autolinks'                   => 5,
+            'autolink_timeout'                  => 7 * DAY_IN_SECONDS,
+            'limit_autolinks'                   => 5,//max number of links returned by autolink
             'wpsstmapi_token'                   => null,
-            'wpsstmapi_timeout'                 => 20, //timeout for API requests, in secs.
+            'wpsstmapi_timeout'                 => 20,//timeout for API requests (seconds)
             'details_engine'                    => array('musicbrainz'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
