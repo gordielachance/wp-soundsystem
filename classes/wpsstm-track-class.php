@@ -782,7 +782,7 @@ class WPSSTM_Track{
         return $inserted;
     }
 
-    function get_track_url(){
+    private function get_track_url(){
         $url = home_url();
         
         $post_type_obj = get_post_type_object(wpsstm()->post_type_track);
@@ -824,18 +824,27 @@ class WPSSTM_Track{
 
         $url = $this->get_track_url();
         if (!$url) return false;
-        
-        $action_var = 'wpsstm_action';
-        $action_permavar = 'action';
-        
+
         if ( !get_option('permalink_structure') ){
             $args = array(
-                $action_var =>     $action,
+                'wpsstm_action' =>     $action,
             );
 
             $url = add_query_arg($args,$url);
         }else{
-            $url .= sprintf('%s/%s/',$action_permavar,$action);
+            $url .= sprintf('%s/%s/','action',$action);
+        }
+        
+        switch($action){
+            //TOUFIX in the end, this should rather open a share popup, and we should not have a switch
+            case 'share':
+                if ( $url = get_permalink($this->tracklist->post_id) ){
+                    $args = array(
+                        'subtrack_autoplay' => $this->subtrack_id,
+                    );
+                    $url = add_query_arg($args,$url);
+                }
+            break;
         }
 
         return $url;
@@ -869,15 +878,6 @@ class WPSSTM_Track{
                 'href' =>       '#',
             );
         }
-
-        //share
-        /*
-        //TO FIX in playlist, etc.
-        $actions['share'] = array(
-            'text' =>       __('Share', 'wpsstm'),
-            'href' =>       $this->get_track_action_url('share'),
-        );
-        */
 
         //favorite
         if ( wpsstm()->get_options('playlists_manager') ){
@@ -923,6 +923,17 @@ class WPSSTM_Track{
         /*
         Subtracks
         */
+        
+        if ($this->tracklist->tracklist_type == 'static'){
+            $actions['share'] = array(
+                'text' =>      __('Share'),
+                'desc' =>       __('Share track','wpsstm'),
+                'href' =>       $this->get_track_action_url('share'),
+                'target' =>     '_blank',
+                'classes' =>    array('no-link-icon'), //TOUFIX this is for gordo theme, should not be in this plugin
+            );
+        }
+        
         if ($can_dequeue_track){
             $actions['dequeue'] = array(
                 'text' =>      __('Remove'),
@@ -1032,6 +1043,7 @@ class WPSSTM_Track{
             'wpsstm-track',
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
             is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
+            ( ( $autoplay_id = wpsstm_get_array_value('subtrack_autoplay',$_GET) ) && ($autoplay_id == $this->subtrack_id) ) ? 'track-autoplay' : null,
 
         );
 
