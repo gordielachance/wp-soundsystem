@@ -21,6 +21,7 @@ class WPSSTM_Core_Tracklists{
         //rewrite rules
         add_action( 'wpsstm_init_rewrite', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
+        add_filter( 'upload_mimes', array($this,'enable_xspf_uploads') );
         
         
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
@@ -88,6 +89,18 @@ class WPSSTM_Core_Tracklists{
         $vars[] = 'subtrack_position';
         $vars[] = 'pulse-max';
         return $vars;
+    }
+    
+    /*
+    Allow those mime types to be uploaded in WP
+    TOUFIX TOUCHECK The problem here is time, sometimes the mimetype is incorrectly guessed (eg. 'text/xml' on MacOS).
+    https://wordpress.stackexchange.com/questions/346533/how-to-enable-xspf-files-on-upload-mime-types-issue
+    */
+    
+    function enable_xspf_uploads($mime_types){
+        $mime_types['xspf'] = 'application/xspf+xml';
+        //$mime_types['xspf'] = 'text/xml';
+        return $mime_types;
     }
 
     function register_tracklists_scripts_styles(){
