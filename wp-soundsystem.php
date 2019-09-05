@@ -871,40 +871,31 @@ class WP_SoundSystem {
             return new WP_Error('wpsstm_no_rest_endpoint',__("Missing REST endpoint",'wpsstm'));
         }
 
-        //build headers
-        $auth_args = array(
-            'method' =>     $method,
-            'headers'=>     array(
-                'Accept' =>         'application/json',
-            )
-        );
-
-        //build URL
-        $url = get_rest_url() . $namespace . '/' .$endpoint;
-
-        self::debug_log(array('url'=>$url),'query REST...');
-
-        $request = wp_remote_get($url,$auth_args);
-        if (is_wp_error($request)) return $request;
-
-        $response = wp_remote_retrieve_body( $request );
-        if (is_wp_error($response)) return $response;
+        $rest_url = sprintf('/%s/%s',$namespace,$endpoint);
         
-        $response = json_decode($response, true);
+        self::debug_log(array('url'=>$rest_url,'method'=>$method),'local REST query...');
 
-        //check for errors
-        $code = wpsstm_get_array_value('code',$response);
-        $message = wpsstm_get_array_value('message',$response);
-        $data = wpsstm_get_array_value('data',$response);
-        $status = wpsstm_get_array_value(array('data','status'),$response);
+        //Create request
+        $request = new WP_REST_Request( $method, $rest_url );
 
-        if ( $code && $message && ($status >= 400) ){
-            $error = new WP_Error($code,$message,$data );
-            self::debug_log($error,'query REST error');
+        //Get response
+        $response = rest_do_request( $request );
+        
+        if ( $response->is_error() ) {
+            
+            $error = $response->as_error();
+            $error_message = $error->get_error_message();
+            
+            self::debug_log($error_message,'local REST query error');
+
             return $error;
+            
         }
         
-        return $response;
+        //Get datas
+        $datas = $response->get_data();
+
+        return $datas;
 
     }
     
