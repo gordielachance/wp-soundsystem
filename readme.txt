@@ -127,6 +127,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 3.0.3 =
+* musicbrainz/spotify : new 'Post fill' metabox (only for tracks)
+
 = 3.0.2 =
 * playlists : share track link (autoplay)
 * enable .xspf file upload in the media library

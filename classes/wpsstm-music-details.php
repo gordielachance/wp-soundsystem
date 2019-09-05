@@ -315,7 +315,7 @@ abstract class WPSSTM_Music_Data{
         $block_attr = wpsstm_get_html_attr($block_attr);
         $input_attr = wpsstm_get_html_attr($input_attr);
 
-        $input = sprintf('<label>%s</label> <input %s />%s',$label,$input_attr,$after);
+        $input = sprintf('<span>%s</span> <input %s /><label>%s</label>',$label,$input_attr,$after);
 
         return sprintf('<p %s>%s</p>',$block_attr,$input);
     }
