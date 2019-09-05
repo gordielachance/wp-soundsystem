@@ -679,12 +679,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //get static subtracks
         $tracks = $this->get_static_subtracks();
-
-        if ( is_wp_error($tracks) ){
-            $error = $tracks->get_error_message();
-            $this->add_notice('populate_static_subtracks',$error );
-            return $tracks;
-        }
+        if ( is_wp_error($tracks) ) return $tracks;
 
         $this->add_tracks($tracks);
         
@@ -733,22 +728,20 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         }else{
             $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
-            $args = array(
+            $params = array(
                 'input' =>      $feed_url,
                 'options'=>     $importer_options
             );
             
             /*
-            get import ID
+            API
             */
+            $success = WPSSTM_Core_API::api_request('import',null,$params);
 
-            $args = rawurlencode_deep( $args );
-            $api_url = add_query_arg($args,'import');
-            $import_id = WPSSTM_Core_API::api_request($api_url);
+            if ( is_wp_error($success) ){
 
-            if ( is_wp_error($import_id) ){
-                $error_code = $import_id->get_error_code();
-                $error_message = $import_id->get_error_message();
+                $error_code = $success->get_error_code();
+                $error_message = $success->get_error_message();
 
                 if($error_code == 'rest_forbidden'){
 
@@ -758,30 +751,30 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                     }
 
                 }else{
+
+                    if($error_code == 'import_error'){
+                        //Populate import ID (stored in the error datas)
+                        $this->import_id = $success->get_error_data();
+                    }
+
                     $this->add_notice('wpsstm-api-error',$error_message  );
                 }
 
-                return $import_id;
+                return $success;
             }
-
-            $this->import_id = $import_id;
+            
+            //Populate import ID
+            $this->import_id = $success;
 
             /*
             get XSPF
             */
-            $xspf_url = WPSSTM_API_CACHE . sprintf('%s.xspf',$import_id);
+            $xspf_url = WPSSTM_API_CACHE . sprintf('%s.xspf',$this->import_id);
             $response = wp_remote_get( $xspf_url );
             $xspf = wp_remote_retrieve_body( $response );
         }
-        
-        if ( is_wp_error($xspf) ){
-            $error_code = $xspf->get_error_code();
-            $error_message = $xspf->get_error_message();
 
-            $this->add_notice('wpsstm-xspf-error',sprintf(__('Error while importing the XSPF file: [%s] %s','wpsstm'),$error_code,$error_message)  );
-
-            return $xspf;
-        }
+        if ( is_wp_error($xspf) ) return $xspf;
         
         /*
         convert XSPF to array
@@ -878,6 +871,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->tracklist_log("sync radio...");
         
         $playlist = $this->import_xspf();
+        
+        //update import ID if any (even if we received an error, we should have the import ID populated)
+        if ($this->import_id){
+            $this->tracklist_log($this->import_id,"storing import ID...");
+            update_post_meta( $this->post_id, self::$import_id_meta_name, $this->import_id );
+        }
+
         if ( is_wp_error($playlist) ) return $playlist;
 
         $updated = $this->update_radio_data($playlist);
@@ -921,7 +921,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             self::$remote_title_meta_name =>                            $input_tracklist->title,
             WPSSTM_Core_Live_Playlists::$remote_author_meta_name =>     $input_tracklist->author,
             WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>      $input_tracklist->date_timestamp,
-            WPSSTM_Post_Tracklist::$import_id_meta_name =>              $this->import_id,
         );
 
         $tracklist_post = array(
