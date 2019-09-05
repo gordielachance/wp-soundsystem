@@ -127,17 +127,12 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= 3.0.3 =
+= 3.0.5 =
 * musicbrainz/spotify : new 'Post fill' metabox (only for tracks)
-
-= 3.0.2 =
 * playlists : share track link (autoplay)
 * enable .xspf file upload in the media library
 * allow 0-minutes cache for radios
 * improved rest & import
-
-= 3.0.1 =
-* Playlists : notice in the Tracklist Importer
 * new fn import_xspf() - extracted out of sync_radio()
 
 = 3.0.0 =
