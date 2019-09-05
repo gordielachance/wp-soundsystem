@@ -87,18 +87,37 @@ abstract class WPSSTM_Music_Data{
             'high' 
         );
         
-        /*
-        Datas Metabox
-        */
-        if ( $music_data && !$is_entry_switch ){
+
+        if ( !$is_entry_switch && $music_data ){
+            
+            /*
+            Datas Mapping
+            */
+            
+            if ( get_post_type() === wpsstm()->post_type_track ){ //TOUFIX this should be supported by all $post_types
+                add_meta_box( 
+                    'wpsstm-music-data-map', 
+                    __('Fill post','wpsstm'),
+                    array($this,'metabox_map_music_data_content'),
+                    $post_types,
+                    'after_title', 
+                    'high' 
+                );
+            }
+            
+            /*
+            Datas Metabox
+            */
+            
             add_meta_box( 
                 'wpsstm-music-data', 
-                sprintf(__('Music Data (%s)','wpsstm'),$this->name),
+                __('Music Data','wpsstm'),
                 array($this,'metabox_music_data_content'),
                 $post_types,
                 'after_title', 
                 'high' 
             );
+            
         }
 
     }
@@ -148,8 +167,6 @@ abstract class WPSSTM_Music_Data{
             $action = 'autoguess-id';
         }elseif ( isset($_POST['wpsstm-musicdata-reload']) ){
             $action = 'reload';
-        }elseif ( isset($_POST['wpsstm-musicdata-fill']) ){
-            $action = 'fill';
         }
 
         /*
@@ -230,33 +247,36 @@ abstract class WPSSTM_Music_Data{
         </p>
         <table class="form-table">
             <tbody>
-                <?php 
-                if ( $can_query ){
-                    ?>
-                    <tr valign="top">
-                        <td>
-                            <?php
-                    
-                            if (!$music_id){
-                                submit_button( __('Search','wpsstm'), null, 'wpsstm-musicid-lookup');
-                            }
-                            if ($music_id &&  ($this->slug === 'musicbrainz')) { //TOUFIX should be available for any service
-                                $entries_url = get_edit_post_link();
-                                $entries_url = add_query_arg(array('list-music-items'=>true),$entries_url);
-                                printf('<p><a class="button" href="%s">%s</a></p>',$entries_url,__('Switch entry','wpsstm'));
-                            }
-                    
-                            if ($music_data){
-                                submit_button( __('Refresh data','wpsstm'), null, 'wpsstm-musicdata-reload');
-                            }
-                    
-                            ?>
+                <tr valign="top">
+                    <td>
+                        <?php
+                        $bt_search_attr = array();
+                        if (!$can_query){
+                           $bt_search_attr['disabled'] = 'disabled'; 
+                        }
+                        submit_button( __('Search','wpsstm'), null, 'wpsstm-musicid-lookup',true,$bt_search_attr);
 
-                        </td>
-                    </tr>
-                    <?php
-                }
-                ?>
+                        if ( $music_id && ($this->slug === 'musicbrainz') ) { //TOUFIX should be available for any service
+                            
+                            $entries_url = get_edit_post_link();
+                            $entries_url = add_query_arg(array('list-music-items'=>true),$entries_url);
+                            
+                            $bt_switch_attr = array(
+                                'class'=>   'button',
+                                'href'=>    $entries_url,
+                            );
+                            if ( !$can_query || !$music_id ){
+                               $bt_switch_attr['disabled'] = 'disabled'; 
+                            }
+                            $bt_switch_attr = wpsstm_get_html_attr($bt_switch_attr);
+                            printf('<p><a %s>%s</a></p>',$bt_switch_attr,__('Switch entry','wpsstm'));
+                            
+                        }
+
+                        ?>
+
+                    </td>
+                </tr>
             </tbody>
         </table>
         <?php
@@ -270,43 +290,114 @@ abstract class WPSSTM_Music_Data{
         
     }
     
-    public function metabox_music_data_content($post){
+    private static function get_map_music_checkbox($name,$label,$before,$after){
+
+        $no_update = ($before==$after);
+        
+        $block_classes = array(
+            'wpsstm-map-input-container'
+        );
+
+        $block_attr = array(
+            'class'=>   implode(' ',$block_classes)
+        );
+
+        $input_attr = array(
+            'type'=>        'checkbox',
+            'name'=>        $name,
+            'value'=>       $after,
+            'disabled'=>    $no_update ? 'disabled' :null,
+            'checked'=>     $no_update ? 'checked' :null,
+        );
+        
+        $input_attr = array_filter($input_attr);
+
+        $block_attr = wpsstm_get_html_attr($block_attr);
+        $input_attr = wpsstm_get_html_attr($input_attr);
+
+        $input = sprintf('<label>%s</label> <input %s />%s',$label,$input_attr,$after);
+
+        return sprintf('<p %s>%s</p>',$block_attr,$input);
+    }
+    
+    public function metabox_map_music_data_content($post){
+        
+        
+        $post_type = get_post_type($post->ID);
+        $map_before = null;
         $music_data = $this->get_post_music_data($post->ID);
         $map_data = $this->get_engine_data_by_post( $post->ID );
+        
         ?>
         <table class="form-table">
             <tbody>
                 <?php 
-        
-                $fillpost = true;
-        
-                if ($fillpost) {
-                    
-                    $list = "caca";
-                    
+
+                if ($music_data) {
                     ?>
                     <tr valign="top">
                         <th scope="row">
-                            <label><?php _e('Fill post with','wpsstm');?></label>
+                            <label><?php echo $this->name;?></label>
                         </th>
                         <td>
                             <p>
                                 <?php
-                                $list = null;
-                                print_r($map_data);
-                                printf('<div id="wpsstm-music-data-map">%s</div>',$list);
+                                switch($post_type){
+                                    case wpsstm()->post_type_artist:
+
+                                    break;
+                                    case wpsstm()->post_type_track:
+                                        global $wpsstm_track;
+                                        $map_before = json_decode(json_encode($wpsstm_track), true); //obj>arr
+
+                                        //artist
+                                        echo self::get_map_music_checkbox('wpsstm_artist',__('Artist:','wpsstm'),$map_before['artist'],$map_data['artist']);
+                                        //album
+                                        echo self::get_map_music_checkbox('wpsstm_album',__('Album:','wpsstm'),$map_before['album'],$map_data['album']);
+                                        //title
+                                        echo self::get_map_music_checkbox('wpsstm_track_title',__('Title:','wpsstm'),$map_before['title'],$map_data['title']);
+                                        //duration
+                                        echo self::get_map_music_checkbox('wpsstm_length',__('Duration:','wpsstm'),$map_before['duration'],$map_data['duration']);
+
+
+                                    break;
+                                    case wpsstm()->post_type_album:
+
+                                    break;
+                                }
                                 ?>
                             </p>
                         </td>
                     </tr>
                     <?php
                 }
+                ?>
+            </tbody>
+        </table>
+        <?php
+
+        /*
+        form
+        */
+        wp_nonce_field( 'wpsstm_map_music_data_meta_box', 'wpsstm_map_music_data_meta_box_nonce' );
         
+        
+    }
+    
+    public function metabox_music_data_content($post){
+        
+        $music_data = $this->get_post_music_data($post->ID);
+
+        ?>
+        <table class="form-table">
+            <tbody>
+                <?php 
+
                 if ($music_data) {
                     ?>
                     <tr valign="top">
                         <th scope="row">
-                            <label><?php _e('Data','wpsstm');?></label>
+                            <label><?php echo $this->name;?></label>
                         </th>
                         <td>
                             <p>
@@ -326,11 +417,15 @@ abstract class WPSSTM_Music_Data{
             </tbody>
         </table>
         <?php
+
+        if ($music_data){
+            submit_button( __('Refresh data','wpsstm'), null, 'wpsstm-musicdata-reload');
+        }
+        
         /*
         form
         */
-        wp_nonce_field( 'wpsstm_mbdata_meta_box', 'wpsstm_mbdata_meta_box_nonce' );
-        
+        wp_nonce_field( 'wpsstm_music_data_meta_box', 'wpsstm_music_data_meta_box_nonce' );
         
     }
             
@@ -464,9 +559,6 @@ abstract class WPSSTM_Music_Data{
             
             if ( $success = update_post_meta( $post_id, $this->data_metakey, $data ) ){
 
-                //fill empty fields with mb datas
-                //URGENT $this->fill_post_with_music_data($post_id);
-
                 //save timestamp
                 $now = current_time('timestamp');
                 update_post_meta( $post_id, $this->time_metakey, $now );
@@ -474,56 +566,7 @@ abstract class WPSSTM_Music_Data{
             }
         }
     }
-
-    private function fill_post_with_music_data($post_id=null){
-        $data = $this->get_post_music_data($post_id);
-        if ( !$data ) return;
-        
-        WP_SoundSystem::debug_log( "fill post with music datas..." );
-        $debug = array();
-        
-        $post_type = get_post_type($post_id);
-        
-        switch($post_type){
-            case wpsstm()->post_type_artist:
-                
-                $artist = $debug['artist'] = $this->artistdata_get_artist($data);
-                WPSSTM_Core_Tracks::save_track_artist($post_id, $artist);
-                
-            break;
-            case wpsstm()->post_type_track:
-                
-                $artist = $debug['artist'] = $this->trackdata_get_artist($data);
-                WPSSTM_Core_Tracks::save_track_artist($post_id, $artist);
-                
-                $track = $debug['track'] = $this->trackdata_get_track($data);
-                WPSSTM_Core_Tracks::save_track_title($post_id, $track);
-                
-                $album = $debug['album'] = $this->trackdata_get_album($data);
-                WPSSTM_Core_Tracks::save_track_album($post_id, $album);
-                
-                $length = $debug['length'] = $this->trackdata_get_length($data);
-                WPSSTM_Core_Tracks::save_track_length($post_id, $length);
-                
-            break;
-            case wpsstm()->post_type_album:
-                
-                $artist = $debug['artist'] = $this->albumdata_get_artist($data);
-                WPSSTM_Core_Tracks::save_track_artist($post_id, $artist);
-                
-                $album = $debug['album'] = $this->albumdata_get_album($data);
-                WPSSTM_Core_Tracks::save_track_album($post_id, $album);
-                
-            break;
-        }
-        
-        $debug['post_id'] = $post_id;
-        WP_SoundSystem::debug_log($debug,"...filled post with music datas" ); 
-
-    }
-
     
-            
     /*
     Use MusicBrainz API to search artists
     WARNING for partial search, you'll need a wildcard * !

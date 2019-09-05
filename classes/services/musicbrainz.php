@@ -521,10 +521,15 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
                 $map['artist'] = wpsstm_get_array_value(array('name'), $datas);
             break;
             case wpsstm()->post_type_track:
-                $map['artist'] =   wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
-                $map['title'] =    wpsstm_get_array_value(array('title'), $datas);
-                $map['album'] =    wpsstm_get_array_value(array('releases',0,'title'), $datas);
-                $map['length'] =   wpsstm_get_array_value(array('length'), $datas);
+                
+                $blank = new WPSSTM_Track();
+                $blank->title =     wpsstm_get_array_value(array('title'), $datas);
+                $blank->artist =    wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
+                $blank->album =     wpsstm_get_array_value(array('releases',0,'title'), $datas);
+                $blank->duration =  wpsstm_get_array_value(array('length'), $datas);
+                //$blank->image_url = 
+                return json_decode(json_encode($blank), true); //obj>arr
+                
             break;
             case wpsstm()->post_type_album:
                 $map['artist'] =   wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
