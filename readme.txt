@@ -127,8 +127,11 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= XXX =
+= 3.0.2 =
 * playlists : share track link (autoplay)
+* enable .xspf file upload in the media library
+* allow 0-minutes cache for radios
+* improved rest & import
 
 = 3.0.1 =
 * Playlists : notice in the Tracklist Importer
