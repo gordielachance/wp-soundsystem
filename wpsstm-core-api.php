@@ -93,6 +93,30 @@ class WPSSTM_Core_API {
         if ( is_wp_error($response) ) return false;
         return wpsstm_get_array_value('is_premium',$response);
     }
+    
+    /*
+    When receiving an error from the API, convert error arrays to WP_Error.
+    //TOUFIX TOUCHECK this is quite quirky.  Should be done in another way ?  
+    But we cannot use WP_REST_Request here since it is remote API... :/
+    */
+    
+    private static function convert_json_response_errors(&$response){
+        if ( isset($response['code']) && isset($response['message']) && isset($response['data']) ){
+
+            $error = new WP_Error( $response['code'],$response['message'],$response['data'] );
+            
+            if( isset($response['additional_errors']) ){
+                foreach ($response['additional_errors'] as $add_error){
+                    $error->add($add_error['code'], $add_error['message'], $add_error['data']);
+                }
+            }
+            
+            return $error;
+
+        }
+        
+        return $response;
+    }
 
     static function api_request($endpoint = null, $namespace = null, $params=null,$method = 'GET'){
 
@@ -104,52 +128,62 @@ class WPSSTM_Core_API {
         
         $rest_url = WPSSTM_API_URL . $namespace . '/' .$endpoint;
 
-        WP_SoundSystem::debug_log(array('url'=>$rest_url,'method'=>$method),'remote REST query...');
+        WP_SoundSystem::debug_log(array('url'=>$rest_url,'params'=>$params,'method'=>$method),'remote API query...');
+        
+        //parameters
+        $url_params = rawurlencode_deep( $params );
+        $rest_url = add_query_arg($url_params,$rest_url);
 
         //Create request
-        $request = WP_REST_Request::from_url( $rest_url );
+        //we can't use WP_REST_Request here since it is remote API
         
-        //Method, headers, ...
-        $request->set_method( $method );
-        $request->set_header('Accept', 'application/json'); //TOUFIX TOUCHECK useful ?
+        //build headers
+        $api_args = array(
+            'method' =>     $method, //TOUFIX TOUCHECK compatible with wp_remote_get ?
+            'timeout' =>    wpsstm()->get_options('wpsstmapi_timeout'),
+            'headers'=>     array(
+                'Accept' =>         'application/json',
+            )
+        );
+        
         $token = self::has_valid_api_token() ? wpsstm()->get_options('wpsstmapi_token') : null;
-
         //token
         if ( $token ){
-            $request->set_header( 'Authorization',sprintf('Bearer %s',$token) );
+            $api_args['headers']['Authorization'] = sprintf('Bearer %s',$token);
         }
 
-        //TOUFIX add request timeout ? how ?
+        $error = null;
+        $request = wp_remote_get($rest_url,$api_args);
+        $response = wp_remote_retrieve_body( $request );
+        $headers = wp_remote_retrieve_headers($request);
+
+        //TOUFIX URGENT
+        /*
+        a 404 API request (wrong URL, etc.) should return an error here, but is not !
+        print_r("<xmp>".json_encode($headers)."<xmp>");die();
+        */
+        if ( is_wp_error($response) ){
+            
+            $error = $response;
+            
+        }else{
+            
+            $response = wp_remote_retrieve_body( $request );
+            $response = json_decode($response, true);
+            $response = self::convert_json_response_errors($response);
+
+            if ( is_wp_error($response) ){
+                $error = $response;
+            }
+            
+        }
         
-        //params
-        switch($method){
-            case 'GET':
-                $request->set_query_params($params);
-            break;
-            case 'POST':
-                $request->set_body_params($params);
-            break;
-        }
-
-        //Get response
-        $response = rest_do_request( $request );
-
-        if ( $response->is_error() ) {
-            
-            $error = $response->as_error();
-
-            $error_message = $error->get_error_message();
-            
-            WP_SoundSystem::debug_log($error_message,'remote REST query error');
-
+        if ($error){
+            WP_SoundSystem::debug_log($error->get_error_message(),'remote REST query error');
             return $error;
-            
         }
         
-        //Get datas
-        $datas = $response->get_data();
-
-        return $datas;
+        return $response;
 
     }
     
