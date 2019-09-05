@@ -792,7 +792,7 @@ class WPSSTM_Track{
         if ( $this->subtrack_id ){
             if ( !get_option('permalink_structure') ){
                 $args = array(
-                    'post_type' =>      wpsstm()->$post_type_track,
+                    'post_type' =>      wpsstm()->post_type_track,
                     'subtrack_id' =>    $this->subtrack_id
                 );
                 $url = add_query_arg($args,$url);
@@ -805,7 +805,7 @@ class WPSSTM_Track{
         }elseif ( $this->post_id ){
             if ( !get_option('permalink_structure') ){
                 $args = array(
-                    'post_type' =>      wpsstm()->$post_type_track,
+                    'post_type' =>      wpsstm()->post_type_track,
                     'p' =>              $this->post_id
                 );
                 $url = add_query_arg($args,$url);
