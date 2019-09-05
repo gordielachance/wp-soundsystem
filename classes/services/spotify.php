@@ -412,28 +412,31 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
         return wpsstm()->local_rest_request($endpoint);
         
     }
+    
+    protected function get_engine_data_by_post($post_id){
+        
+        $map = array();
+        $post_type = get_post_type($post_id);
+        $datas = $this->get_post_music_data($post_id);
 
-    protected function artistdata_get_artist($data){
-        return wpsstm_get_array_value(array('name'), $data);
+        switch ($post_type){
+            case wpsstm()->post_type_artist:
+                $map['artist'] = wpsstm_get_array_value(array('name'), $datas);
+            break;
+            case wpsstm()->post_type_track:
+                $map['artist'] =   wpsstm_get_array_value(array('artists',0,'name'), $datas);
+                $map['title'] =    wpsstm_get_array_value(array('name'), $datas);
+                $map['album'] =    wpsstm_get_array_value(array('album','name'), $datas);
+                $map['length'] =   wpsstm_get_array_value(array('duration_ms'), $datas);
+            break;
+            case wpsstm()->post_type_album:
+                $map['artist'] =   wpsstm_get_array_value(array('artists',0,'name'), $datas);
+                $map['album'] =    wpsstm_get_array_value(array('name'), $datas);
+            break;
+        }
+        return $map;
     }
-    protected function trackdata_get_artist($data){
-        return wpsstm_get_array_value(array('artists',0,'name'), $data);
-    }
-    protected function trackdata_get_track($data){
-        return wpsstm_get_array_value(array('name'), $data);
-    }
-    protected function trackdata_get_album($data){
-        return wpsstm_get_array_value(array('album','name'), $data);
-    }
-    protected function trackdata_get_length($data){
-        return wpsstm_get_array_value(array('duration_ms'), $data);
-    }
-    protected function albumdata_get_artist($data){
-        return wpsstm_get_array_value(array('artists',0,'name'), $data);
-    }
-    protected function albumdata_get_album($data){
-        return wpsstm_get_array_value(array('name'), $data);
-    }  
+
             
 }
 

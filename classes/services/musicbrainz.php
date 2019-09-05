@@ -509,28 +509,31 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
         $endpoint = sprintf('services/musicbrainz/data/%s/%s',$endpoint,$music_id);
         return wpsstm()->local_rest_request($endpoint);
     }
+    
+    protected function get_engine_data_by_post($post_id){
+        
+        $map = array();
+        $post_type = get_post_type($post_id);
+        $datas = $this->get_post_music_data($post_id);
 
-    protected function artistdata_get_artist($data){
-        return wpsstm_get_array_value(array('name'), $data);
+        switch ($post_type){
+            case wpsstm()->post_type_artist:
+                $map['artist'] = wpsstm_get_array_value(array('name'), $datas);
+            break;
+            case wpsstm()->post_type_track:
+                $map['artist'] =   wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
+                $map['title'] =    wpsstm_get_array_value(array('title'), $datas);
+                $map['album'] =    wpsstm_get_array_value(array('releases',0,'title'), $datas);
+                $map['length'] =   wpsstm_get_array_value(array('length'), $datas);
+            break;
+            case wpsstm()->post_type_album:
+                $map['artist'] =   wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
+                $map['album'] =    wpsstm_get_array_value(array('title'), $datas);
+            break;
+        }
+        return $map;
     }
-    protected function trackdata_get_artist($data){
-        return wpsstm_get_array_value(array('artist-credit',0,'name'), $data);
-    }
-    protected function trackdata_get_track($data){
-        return wpsstm_get_array_value(array('title'), $data);
-    }
-    protected function trackdata_get_album($data){
-        return wpsstm_get_array_value(array('releases',0,'title'), $data);
-    }
-    protected function trackdata_get_length($data){
-        return wpsstm_get_array_value(array('length'), $data);
-    }
-    protected function albumdata_get_artist($data){
-        return wpsstm_get_array_value(array('artist-credit',0,'name'), $data);
-    }
-    protected function albumdata_get_album($data){
-        return wpsstm_get_array_value(array('title'), $data);
-    }     
+  
 }
 
 class WPSSTM_MB_Entries extends WPSSTM_Music_Entries {

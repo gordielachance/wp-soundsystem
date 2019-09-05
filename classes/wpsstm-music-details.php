@@ -52,16 +52,8 @@ abstract class WPSSTM_Music_Data{
     Get the correspondence between the item & the service datas
     **/
 
-    abstract protected function artistdata_get_artist($data);
-    
-    abstract protected function trackdata_get_artist($data);
-    abstract protected function trackdata_get_track($data);
-    abstract protected function trackdata_get_album($data);
-    abstract protected function trackdata_get_length($data);
-    
-    abstract protected function albumdata_get_artist($data);
-    abstract protected function albumdata_get_album($data);
-    
+    abstract protected function get_engine_data_by_post($post_id);
+
     public static function is_entries_switch(){
         return ( isset($_GET['list-music-items'])) ? true : false;
     }
@@ -280,10 +272,36 @@ abstract class WPSSTM_Music_Data{
     
     public function metabox_music_data_content($post){
         $music_data = $this->get_post_music_data($post->ID);
+        $map_data = $this->get_engine_data_by_post( $post->ID );
         ?>
         <table class="form-table">
             <tbody>
                 <?php 
+        
+                $fillpost = true;
+        
+                if ($fillpost) {
+                    
+                    $list = "caca";
+                    
+                    ?>
+                    <tr valign="top">
+                        <th scope="row">
+                            <label><?php _e('Fill post with','wpsstm');?></label>
+                        </th>
+                        <td>
+                            <p>
+                                <?php
+                                $list = null;
+                                print_r($map_data);
+                                printf('<div id="wpsstm-music-data-map">%s</div>',$list);
+                                ?>
+                            </p>
+                        </td>
+                    </tr>
+                    <?php
+                }
+        
                 if ($music_data) {
                     ?>
                     <tr valign="top">
