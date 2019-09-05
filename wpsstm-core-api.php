@@ -118,21 +118,19 @@ class WPSSTM_Core_API {
         return $response;
     }
 
-    static function api_request($endpoint = null, $namespace = null, $params=null,$method = 'GET'){
-
-        if (!$namespace) $namespace = WPSSTM_API_NAMESPACE; 
+    static function api_request($endpoint = null, $params=null,$method = 'GET'){
 
         if (!$endpoint){
             return new WP_Error('wpsstmapi_no_api_url',__("Missing API endpoint",'wpsstm'));
         }
         
-        $rest_url = WPSSTM_API_URL . $namespace . '/' .$endpoint;
+        $rest_url = WPSSTM_API_URL . WPSSTM_API_NAMESPACE . '/' .$endpoint;
 
-        WP_SoundSystem::debug_log(array('url'=>$rest_url,'params'=>$params,'method'=>$method),'remote API query...');
-        
         //parameters
-        $url_params = rawurlencode_deep( $params );
-        $rest_url = add_query_arg($url_params,$rest_url);
+        if ($params){
+            $url_params = rawurlencode_deep( $params );
+            $rest_url = add_query_arg($url_params,$rest_url);
+        }
 
         //Create request
         //we can't use WP_REST_Request here since it is remote API
@@ -151,6 +149,8 @@ class WPSSTM_Core_API {
         if ( $token ){
             $api_args['headers']['Authorization'] = sprintf('Bearer %s',$token);
         }
+        
+        WP_SoundSystem::debug_log(array('endpoint'=>$endpoint,'params'=>$params,'args'=>$api_args,'method'=>$method),'remote API query...');
 
         $error = null;
         $request = wp_remote_get($rest_url,$api_args);

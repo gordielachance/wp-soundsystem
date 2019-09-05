@@ -745,7 +745,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             /*
             API
             */
-            $success = WPSSTM_Core_API::api_request('import',null,$params);
+            $success = WPSSTM_Core_API::api_request('import',$params);
 
             if ( is_wp_error($success) ){
 
