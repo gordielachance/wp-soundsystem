@@ -150,7 +150,7 @@ abstract class WPSSTM_Music_Data{
         //without this the function would be called for every subtrack if there was some.
         unset($_POST['wpsstm_music_id_meta_box_nonce']);
 
-        //clicked a musicbrainz action button
+        //clicked a musicdata action button
         $action = null;
         if ( isset($_POST['wpsstm-musicid-lookup']) ){
             $action = 'autoguess-id';
@@ -161,34 +161,20 @@ abstract class WPSSTM_Music_Data{
         }
 
         /*
-        Handle ID
-        */
-        $old_id = $this->get_post_music_id($post_id);
-        $id = ( isset($_POST['wpsstm_music_id']) ) ? trim($_POST['wpsstm_music_id']) : null;
-        $is_id_update = ($old_id != $id);
-        
-        if (!$id){
-            delete_post_meta( $post_id, $this->id_metakey );
-            delete_post_meta( $post_id, $this->data_metakey ); //delete music datas
-            delete_post_meta( $post_id, $this->time_metakey ); //delete music datas timestamp
-        }else{
-            update_post_meta( $post_id, $this->id_metakey, $id );
-            if ($is_id_update){
-                $this->save_music_details($post_id);
-            }
-        }
-        
-        /*
         Handle action
         */
 
         switch ($action){
             case 'autoguess-id':
-                $id = $this->auto_music_id( $post_id );
-                if ( is_wp_error($id) ) break;
+                $music_id = $this->auto_music_id( $post_id );
+                if ( is_wp_error($music_id) ) break;
             break;
             case 'reload':
-                $this->save_music_details($post_id);
+                $this->cache_music_data($post_id);
+            break;
+            default:
+                $music_id = $_POST['wpsstm_music_id'];
+                $this->save_music_id($post_id,$music_id);
             break;
         }
     }
@@ -388,7 +374,7 @@ abstract class WPSSTM_Music_Data{
         
         //TO FIX limit musicbrainz query to 1 entry max ?
 
-        $id = null;
+        $music_id = null;
 
         //check post type
         $post_type = get_post_type($post_id);
@@ -398,56 +384,77 @@ abstract class WPSSTM_Music_Data{
         $album =    wpsstm_get_post_album($post_id);
         $track =    wpsstm_get_post_track($post_id);
         
-        $id = $this->get_item_auto_id($artist,$album,$track);
+        $music_id = $this->get_item_auto_id($artist,$album,$track);
 
-        if ( is_wp_error($id) ) $id = null;
+        if ( is_wp_error($music_id) ) $music_id = null;
+
+        $success = $this->save_music_id($post_id,$music_id);
+        if ( is_wp_error($success) ) return $success;
+
+        return $music_id;
         
-        if ($id){
-            if ( $success = update_post_meta( $post_id, $this->id_metakey, $id ) ){
-                WP_SoundSystem::debug_log( json_encode(array('post_id'=>$post_id,'id'=>$id,'engine'=>$this->slug)),"Updated Music ID" ); 
-                $this->save_music_details($post_id);
+    }
+       
+    /*
+    Handle music date for a post
+    */
+    
+    private function save_music_id($post_id,$id = null){
+
+        $api_url = null;
+        $id = trim($id);
+
+        if ( !$post_type = get_post_type($post_id) ) return false;
+
+        $old_id = $this->get_post_music_id($post_id);
+        $is_id_update = ($old_id != $id);
+        $cache_data = ($id && $is_id_update);
+        
+        /*ID*/
+        
+        if ($is_id_update){
+            if (!$id){
+                
+                WP_SoundSystem::debug_log( "delete music datas..." );
+                
+                delete_post_meta( $post_id, $this->id_metakey );
+                delete_post_meta( $post_id, $this->data_metakey );
+                delete_post_meta( $post_id, $this->time_metakey );
+            }else{
+                
+                WP_SoundSystem::debug_log( "update music ID..." );
+                
+                update_post_meta( $post_id, $this->id_metakey, $id );
             }
-        }else{
-            $success = delete_post_meta( $post_id, $this->id_metakey );
+        }
+        
+        /*data*/
+        if ($cache_data){
+            $this->cache_music_data($post_id);
         }
 
         return $id;
         
     }
-            
-    /*
-    Reload music datas for an item ID
-    */
     
-    protected function save_music_details($post_id){
-        
-        $api_url = null;
-
-        if ( !$post_type = get_post_type($post_id) ) return false;
-
-        //delete existing
-        if ( delete_post_meta( $post_id, $this->data_metakey ) ){
-            delete_post_meta( $post_id, $this->time_metakey ); //delete timestamp
-            WP_SoundSystem::debug_log('deleted music details datas','reload music details');
-        }
-
+    private function cache_music_data($post_id){
         $data = $this->get_music_data_for_post($post_id);
 
-        if ( is_wp_error($data) ) $data = null;
+        if ( !is_wp_error($data) ){
+            
+            WP_SoundSystem::debug_log( "cache music datas..." );
+            
+            if ( $success = update_post_meta( $post_id, $this->data_metakey, $data ) ){
 
-        if ( $success = update_post_meta( $post_id, $this->data_metakey, $data ) ){
-            
-            //fill empty fields with mb datas
-            $this->fill_post_with_music_data($post_id);
-            
-            //save timestamp
-            $now = current_time('timestamp');
-            update_post_meta( $post_id, $this->time_metakey, $now );
-   
+                //fill empty fields with mb datas
+                //URGENT $this->fill_post_with_music_data($post_id);
+
+                //save timestamp
+                $now = current_time('timestamp');
+                update_post_meta( $post_id, $this->time_metakey, $now );
+
+            }
         }
-
-        return $success;
-        
     }
 
     private function fill_post_with_music_data($post_id=null){
