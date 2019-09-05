@@ -7,7 +7,7 @@ class WPSSTM_Track{
     public $title;
     public $artist;
     public $album;
-    public $duration; //in seconds
+    public $duration; //in milliseconds
     public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
     public $spotify_id = null;
     

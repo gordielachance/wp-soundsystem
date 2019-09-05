@@ -853,7 +853,7 @@ class WPSSTM_Core_Tracks{
             'name' => 'wpsstm_length',
             'value' => wpsstm_get_post_length($post_id,true),
             'icon' => '<i class="fa fa-music" aria-hidden="true"></i>',
-            'label' => __("Length (seconds)",'wpsstm'),
+            'label' => __("Length (milliseconds)",'wpsstm'),
             'placeholder' => __("Enter length here",'wpsstm')
         );
         return wpsstm_get_backend_form_input($input_attr);
@@ -902,7 +902,7 @@ class WPSSTM_Core_Tracks{
         $artist = ( isset($_POST[ 'wpsstm_artist' ]) ) ? $_POST[ 'wpsstm_artist' ] : null;
         $album = ( isset($_POST[ 'wpsstm_album' ]) ) ? $_POST[ 'wpsstm_album' ] : null;
         $title = ( isset($_POST[ 'wpsstm_track_title' ]) ) ? $_POST[ 'wpsstm_track_title' ] : null;
-        $length = ( isset($_POST[ 'wpsstm_length' ]) && ctype_digit($_POST[ 'wpsstm_length' ]) ) ? ( (int)$_POST[ 'wpsstm_length' ] * 1000 ) : null; //ms
+        $length = ( isset($_POST[ 'wpsstm_length' ]) && ctype_digit($_POST[ 'wpsstm_length' ]) ) ? ( (int)$_POST[ 'wpsstm_length' ] ) : null; //ms
         
         switch($post_type){
                 

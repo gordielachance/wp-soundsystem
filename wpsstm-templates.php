@@ -62,16 +62,15 @@ function wpsstm_get_post_image_url($post_id = null){
     return $image_url;
 }
 
+/*
+milliseconds
+*/
 function wpsstm_get_post_length($post_id = null,$seconds = false){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     $ms = $s = 0;
 
-    if ( $ms = get_post_meta( $post_id, WPSSTM_Core_Tracks::$length_metakey, true ) ){
-        $s = round($ms / 1000);
-    }
-    
-    return ($seconds) ? $s : $ms;
+    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$length_metakey, true );
 }
 
 function wpsstm_get_post_artist($post_id = null){
