@@ -39,6 +39,8 @@ class WPSSTM_Core_API {
             if ( is_wp_error($response) ) return $response;
 
             $response = json_decode($response, true);
+            
+            
 
             //check for errors
             $code = wpsstm_get_array_value('code',$response);
@@ -92,75 +94,62 @@ class WPSSTM_Core_API {
         return wpsstm_get_array_value('is_premium',$response);
     }
 
-    static function api_request($endpoint = null, $namespace = null, $method = 'GET'){
+    static function api_request($endpoint = null, $namespace = null, $params=null,$method = 'GET'){
 
         if (!$namespace) $namespace = WPSSTM_API_NAMESPACE; 
 
         if (!$endpoint){
             return new WP_Error('wpsstmapi_no_api_url',__("Missing API endpoint",'wpsstm'));
         }
-
-        //build headers
-        $api_args = array(
-            'method' =>     $method, //TOUFIX TOUCHECK compatible with wp_remote_get ?
-            'timeout' =>    wpsstm()->get_options('wpsstmapi_timeout'),
-            'headers'=>     array(
-                'Accept' =>         'application/json',
-            )
-        );
         
+        $rest_url = WPSSTM_API_URL . $namespace . '/' .$endpoint;
+
+        WP_SoundSystem::debug_log(array('url'=>$rest_url,'method'=>$method),'remote REST query...');
+
+        //Create request
+        $request = WP_REST_Request::from_url( $rest_url );
+        
+        //Method, headers, ...
+        $request->set_method( $method );
+        $request->set_header('Accept', 'application/json'); //TOUFIX TOUCHECK useful ?
         $token = self::has_valid_api_token() ? wpsstm()->get_options('wpsstmapi_token') : null;
 
         //token
         if ( $token ){
-            $api_args['headers']['Authorization'] = sprintf('Bearer %s',$token);
+            $request->set_header( 'Authorization',sprintf('Bearer %s',$token) );
         }
+
+        //TOUFIX add request timeout ? how ?
         
-        //build URL
-        $url = WPSSTM_API_URL . $namespace . '/' .$endpoint;
-
-        WP_SoundSystem::debug_log(array('url'=>$url,'args'=>$api_args),'query API...');
-
-        $error = null;
-        $request = wp_remote_get($url,$api_args);
-        $response = wp_remote_retrieve_body( $request );
-        $headers = wp_remote_retrieve_headers($request);
-
-        //TOUFIX URGENT
-        /*
-        a 404 API request (wrong URL, etc.) should return an error here, but is not !
-        print_r("<xmp>".json_encode($headers)."<xmp>");die();
-        */
-
-        if ( is_wp_error($response) ){
-            
-            $error = $response;
-            
-        }else{
-            
-            $response = wp_remote_retrieve_body( $request );
-
-            $response = json_decode($response, true);
-
-            //check for errors
-            $code = wpsstm_get_array_value('code',$response);
-            $message = wpsstm_get_array_value('message',$response);
-            $data = wpsstm_get_array_value('data',$response);
-            $status = wpsstm_get_array_value(array('data','status'),$response);
-
-            if ( $code && $message && ($status >= 400) ){
-                $error = new WP_Error($code,$message,$data );
-                return $error;
-            }
-            
+        //params
+        switch($method){
+            case 'GET':
+                $request->set_query_params($params);
+            break;
+            case 'POST':
+                $request->set_body_params($params);
+            break;
         }
-        
-        if ($error){
-            $this->track_log($error->get_error_message(),'WPSSTMAPI error');
+
+        //Get response
+        $response = rest_do_request( $request );
+
+        if ( $response->is_error() ) {
+            
+            $error = $response->as_error();
+
+            $error_message = $error->get_error_message();
+            
+            WP_SoundSystem::debug_log($error_message,'remote REST query error');
+
             return $error;
+            
         }
+        
+        //Get datas
+        $datas = $response->get_data();
 
-        return $response;
+        return $datas;
 
     }
     
