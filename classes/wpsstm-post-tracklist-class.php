@@ -667,6 +667,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         global $wpdb;
         
         //avoid populating the subtracks several times (eg. Jetpack populates the content several times) TOUFIX TOUCHECK ?
+
         if ($this->track_count !== null) return;
 
         $tracks = array();
@@ -688,6 +689,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //get static subtracks
         $tracks = $this->get_static_subtracks();
+
         if ( is_wp_error($tracks) ) return $tracks;
 
         $this->add_tracks($tracks);
@@ -772,6 +774,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 return $success;
             }
             
+            if (!$success){
+                $error_msg = __('Missing import ID','wpsstm');
+                $this->tracklist_log($error_msg);
+                return new WP_Error( 'missing_import_id',$error_msg );
+            }
+
             //Populate import ID
             $this->import_id = $success;
 
@@ -780,11 +788,23 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             */
             $xspf_url = WPSSTM_API_CACHE . sprintf('%s.xspf',$this->import_id);
             $response = wp_remote_get( $xspf_url );
+            $response_code = wp_remote_retrieve_response_code($response);
+            
+            if( $response_code > 400){
+                $response_msg = wp_remote_retrieve_response_message($response);
+                $error_msg = sprintf('[%s] %s',$response_code,$response_msg);
+                $error_msg = sprintf( __('Unable to load XSPF file: %s','wpsstm'),$error_msg );
+                
+                $this->tracklist_log($xspf_url,$error_msg);
+                
+                return new WP_Error( 'missing_api_xspf',$error_msg, $xspf_url );
+            }
+            
             $xspf = wp_remote_retrieve_body( $response );
         }
 
         if ( is_wp_error($xspf) ) return $xspf;
-        
+
         /*
         convert XSPF to array
         */
@@ -1170,9 +1190,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
         $querystr = $wpdb->prepare( "SELECT * FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
-        $rows = $wpdb->get_results( $querystr);
+        $rows = $wpdb->get_results( $querystr, ARRAY_A);
 
         $post_ids = array_column($rows, 'track_id');
+
         if (!$post_ids) $post_ids = array(0); //https://core.trac.wordpress.org/ticket/28099
         
         /*
@@ -1198,10 +1219,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $tracks = array();
         foreach($rows as $row){
             
-            if ( !in_array($row->track_id,$filtered_post_ids) ) continue;
+            if ( !in_array($row['track_id'],$filtered_post_ids) ) continue;
             
             $subtrack = new WPSSTM_Track(); //default
-            $subtrack->populate_subtrack($row->ID);
+            $subtrack->populate_subtrack($row['ID']);
             $tracks[] = $subtrack;
         }
 

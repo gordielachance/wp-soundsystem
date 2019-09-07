@@ -150,39 +150,38 @@ class WPSSTM_Core_API {
             $api_args['headers']['Authorization'] = sprintf('Bearer %s',$token);
         }
         
-        WP_SoundSystem::debug_log(array('endpoint'=>$endpoint,'params'=>$params,'args'=>$api_args,'method'=>$method),'remote API query...');
+        WP_SoundSystem::debug_log(array('endpoint'=>$endpoint,'params'=>$params,'args'=>$api_args,'method'=>$method,'url'=>$rest_url),'remote API query...');
 
-        $error = null;
         $request = wp_remote_get($rest_url,$api_args);
-        $response = wp_remote_retrieve_body( $request );
+
+        if ( is_wp_error($request) ){
+            WP_SoundSystem::debug_log($request->get_error_message());
+            return $request;
+        }
+        
         $headers = wp_remote_retrieve_headers($request);
+        $response_code = wp_remote_retrieve_response_code($request);
+        
+        if( $response_code > 400){
+            $response_msg = wp_remote_retrieve_response_message($request);
+            $error_msg = sprintf('[%s] %s',$response_code,$response_msg);
+            $error_msg = sprintf( __('Unable to query API: %s','wpsstm'),$error_msg );
+            
+            WP_SoundSystem::debug_log($error_msg);
+            return  WP_Error( 'query_api',$error_msg, $rest_url );
+            
+        }
 
-        //TOUFIX URGENT
-        /*
-        a 404 API request (wrong URL, etc.) should return an error here, but is not !
-        print_r("<xmp>".json_encode($headers)."<xmp>");die();
-        */
+        $response = wp_remote_retrieve_body( $request );
+        
         if ( is_wp_error($response) ){
-            
-            $error = $response;
-            
-        }else{
-            
-            $response = wp_remote_retrieve_body( $request );
-            $response = json_decode($response, true);
-            $response = self::convert_json_response_errors($response);
+            WP_SoundSystem::debug_log($response->get_error_message());
+            return $response;
+        }
 
-            if ( is_wp_error($response) ){
-                $error = $response;
-            }
-            
-        }
-        
-        if ($error){
-            WP_SoundSystem::debug_log($error->get_error_message(),'remote REST query error');
-            return $error;
-        }
-        
+        $response = json_decode($response, true);
+        $response = self::convert_json_response_errors($response);
+
         return $response;
 
     }
