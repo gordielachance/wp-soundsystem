@@ -408,7 +408,7 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
     public $name = 'MusicBrainz';
     public $entries_table_classname = 'WPSSTM_MB_Entries';
             
-    protected static function get_supported_post_types(){
+    protected function get_supported_post_types(){
         return array(
             wpsstm()->post_type_artist,
             wpsstm()->post_type_track,
