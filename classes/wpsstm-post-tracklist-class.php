@@ -1330,5 +1330,17 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if (!$this->import_id) return;
         return $xspf_url = WPSSTM_API_CACHE . sprintf('%s-feedback.json',$this->import_id);
     }
+    
+    function get_backend_tracks_url(){
+        $links_url = admin_url('edit.php');
+        $links_url = add_query_arg( 
+            array(
+                'post_type' =>      wpsstm()->post_type_track,
+                'tracklist_id' =>   $this->post_id,
+                //'post_status' => 'publish'
+            ),$links_url 
+        );
+        return $links_url;
+    }
 
 }

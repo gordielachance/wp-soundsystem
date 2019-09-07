@@ -205,16 +205,16 @@ class WPSSTM_Core_Tracklists{
         
         global $wpsstm_tracklist;
         
-            //playable
-            $option = $wpsstm_tracklist->get_options('playable');
+        //playable
+        $option = $wpsstm_tracklist->get_options('playable');
 
-            $input = sprintf(
-                '<input type="checkbox" name="%s[playable]" value="on" %s />',
-                'wpsstm_tracklist_options',
-                checked($option,true, false)
-            );
-            
-            printf('<p>%s <label>%s</label></p>',$input,__('Playable','wpsstm'));
+        $input = sprintf(
+            '<input type="checkbox" name="%s[playable]" value="on" %s />',
+            'wpsstm_tracklist_options',
+            checked($option,true, false)
+        );
+
+        printf('<p>%s <label>%s</label></p>',$input,__('Playable','wpsstm'));
 
         if ($wpsstm_tracklist->tracklist_type === 'live' ) {
 
@@ -230,6 +230,10 @@ class WPSSTM_Core_Tracklists{
             
             printf('<p><strong>%s</strong> <small>(%s)</small></br>%s</p>',__('Cache time','wpsstm'),__('minutes','wpsstm'),$input);
         }
+        
+        //edit tracks bt
+        $post_links_url = $wpsstm_tracklist->get_backend_tracks_url();
+        printf('<a href="%s" class="button">%s</a>',$post_links_url,__('Filter tracks','wpsstm'));
         
          wp_nonce_field( 'wpsstm_tracklist_options_meta_box', 'wpsstm_tracklist_options_meta_box_nonce' );
     }

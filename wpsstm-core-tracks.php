@@ -59,6 +59,7 @@ class WPSSTM_Core_Tracks{
         
         add_filter( 'posts_join', array($this,'tracks_query_left_join_subtracks'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_exclude_subtracks'), 10, 2 );
+        add_filter( 'posts_where', array($this,'track_query_where_tracklist_id'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_id'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_in'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_position'), 10, 2 );
@@ -477,8 +478,9 @@ class WPSSTM_Core_Tracks{
         $subtrack_in_query =            $query->get('subtrack__in');
         $subtrack_position_query =      $query->get('subtrack_position');
         $subtrack_sort_query =          ($query->get('orderby') == 'subtracks');
+        $tracklist_id_query =           $query->get('tracklist_id');
 
-        $join_subtracks = ( $subtracks_exclude_query || $subtrack_id_query || $subtrack_in_query || $subtrack_sort_query || $subtrack_position_query  );
+        $join_subtracks = ( $subtracks_exclude_query || $subtrack_id_query || $subtrack_in_query || $subtrack_sort_query || $subtrack_position_query || $tracklist_id_query  );
         
         if ($join_subtracks){
             $join .= sprintf("LEFT JOIN %s AS subtracks ON subtracks.track_id = %s.ID",$subtracks_table,$wpdb->posts);
@@ -515,6 +517,20 @@ class WPSSTM_Core_Tracks{
 
         return $where;
     }
+    
+    function track_query_where_tracklist_id($where,$query){
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$tracklist_id = $query->get('tracklist_id') ) return $where;
+        
+        $where.= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
+
+        //so single template is shown, instead of search results
+        //TOUFIX this is maybe quite hackish, should be improved ? eg. setting $query->is_singular = true crashes wordpress.
+        $query->is_single = true; 
+
+        return $where;
+    }
+    
     function track_query_where_subtrack_id($where,$query){
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
         if ( !$subtrack_id = $query->get('subtrack_id') ) return $where;
