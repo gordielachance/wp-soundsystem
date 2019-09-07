@@ -727,9 +727,11 @@ class WPSSTM_Core_Tracks{
     
     function add_query_vars_track( $qvars ) {
         $qvars[] = 'wpsstm_track_data';
+        $qvars[] = 'tracklist_id';
         $qvars[] = 'loved_tracks';
         $qvars[] = 'subtrack_id';
         $qvars[] = 'subtrack__in';
+        $qvars[] = 'subtrack_position';
         $qvars[] = 'exclude_subtracks';
         
         return $qvars;

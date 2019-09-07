@@ -46,9 +46,7 @@ class WPSSTM_Core_Tracklists{
 
         //tracklist queries
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracklists') );
-        add_filter( 'posts_join', array($this,'tracklist_query_join_subtracks_table'), 10, 2 );
-        add_filter( 'posts_where', array($this,'tracklist_query_where_tracklist_id'), 10, 2 );
-        add_filter( 'posts_where', array($this,'tracklist_query_where_track_id'), 10, 2 );
+        //TOUFIX used ? not a duplicate of stuff in core tracks ?
 
         //post content
         add_filter( 'the_title', array($this, 'filter_imported_playlist_title'), 9, 2 );
@@ -85,8 +83,6 @@ class WPSSTM_Core_Tracklists{
 
     function add_tracklist_query_vars($vars){
         $vars[] = 'tracklists-favorited-by';
-        $vars[] = 'tracklist_id';
-        $vars[] = 'subtrack_position';
         $vars[] = 'pulse-max';
         return $vars;
     }
@@ -219,7 +215,7 @@ class WPSSTM_Core_Tracklists{
             );
             
             printf('<p>%s <label>%s</label></p>',$input,__('Playable','wpsstm'));
-        
+
         if ($wpsstm_tracklist->tracklist_type === 'live' ) {
 
             //cache min
@@ -654,56 +650,6 @@ class WPSSTM_Core_Tracklists{
         return $query;
     }
 
-    function tracklist_query_join_subtracks_table($join,$query){
-        global $wpdb;
-        
-        //check this is a tracklist query
-        //https://stackoverflow.com/a/7542708/782013
-        $post_types = $query->get('post_type');
-        $has_tracklist_type = (count(array_intersect((array)$post_types, wpsstm()->tracklist_post_types)) > 0);
-        if ( !$has_tracklist_type ) return $join;
-
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        $tracklist_id = $query->get('tracklist_id');
-        $subtrack_id = $query->get('subtrack_id');
-        
-        if ( $tracklist_id || $subtrack_id ) {
-            $join .= sprintf(" INNER JOIN %s AS subtracks ON (%s.ID = subtracks.tracklist_id)",$subtracks_table,$wpdb->posts);
-        }
-
-        return $join;
-    }
-    
-    function tracklist_query_where_tracklist_id($where,$query){
-        global $wpdb;
-        
-        //check this is a tracklist query
-        //https://stackoverflow.com/a/7542708/782013
-        $post_types = $query->get('post_type');
-        $has_tracklist_type = (count(array_intersect((array)$post_types, wpsstm()->tracklist_post_types)) > 0);
-        if ( !$has_tracklist_type ) return $where;
-
-        if ( $tracklist_id = $query->get('tracklist_id') ) {
-            $where .= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
-        }
-        return $where;
-    }
-    
-    function tracklist_query_where_track_id($where,$query){
-        
-        //check this is a tracklist query
-        //https://stackoverflow.com/a/7542708/782013
-        $post_types = $query->get('post_type');
-        $has_tracklist_type = (count(array_intersect((array)$post_types, wpsstm()->tracklist_post_types)) > 0);
-        if ( !$has_tracklist_type ) return $where;
-
-        if ( !$subtrack_id = $query->get('subtrack_id') ) return $where;
-        
-        $where.= sprintf(" AND subtracks.track_id = %s",$subtrack_id);
-        return $where;
-    }
-    
     /*
     Unset tracklist occurences out of the subtracks table when it is deleted
     */
@@ -722,7 +668,7 @@ class WPSSTM_Core_Tracklists{
     }
     
     /*
-    Delete the tracklist related entries from the subtracks table when a tracklist post is deleted.
+    Delete the subtracks matching a tracklist ID when a tracklist post is deleted.
     */
     
     function delete_tracklist_subtracks($post_id){
