@@ -122,7 +122,7 @@ abstract class WPSSTM_Music_Data{
 
     }
     
-    public static function pre_get_posts_music_data_id( $query ) {
+    public function pre_get_posts_music_data_id( $query ) {
 
         if ( !in_array( $query->get( 'post_type' ),$this->get_supported_post_types() ) ) return $query;
         if ( $search = $query->get( 'mbid' ) ){
