@@ -127,6 +127,10 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 3.0.6 =
+* playlist settings metabox : add 'filter tracks' button
+* bugfixes
+
 = 3.0.5 =
 * musicbrainz/spotify : new 'Post fill' metabox (only for tracks)
 * playlists : share track link (autoplay)
