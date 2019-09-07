@@ -43,7 +43,7 @@ abstract class WPSSTM_Music_Data{
 
     }
 
-    abstract protected function get_supported_post_types();
+    abstract protected static function get_supported_post_types();
     abstract protected function query_music_entries( $artist,$album = null,$track = null );
     abstract protected function get_item_auto_id( $artist,$album = null,$track = null );
     abstract public function get_music_item_url();
@@ -62,7 +62,7 @@ abstract class WPSSTM_Music_Data{
         global $post;
         if (!$post) return;
         
-        $post_types = $this->get_supported_post_types();
+        $post_types = self::get_supported_post_types();
         $music_id = $this->get_post_music_id($post->ID);
         $music_data = $this->get_post_music_data($post->ID);
 
@@ -124,7 +124,7 @@ abstract class WPSSTM_Music_Data{
     
     public static function pre_get_posts_music_data_id( $query ) {
 
-        if ( !in_array( $query->get( 'post_type' ),$this->get_supported_post_types() ) ) return $query;
+        if ( !in_array( $query->get( 'post_type' ),self::get_supported_post_types() ) ) return $query;
         if ( $search = $query->get( 'mbid' ) ){
             
             $query->set( 'meta_key', $this->id_metakey );
@@ -151,7 +151,7 @@ abstract class WPSSTM_Music_Data{
 
         //check post type
         $post_type = get_post_type($post_id);
-        if ( !in_array($post_type,$this->get_supported_post_types()) ) return;
+        if ( !in_array($post_type,self::get_supported_post_types()) ) return;
 
         //nonce
         $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_music_id_meta_box_nonce'], 'wpsstm_music_id_meta_box' ) );
@@ -491,7 +491,7 @@ abstract class WPSSTM_Music_Data{
 
         //check post type
         $post_type = get_post_type($post_id);
-        if ( !in_array($post_type,$this->get_supported_post_types()) ) return false;
+        if ( !in_array($post_type,self::get_supported_post_types()) ) return false;
 
         $artist =   wpsstm_get_post_artist($post_id);
         $album =    wpsstm_get_post_album($post_id);
