@@ -93,13 +93,21 @@ class WPSSTM_Tracklist{
 
         return $valid_tracks;
     }
+    
+    /*
+    Return one level array
+    */
 
-    function to_array(){
-        $export = array(
+    function to_array($filter = true){
+        $arr = array(
             'post_id' => $this->post_id,
             'index' => $this->index,
         );
-        return array_filter($export);
+        
+        if ($filter) $arr = array_filter($arr);
+        
+        return $arr;
+
     }
 
     /**

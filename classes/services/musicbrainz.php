@@ -443,19 +443,18 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Data_Engine{
 
     }
             
-    protected function query_music_entries( $artist,$album = null,$track = null ){
+    protected function query_music_entries( $artist,$album = '_',$track = null ){
 
         $endpoint = null;
         
         //url encode
         $artist = urlencode($artist);
-        $album = ($album) ? $album : '_';
         $album = urlencode($album);
         $track = urlencode($track);
         
         if($artist && $track){//track
             $endpoint = sprintf('services/musicbrainz/search/%s/%s/%s',$artist,$album,$track);
-        }elseif($artist && $album){//album
+        }elseif($artist && ($album !== '_') ){//album
             $endpoint = sprintf('services/musicbrainz/search/%s/%s',$artist,$album);
         }elseif($artist){//artist
             $endpoint = sprintf('services/musicbrainz/search/%s',$artist);
@@ -468,7 +467,8 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Data_Engine{
         return wpsstm()->local_rest_request($endpoint);
     }
             
-    public function get_item_auto_id($artist,$album=null,$track=null){
+    protected function get_item_auto_id($artist,$album=null,$track=null){
+
         $entries = $this->query_music_entries($artist,$album,$track);
         if ( is_wp_error($entries) || !$entries ) return $entries;
         
@@ -542,6 +542,8 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Data_Engine{
 
 class WPSSTM_MB_Entries extends WPSSTM_Music_Entries {
     
+    var $engine_slug = 'musicbrainz';
+    
     function display_tablenav($which){
         
     }
@@ -583,7 +585,7 @@ class WPSSTM_MB_Entries extends WPSSTM_Music_Entries {
         }
         
         //mbid
-        $columns['mbitem_mbid'] = __('MusicBrainz ID','wpsstm');
+        $columns['mbitem_mbid'] = __('ID','wpsstm');
         $columns['mbitem_score'] = __('Score','wpsstm');
         
         return $columns;

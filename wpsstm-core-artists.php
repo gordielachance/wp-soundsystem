@@ -161,7 +161,16 @@ class WPSSTM_Core_Artists{
             'show_tagcloud'              => false,
             'capabilities'               => $capabilities,
         );
-        register_taxonomy(WPSSTM_Core_Tracks::$artist_taxonomy, array( wpsstm()->post_type_track ), $args );
+        
+        register_taxonomy(
+            WPSSTM_Core_Tracks::$artist_taxonomy,
+            array(
+                wpsstm()->post_type_artist,
+                wpsstm()->post_type_track,
+                wpsstm()->post_type_album
+            ),
+            $args
+        );
 
     }
     

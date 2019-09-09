@@ -373,7 +373,11 @@ class WPSSTM_Track_Link{
 
     }
     
-    function to_array(){
+    /*
+    Return one level array
+    */
+    
+    function to_array($filter = true){
 
         $arr = array(
             'track_id' =>       $this->track->post_id,
@@ -391,7 +395,11 @@ class WPSSTM_Track_Link{
             'mime_type' =>      $this->mime_type,
             'duration' =>       $this->duration,
         );
-        return array_filter($arr);
+        
+        if ($filter) $arr = array_filter($arr);
+        
+        return $arr;
+
     }
 
 }

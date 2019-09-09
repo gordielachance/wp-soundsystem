@@ -67,7 +67,7 @@ class WPSSTM_Track{
         $this->artist           = wpsstm_get_post_artist($this->post_id);
         $this->album            = wpsstm_get_post_album($this->post_id);
         $this->image_url        = wpsstm_get_post_image_url($this->post_id);
-        $this->duration         = wpsstm_get_post_length($this->post_id);
+        $this->duration         = wpsstm_get_post_duration($this->post_id);
         $this->did_autolink     = $this->autolink_check();
         
     }
@@ -251,8 +251,12 @@ class WPSSTM_Track{
             return sprintf('<ul class="wpsstm-track-parents">%s</ul>',implode("\n",$links));
         }
     }
+    
+    /*
+    Return one level array
+    */
 
-    function to_array(){
+    function to_array($filter = true){
 
         $arr = array(
             'post_id' => $this->post_id,
@@ -265,7 +269,11 @@ class WPSSTM_Track{
             'position' => $this->position,
             'duration' => $this->duration,
         );
-        return array_filter($arr);
+        
+        if ($filter) $arr = array_filter($arr);
+        
+        return $arr;
+
     }
     
     function to_url(){

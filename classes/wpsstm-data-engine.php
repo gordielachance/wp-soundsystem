@@ -139,7 +139,7 @@ abstract class WPSSTM_Data_Engine{
         $can_query = $this->can_query_music_entries($post->ID);
 
         $this->map_post_datas_notice();
-        //$this->mapped_item_header();//TOUFIX TO IMPROVE
+        $this->mapped_item_header();
 
         ?>
         <div class="wpsstm-data-metabox">
@@ -272,8 +272,10 @@ abstract class WPSSTM_Data_Engine{
 
         $header = null;
         $mapped_item = $this->get_mapped_object_by_post( $post->ID );
-        $classname = get_class($mapped_item);
+        if (!$mapped_item) return;
         
+        $classname = get_class($mapped_item);
+
         /*
         Item header
         */
@@ -295,6 +297,8 @@ abstract class WPSSTM_Data_Engine{
 
         $music_id = $this->get_post_music_id($post->ID);
         $mapped_item = $this->get_mapped_object_by_post( $post->ID );
+        if (!$mapped_item) return;
+        
         $classname = get_class($mapped_item);
 
         $post_type = get_post_type($post->ID);
@@ -308,7 +312,7 @@ abstract class WPSSTM_Data_Engine{
         switch($classname){
             case 'WPSSTM_Track':
                 global $wpsstm_track;
-                $item = $wpsstm_track->to_array();
+                $item = $wpsstm_track->to_array(false);
             break;
         }
         
@@ -378,6 +382,8 @@ abstract class WPSSTM_Data_Engine{
         $track =    wpsstm_get_post_track($post_id);
         $album =    wpsstm_get_post_album($post_id);
         
+        
+        
         $can = false;
 
         switch($post_type){
@@ -391,6 +397,8 @@ abstract class WPSSTM_Data_Engine{
                 $can = ($music_id || ($artist && $album) );
             break;
         }
+        
+        
         
         return $can;
 
@@ -413,7 +421,7 @@ abstract class WPSSTM_Data_Engine{
         $artist =   wpsstm_get_post_artist($post_id);
         $album =    wpsstm_get_post_album($post_id);
         $track =    wpsstm_get_post_track($post_id);
-        
+
         $music_id = $this->get_item_auto_id($artist,$album,$track);
 
         if ( is_wp_error($music_id) ) $music_id = null;
@@ -606,6 +614,7 @@ abstract class WPSSTM_Data_Engine{
 class WPSSTM_Music_Entries extends WP_List_Table {
     
     var $current_id = null;
+    var $engine_slug = null; //to override in child class
     
 	/**
 	 * Handles the checkbox column output.
@@ -617,18 +626,21 @@ class WPSSTM_Music_Entries extends WP_List_Table {
 	 */
 	public function column_cb( $item ) {
         global $post;
-        global $music_entry_index;
+        
+        $checked = ($this->current_id == $item['id']);
 
-        $entry_idx = ( isset($music_entry_index) ) ? $music_entry_index : 0;
+        $input_attr = array(
+            'type'=>        'radio',
+            'name'=>        sprintf('wpsstm-data[%s][id]',$this->engine_slug),
+            'value'=>       esc_attr( $item['id'] ),
+            'checked'=>     $checked ? 'checked' :null,
+        );
+        
+        $input_attr = array_filter($input_attr);
+        $input_attr = wpsstm_get_html_attr($input_attr);
 
-        if ( $this->current_id ){
-            $checked_str = checked($this->current_id,$item['id'],false);
-        }else{
-            $checked_str = checked($entry_idx,0,false);
-        }
 
-        printf('<input type="radio" name="wpsstm_music_id" id="cb-select-%s" value="%s" %s />',$entry_idx,esc_attr( $item['id'] ),$checked_str);
+        printf('<input %s />',$input_attr);
 
-        $entry_idx++;
 	}
 }

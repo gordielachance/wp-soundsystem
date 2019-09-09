@@ -62,24 +62,13 @@ function wpsstm_get_post_image_url($post_id = null){
     return $image_url;
 }
 
-/*
-milliseconds
-*/
-function wpsstm_get_post_length($post_id = null,$seconds = false){
-    global $post;
-    if (!$post_id) $post_id = $post->ID;
-    $ms = $s = 0;
-
-    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$length_metakey, true );
-}
-
 function wpsstm_get_post_artist($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
     $terms_list = get_the_term_list( $post_id, WPSSTM_Core_Tracks::$artist_taxonomy , null, ',' );
+
     if ( is_wp_error($terms_list) ) return false;
-    
     return strip_tags($terms_list);
 }
 
@@ -101,6 +90,17 @@ function wpsstm_get_post_album($post_id = null){
     if ( is_wp_error($terms_list) ) return false;
     
     return strip_tags($terms_list);
+}
+
+/*
+milliseconds
+*/
+function wpsstm_get_post_duration($post_id = null,$seconds = false){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    $ms = $s = 0;
+
+    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$duration_metakey, true );
 }
 
 function wpsstm_get_blank_action(){
