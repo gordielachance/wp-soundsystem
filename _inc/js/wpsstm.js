@@ -11,6 +11,18 @@ $( ".wpsstm-json" ).each(function( index ) {
     container_el.addClass('.wpsstm-json-loaded');
 });
 
+//datas metabox
+$('.wpsstm-data-metabox').each(function( index ) {
+    var lookup_bt = $(this).find('a.wpsstm-data-id-lookup-bt');
+    var input_id = $(this).find('input[type="text"].wpsstm-data-id');
+
+    input_id.change(function() {
+        var hasVal = ( input_id.val().trim() );
+        lookup_bt.toggleClass( "wpsstm-freeze", hasVal );
+    });
+});
+
+
 //artist autocomplete
 $('.wpsstm-artist-autocomplete').each(function() {
     var input_el = $(this);

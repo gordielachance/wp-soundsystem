@@ -11,7 +11,7 @@ class WPSSTM_Track{
     public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
     public $spotify_id = null;
     
-    public $image_url;
+    public $image_url; //remote image URL
     public $location;
     
     var $link;
@@ -67,7 +67,7 @@ class WPSSTM_Track{
         $this->artist           = wpsstm_get_post_artist($this->post_id);
         $this->album            = wpsstm_get_post_album($this->post_id);
         $this->image_url        = wpsstm_get_post_image_url($this->post_id);
-        $this->duration         = wpsstm_get_post_length($this->post_id);
+        $this->duration         = wpsstm_get_post_duration($this->post_id);
         $this->did_autolink     = $this->autolink_check();
         
     }
@@ -251,6 +251,10 @@ class WPSSTM_Track{
             return sprintf('<ul class="wpsstm-track-parents">%s</ul>',implode("\n",$links));
         }
     }
+    
+    /*
+    Return one level array
+    */
 
     function to_array(){
 
@@ -263,8 +267,11 @@ class WPSSTM_Track{
             'from_tracklist' => $this->from_tracklist,
             'subtrack_id' => $this->subtrack_id,
             'position' => $this->position,
+            'duration' => $this->duration,
         );
+        
         return array_filter($arr);
+
     }
     
     function to_url(){
@@ -302,6 +309,7 @@ class WPSSTM_Track{
         global $wpsstm_track;
         $old_track = $wpsstm_track; //store temp
         $wpsstm_track = $this;
+        $wpsstm_track->local_track_lookup(); //check for this track in the database (if it has no ID) //TOUFIX TOUCHECK useful ?
         
         ob_start();
         wpsstm_locate_template( 'content-track.php', true, false );
@@ -1267,6 +1275,7 @@ class WPSSTM_Track{
     */
     
     public function __toString() {
+
         if ($this->album){
             $title = sprintf('%s - "%s" | %s',$this->artist,$this->title,$this->album);
         }else{

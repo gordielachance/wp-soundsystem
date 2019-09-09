@@ -29,6 +29,7 @@ function wpsstm_get_array_value($keys = null, $array){
 
 function wpsstm_get_json_viewer($input,$parent_slugs=array() ){
     
+    if ( !$input ) return;
     if( is_array($input) ) $input = json_encode($input);
     
     $input = sprintf('<textarea class="wpsstm-json-input wpsstm-fullwidth">%s</textarea>',$input);

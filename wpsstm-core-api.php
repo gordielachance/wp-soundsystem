@@ -168,7 +168,7 @@ class WPSSTM_Core_API {
             $error_msg = sprintf( __('Unable to query API: %s','wpsstm'),$error_msg );
             
             WP_SoundSystem::debug_log($error_msg);
-            return  WP_Error( 'query_api',$error_msg, $rest_url );
+            return new WP_Error( 'query_api',$error_msg, $rest_url );
             
         }
 

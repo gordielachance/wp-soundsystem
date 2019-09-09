@@ -214,13 +214,21 @@ class WPSSTM_Core_Albums{
             'labels'                     => $labels,
             'hierarchical'               => false,
             'public'                     => false,
-            'show_ui'                    => false,
+            'show_ui'                    => true,
             'show_admin_column'          => false,
             'show_in_nav_menus'          => false,
             'show_tagcloud'              => false,
             'capabilities'               => $capabilities,
         );
-        register_taxonomy(WPSSTM_Core_Tracks::$album_taxonomy, array( wpsstm()->post_type_track ), $args );
+        
+        register_taxonomy(
+            WPSSTM_Core_Tracks::$album_taxonomy,
+            array(
+                wpsstm()->post_type_track,
+                wpsstm()->post_type_album
+            ),
+            $args
+        );
 
     }
     
@@ -230,6 +238,8 @@ class WPSSTM_Core_Albums{
         if ( $post_type !== wpsstm()->post_type_album ) return $title;
         $title = wpsstm_get_post_track($post_id);
         $artist = wpsstm_get_post_artist($post_id);
+        
+        if (!$title || !$artist) return null;
         
         return sprintf('"%s" - %s',$title,$artist);
     }

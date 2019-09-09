@@ -62,24 +62,13 @@ function wpsstm_get_post_image_url($post_id = null){
     return $image_url;
 }
 
-/*
-milliseconds
-*/
-function wpsstm_get_post_length($post_id = null,$seconds = false){
-    global $post;
-    if (!$post_id) $post_id = $post->ID;
-    $ms = $s = 0;
-
-    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$length_metakey, true );
-}
-
 function wpsstm_get_post_artist($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
     $terms_list = get_the_term_list( $post_id, WPSSTM_Core_Tracks::$artist_taxonomy , null, ',' );
+
     if ( is_wp_error($terms_list) ) return false;
-    
     return strip_tags($terms_list);
 }
 
@@ -101,6 +90,17 @@ function wpsstm_get_post_album($post_id = null){
     if ( is_wp_error($terms_list) ) return false;
     
     return strip_tags($terms_list);
+}
+
+/*
+milliseconds
+*/
+function wpsstm_get_post_duration($post_id = null,$seconds = false){
+    global $post;
+    if (!$post_id) $post_id = $post->ID;
+    $ms = $s = 0;
+
+    return get_post_meta( $post_id, WPSSTM_Core_Tracks::$duration_metakey, true );
 }
 
 function wpsstm_get_blank_action(){
@@ -175,19 +175,26 @@ function wpsstm_get_backend_form_input($options = null){
         'value' => null,
         'icon' => null,
         'label' => null,
-        'placeholder' => null
+        'placeholder' => null,
+        'class' => null,
     );
     $options = wp_parse_args((array)$options,$option_defaults);
 
     //label
     $label_el = (isset($options['label'])) ? sprintf('<label for="%s">%s</label>',$options['id'],$options['label']) : null;
 
+    //class
+    $class_str = 'wpsstm-fullwidth input-group-field ';
+    if ( isset($options['class']) ){
+        $class_str .= $options['class'];
+    }
+    
     //input
     $input_attr = array(
         'id' =>             isset($options['id']) ? $options['id'] : null,
         'type' =>           'text',
         'name' =>           isset($options['name']) ? $options['name'] : null,
-        'class' =>          'wpsstm-fullwidth input-group-field',
+        'class' =>          $class_str,
         'value' =>          isset($options['value']) ? $options['value'] : null,
         'placeholder' =>    isset($options['placeholder']) ? $options['placeholder'] : null,
 

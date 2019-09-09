@@ -14,14 +14,13 @@ class WPSSTM_Spotify{
         
         $this->options = wp_parse_args(get_option( self::$spotify_options_meta_name),$options_default);
         
+        add_filter( 'wpsstm_get_music_detail_engines',array($this,'register_details_engine') ); //music details
+        
         /*backend*/
         add_action( 'admin_init', array( $this, 'spotify_settings_init' ) );
         add_action( 'rest_api_init', array($this,'register_endpoints') );
         
         if ( $this->can_spotify_api() === true ){
-            //music details
-            add_filter( 'wpsstm_get_music_detail_engines',array($this,'register_details_engine') );
-            
             //presets
             //TOUFIX should be WPSSTMAPI stuff
             add_filter('wpsstm_feed_url', array($this, 'spotify_playlist_bang_to_url'));
@@ -314,7 +313,7 @@ class WPSSTM_Spotify{
 
 }
 
-class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
+class WPSSTM_Spotify_Data extends WPSSTM_Data_Engine{
     public $slug = 'spotify';
     public $name = 'Spotify';
     public $entries_table_classname = 'WPSSTM_MB_Entries';
@@ -355,7 +354,7 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
         return sprintf('https://open.spotify.com/%s/%s',$remote_type,$id);
     }
 
-    function get_item_auto_id( $artist,$album = null,$track = null ){
+    protected function get_item_auto_id( $artist,$album = null,$track = null ){
 
         $entries = $this->query_music_entries($artist,$album,$track);
         if ( is_wp_error($entries) || !$entries ) return $entries;
@@ -393,17 +392,16 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
         return wpsstm()->local_rest_request($endpoint);
     }
     
-    protected function query_music_entries( $artist,$album = null,$track = null ){
+    protected function query_music_entries( $artist,$album = '_',$track = null ){
 
         $endpoint = null;
         $artist = urlencode($artist);
-        $album = ($album === '_') ? null : $album;
         $album = urlencode($album);
         $track = urlencode($track);
         
         if($artist && $track){//track
             $endpoint = sprintf('services/spotify/search/%s/%s/%s',$artist,$album,$track);
-        }elseif($artist && $album){//album
+        }elseif($artist && ($album !== '_') ){//album
             $endpoint = sprintf('services/spotify/search/%s/%s',$artist,$album);
         }elseif($artist){//artist
             $endpoint = sprintf('services/spotify/search/%s',$artist);
@@ -413,28 +411,32 @@ class WPSSTM_Spotify_Data extends WPSSTM_Music_Data{
         
     }
     
-    protected function get_engine_data_by_post($post_id){
+    protected function get_mapped_object_by_post($post_id){
         
-        $map = array();
+        $item = null;
         $post_type = get_post_type($post_id);
         $datas = $this->get_post_music_data($post_id);
 
         switch ($post_type){
             case wpsstm()->post_type_artist:
-                $map['artist'] = wpsstm_get_array_value(array('name'), $datas);
+                //$item['artist'] = wpsstm_get_array_value(array('name'), $datas);
             break;
             case wpsstm()->post_type_track:
-                $map['artist'] =   wpsstm_get_array_value(array('artists',0,'name'), $datas);
-                $map['title'] =    wpsstm_get_array_value(array('name'), $datas);
-                $map['album'] =    wpsstm_get_array_value(array('album','name'), $datas);
-                $map['length'] =   wpsstm_get_array_value(array('duration_ms'), $datas);
+                
+                $item = new WPSSTM_Track();
+                $item->title =     wpsstm_get_array_value(array('name'), $datas);
+                $item->artist =    wpsstm_get_array_value(array('artists',0,'name'), $datas);
+                $item->album =     wpsstm_get_array_value(array('album','name'), $datas);
+                $item->duration =  wpsstm_get_array_value(array('duration_ms'), $datas);
+                //$item->image_url = 
+   
             break;
             case wpsstm()->post_type_album:
-                $map['artist'] =   wpsstm_get_array_value(array('artists',0,'name'), $datas);
-                $map['album'] =    wpsstm_get_array_value(array('name'), $datas);
+                //$item['artist'] =   wpsstm_get_array_value(array('artists',0,'name'), $datas);
+                //$item['album'] =    wpsstm_get_array_value(array('name'), $datas);
             break;
         }
-        return $map;
+        return $item;
     }
 
             
@@ -601,7 +603,11 @@ class WPSSTM_Spotify_Endpoints extends WP_REST_Controller {
 }
 
 class WPSSTM_Spotify_Entries extends WPSSTM_Music_Entries {
+    
+    var $engine_slug = 'spotify';
+    
     //TOUFIX
+    
 }
 
 function wpsstm_spotify_init(){

@@ -331,7 +331,7 @@ class WPSSTM_Core_Tracklists{
         $before = array();
         $after = array();
         
-        $after['tracks-count'] = __('Tracks','wpsstm');
+        $after['tracks-count'] = __('Tracks Count','wpsstm');
         
         return array_merge($before,$defaults,$after);
     }

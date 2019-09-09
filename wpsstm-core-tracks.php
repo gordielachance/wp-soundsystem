@@ -6,11 +6,8 @@ class WPSSTM_Core_Tracks{
     static $track_taxonomy = 'wpsstm_track';
     static $album_taxonomy = 'wpsstm_album';
 
-    static $length_metakey = '_wpsstm_length_ms';
+    static $duration_metakey = '_wpsstm_length_ms';
     static $image_url_metakey = '_wpsstm_track_image_url';
-    static $artist_metakey = '_wpsstm_artist';
-    static $title_metakey = '_wpsstm_track';
-    static $album_metakey = '_wpsstm_release';
 
     function __construct() {
         global $wpsstm_track;
@@ -731,13 +728,17 @@ class WPSSTM_Core_Tracks{
             'labels'                     => $labels,
             'hierarchical'               => false,
             'public'                     => false,
-            'show_ui'                    => false,
+            'show_ui'                    => true,
             'show_admin_column'          => false,
             'show_in_nav_menus'          => false,
             'show_tagcloud'              => false,
             'capabilities'               => $capabilities,
         );
-        register_taxonomy(WPSSTM_Core_Tracks::$track_taxonomy, array( wpsstm()->post_type_track ), $args );
+        register_taxonomy(
+            WPSSTM_Core_Tracks::$track_taxonomy,
+            array( wpsstm()->post_type_track ),
+            $args
+        );
 
     }
     
@@ -869,9 +870,9 @@ class WPSSTM_Core_Tracks{
         $input_attr = array(
             'id' => 'wpsstm-length',
             'name' => 'wpsstm_length',
-            'value' => wpsstm_get_post_length($post_id,true),
+            'value' => wpsstm_get_post_duration($post_id,true),
             'icon' => '<i class="fa fa-music" aria-hidden="true"></i>',
-            'label' => __("Length (milliseconds)",'wpsstm'),
+            'label' => __("Duration (milliseconds)",'wpsstm'),
             'placeholder' => __("Enter length here",'wpsstm')
         );
         return wpsstm_get_backend_form_input($input_attr);
@@ -912,15 +913,15 @@ class WPSSTM_Core_Tracks{
         //this should run only once (for the main post); so unset meta box nonce.
         //without this the function would be called for every subtrack if there was some.
         unset($_POST['wpsstm_music_details_meta_box_nonce']);
-        
-        //check post type
-        $post_type = get_post_type($post_id);
-        
+
         //sanitize datas
         $artist = ( isset($_POST[ 'wpsstm_artist' ]) ) ? $_POST[ 'wpsstm_artist' ] : null;
         $album = ( isset($_POST[ 'wpsstm_album' ]) ) ? $_POST[ 'wpsstm_album' ] : null;
         $title = ( isset($_POST[ 'wpsstm_track_title' ]) ) ? $_POST[ 'wpsstm_track_title' ] : null;
         $length = ( isset($_POST[ 'wpsstm_length' ]) && ctype_digit($_POST[ 'wpsstm_length' ]) ) ? ( (int)$_POST[ 'wpsstm_length' ] ) : null; //ms
+        
+        
+        $post_type = get_post_type($post_id);
         
         switch($post_type){
                 
@@ -928,7 +929,7 @@ class WPSSTM_Core_Tracks{
                 
                 //artist
                 self::save_track_artist($post_id, $artist);
-                
+
             break;
                 
                 
@@ -951,49 +952,58 @@ class WPSSTM_Core_Tracks{
                 //title
                 self::save_track_title($post_id, $title);
                 //length
-                self::save_track_length($post_id, $length);
+                self::save_track_duration($post_id, $length);
 
             break;
         }
-        
-        
 
     }
 
-    private static function save_track_music_term($post_id, $taxonomy, $value = null){
-        
-        $old_term = null;
-        
+    private static function save_music_term($post_id, $taxonomy, $value = null){
+
         if ( $old_terms = wp_get_post_terms( $post_id, $taxonomy ) ){
-            $old_term = $old_terms[0];
+            
+            foreach ($old_terms as $old_term){
+
+                //delete previous terms if unique
+                if ( $old_term && ($value !== $old_term->name) && $old_term->count <= 1 ){
+                    wp_delete_term( $old_term->term_id, $taxonomy );
+                }
+            }
+
         }
 
-        //delete previous term if unique
-        if ( $old_term && ($value !== $old_term->name) && $old_term->count <= 1 ){
-            wp_delete_term( $old_term->term_id, $taxonomy );
-        }
+        return wp_set_post_terms( $post_id,$value, $taxonomy, false);
 
-        return wp_set_post_terms( $post_id,$value, $taxonomy);
     }
     
     static function save_track_title($post_id, $value = null){
-        return self::save_track_music_term($post_id,WPSSTM_Core_Tracks::$track_taxonomy,$value);
+        return self::save_music_term($post_id,WPSSTM_Core_Tracks::$track_taxonomy,$value);
     }
     
     static function save_track_artist($post_id, $value = null){
-        return self::save_track_music_term($post_id,WPSSTM_Core_Tracks::$artist_taxonomy,$value);
+        return self::save_music_term($post_id,WPSSTM_Core_Tracks::$artist_taxonomy,$value);
     }
     
     static function save_track_album($post_id, $value = null){
-        return self::save_track_music_term($post_id,WPSSTM_Core_Tracks::$album_taxonomy,$value);
+        return self::save_music_term($post_id,WPSSTM_Core_Tracks::$album_taxonomy,$value);
     }
     
-    static function save_track_length($post_id, $value = null){
+    static function save_track_duration($post_id, $value = null){
         $value = filter_var($value, FILTER_VALIDATE_INT); //cast to int
         if (!$value){
-            delete_post_meta( $post_id, self::$length_metakey );
+            delete_post_meta( $post_id, self::$duration_metakey );
         }else{
-            update_post_meta( $post_id, self::$length_metakey, $value );
+            update_post_meta( $post_id, self::$duration_metakey, $value );
+        }
+    }
+    
+    static function save_image_url($post_id, $value = null){
+        $value = filter_var($value, FILTER_VALIDATE_URL);
+        if (!$value){
+            delete_post_meta( $post_id, self::$image_url_metakey );
+        }else{
+            update_post_meta( $post_id, self::$image_url_metakey, $value );
         }
     }
 

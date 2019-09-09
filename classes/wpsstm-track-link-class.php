@@ -373,6 +373,10 @@ class WPSSTM_Track_Link{
 
     }
     
+    /*
+    Return one level array
+    */
+    
     function to_array(){
 
         $arr = array(
@@ -391,7 +395,9 @@ class WPSSTM_Track_Link{
             'mime_type' =>      $this->mime_type,
             'duration' =>       $this->duration,
         );
+        
         return array_filter($arr);
+
     }
 
 }
