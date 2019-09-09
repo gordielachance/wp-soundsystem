@@ -139,7 +139,7 @@ abstract class WPSSTM_Data_Engine{
         $can_query = $this->can_query_music_entries($post->ID);
 
         $this->map_post_datas_notice();
-        $this->mapped_item_header();
+        //$this->mapped_item_header();//TOUFIX TO IMPROVE
 
         ?>
         <div class="wpsstm-data-metabox">
@@ -188,7 +188,7 @@ abstract class WPSSTM_Data_Engine{
 
                     //switch entries
 
-                    if ( $music_id && ($this->slug === 'musicbrainz') ) { //TOUFIX should be available for any service
+                    if ( $music_id ) {
 
                         $entries_url = add_query_arg(array('wpsstm-data'=>array($this->slug=>array('action'=>'list_entries'))),get_edit_post_link());
 
@@ -196,7 +196,7 @@ abstract class WPSSTM_Data_Engine{
                             'class'=>   'wpsstm-data-switch-bt button',
                             'href'=>    $entries_url,
                         );
-                        if ( !$can_query || !$music_id ){
+                        if ( !$can_query || !$music_id || ($this->slug !== 'musicbrainz') ){//TOUFIX should be available for any service
                            $bt_switch_attr['disabled'] = 'disabled'; 
                         }
                         $bt_switch_attr = wpsstm_get_html_attr($bt_switch_attr);
