@@ -28,7 +28,7 @@ abstract class WPSSTM_Data_Engine{
         
         add_action( 'current_screen', array($this, 'handle_data_actions'));
         add_action( 'add_meta_boxes', array($this, 'datas_metabox_register'),50);
-        add_action( 'save_post', array($this,'music_datas_metabox_save'), 7);
+        add_action( 'save_post', array($this,'datas_metabox_save'), 7);
 
         /*DB*/
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_music_data_id') );
@@ -177,11 +177,11 @@ abstract class WPSSTM_Data_Engine{
                     $lookup_url = add_query_arg(array('wpsstm-data'=>array($this->slug=>array('action'=>'id_lookup'))),get_edit_post_link());
 
                     $bt_lookup_attr = array(
-                        'class'=>   'wpsstm-data-id-lookup-bt button',
+                        'class'=>   'wpsstm-data-id-lookup-bt button ',
                         'href'=>    $lookup_url,
                     );
                     if ( !$can_query || $music_id ){
-                       $bt_lookup_attr['disabled'] = 'disabled'; 
+                       $bt_lookup_attr['class'] .= 'wpsstm-freeze';
                     }
                     $bt_lookup_attr = wpsstm_get_html_attr($bt_lookup_attr);
                     printf('<a %s>%s</a>',$bt_lookup_attr,__('Lookup','wpsstm'));  
@@ -191,11 +191,11 @@ abstract class WPSSTM_Data_Engine{
                     $entries_url = add_query_arg(array('wpsstm-data'=>array($this->slug=>array('action'=>'list_entries'))),get_edit_post_link());
 
                     $bt_switch_attr = array(
-                        'class'=>   'wpsstm-data-switch-bt button',
+                        'class'=>   'wpsstm-data-switch-bt button ',
                         'href'=>    $entries_url,
                     );
                     if ( !$can_query || !$music_id || ($this->slug !== 'musicbrainz') ){//TOUFIX should be available for any service
-                       $bt_switch_attr['disabled'] = 'disabled'; 
+                       $bt_switch_attr['class'] .= 'wpsstm-freeze';
                     }
                     $bt_switch_attr = wpsstm_get_html_attr($bt_switch_attr);
                     printf('<a %s>%s</a>',$bt_switch_attr,__('Switch entry','wpsstm'));
@@ -205,11 +205,11 @@ abstract class WPSSTM_Data_Engine{
                     $entries_url = add_query_arg(array('wpsstm-data'=>array($this->slug=>array('action'=>'reload_data'))),get_edit_post_link());
 
                     $bt_reload_attr = array(
-                        'class'=>   'wpsstm-data-reload-bt button',
+                        'class'=>   'wpsstm-data-reload-bt button ',
                         'href'=>    $entries_url,
                     );
                     if ( !$can_query || !$music_id ){
-                       $bt_reload_attr['disabled'] = 'disabled'; 
+                       $bt_reload_attr['class'] .= 'wpsstm-freeze';
                     }
                     $bt_reload_attr = wpsstm_get_html_attr($bt_reload_attr);
                     printf('<a %s>%s</a>',$bt_reload_attr,__('Reload datas','wpsstm'));
@@ -262,6 +262,7 @@ abstract class WPSSTM_Data_Engine{
     }
     
     public function mapped_item_header(){
+
         global $post;
         
         if ( !$music_data = $this->get_post_music_data($post->ID) ) return;
@@ -278,7 +279,8 @@ abstract class WPSSTM_Data_Engine{
 
         switch($classname){
             case 'WPSSTM_Track':
-                $header = $mapped_item->get_track_html();
+                //TOUFIX!!!
+                //$header = $mapped_item->get_track_html();
             break;
         }
         if (!$header) return;
@@ -308,7 +310,7 @@ abstract class WPSSTM_Data_Engine{
         switch($classname){
             case 'WPSSTM_Track':
                 global $wpsstm_track;
-                $item = $wpsstm_track->to_array(false);
+                $item = $wpsstm_track->to_array();
             break;
         }
         
@@ -322,15 +324,15 @@ abstract class WPSSTM_Data_Engine{
         switch($classname){
 
             case 'WPSSTM_Track':
+                
                 //artist
-                $checkboxes[] = $this->get_map_music_checkbox('artist',__('artist','wpsstm'),$item['artist'],$mapped_item['artist']);
+                $checkboxes[] = $this->get_map_music_checkbox('artist',__('artist','wpsstm'),$item,$mapped_item);
                 //album
-                $checkboxes[] = $this->get_map_music_checkbox('album',__('album','wpsstm'),$item['album'],$mapped_item['album']);
+                $checkboxes[] = $this->get_map_music_checkbox('album',__('album','wpsstm'),$item,$mapped_item);
                 //title
-                $checkboxes[] = $this->get_map_music_checkbox('title',__('title','wpsstm'),$item['title'],$mapped_item['title']);
+                $checkboxes[] = $this->get_map_music_checkbox('title',__('title','wpsstm'),$item,$mapped_item);
                 //duration
-                $checkboxes[] = $this->get_map_music_checkbox('duration',__('duration','wpsstm'),$item['duration'],$mapped_item['duration']);
-
+                $checkboxes[] = $this->get_map_music_checkbox('duration',__('duration','wpsstm'),$item,$mapped_item);   
 
             break;
         }
@@ -346,14 +348,17 @@ abstract class WPSSTM_Data_Engine{
         
     }
     
-    private function get_map_music_checkbox($prop,$label,$before,$after){
+    private function get_map_music_checkbox($prop,$label,$current,$map){
+        
+        $current_val =  wpsstm_get_array_value($prop,$current);
+        $map_val =      wpsstm_get_array_value($prop,$map);
 
-        $no_update = ($before==$after);
+        $no_update = ($current_val==$map_val);
 
         $input_attr = array(
             'type'=>        'checkbox',
             'name'=>        sprintf('wpsstm-data[map][%s]',$prop),
-            'value'=>       $after,
+            'value'=>       $map_val,
             'disabled'=>    $no_update ? 'disabled' :null,
             'checked'=>     $no_update ? 'checked' :null,
         );
@@ -361,7 +366,7 @@ abstract class WPSSTM_Data_Engine{
         $input_attr = array_filter($input_attr);
         $input_attr = wpsstm_get_html_attr($input_attr);
 
-        return sprintf('<input %s /><span title="%s">%s</span> ',$input_attr,$after,$label);
+        return sprintf('<input %s /><span title="%s">%s</span> ',$input_attr,$map_val,$label);
 
     }
     
@@ -445,7 +450,7 @@ abstract class WPSSTM_Data_Engine{
 
     }
     
-    public function music_datas_metabox_save( $post_id ){
+    public function datas_metabox_save( $post_id ){
 
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
         $is_autodraft = ( get_post_status( $post_id ) == 'auto-draft' );

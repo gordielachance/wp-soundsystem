@@ -3,12 +3,14 @@
 class WPSSTM_Core_Artists{
 
     function __construct(){
+
         add_action( 'wpsstm_init_post_types', array($this,'register_artist_post_type' ));
         add_action( 'wpsstm_init_post_types', array($this,'register_artist_taxonomy' ));
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_artists_submenu' ) );
         
         add_action( 'add_meta_boxes', array($this, 'metabox_artist_register'));
+
     }
     
     //add custom admin submenu under WPSSTM
@@ -155,7 +157,7 @@ class WPSSTM_Core_Artists{
             'labels'                     => $labels,
             'hierarchical'               => false,
             'public'                     => false,
-            'show_ui'                    => false,
+            'show_ui'                    => true,
             'show_admin_column'          => false,
             'show_in_nav_menus'          => false,
             'show_tagcloud'              => false,

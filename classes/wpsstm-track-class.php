@@ -256,7 +256,7 @@ class WPSSTM_Track{
     Return one level array
     */
 
-    function to_array($filter = true){
+    function to_array(){
 
         $arr = array(
             'post_id' => $this->post_id,
@@ -270,9 +270,7 @@ class WPSSTM_Track{
             'duration' => $this->duration,
         );
         
-        if ($filter) $arr = array_filter($arr);
-        
-        return $arr;
+        return array_filter($arr);
 
     }
     
@@ -1277,6 +1275,7 @@ class WPSSTM_Track{
     */
     
     public function __toString() {
+
         if ($this->album){
             $title = sprintf('%s - "%s" | %s',$this->artist,$this->title,$this->album);
         }else{

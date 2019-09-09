@@ -98,15 +98,13 @@ class WPSSTM_Tracklist{
     Return one level array
     */
 
-    function to_array($filter = true){
+    function to_array(){
         $arr = array(
             'post_id' => $this->post_id,
             'index' => $this->index,
         );
         
-        if ($filter) $arr = array_filter($arr);
-        
-        return $arr;
+        return array_filter($arr);
 
     }
 

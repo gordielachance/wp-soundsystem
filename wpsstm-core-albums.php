@@ -214,7 +214,7 @@ class WPSSTM_Core_Albums{
             'labels'                     => $labels,
             'hierarchical'               => false,
             'public'                     => false,
-            'show_ui'                    => false,
+            'show_ui'                    => true,
             'show_admin_column'          => false,
             'show_in_nav_menus'          => false,
             'show_tagcloud'              => false,
@@ -238,6 +238,8 @@ class WPSSTM_Core_Albums{
         if ( $post_type !== wpsstm()->post_type_album ) return $title;
         $title = wpsstm_get_post_track($post_id);
         $artist = wpsstm_get_post_artist($post_id);
+        
+        if (!$title || !$artist) return null;
         
         return sprintf('"%s" - %s',$title,$artist);
     }

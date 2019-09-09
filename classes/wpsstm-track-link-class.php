@@ -377,7 +377,7 @@ class WPSSTM_Track_Link{
     Return one level array
     */
     
-    function to_array($filter = true){
+    function to_array(){
 
         $arr = array(
             'track_id' =>       $this->track->post_id,
@@ -396,9 +396,7 @@ class WPSSTM_Track_Link{
             'duration' =>       $this->duration,
         );
         
-        if ($filter) $arr = array_filter($arr);
-        
-        return $arr;
+        return array_filter($arr);
 
     }
 

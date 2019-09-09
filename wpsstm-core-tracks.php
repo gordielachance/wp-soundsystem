@@ -728,13 +728,17 @@ class WPSSTM_Core_Tracks{
             'labels'                     => $labels,
             'hierarchical'               => false,
             'public'                     => false,
-            'show_ui'                    => false,
+            'show_ui'                    => true,
             'show_admin_column'          => false,
             'show_in_nav_menus'          => false,
             'show_tagcloud'              => false,
             'capabilities'               => $capabilities,
         );
-        register_taxonomy(WPSSTM_Core_Tracks::$track_taxonomy, array( wpsstm()->post_type_track ), $args );
+        register_taxonomy(
+            WPSSTM_Core_Tracks::$track_taxonomy,
+            array( wpsstm()->post_type_track ),
+            $args
+        );
 
     }
     
@@ -955,20 +959,22 @@ class WPSSTM_Core_Tracks{
 
     }
 
-    //TOUFIX URGENT is currently keeping old term if not unique
     private static function save_music_term($post_id, $taxonomy, $value = null){
 
         if ( $old_terms = wp_get_post_terms( $post_id, $taxonomy ) ){
-            $old_term = $old_terms[0];
             
-            //delete previous term if unique
-            if ( $old_term && ($value !== $old_term->name) && $old_term->count <= 1 ){
-                wp_delete_term( $old_term->term_id, $taxonomy );
+            foreach ($old_terms as $old_term){
+
+                //delete previous terms if unique
+                if ( $old_term && ($value !== $old_term->name) && $old_term->count <= 1 ){
+                    wp_delete_term( $old_term->term_id, $taxonomy );
+                }
             }
-            
+
         }
 
         return wp_set_post_terms( $post_id,$value, $taxonomy, false);
+
     }
     
     static function save_track_title($post_id, $value = null){
