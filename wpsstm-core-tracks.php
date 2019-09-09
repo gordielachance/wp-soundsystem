@@ -8,9 +8,6 @@ class WPSSTM_Core_Tracks{
 
     static $length_metakey = '_wpsstm_length_ms';
     static $image_url_metakey = '_wpsstm_track_image_url';
-    static $artist_metakey = '_wpsstm_artist';
-    static $title_metakey = '_wpsstm_track';
-    static $album_metakey = '_wpsstm_release';
 
     function __construct() {
         global $wpsstm_track;
@@ -871,7 +868,7 @@ class WPSSTM_Core_Tracks{
             'name' => 'wpsstm_length',
             'value' => wpsstm_get_post_length($post_id,true),
             'icon' => '<i class="fa fa-music" aria-hidden="true"></i>',
-            'label' => __("Length (milliseconds)",'wpsstm'),
+            'label' => __("Duration (milliseconds)",'wpsstm'),
             'placeholder' => __("Enter length here",'wpsstm')
         );
         return wpsstm_get_backend_form_input($input_attr);
@@ -951,7 +948,7 @@ class WPSSTM_Core_Tracks{
                 //title
                 self::save_track_title($post_id, $title);
                 //length
-                self::save_track_length($post_id, $length);
+                self::save_track_duration($post_id, $length);
 
             break;
         }
@@ -988,12 +985,21 @@ class WPSSTM_Core_Tracks{
         return self::save_track_music_term($post_id,WPSSTM_Core_Tracks::$album_taxonomy,$value);
     }
     
-    static function save_track_length($post_id, $value = null){
+    static function save_track_duration($post_id, $value = null){
         $value = filter_var($value, FILTER_VALIDATE_INT); //cast to int
         if (!$value){
             delete_post_meta( $post_id, self::$length_metakey );
         }else{
             update_post_meta( $post_id, self::$length_metakey, $value );
+        }
+    }
+    
+    static function save_image_url($post_id, $value = null){
+        $value = filter_var($value, FILTER_VALIDATE_URL);
+        if (!$value){
+            delete_post_meta( $post_id, self::$image_url_metakey );
+        }else{
+            update_post_meta( $post_id, self::$image_url_metakey, $value );
         }
     }
 
