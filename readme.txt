@@ -120,10 +120,11 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 2. Radio (live) tracklist
 3. Plugin settings page & menu
 4. Tracklist Importer metabox
-5. Tracks Links metabox
-6. Tracklists manager popup (when favoriting a track)
-7. Frontend Tracklist Importer
-8. Music menu on a BuddyPress profile
+5. MusicBrainz metabox
+6. Tracks Links metabox
+7. Tracklists manager popup (when favoriting a track)
+8. Frontend Tracklist Importer
+9. Music menu on a BuddyPress profile
 
 == Changelog ==
 
