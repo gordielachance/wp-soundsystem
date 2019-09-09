@@ -127,6 +127,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 3.0.7 =
+* Improved music datas engines
+
 = 3.0.6 =
 * playlist settings metabox : add 'filter tracks' button
 * bugfixes
@@ -230,7 +233,7 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 * Last.fm : fix url encoding / fix regexes / fix importer / scrobbler disabled by default
 * abord autolink if 'wpsstm_autolink_input' returns an error
 * + various bug fixes
-* new class WPSSTM_Music_Data
+* new class WPSSTM_Data_Engine
 
 = 2.5.0 =
 * So much improvements that they cannot even be listed !  More than one year of developpement and 754 commits !
