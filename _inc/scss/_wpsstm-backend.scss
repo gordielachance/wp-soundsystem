@@ -38,39 +38,6 @@
         }
     }
 
-    &#wpsstm_mbdata{
-        ul{
-            li{
-                span{
-                    font-weight: bold;
-                    &:after{
-                        content:" ";
-                    }
-                }
-            }
-        }
-
-        
-        #wpsstm-metabox-mbdata-actions{
-            margin-top:1em;
-            position:relative;
-            
-            text-align:center;
-            a{
-                margin:.5em auto;
-                display:block;
-                max-width:75%;
-            }
-            
-            p.submit{
-                text-align:center;
-                margin: .5em 0;
-                padding: 0;
-            }
-        }
-        
-    }
-    
     &#wpsstm_mb_entries{
         
         //summary
@@ -109,6 +76,18 @@
             }
         }
 
+    }
+    
+    .wpsstm-data-metabox{
+        //header
+        .wpsstm-track-row{
+            .wpsstm-track-pre{
+                display:none;
+            }
+            .wpsstm-track-actions{
+                display:none;
+            }
+        }
     }
     
 }

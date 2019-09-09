@@ -137,12 +137,14 @@ abstract class WPSSTM_Data_Engine{
         $music_id = $this->get_post_music_id($post->ID);
         $music_data = $this->get_post_music_data($post->ID);
         $can_query = $this->can_query_music_entries($post->ID);
-
-        $this->map_post_datas_notice();
-        $this->mapped_item_header();
-
         ?>
         <div class="wpsstm-data-metabox">
+            
+            <?php
+                $this->map_post_datas_notice();
+                $this->mapped_item_header();
+            ?>
+            
             <div class="wpsstm-data-section-id">
                 <?php 
 
@@ -229,7 +231,7 @@ abstract class WPSSTM_Data_Engine{
         form
         */
 
-        wp_nonce_field( sprintf('wpsstm_data_%s_id_meta_box',$this->slug), sprintf('wpsstm_data_%s_id_meta_box_nonce',$this->slug) );
+        wp_nonce_field( sprintf('wpsstm_data_%s_meta_box',$this->slug), sprintf('wpsstm_data_%s_meta_box_nonce',$this->slug) );
         
         
     }
@@ -258,7 +260,7 @@ abstract class WPSSTM_Data_Engine{
         form
         */
 
-        wp_nonce_field( sprintf('wpsstm_data_%s_entries_meta_box',$this->slug), sprintf('wpsstm_data_%s_entries_meta_box_nonce',$this->slug) );
+        wp_nonce_field( sprintf('wpsstm_data_%s_meta_box',$this->slug), sprintf('wpsstm_data_%s_meta_box_nonce',$this->slug) );
     }
     
     public function mapped_item_header(){
@@ -279,8 +281,8 @@ abstract class WPSSTM_Data_Engine{
 
         switch($classname){
             case 'WPSSTM_Track':
-                //TOUFIX!!!
-                //$header = $mapped_item->get_track_html();
+                //TOUFIX TO IMPROVE !!!
+                $header = $mapped_item->get_track_html();
             break;
         }
         if (!$header) return;
@@ -461,8 +463,9 @@ abstract class WPSSTM_Data_Engine{
         if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
 
         //nonce
-        $is_valid_nonce = ( wp_verify_nonce( sprintf('wpsstm_data_%s_id_meta_box_nonce',$this->slug), sprintf('wpsstm_data_%s_id_meta_box',$this->slug) ) );
-        //TOUFIX URGENT if ( !$is_valid_nonce ) return;
+        $nonce = wpsstm_get_array_value(sprintf('wpsstm_data_%s_meta_box_nonce',$this->slug),$_POST);
+        $is_valid_nonce = wp_verify_nonce( $nonce,sprintf('wpsstm_data_%s_meta_box',$this->slug) );
+        if ( !$is_valid_nonce ) return;
 
         //check post type
         $post_type = get_post_type($post_id);
