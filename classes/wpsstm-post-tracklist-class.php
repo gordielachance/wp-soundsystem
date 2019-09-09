@@ -763,15 +763,21 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
                 }else{
 
-                    if($error_code == 'import_error'){
-                        //Populate import ID (stored in the error datas)
-                        $this->import_id = $success->get_error_data();
+                    //Populate import ID (error)
+                    if ( $import_id = $success->get_error_data('import_error') ){
+                        $this->import_id = $import_id;
                     }
 
                     $this->add_notice('wpsstm-api-error',$error_message  );
                 }
 
                 return $success;
+                
+            }else{
+                
+                //Populate import ID (success)
+                $this->import_id = $success;
+                
             }
             
             if (!$success){
@@ -780,8 +786,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 return new WP_Error( 'missing_import_id',$error_msg );
             }
 
-            //Populate import ID
-            $this->import_id = $success;
+            
+            
 
             /*
             get XSPF

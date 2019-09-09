@@ -161,7 +161,8 @@ class WPSSTM_Core_API {
         
         $headers = wp_remote_retrieve_headers($request);
         $response_code = wp_remote_retrieve_response_code($request);
-        
+        $response = wp_remote_retrieve_body( $request );
+
         if( $response_code > 400){
             $response_msg = wp_remote_retrieve_response_message($request);
             $error_msg = sprintf('[%s] %s',$response_code,$response_msg);
@@ -172,8 +173,6 @@ class WPSSTM_Core_API {
             
         }
 
-        $response = wp_remote_retrieve_body( $request );
-        
         if ( is_wp_error($response) ){
             WP_SoundSystem::debug_log($response->get_error_message());
             return $response;
