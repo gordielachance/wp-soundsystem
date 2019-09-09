@@ -158,7 +158,7 @@ abstract class WPSSTM_Data_Engine{
                     'value' =>          $this->get_post_music_id($post->ID),
                     'icon' =>           '<i class="fa fa-key" aria-hidden="true"></i>',
                     'label' =>          __('Item ID','wpsstm'),
-                    'placeholder' =>    __("Enter ID here - or try the Search button",'wpsstm')
+                    'placeholder' =>    __("Enter ID here - or try the Lookup button",'wpsstm')
                 );
 
                 $input_el = wpsstm_get_backend_form_input($input_attr);
@@ -188,22 +188,18 @@ abstract class WPSSTM_Data_Engine{
 
                     //switch entries
 
-                    if ( $music_id ) {
+                    $entries_url = add_query_arg(array('wpsstm-data'=>array($this->slug=>array('action'=>'list_entries'))),get_edit_post_link());
 
-                        $entries_url = add_query_arg(array('wpsstm-data'=>array($this->slug=>array('action'=>'list_entries'))),get_edit_post_link());
-
-                        $bt_switch_attr = array(
-                            'class'=>   'wpsstm-data-switch-bt button',
-                            'href'=>    $entries_url,
-                        );
-                        if ( !$can_query || !$music_id || ($this->slug !== 'musicbrainz') ){//TOUFIX should be available for any service
-                           $bt_switch_attr['disabled'] = 'disabled'; 
-                        }
-                        $bt_switch_attr = wpsstm_get_html_attr($bt_switch_attr);
-                        printf('<a %s>%s</a>',$bt_switch_attr,__('Switch entry','wpsstm'));
-
+                    $bt_switch_attr = array(
+                        'class'=>   'wpsstm-data-switch-bt button',
+                        'href'=>    $entries_url,
+                    );
+                    if ( !$can_query || !$music_id || ($this->slug !== 'musicbrainz') ){//TOUFIX should be available for any service
+                       $bt_switch_attr['disabled'] = 'disabled'; 
                     }
-        
+                    $bt_switch_attr = wpsstm_get_html_attr($bt_switch_attr);
+                    printf('<a %s>%s</a>',$bt_switch_attr,__('Switch entry','wpsstm'));
+
                     //refresh
 
                     $entries_url = add_query_arg(array('wpsstm-data'=>array($this->slug=>array('action'=>'reload_data'))),get_edit_post_link());
