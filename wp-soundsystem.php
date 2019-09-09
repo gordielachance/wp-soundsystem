@@ -109,7 +109,7 @@ class WP_SoundSystem {
             'limit_autolinks'                   => 5,//max number of links returned by autolink
             'wpsstmapi_token'                   => null,
             'wpsstmapi_timeout'                 => 20,//timeout for API requests (seconds)
-            'details_engine'                    => array('musicbrainz'),
+            'details_engines'                   => array('musicbrainz'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
             'ajax_tracks'                       => true,
@@ -140,7 +140,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-user.php';
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';
         require $this->plugin_dir . 'wpsstm-core-api.php';
-        require $this->plugin_dir . 'classes/wpsstm-music-details.php';
+        require $this->plugin_dir . 'classes/wpsstm-data-engine.php';
         require $this->plugin_dir . 'wpsstm-core-importer.php';
         
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
@@ -180,7 +180,7 @@ class WP_SoundSystem {
         //init
         add_action( 'init', array($this,'init_post_types'), 5);
         add_action( 'init', array($this,'init_rewrite'), 5);
-        add_action( 'init', array($this,'save_music_details_engines'));
+        add_action( 'init', array($this,'populate_data_engines'));
         add_action( 'admin_init', array($this,'load_textdomain'));
         
         add_action( 'init', array($this, 'upgrade'), 9);
@@ -235,19 +235,6 @@ class WP_SoundSystem {
         do_action('wpsstm_init_rewrite');
         
         flush_rewrite_rules();
-    }
-    
-    function save_music_details_engines(){
-        $enabled_engine_slugs = wpsstm()->get_options('details_engine');
-        $available_engines = wpsstm()->get_available_detail_engines();
-
-        foreach((array)$available_engines as $engine){
-            if ( !in_array($engine->slug,$enabled_engine_slugs) ) continue;
-            $engine->setup_actions();
-            $this->details_engine = $engine;
-                
-            break;//TOUFIX at the end we should be able to populate several details engines
-        }
     }
 
     function deactivate_wpsstm() {
@@ -914,7 +901,18 @@ class WP_SoundSystem {
         
         $response = rest_ensure_response( $response );
         return $response;
-    }   
+    }
+    
+    function populate_data_engines(){
+        $enabled_engine_slugs = $this->get_options('details_engines');
+        $available_engines = $this->get_available_detail_engines();
+
+        foreach((array)$available_engines as $engine){
+            if ( !in_array($engine->slug,$enabled_engine_slugs) ) continue;
+            $engine->setup_actions();
+            $this->engines[] = $engine;
+        }
+    }
 
 }
 

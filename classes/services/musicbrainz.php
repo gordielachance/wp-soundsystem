@@ -403,7 +403,7 @@ class WPSSTM_MusicBrainz_Endpoints extends WP_REST_Controller {
 
 }
 
-class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
+class WPSSTM_Musicbrainz_Data extends WPSSTM_Data_Engine{
     public $slug = 'musicbrainz';
     public $name = 'MusicBrainz';
     public $entries_table_classname = 'WPSSTM_MB_Entries';
@@ -510,33 +510,32 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Music_Data{
         return wpsstm()->local_rest_request($endpoint);
     }
     
-    protected function get_engine_data_by_post($post_id){
+    protected function get_mapped_object_by_post($post_id){
         
-        $map = array();
+        $item = array();
         $post_type = get_post_type($post_id);
         $datas = $this->get_post_music_data($post_id);
 
         switch ($post_type){
             case wpsstm()->post_type_artist:
-                $map['artist'] = wpsstm_get_array_value(array('name'), $datas);
+                //$item['artist'] = wpsstm_get_array_value(array('name'), $datas);
             break;
             case wpsstm()->post_type_track:
                 
-                $blank = new WPSSTM_Track();
-                $blank->title =     wpsstm_get_array_value(array('title'), $datas);
-                $blank->artist =    wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
-                $blank->album =     wpsstm_get_array_value(array('releases',0,'title'), $datas);
-                $blank->duration =  wpsstm_get_array_value(array('length'), $datas);
-                //$blank->image_url = 
-                return json_decode(json_encode($blank), true); //obj>arr
+                $item = new WPSSTM_Track();
+                $item->title =     wpsstm_get_array_value(array('title'), $datas);
+                $item->artist =    wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
+                $item->album =     wpsstm_get_array_value(array('releases',0,'title'), $datas);
+                $item->duration =  wpsstm_get_array_value(array('length'), $datas);
+                //$item->image_url = 
                 
             break;
             case wpsstm()->post_type_album:
-                $map['artist'] =   wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
-                $map['album'] =    wpsstm_get_array_value(array('title'), $datas);
+                //$item['artist'] =   wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
+                //$item['album'] =    wpsstm_get_array_value(array('title'), $datas);
             break;
         }
-        return $map;
+        return $item;
     }
   
 }
@@ -585,11 +584,8 @@ class WPSSTM_MB_Entries extends WPSSTM_Music_Entries {
         
         //mbid
         $columns['mbitem_mbid'] = __('MusicBrainz ID','wpsstm');
+        $columns['mbitem_score'] = __('Score','wpsstm');
         
-        if ( WPSSTM_Music_Data::is_entries_switch() ){
-            $columns['mbitem_score'] = __('Score','wpsstm');
-        }
-
         return $columns;
     }
     

@@ -115,7 +115,7 @@ class WPSSTM_Settings {
 
         $new_input['wpsstmapi_token'] = trim( wpsstm_get_array_value('wpsstmapi_token',$input) );
         
-        $new_input['details_engine'] = (array)$input['details_engine'];
+        $new_input['details_engines'] = (array)$input['details_engines'];
 
         return $new_input;
 
@@ -165,9 +165,9 @@ class WPSSTM_Settings {
         );
         
         add_settings_field(
-            'details_engine', 
+            'details_engines', 
             __('Music Details','wpsstm'), 
-            array( $this, 'details_engine_callback' ), 
+            array( $this, 'details_engines_callback' ), 
             'wpsstm-settings-page', 
             'wpsstmapi_settings'
         );
@@ -422,8 +422,8 @@ class WPSSTM_Settings {
 
     }
 
-    function details_engine_callback(){
-        $enabled_services = wpsstm()->get_options('details_engine');
+    function details_engines_callback(){
+        $enabled_services = wpsstm()->get_options('details_engines');
         $available_engines = wpsstm()->get_available_detail_engines();
 
         foreach((array)$available_engines as $engine){
@@ -431,7 +431,7 @@ class WPSSTM_Settings {
             $is_checked = in_array($engine->slug,$enabled_services);
             
             printf(
-                '<input type="radio" name="%s[details_engine]" value="%s" %s /> <label>%s</label> ',
+                '<input type="checkbox" name="%s[details_engines][]" value="%s" %s /> <label>%s</label> ',
                 wpsstm()->meta_name_options,
                 $engine->slug,
                 checked($is_checked,true, false ),

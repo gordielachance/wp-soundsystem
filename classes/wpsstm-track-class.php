@@ -11,7 +11,7 @@ class WPSSTM_Track{
     public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
     public $spotify_id = null;
     
-    public $image_url;
+    public $image_url; //remote image URL
     public $location;
     
     var $link;
@@ -263,6 +263,7 @@ class WPSSTM_Track{
             'from_tracklist' => $this->from_tracklist,
             'subtrack_id' => $this->subtrack_id,
             'position' => $this->position,
+            'duration' => $this->duration,
         );
         return array_filter($arr);
     }
@@ -302,6 +303,7 @@ class WPSSTM_Track{
         global $wpsstm_track;
         $old_track = $wpsstm_track; //store temp
         $wpsstm_track = $this;
+        $wpsstm_track->local_track_lookup(); //check for this track in the database (if it has no ID) //TOUFIX TOUCHECK useful ?
         
         ob_start();
         wpsstm_locate_template( 'content-track.php', true, false );

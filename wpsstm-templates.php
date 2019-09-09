@@ -175,19 +175,26 @@ function wpsstm_get_backend_form_input($options = null){
         'value' => null,
         'icon' => null,
         'label' => null,
-        'placeholder' => null
+        'placeholder' => null,
+        'class' => null,
     );
     $options = wp_parse_args((array)$options,$option_defaults);
 
     //label
     $label_el = (isset($options['label'])) ? sprintf('<label for="%s">%s</label>',$options['id'],$options['label']) : null;
 
+    //class
+    $class_str = 'wpsstm-fullwidth input-group-field ';
+    if ( isset($options['class']) ){
+        $class_str .= $options['class'];
+    }
+    
     //input
     $input_attr = array(
         'id' =>             isset($options['id']) ? $options['id'] : null,
         'type' =>           'text',
         'name' =>           isset($options['name']) ? $options['name'] : null,
-        'class' =>          'wpsstm-fullwidth input-group-field',
+        'class' =>          $class_str,
         'value' =>          isset($options['value']) ? $options['value'] : null,
         'placeholder' =>    isset($options['placeholder']) ? $options['placeholder'] : null,
 
