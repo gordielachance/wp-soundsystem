@@ -870,7 +870,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
             //links
             //when there are several links, it is an array; while it is a string for a single link.  So force array.
-            if ( $link_urls = wpsstm_get_array_value('link',$xspf_track) ){
+            if ( $link_urls = wpsstm_get_array_value('location',$xspf_track) ){
 
                 $link_urls = (array)$link_urls;
                 $addlinks = array();
@@ -884,7 +884,33 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 $track->add_links($addlinks);
 
             }
+            
+            //identifiers
+            if ( $identifiers = wpsstm_get_array_value('identifier',$xspf_track) ){
+                $identifiers = (array)$identifiers;
 
+                foreach($identifiers as $url){
+                    
+                    //MusicBrainz
+                    $regex = '~^https://www.musicbrainz.org/track/([^/]+)/?$~i';
+                    preg_match($regex, $url, $matches);
+                    
+                    if ( $mbid = wpsstm_get_array_value(1,$matches) ){
+                        $track->musicbrainz_id = $mbid;
+                        continue;
+                    }
+                    //Spotify
+                    $regex = '~^https://open.spotify.com/track/([^/]+)/?$~i';
+                    preg_match($regex, $url, $matches);
+                    
+                    if ( $mbid = wpsstm_get_array_value(1,$matches) ){
+                        $track->musicbrainz_id = $mbid;
+                        continue;
+                    }
+                    
+                }
+                
+            }
 
             //meta
 

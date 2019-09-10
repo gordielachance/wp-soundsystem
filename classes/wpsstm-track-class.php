@@ -8,7 +8,7 @@ class WPSSTM_Track{
     public $artist;
     public $album;
     public $duration; //in milliseconds
-    public $mbid = null; //set 'null' so we can check later (by setting it to false) if it has been requested
+    public $musicbrainz_id = null; //set 'null' so we can check later (by setting it to false) if it has been requested
     public $spotify_id = null;
     
     public $image_url; //remote image URL
@@ -424,9 +424,11 @@ class WPSSTM_Track{
         if ($this->album === '_'){
             $this->album = null;
         }
-        
+
         $meta_input = array(
-            WPSSTM_Core_Tracks::$image_url_metakey      => $this->image_url,
+            WPSSTM_Core_Tracks::$image_url_metakey          => $this->image_url,
+            sprintf('_wpsstm_details_%s_id','musicbrainz')  => $this->musicbrainz_id,
+            sprintf('_wpsstm_details_%s_id','spotify')      => $this->spotify_id,
         );
 
         //swap metas
