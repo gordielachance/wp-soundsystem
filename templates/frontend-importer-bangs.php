@@ -1,13 +1,23 @@
 <?php
-$links = apply_filters('wpsstm_importer_bang_links',array());
-if ( empty($links) ) return;
+
+$items = array();
+$api_items = WPSSTM_Core_Importer::get_import_bangs();
+
+if ( $api_items && !is_wp_error($api_items) ){
+    foreach($api_items as $api_item){
+
+        $items[] = sprintf('<strong>%s</strong> <code>%s</code>',$api_item['name'],$api_item['code']);
+    }
+}
+
+if (!$items) return;
 
 //wrap
-$list_els = array_map(
+$list_items = array_map(
    function ($el) {
       return "<li>{$el}</li>";
    },
-   $links
+   $items
 );
 ?>
 <section id="wpsstm-importer-bangs">
@@ -16,6 +26,6 @@ $list_els = array_map(
     <?php _e('You can type those shortcuts in the input box above.','wpsstm');?>
     </p>
     <ul>
-        <?php echo implode("\n",$list_els); ?>
+        <?php echo implode("\n",$list_items); ?>
     </ul>
 </section>

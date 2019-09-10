@@ -26,15 +26,8 @@ class WPSSTM_LastFM{
         );
         
         $this->options = wp_parse_args(get_option( self::$lastfm_options_meta_name),$options_default);
-        
-        ///
-        add_filter('wpsstm_feed_url', array($this, 'artist_bang_to_lastfm_url'));
-        add_filter('wpsstm_feed_url', array($this, 'lastfm_station_artist_bang_to_url'));
-        add_filter('wpsstm_feed_url', array($this, 'lastfm_station_user_bang_to_url'));
-        
 
         add_filter( 'wpsstm_importer_input',array(__class__,'wizard_no_url_input'));
-        add_filter('wpsstm_importer_bang_links',array($this,'register_lastfm_bang_links'));
         
         add_action( 'init', array($this,'setup_lastfm_user') ); //TO FIX only if player is loaded ?
         add_action( 'wp', array($this,'after_app_auth') );
@@ -69,61 +62,6 @@ class WPSSTM_LastFM{
         add_action('wp_ajax_wpsstm_lastfm_scrobble_bot_track', array($this,'ajax_lastfm_scrobble_bot_track'));
         add_action('wp_ajax_nopriv_wpsstm_lastfm_scrobble_bot_track', array($this,'ajax_lastfm_scrobble_bot_track'));
 
-    }
-    
-    function artist_bang_to_lastfm_url($url){
-        $pattern = '~^artist:([^:]+)(?::([^:]+))?~i';
-        preg_match($pattern, $url, $matches);
-        
-        $artist = isset($matches[1]) ? $matches[1] : null;
-        $artist = urlencode($artist);
-
-        if ( !$artist ) return $url;
-        $url = sprintf('https://www.last.fm/music/%s',$artist);
-        
-        $subpage = isset($matches[2]) ? $matches[2] : 'tracks';
-        
-        switch($subpage){
-
-            case 'similar':
-                $url = sprintf('lastfm:station:music:%s:similar',$artist);
-            break;
-
-            default:
-                $url = trailingslashit($url) . '+' . $subpage;
-            break;
-        }
-
-        return $url;
-    }
-    function lastfm_station_artist_bang_to_url($url){
-        $pattern = '~^lastfm:station:([^:]+):([^:]+)(?::([^:]+))?~i';
-        preg_match($pattern, $url, $matches);
-        $page = isset($matches[1]) ? $matches[1] : null;
-        $artist = isset($matches[2]) ? $matches[2] : null;
-        $artist = urlencode($artist);
-
-        if ( ( $page == 'music' )  && $artist ){
-            $url = sprintf('https://www.last.fm/player/station/music/%s',$artist);
-        }
-
-        return $url;
-    }
-    function lastfm_station_user_bang_to_url($url){
-        $pattern = '~^lastfm:station:([^:]+):([^:]+)(?::([^:]+))?~i';
-        preg_match($pattern, $url, $matches);
-        $page = isset($matches[1]) ? $matches[1] : null;
-        $user = isset($matches[2]) ? $matches[2] : null;
-        $user = urlencode($user);
-        $subpage = isset($matches[3]) ? $matches[3] : 'library';
-
-        if ( ( $page == 'user' )  && $user ){
-            $url = sprintf('https://www.last.fm/player/station/user/%s',$user);
-            if ($subpage){
-                $url = trailingslashit($url) . $subpage;
-            }
-        }
-        return $url;
     }
     
     function get_options($keys = null){
@@ -646,28 +584,6 @@ class WPSSTM_LastFM{
         return ( $bot->is_user_connected() === true);
     }
 
-    function register_lastfm_bang_links($links){
-        $bang_artist = '<label for="wpsstm-lastfm-artist-bang"><code>artist:NAME</code></label>';
-        $desc = sprintf(__('Will fetch the top tracks by %s, while %s will load a station based on that artist.','wpsstm'),'<code>NAME</code>','<code>artist:NAME:similar</code>');
-        $desc.= '  '.__('Powered by Last.fm.','wpsstm');
-        $bang_artist .= sprintf('<div id="wpsstm-lastfm-artist-bang" class="wpsstm-bang-desc">%s</div>',$desc);
-        $links[] = $bang_artist;
-
-        $bang_user_station = '<label for="wpsstm-lastfm-user-station-bang"><code>lastfm:station</code></label>';
-        $desc = __('Will load a Last.fm station based on an artist or a user.','wpsstm');
-        $examples = array(
-            '<li><code>lastfm:station:music:ARTIST:similar</code></li>',
-            '<li><code>lastfm:station:user:USERNAME:library</code></li>',
-            '<li><code>lastfm:station:user:USERNAME:recommended</code></li>',
-            '<li><code>lastfm:station:user:USERNAME:mix</code></li>'
-        );'<ul></ul>';
-        $desc.= sprintf('<ul>%s</ul>',implode("\n",$examples));
-        $bang_user_station .= sprintf('<div id="wpsstm-lastfm-user-station-bang" class="wpsstm-bang-desc">%s</div>',$desc);
-        $links[] = $bang_user_station;
-        
-        return $links;
-    }
-    
     /*
     When the wizard input is NOT an URL, redirect to Last.fm tracks search
     */

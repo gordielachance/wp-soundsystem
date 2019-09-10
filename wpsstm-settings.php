@@ -125,7 +125,8 @@ class WPSSTM_Settings {
         //force API checks by deleting some transients
         if ( !WP_SoundSystem::is_settings_page() ) return;
         WP_SoundSystem::debug_log('deleted premium transients...');
-        delete_transient( WPSSTM_Core_Importer::$importer_links_transient_name );
+        delete_transient( WPSSTM_Core_Importer::$importer_services_transient_name );
+        delete_transient( WPSSTM_Core_Importer::$importer_bangs_transient_name );
         delete_transient( WPSSTM_Core_API::$valid_token_transient_name );
         delete_transient( WPSSTM_Core_API::$premium_expiry_transient_name );
     }

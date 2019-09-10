@@ -3,7 +3,8 @@
 class WPSSTM_Core_Importer{
 
     static $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
-    static $importer_links_transient_name = 'wpsstmapi_importers_links';
+    static $importer_services_transient_name = 'wpsstmapi_services_links';
+    static $importer_bangs_transient_name = 'wpsstmapi_bangs_links';
 
     function __construct(){
 
@@ -563,18 +564,33 @@ class WPSSTM_Core_Importer{
     
     static function get_import_services(){
         
-        $services = get_transient( self::$importer_links_transient_name );
+        $services = get_transient( self::$importer_services_transient_name );
 
         if (false === $services){
             $services = WPSSTM_Core_API::api_request('import/services/get');
 
             if ( is_wp_error($services) ) return false;
 
-            set_transient( self::$importer_links_transient_name, $services, 1 * DAY_IN_SECONDS );
+            set_transient( self::$importer_services_transient_name, $services, 1 * DAY_IN_SECONDS );
         }
         
         return $services;
     }
+    
+    static function get_import_bangs(){
+        $bangs = get_transient( self::$importer_bangs_transient_name );
+
+        if (false === $bangs){
+            $bangs = WPSSTM_Core_API::api_request('import/bangs/get');
+
+            if ( is_wp_error($bangs) ) return false;
+
+            set_transient( self::$importer_bangs_transient_name, $bangs, 1 * DAY_IN_SECONDS );
+        }
+        
+        return $bangs;
+    }
+    
     
     function ajax_importer_debug(){
         $ajax_data = wp_unslash($_POST);
