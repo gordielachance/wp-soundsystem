@@ -26,6 +26,7 @@ class WPSSTM_Track{
     public $subtrack_id = null;
     public $position = 0;
     public $subtrack_time = null;
+    public $subtrack_author = null;
     public $from_tracklist = null;
     
     public $did_autolink = null;
@@ -91,10 +92,11 @@ class WPSSTM_Track{
         }
 
         //subtrack-specific
-        $this->subtrack_id =    $subtrack->ID;
-        $this->subtrack_time =  $subtrack->time;
-        $this->from_tracklist = $subtrack->tracklist_id;
-        $this->position =       $subtrack->track_order;
+        $this->subtrack_id =        $subtrack->ID;
+        $this->subtrack_time =      $subtrack->time;
+        $this->subtrack_author =    $subtrack->author;
+        $this->from_tracklist =     $subtrack->tracklist_id;
+        $this->position =           $subtrack->track_order;
     }
     
     function from_array( $args ){
@@ -259,37 +261,23 @@ class WPSSTM_Track{
     function to_array(){
 
         $arr = array(
-            'post_id' => $this->post_id,
-            'title' => $this->title,
-            'artist' => $this->artist,
-            'album' => $this->album,
-            'tracklist_id' => $this->tracklist->post_id,
-            'from_tracklist' => $this->from_tracklist,
-            'subtrack_id' => $this->subtrack_id,
-            'position' => $this->position,
-            'duration' => $this->duration,
+            'post_id' =>            $this->post_id,
+            'title' =>              $this->title,
+            'artist' =>             $this->artist,
+            'album' =>              $this->album,
+            'tracklist_id' =>       $this->tracklist->post_id,
+            'from_tracklist' =>     $this->from_tracklist,
+            'subtrack_time' =>      $this->subtrack_time,
+            'subtrack_author' =>    $this->subtrack_author,
+            'subtrack_id' =>        $this->subtrack_id,
+            'position' =>           $this->position,
+            'duration' =>           $this->duration,
         );
         
         return array_filter($arr);
 
     }
-    
-    function to_url(){
-        $arr = $this->to_array();
-        
-        if ($this->post_id || $this->subtrack_id){
-            $removekeys = array('title','artist','album');
-            $arr = array_diff_key($arr, array_flip($removekeys));
-        }
-        
-        if ($this->subtrack_id){
-            $removekeys = array('post_id','tracklist_id','position','from_tracklist');
-            $arr = array_diff_key($arr, array_flip($removekeys));
-        }
-        
-        return array_filter($arr);
-    }
-    
+
     /**
     http://www.xspf.org/xspf-v1.html#rfc.section.4.1.1.2.14.1.1
     */

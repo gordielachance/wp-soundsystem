@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '211';
+    public $db_version = '214';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -248,6 +248,7 @@ class WP_SoundSystem {
         global $wpdb;
 
         $current_version = get_option("_wpsstm-db_version");
+        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
 
         if ($current_version==$this->db_version) return false;
         if(!$current_version){ //not installed
@@ -398,6 +399,10 @@ class WP_SoundSystem {
                 //remove unused music terms since we hadn't cleanup functions before this version
                 self::batch_delete_unused_music_terms();
             }
+            
+            if ($current_version < 214){
+                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD author bigint(20) UNSIGNED NULL" );
+            }
 
         }
         
@@ -450,6 +455,7 @@ class WP_SoundSystem {
             track_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             tracklist_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             from_tracklist bigint(20) UNSIGNED NULL,
+            author bigint(20) UNSIGNED NULL,
             track_order int(11) NOT NULL DEFAULT '0',
             time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY  (ID)

@@ -917,7 +917,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     Update WP post and eventually update subtracks.
     */
     
-    private function update_radio_data(WPSSTM_Tracklist $input_tracklist){
+    private function update_radio_data(WPSSTM_Tracklist $tracklist){
 
         if (!$this->post_id){
             $this->tracklist_log('wpsstm_missing_post_id','Set live datas error' );
@@ -929,7 +929,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         /*
         subtracks
         */
-        $success = $this->set_radio_subtracks($input_tracklist);
+        $success = $this->set_radio_subtracks($tracklist);
         if( is_wp_error($success) ) return $success;
    
         /*
@@ -937,9 +937,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         */
 
         $meta_input = array(
-            self::$remote_title_meta_name =>                            $input_tracklist->title,
-            WPSSTM_Core_Live_Playlists::$remote_author_meta_name =>     $input_tracklist->author,
-            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>      $input_tracklist->date_timestamp,
+            self::$remote_title_meta_name =>                            $tracklist->title,
+            WPSSTM_Core_Live_Playlists::$remote_author_meta_name =>     $tracklist->author,
+            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>      $tracklist->date_timestamp,
         );
 
         $tracklist_post = array(
@@ -958,13 +958,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     Clear the stored subtracks and add the new ones
     */
 
-    private function set_radio_subtracks(WPSSTM_Tracklist $input_tracklist){
+    private function set_radio_subtracks(WPSSTM_Tracklist $tracklist){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
         //check bot user
         $bot_ready = wpsstm()->is_bot_ready();
         if ( is_wp_error($bot_ready) ) return $bot_ready;
+        
+        $bot_id = wpsstm()->get_options('bot_user_id');
         
         //delete actual subtracks
         $this->tracklist_log('delete current tracklist subtracks...'); 
@@ -980,13 +982,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $error_msgs = array();
 
-        $tracks = apply_filters('wpsstm_radio_tracks_input',$input_tracklist->tracks,$this);
+        $tracks = apply_filters('wpsstm_radio_tracks_input',$tracklist->tracks,$this);
 
         foreach((array)$tracks as $index=>$new_track){
 
             $new_track->position = $index + 1;
-            $success = $this->add_subtrack($new_track);
-            
+            $new_track->subtrack_author = $bot_id; //set bot as author
+
+            $success = $this->insert_subtrack($new_track);
+
             //populate subtrack ID
             if( is_wp_error($success) ){
                 $error_code = $success->get_error_code();
@@ -994,7 +998,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             }
         }
         
-        $this->tracklist_log(array('input'=>count($input_tracklist->tracks),'output'=>count($tracks),'errors'=>count($error_msgs),'error_msgs'=>$error_msgs),'...has saved subtracks'); 
+        $this->tracklist_log(array('input'=>count($tracklist->tracks),'output'=>count($tracks),'errors'=>count($error_msgs),'error_msgs'=>$error_msgs),'...has saved subtracks'); 
 
         return true;
         
@@ -1067,7 +1071,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $new_track = clone $track;
         $new_track->subtrack_id = null;
 
-        $success = $this->add_subtrack($new_track);
+        $success = $this->insert_subtrack($new_track);
 
         if ( $success && !is_wp_error($success) ){
             do_action('wpsstm_queue_track',$track,$this->post_id);
@@ -1120,7 +1124,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     I mean when we have playlists with hundreds of subtracks to save...
     */
     
-    private function add_subtrack(WPSSTM_Track $track){
+    private function insert_subtrack(WPSSTM_Track $track){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
@@ -1151,11 +1155,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'track_id' =>   $track->post_id
         );
 
-        //new subtrack
+        /*
+        insert subtrack
+        */
         if (!$track->subtrack_id){
             $subtrack_data['time'] =            current_time('mysql');
             $subtrack_data['tracklist_id'] =    $this->post_id;
             $subtrack_data['from_tracklist'] =  $track->from_tracklist;
+            $subtrack_data['author'] =          ($author = $track->subtrack_author) ? $author : get_current_user_id();
             $subtrack_data['track_order'] =     $this->get_subtracks_count() + 1;
             
             $track_data = array_merge($track_data,$subtrack_data);
@@ -1167,7 +1174,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ( is_wp_error($success) ) return $success;
 
         $track->subtrack_id = $wpdb->insert_id;
-        return $wpdb->insert_id;
+        
+        return $track->subtrack_id;
 
     }
 
