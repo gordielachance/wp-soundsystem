@@ -1,6 +1,8 @@
 <?php
-define('WPSSTM_API_URL','https://api.spiff-radio.org/wp-json/');
-define('WPSSTM_API_CACHE','https://api.spiff-radio.org/wordpress/wp-content/uploads/wpsstmapi/');
+define('WPSSTM_API_URL','https://api.spiff-radio.org/');
+define('WPSSTM_API_REST',WPSSTM_API_URL . 'wp-json/');
+define('WPSSTM_API_CACHE',WPSSTM_API_URL . 'wordpress/wp-content/uploads/wpsstmapi/');
+
 define('WPSSTM_API_NAMESPACE','wpsstmapi/v1');
 define('WPSSTM_API_REGISTER_URL','https://api.spiff-radio.org/?p=10');
 
@@ -24,7 +26,7 @@ class WPSSTM_Core_API {
 
         if ( false === ( $valid = get_transient(self::$valid_token_transient_name ) ) ) {
 
-            $url = WPSSTM_API_URL . 'simple-jwt-authentication/v1/token/validate';
+            $url = WPSSTM_API_REST . 'simple-jwt-authentication/v1/token/validate';
             
             //build headers
             $args = array(
@@ -124,7 +126,7 @@ class WPSSTM_Core_API {
             return new WP_Error('wpsstmapi_no_api_url',__("Missing API endpoint",'wpsstm'));
         }
         
-        $rest_url = WPSSTM_API_URL . WPSSTM_API_NAMESPACE . '/' .$endpoint;
+        $rest_url = WPSSTM_API_REST . WPSSTM_API_NAMESPACE . '/' .$endpoint;
 
         //parameters
         if ($params){

@@ -6,7 +6,7 @@ $api_items = WPSSTM_Core_Importer::get_import_bangs();
 if ( $api_items && !is_wp_error($api_items) ){
     foreach($api_items as $api_item){
 
-        $items[] = sprintf('<strong>%s</strong> <code>%s</code>',$api_item['name'],$api_item['code']);
+        $items[] = sprintf('<code>%s</code> <span>%s</span>',$api_item['code'],$api_item['name']);
     }
 }
 
