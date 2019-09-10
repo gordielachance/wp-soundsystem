@@ -9,8 +9,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
 <div id="wpsstm-importer" data-wpsstm-tracklist-id="<?php echo get_the_ID();?>">
     <ul id="wpsstm-importer-tabs">
         <li><a href="#wpsstm-importer-step-feed-url"><?php _e('URLs','wpsstm');?></a></li>
-        <li><a href="#wpsstm-importer-step-tracks"><?php _e('Tracks','wpsstm');?></a></li>
-        <li><a href="#wpsstm-importer-step-details"><?php _e('Details','wpsstm');?></a></li>
+        <li><a href="#wpsstm-importer-step-parser"><?php _e('Custom Parser','wpsstm');?></a></li>
         <li><a href="#wpsstm-importer-step-debug" class="wpsstm-debug-log-bt" target="_blank"><span class="wpsstm-debug-log-icon"></span><?php _e('Debug log','wpsstm');?></a></li>
     </ul>
 
@@ -18,14 +17,22 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
     <div id="wpsstm-importer-step-feed-url" class="wpsstm-importer-section">
         <h3 class="wpsstm-importer-section-label"><?php _e('Feed URL','wpsstm');?></h3>
         <?php 
-        $xspf_link = sprintf('<a href="%s" target="_blank">%s</a>','http://xspf.org','.xspf');
-        printf(__('Tracklist URL. It should have an %s extension.','wpsstm'),$xspf_link);
+        if ( !WPSSTM_Core_API::is_premium() ){
+            $xspf_link = sprintf('<a href="%s" target="_blank">%s</a>','http://xspf.org','.xspf');
+            $notice = sprintf(__('Tracklist URL. Since you are not premium, it should be a local file with a %s extension.','wpsstm'),$xspf_link);
+            printf('<div class="notice notice-warning inline is-dismissible"><p>%s</p></div>',$notice);
+        }
         ?>
         <p>
             <input type="text" name="wpsstm_importer[feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a tracklist URL or type a bang (eg. artist:Gorillaz)','wpsstm');?>" />
         </p>
         <?php
-        $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('API key','wpsstm'));
+
+        //supported services
+        $title = __('Supported services','wpsstm');
+        if ( !WPSSTM_Core_API::is_premium() ) $title.= sprintf(' <small>(%s)</small>',__('Requires an API key','wpsstm'));
+        printf('<h4>%s</h4>',$title);
+        
         $items = array();
         $services = WPSSTM_Core_Importer::get_import_services();
 
@@ -38,9 +45,28 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
                 $items[] = $item;
             }
         }
+        
+        printf('<em>%s</em>',implode(', ',$items));
+        
+        //bangs
+        $title = __('Supported Bangs','wpsstm');
+        if ( !WPSSTM_Core_API::is_premium() ) $title.= sprintf(' <small>(%s)</small>',__('Requires an API key','wpsstm'));
+        printf('<h4>%s</h4>',$title);
+        
+        $items = array();
+        $services = WPSSTM_Core_Importer::get_import_bangs();
 
-        $services_list = sprintf('<em>%s</em>',implode(', ',$items));
-        printf(__('If you have an %s, you could also enter URL to those services: %s - or use your own custom import settings!','wpsstm'),$api_link,$services_list);
+        if ( !is_wp_error($services) ){
+            foreach((array)$services as $service){
+                $items[] = sprintf('<code>%s</code>',$service['code']);
+            }
+        }
+        
+        printf('<em>%s</em>',implode(', ',$items));
+        
+        printf('<h4>%s</h4>',__('...Or build a Custom Parser!','wpsstm'));
+        
+
         ?>
         <h3 class="wpsstm-importer-section-label"><?php _e('Website URL','wpsstm');?></h3>
         <?php _e("URL of the radio that will be displayed on the playlist.  If empty, the Feed URL will be used.",'wpsstm');?>
@@ -49,8 +75,8 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
         </p>
     </div>
     
-    <!--track-->
-    <div id="wpsstm-importer-step-tracks" class="wpsstm-importer-section wpsstm-importer-section-advanced">
+    <!--parser-->
+    <div id="wpsstm-importer-step-parser" class="wpsstm-importer-section wpsstm-importer-section-advanced">
         <h3 class="wpsstm-importer-section-label"><?php _e('Tracks','wpsstm');?></h3>
         <!--tracks selector-->
         <div class="wpsstm-importer-row">
@@ -63,7 +89,6 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
                     ?>
                 </small>
             </div>
-
         </div>
          <!--tracks order-->
          <div class="wpsstm-importer-row">
@@ -95,10 +120,6 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
                 ?>
             </div>
         </div>
-    </div>
-
-    <!--track details-->
-    <div id="wpsstm-importer-step-details" class="wpsstm-importer-section  wpsstm-importer-section-advanced">
         <div class="wpsstm-importer-section-label">
             <h3><?php _e('Track details','wpsstm');?></h3>
             <small>

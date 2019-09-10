@@ -19,33 +19,13 @@ class WPSSTM_Spotify{
         /*backend*/
         add_action( 'admin_init', array( $this, 'spotify_settings_init' ) );
         add_action( 'rest_api_init', array($this,'register_endpoints') );
-        
-        if ( $this->can_spotify_api() === true ){
-            //presets
-            //TOUFIX should be WPSSTMAPI stuff
-            add_filter('wpsstm_feed_url', array($this, 'spotify_playlist_bang_to_url'));
-            add_filter('wpsstm_importer_bang_links',array($this,'register_spotify_bang_links'));
-            
-        }
+
     }
     
     function register_endpoints() {
         //TRACK
 		$controller = new WPSSTM_Spotify_Endpoints();
 		$controller->register_routes();
-    }
-
-    function spotify_playlist_bang_to_url($url){
-        $pattern = '~^spotify:user:([^:]+):playlist:([\w\d]+)~i';
-        preg_match($pattern,$url, $matches);
-        $user = isset($matches[1]) ? $matches[1] : null;
-        $playlist = isset($matches[2]) ? $matches[2] : null;
-        
-        if ($user && $playlist){
-            $url = sprintf('https://open.spotify.com/user/%s/playlist/%s',$user,$playlist);
-        }
-        
-        return $url;
     }
 
     function get_options($keys = null){
@@ -123,13 +103,6 @@ class WPSSTM_Spotify{
             self::$spotify_options_meta_name,
             $client_secret
         );
-    }
-
-    function register_spotify_bang_links($links){
-        $bang_playlist = '<label><code>spotify:user:USER:playlist:PLAYLIST_ID</code></label>';
-        //$bang_playlist .= sprintf('<div id="wpsstm-spotify-playlist-bang" class="wpsstm-bang-desc">%s</div>',$desc);
-        $links[] = $bang_playlist;
-        return $links;
     }
     
     private function get_access_token(){
