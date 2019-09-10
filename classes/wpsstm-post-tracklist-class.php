@@ -706,7 +706,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 $this->add_notice('refresh_radio',$error->get_error_message() );
                 return $error;
         }
-        
+
         /*
         redirect URL
         Hook to filter bangs, etc.
@@ -747,12 +747,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             /*
             API
             */
-            $success = WPSSTM_Core_API::api_request('import',$params);
+            $xspf = WPSSTM_Core_API::api_request('import',$params);
 
-            if ( is_wp_error($success) ){
+            if ( is_wp_error($xspf) ){
 
-                $error_code = $success->get_error_code();
-                $error_message = $success->get_error_message();
+                $error_code = $xspf->get_error_code();
+                $error_message = $xspf->get_error_message();
 
                 if($error_code == 'rest_forbidden'){
 
@@ -762,54 +762,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                     }
 
                 }else{
-
-                    //Populate import ID (error)
-                    if ( $import_id = $success->get_error_data('import_error') ){
-                        $this->import_id = $import_id;
-                    }
-
                     $this->add_notice('wpsstm-api-error',$error_message  );
                 }
 
-                return $success;
+                return $xspf;
                 
-            }else{
-                
-                //Populate import ID (success)
-                $this->import_id = $success;
-                
-            }
-            
-            if (!$success){
-                $error_msg = __('Missing import ID','wpsstm');
-                $this->tracklist_log($error_msg);
-                return new WP_Error( 'missing_import_id',$error_msg );
             }
 
-            
-            
-
-            /*
-            get XSPF
-            */
-            $xspf_url = WPSSTM_API_CACHE . sprintf('%s.xspf',$this->import_id);
-            $response = wp_remote_get( $xspf_url );
-            $response_code = wp_remote_retrieve_response_code($response);
-            
-            if( $response_code > 400){
-                $response_msg = wp_remote_retrieve_response_message($response);
-                $error_msg = sprintf('[%s] %s',$response_code,$response_msg);
-                $error_msg = sprintf( __('Unable to load XSPF file: %s','wpsstm'),$error_msg );
-                
-                $this->tracklist_log($xspf_url,$error_msg);
-                
-                return new WP_Error( 'missing_api_xspf',$error_msg, $xspf_url );
-            }
-            
-            $xspf = wp_remote_retrieve_body( $response );
         }
-
-        if ( is_wp_error($xspf) ) return $xspf;
 
         /*
         convert XSPF to array
@@ -817,8 +777,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $xspf = simplexml_load_string($xspf, "SimpleXMLElement", LIBXML_NOCDATA);
         $json = json_encode($xspf);
         $xspf = json_decode($json,TRUE);
-
-        $this->tracklist_log("...succeeded loading XSPF");
+        $this->import_id = wpsstm_get_array_value('identifier',$xspf);
 
         /*
         Create playlist from the XSPF array
@@ -932,14 +891,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->tracklist_log("sync radio...");
         
         $playlist = $this->import_xspf();
+        if ( is_wp_error($playlist) ) return $playlist;
         
         //update import ID if any (even if we received an error, we should have the import ID populated)
         if ($this->import_id){
-            $this->tracklist_log($this->import_id,"storing import ID...");
+            $this->tracklist_log($this->get_debug_url(),"import succeeded");
             update_post_meta( $this->post_id, self::$import_id_meta_name, $this->import_id );
         }
-
-        if ( is_wp_error($playlist) ) return $playlist;
 
         $updated = $this->update_radio_data($playlist);
 
