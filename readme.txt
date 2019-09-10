@@ -128,6 +128,10 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= XXX =
+* remove 'delete_duplicate_links' setting
+* subtracks : save subtrack author (pinner) in database - will be bot if tracklist is imported
+
 = 3.1.1 =
 * faster REST import
 
