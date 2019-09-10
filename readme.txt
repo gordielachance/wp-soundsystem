@@ -128,11 +128,12 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= 3.0.9 =
+= 3.1.1 =
+* faster REST import
+
+= 3.1.0 =
 * Migrated BANGS stuff to wpsstmapi
 * Improved importer GUI
-
-= 3.0.7 =
 * Improved music datas engines
 * playlist settings metabox : add 'filter tracks' button
 
