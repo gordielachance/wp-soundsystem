@@ -54,10 +54,6 @@ class WPSSTM_Settings {
         //reset
         if ( self::is_settings_reset() ) return;
 
-        if( isset( $input['delete-duplicate-links'] ) ){
-            WPSSTM_Core_Track_Links::delete_duplicate_links();
-        }
-
         /*
         Bot user
         */
@@ -301,14 +297,6 @@ class WPSSTM_Settings {
             'reset_options', 
             __('Reset Options','wpsstm'), 
             array( $this, 'reset_options_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings_maintenance'//section
-        );
-
-        add_settings_field(
-            'delete_duplicate_links', 
-            __('Delete duplicate links','wpsstm'), 
-            array( $this, 'delete_duplicate_links_callback' ), 
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
@@ -605,17 +593,6 @@ class WPSSTM_Settings {
             '<input type="checkbox" name="%s[reset_options]" value="on"/><label>%s</label>',
             wpsstm()->meta_name_options,
             __("Reset options to their default values.","wpsstm")
-        );
-    }
-
-    function delete_duplicate_links_callback(){
-        $count = count(WPSSTM_Core_Track_Links::get_duplicate_link_ids());
-        $desc = sprintf(__("Delete %d duplicate links (same URL & parent post).","wpsstm"),$count);
-        printf(
-            '<input type="checkbox" name="%s[delete-duplicate-links]" value="on" %s /><label>%s</label>',
-            wpsstm()->meta_name_options,
-            disabled($count,0,false),
-            $desc
         );
     }
 

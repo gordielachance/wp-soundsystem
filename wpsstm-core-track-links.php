@@ -695,35 +695,11 @@ class WPSSTM_Core_Track_Links{
 
         return $query->posts;
     }
-
-    /*
-    Flush duplicate links (same post parent & URL)
-    */
-    static function delete_duplicate_links(){
-        
-        if ( !current_user_can('manage_options') ){
-            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
-        }
-
-        $deleted = array();
-        
-        if ( $flushable_ids = self::get_duplicate_link_ids() ){
-
-            foreach( (array)$flushable_ids as $post_id ){
-                $success = wp_delete_post($post_id,true);
-                if ( $success ) $deleted[] = $post_id;
-            }
-        }
-
-        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($deleted))),"Deleted duplicate links");
-
-        return $deleted;
-
-    }
     
     /*
     Get the duplicate links (by post parent and url)
     https://wordpress.stackexchange.com/questions/340474/sql-query-that-returns-a-list-of-duplicate-posts-ids-comparing-their-post-paren
+    //!!!not used for now, but might be useful
     */
     
     static function get_duplicate_link_ids(){
