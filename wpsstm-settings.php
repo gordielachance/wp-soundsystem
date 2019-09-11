@@ -96,7 +96,7 @@ class WPSSTM_Settings {
         Importer
         */
 
-        //page ID
+        //post ID
         if ( isset ($input['importer_page_id']) && ctype_digit($input['importer_page_id']) ){
             if ( get_post_type($input['importer_page_id'] ) ){ //check page exists
                 $new_input['importer_page_id'] = $input['importer_page_id'];
@@ -107,16 +107,16 @@ class WPSSTM_Settings {
         Now Playing
         */
 
-        //radio ID
-        if ( isset ($input['nowplaying_radio_id']) && ctype_digit($input['nowplaying_radio_id']) ){
-            if ( get_post_type($input['nowplaying_radio_id'] ) ){ //check page exists
-                $new_input['nowplaying_radio_id'] = $input['nowplaying_radio_id'];
+        //post ID
+        if ( isset ($input['nowplaying_id']) && ctype_digit($input['nowplaying_id']) ){
+            if ( get_post_type($input['nowplaying_id'] ) ){ //check page exists
+                $new_input['nowplaying_id'] = $input['nowplaying_id'];
             }
         }
         
         //delay
         if ( isset ($input['nowplaying_radio_delay']) && ctype_digit($input['nowplaying_radio_delay']) ){
-            $new_input['nowplaying_radio_delay'] = $input['nowplaying_radio_delay'];
+            $new_input['nowplaying_radio_delay'] = $input['nowplaying_radio_delay'] * HOUR_IN_SECONDS;
         }
 
         /*
@@ -227,26 +227,26 @@ class WPSSTM_Settings {
         */
 
         add_settings_section(
-            'now_playing_radio', // ID
-            __("'Now playing' radio",'wpsstm'), // Title
-            array( $this, 'now_playing_radio_desc' ), // Callback
+            'now_playing_playlist', // ID
+            __("Now playing",'wpsstm'), // Title
+            array( $this, 'now_playing_playlist_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
 
         add_settings_field(
-            'now_playing_radio_id', 
-            __('Radio ID','wpsstm'), 
-            array( $this, 'now_playing_radio_callback' ), 
+            'now_playing_playlist_id', 
+            __('Playlist ID','wpsstm'), 
+            array( $this, 'now_playing_playlist_callback' ), 
             'wpsstm-settings-page', 
-            'now_playing_radio'
+            'now_playing_playlist'
         );
         
         add_settings_field(
-            'now_playing_radio_delay', 
+            'now_playing_playlist_delay', 
             __('Delay','wpsstm'), 
             array( $this, 'now_playing_delay_callback' ), 
             'wpsstm-settings-page', 
-            'now_playing_radio'
+            'now_playing_playlist'
         );
         
         /*
@@ -552,8 +552,8 @@ class WPSSTM_Settings {
         _e('Page used as placeholder to import tracklists frontend.','wppstm');
     }
     
-    function now_playing_radio_desc(){
-        _e('Page used as placeholder to display the tracks currently played by users.','wppstm');
+    function now_playing_playlist_desc(){
+        _e('Playlist displaying the last tracks played.','wppstm');
     }
     
     function section_radios_desc(){
@@ -583,17 +583,17 @@ class WPSSTM_Settings {
         if ( get_post_type($page_id) ){
             $page_title = get_the_title( $page_id );
             $edit_url = get_edit_post_link($page_id);
-            $link_txt = sprintf(__('Edit page %s','wpsstm'),'<em>' . $page_title . '</em>');
+            $link_txt = sprintf(__('Edit %s','wpsstm'),'<em>' . $page_title . '</em>');
             printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
         }
         
     }
     
-    function now_playing_radio_callback(){
-        $page_id = wpsstm()->get_options('nowplaying_radio_id');
+    function now_playing_playlist_callback(){
+        $page_id = wpsstm()->get_options('nowplaying_id');
 
         printf(
-            '<input type="number" name="%s[nowplaying_radio_id]" size="4" min="0" value="%s"/>',
+            '<input type="number" name="%s[nowplaying_id]" size="4" min="0" value="%s"/>',
             wpsstm()->meta_name_options,
             $page_id
         );
@@ -601,7 +601,7 @@ class WPSSTM_Settings {
         if ( get_post_type($page_id) ){
             $page_title = get_the_title( $page_id );
             $edit_url = get_edit_post_link($page_id);
-            $link_txt = sprintf(__('Edit radio %s','wpsstm'),'<em>' . $page_title . '</em>');
+            $link_txt = sprintf(__('Edit %s','wpsstm'),'<em>' . $page_title . '</em>');
             printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
         }
         
@@ -613,9 +613,9 @@ class WPSSTM_Settings {
         printf(
             '<input type="number" name="%s[nowplaying_radio_delay]" value="%s"/>',
             wpsstm()->meta_name_options,
-            $delay
+            $delay / HOUR_IN_SECONDS
         );
-        _e('Seconds holding history','wpsstm');
+        _e('Hours a track remains in the playlist','wpsstm');
         
     }
     
@@ -639,7 +639,7 @@ class WPSSTM_Settings {
         if ( $bot_id = wpsstm()->get_options('bot_user_id') ){
             $userdata = get_userdata( $bot_id );
             $edit_url = get_edit_user_link($bot_id);
-            $link_txt = sprintf(__('Edit user %s','wpsstm'),'<em>' . $userdata->user_login . '</em>');
+            $link_txt = sprintf(__('Edit %s','wpsstm'),'<em>' . $userdata->user_login . '</em>');
             printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
             
         }

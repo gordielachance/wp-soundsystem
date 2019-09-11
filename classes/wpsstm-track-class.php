@@ -1278,8 +1278,8 @@ class WPSSTM_Track{
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        $nowplaying_id = wpsstm()->get_options('nowplaying_radio_id');
-        if (!$nowplaying_id) return new WP_Error('missing_nowplaying_radio_id','Missing Now Playing Radio ID');
+        $nowplaying_id = wpsstm()->get_options('nowplaying_id');
+        if (!$nowplaying_id) return new WP_Error('missing_nowplaying_id','Missing Now Playing Radio ID');
         
         if ( !$delay = wpsstm()->get_options('nowplaying_radio_delay') ) return false;
         
@@ -1294,8 +1294,8 @@ class WPSSTM_Track{
     }
     
     function insert_now_playing(){
-        $nowplaying_id = wpsstm()->get_options('nowplaying_radio_id');
-        if (!$nowplaying_id) return new WP_Error('missing_nowplaying_radio_id','Missing Now Playing Radio ID');
+        $nowplaying_id = wpsstm()->get_options('nowplaying_id');
+        if (!$nowplaying_id) return new WP_Error('missing_nowplaying_id','Missing Now Playing Radio ID');
         
         $clear = $this->clear_now_playing();
         
