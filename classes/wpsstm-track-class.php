@@ -373,8 +373,8 @@ class WPSSTM_Track{
 
         $result = $wpdb->update( 
             $subtracks_table, //table
-            array('track_order'=>$new_pos), //data
-            array('ID'=>$this->subtrack_id) //where
+            array('subtrack_order'=>$new_pos),//data
+            array('ID'=>$this->subtrack_id)//where
         );
 
         if ( !$result ){
