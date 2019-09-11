@@ -1158,11 +1158,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         insert subtrack
         */
         if (!$track->subtrack_id){
-            $subtrack_data['time'] =            current_time('mysql');
-            $subtrack_data['tracklist_id'] =    $this->post_id;
-            $subtrack_data['from_tracklist'] =  $track->from_tracklist;
-            $subtrack_data['author'] =          ($author = $track->subtrack_author) ? $author : get_current_user_id();
-            $subtrack_data['track_order'] =     $this->get_subtracks_count() + 1;
+            $subtrack_data['subtrack_time'] =       current_time('mysql');
+            $subtrack_data['tracklist_id'] =        $this->post_id;
+            $subtrack_data['from_tracklist'] =      $track->from_tracklist;
+            $subtrack_data['subtrack_author'] =     ($author = $track->subtrack_author) ? $author : get_current_user_id();
+            $subtrack_data['subtrack_order'] =      $this->get_subtracks_count() + 1;
             
             $track_data = array_merge($track_data,$subtrack_data);
         }
@@ -1185,7 +1185,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         get subtracks from custom table
         */
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        $querystr = $wpdb->prepare( "SELECT * FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
+        $querystr = $wpdb->prepare( "SELECT * FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY subtrack_order ASC", $this->post_id );
         $rows = $wpdb->get_results( $querystr, ARRAY_A);
         $post_ids = array_column($rows, 'track_id');
         if (!$post_ids) $post_ids = array(0); //https://core.trac.wordpress.org/ticket/28099

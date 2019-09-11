@@ -115,8 +115,8 @@ class WPSSTM_Settings {
         }
         
         //delay
-        if ( isset ($input['nowplaying_radio_delay']) && ctype_digit($input['nowplaying_radio_delay']) ){
-            $new_input['nowplaying_radio_delay'] = $input['nowplaying_radio_delay'] * HOUR_IN_SECONDS;
+        if ( isset ($input['play_history_timeout']) && ctype_digit($input['play_history_timeout']) ){
+            $new_input['play_history_timeout'] = $input['play_history_timeout'] * HOUR_IN_SECONDS;
         }
         
         /*
@@ -642,10 +642,10 @@ class WPSSTM_Settings {
     }
     
     function now_playing_delay_callback(){
-        $delay = wpsstm()->get_options('nowplaying_radio_delay');
+        $delay = wpsstm()->get_options('play_history_timeout');
         
         printf(
-            '<input type="number" name="%s[nowplaying_radio_delay]" value="%s"/>',
+            '<input type="number" name="%s[play_history_timeout]" value="%s"/>',
             wpsstm()->meta_name_options,
             $delay / HOUR_IN_SECONDS
         );

@@ -60,6 +60,7 @@ class WPSSTM_Core_Tracks{
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_in'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_position'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_author'), 10, 2 );
+        add_filter( 'posts_where', array($this,'track_query_where_playing'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_favorited'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_position'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_time'), 10, 2 );
@@ -492,7 +493,7 @@ class WPSSTM_Core_Tracks{
         
         if ( !$this->is_subtracks_query($query) ) return $fields;
 
-        //TOUCHECK NOT WORKING URGENT return sprintf('%s.ID,%s.subtrack_id',$wpdb->posts,'subtracks');
+        //TOUCHECK SHOULD BE THIS? BUT NOT WORKING URGENT return sprintf('%s.ID,%s.subtrack_id',$wpdb->posts,'subtracks');
 
         $fields = (array)$fields;
         $fields[] = sprintf('%s.subtrack_id','subtracks');
@@ -520,7 +521,7 @@ class WPSSTM_Core_Tracks{
         if ( !$subtrack_position = $query->get('subtrack_position') ) return $where;
         if ( !$tracklist_id = $query->get('tracklist_id') ) return $where;
 
-        $where.= sprintf(" AND subtracks.tracklist_id = %s AND subtracks.track_order = %s",$tracklist_id,$subtrack_position);
+        $where.= sprintf(" AND subtracks.tracklist_id = %s AND subtracks.subtrack_order = %s",$tracklist_id,$subtrack_position);
 
         //so single template is shown, instead of search results
         //TOUFIX this is maybe quite hackish, should be improved ? eg. setting $query->is_singular = true crashes wordpress.
@@ -533,8 +534,24 @@ class WPSSTM_Core_Tracks{
         if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$subtrack_author = $query->get('subtrack_author') ) return $where;
 
-        $where.= sprintf(" AND subtracks.author = %s",$subtrack_author);
+        $where.= sprintf(" AND subtracks.subtrack_author = %s",$subtrack_author);
         
+        return $where;   
+    }
+    
+    /*
+    Get recents subtracks added in the 'now playing' tracklist
+    */
+    
+    function track_query_where_playing($where,$query){
+        if ( !$this->is_subtracks_query($query) ) return $where;
+        if ( !$query->get('subtrack_playing') ) return $where;
+        if ( !$nowplaying_id = wpsstm()->get_options('nowplaying_id') ) return $where;
+        
+        $seconds = wpsstm()->get_options('playing_timeout');
+
+        $where.= sprintf(" AND subtracks.tracklist_id = %s AND subtrack_time > DATE_SUB(NOW(), INTERVAL %s SECOND)",$nowplaying_id,$seconds);
+
         return $where;   
     }
     
@@ -555,7 +572,7 @@ class WPSSTM_Core_Tracks{
         if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$subtrack_id = $query->get('subtrack_id') ) return $where;
         
-        $where.= sprintf(" AND subtracks.ID = %s",$subtrack_id);
+        $where.= sprintf(" AND subtracks.subtrack_id = %s",$subtrack_id);
         
         //so single template is shown, instead of search results
         //TOUFIX this is maybe quite hackish, should be improved ? eg. setting $query->is_singular = true crashes wordpress.
@@ -572,7 +589,7 @@ class WPSSTM_Core_Tracks{
             $ids_str = implode(',',$ids_str);
         }
         
-        $where .= sprintf(" AND subtracks.ID IN (%s)",$ids_str);
+        $where .= sprintf(" AND subtracks.subtrack_id IN (%s)",$ids_str);
 
         return $where;
     }
@@ -604,7 +621,7 @@ class WPSSTM_Core_Tracks{
         if ( !$this->is_subtracks_query($query) ) return $orderby_sql;
         if ( $query->get('orderby') != 'subtrack_position' ) return $orderby_sql;
 
-        $orderby_sql = 'subtracks.track_order ' . $query->get('order');
+        $orderby_sql = 'subtracks.subtrack_order ' . $query->get('order');
 
         return $orderby_sql;
 
@@ -615,7 +632,7 @@ class WPSSTM_Core_Tracks{
         if ( !$this->is_subtracks_query($query) ) return $orderby_sql;
         if ( $query->get('orderby') != 'subtrack_time' ) return $orderby_sql;
         
-        $orderby_sql = 'subtracks.time ' . $query->get('order');
+        $orderby_sql = 'subtracks.subtrack_time ' . $query->get('order');
         
         return $orderby_sql;
 
@@ -777,6 +794,7 @@ class WPSSTM_Core_Tracks{
         $qvars[] = 'wpsstm_track_data';
         $qvars[] = 'tracklist_id';
         $qvars[] = 'subtrack_query';
+        $qvars[] = 'subtrack_playing';
         $qvars[] = 'subtrack_author';
         $qvars[] = 'subtrack_favorites';
         $qvars[] = 'subtrack_id';
@@ -1421,8 +1439,8 @@ class WPSSTM_Core_Tracks{
         $forced_track_args = array(
             'post_type' =>              wpsstm()->post_type_track,
             'subtrack_query' =>         true,
+            'subtrack_playing' =>       true,
             'subtrack_author' =>        $user_id,
-            'tracklist_id'=>            $nowplaying_id,
             'orderby'=>                 'subtrack_time',
             'order'=>                   'DESC',
         );
@@ -1431,16 +1449,12 @@ class WPSSTM_Core_Tracks{
         $track_args = wp_parse_args($forced_track_args,$track_args);
 
         $query = new WP_Query( $track_args );
+
         $post = isset($query->posts[0]) ? $query->posts[0] : null;
         if ( !$post ) return;
         
         $track = new WPSSTM_Track();
-
-        if($post->subtrack_id){
-            $track->populate_subtrack($post->subtrack_id);
-        }elseif($post->ID){
-            $track->populate_track_post($post->ID);
-        }
+        $track->populate_subtrack($post->subtrack_id);
 
         return $track;
     }

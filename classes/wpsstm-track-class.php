@@ -93,10 +93,10 @@ class WPSSTM_Track{
 
         //subtrack-specific
         $this->subtrack_id =        $subtrack->subtrack_id;
-        $this->subtrack_time =      $subtrack->time;
-        $this->subtrack_author =    $subtrack->author;
+        $this->subtrack_time =      $subtrack->subtrack_time;
+        $this->subtrack_author =    $subtrack->subtrack_author;
+        $this->position =           $subtrack->subtrack_order;
         $this->from_tracklist =     $subtrack->tracklist_id;
-        $this->position =           $subtrack->track_order;
     }
     
     function from_array( $args ){
@@ -223,7 +223,7 @@ class WPSSTM_Track{
         $subtracks_ids_str = implode(',',$subtracks_ids);
         
         // !!! using wpb->prepare fucks up here, it wraps our IDs string with quotes and then the query fails.
-        //$querystr = $wpdb->prepare( "SELECT `tracklist_id` FROM `$subtracks_table` WHERE `ID` IN (%s)",$subtracks_ids_str );
+        //$querystr = $wpdb->prepare( "SELECT `tracklist_id` FROM `$subtracks_table` WHERE `subtrack_id` IN (%s)",$subtracks_ids_str );
         $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `subtrack_id` IN (%s)",$subtracks_ids_str );
         
         $tracklist_ids = $wpdb->get_col($querystr);
@@ -357,10 +357,10 @@ class WPSSTM_Track{
         //update tracks range
         $up = ($new_pos < $old_pos);
         if ($up){
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order + 1 WHERE tracklist_id = %d AND track_order < %d AND track_order >= %d",$tracklist_id,$old_pos,$new_pos);
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET subtrack_order = subtrack_order + 1 WHERE tracklist_id = %d AND subtrack_order < %d AND subtrack_order >= %d",$tracklist_id,$old_pos,$new_pos);
             $result = $wpdb->get_results ( $querystr );
         }else{
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d AND track_order <= %d",$tracklist_id,$old_pos,$new_pos);
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET subtrack_order = subtrack_order - 1 WHERE tracklist_id = %d AND subtrack_order > %d AND subtrack_order <= %d",$tracklist_id,$old_pos,$new_pos);
             $result = $wpdb->get_results ( $querystr );
         }
         
@@ -536,7 +536,7 @@ class WPSSTM_Track{
 
         //update tracks range
         if ( !is_wp_error($result) ){
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET track_order = track_order - 1 WHERE tracklist_id = %d AND track_order > %d",$this->tracklist->post_id,$this->position);
+            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET subtrack_order = subtrack_order - 1 WHERE tracklist_id = %d AND subtrack_order > %d",$this->tracklist->post_id,$this->position);
             $range_success = $wpdb->get_results ( $querystr );
              $this->track_log(array('subtrack_id'=>$this->subtrack_id,'tracklist'=>$this->tracklist->post_id),"dequeued subtrack");
             $this->subtrack_id = null;
@@ -567,7 +567,7 @@ class WPSSTM_Track{
 
     }
     
-    function get_track_favorited_by(){
+    function get_favoriters(){
         global $wpdb;
 
         //get subtracks
@@ -591,13 +591,13 @@ class WPSSTM_Track{
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
         
-        $favorited_by = $this->get_track_favorited_by();
+        $favorited_by = $this->get_favoriters();
         return in_array($user_id,(array)$favorited_by);
     }
     
     function get_favorited_by_list(){
         $list = null;
-        if ( !$user_ids = $this->get_track_favorited_by() ) return;
+        if ( !$user_ids = $this->get_favoriters() ) return;
         
         foreach($user_ids as $user_id){
             $user_info = get_userdata($user_id);
@@ -1281,13 +1281,13 @@ class WPSSTM_Track{
         $nowplaying_id = wpsstm()->get_options('nowplaying_id');
         if (!$nowplaying_id) return new WP_Error('missing_nowplaying_id','Missing Now Playing Radio ID');
         
-        if ( !$delay = wpsstm()->get_options('nowplaying_radio_delay') ) return false;
+        if ( !$delay = wpsstm()->get_options('play_history_timeout') ) return false;
         
         $now = current_time('timestamp');
         $limit = $now - $delay;
         $limit_datetime = date("Y-m-d H:i:s", $limit);
         
-        $query = $wpdb->prepare(" DELETE FROM `$subtracks_table` WHERE tracklist_id = %s AND time < %s",$nowplaying_id,$limit_datetime);
+        $query = $wpdb->prepare(" DELETE FROM `$subtracks_table` WHERE tracklist_id = %s AND subtrack_time < %s",$nowplaying_id,$limit_datetime);
         //WP_SoundSystem::debug_log($query,"clear now playing");
         return $wpdb->query($query);
 

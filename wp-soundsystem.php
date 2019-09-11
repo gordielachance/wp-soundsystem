@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '221';
+    public $db_version = '212';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -103,7 +103,8 @@ class WP_SoundSystem {
             'player_enabled'                    => true,
             'importer_page_id'                  => null,
             'nowplaying_id'                     => null,
-            'nowplaying_radio_delay'            => 1 * DAY_IN_SECONDS,
+            'play_history_timeout'              => 1 * DAY_IN_SECONDS, //how long a track is stored in the plays history
+            'playing_timeout'                   => 5 * MINUTE_IN_SECONDS,//how long a track is considered playing 'now'
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'bot_user_id'                       => null,
             'autolink'                          => true,
@@ -403,20 +404,16 @@ class WP_SoundSystem {
                 self::batch_delete_unused_music_terms();
             }
             
-            if ($current_version < 216){
-                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD author bigint(20) UNSIGNED NULL" );
-                $this->create_nowplaying_post();
-            }
-            
-            if ($current_version < 220){
+            if ($current_version < 212){ //URGENT
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
-            }
-            
-            if ($current_version < 221){
+                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `time` `subtrack_time` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `track_order` `subtrack_order` int(11) NOT NULL DEFAULT '0'");
+                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD subtrack_author bigint(20) UNSIGNED NULL" );
+                
+                $this->create_nowplaying_post();
                 $this->create_global_favorites_post();
             }
-            
-            
+
         }
         
         //update DB version
@@ -498,9 +495,9 @@ class WP_SoundSystem {
             track_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             tracklist_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             from_tracklist bigint(20) UNSIGNED NULL,
-            author bigint(20) UNSIGNED NULL,
-            track_order int(11) NOT NULL DEFAULT '0',
-            time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+            subtrack_author bigint(20) UNSIGNED NULL,
+            subtrack_order int(11) NOT NULL DEFAULT '0',
+            subtrack_time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY  (ID)
         ) $charset_collate;";
 
