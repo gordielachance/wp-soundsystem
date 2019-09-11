@@ -186,7 +186,11 @@ class WPSSTM_Core_Tracklists{
         }
         
         //playable
-        $new_input['playable'] = isset($input_data['playable']);
+        $new_input['playable'] = wpsstm_get_array_value('playable',$input_data);
+        
+        //order
+        $order = wpsstm_get_array_value('order',$input_data);
+        $new_input['order'] = strtoupper($order);
 
         if (!$new_input){
             $success = delete_post_meta($post_id, WPSSTM_Post_Tracklist::$tracklist_options_meta_name);
@@ -215,6 +219,24 @@ class WPSSTM_Core_Tracklists{
         );
 
         printf('<p>%s <label>%s</label></p>',$input,__('Playable','wpsstm'));
+        
+        //sort
+        $option = $wpsstm_tracklist->get_options('order');
+
+        $input_desc = sprintf(
+            '<input type="radio" name="%s[order]" value="DESC" %s /><label>%s</label>',
+            'wpsstm_tracklist_options',
+            checked($option,'DESC', false),
+            'DESC'
+        );
+        $input_asc = sprintf(
+            '<input type="radio" name="%s[order]" value="ASC" %s /><label>%s</label>',
+            'wpsstm_tracklist_options',
+            checked($option,'ASC', false),
+            'ASC'
+        );
+
+        printf('<p><strong>%s</strong></br>%s</p>',__('Sort','wpsstm'),$input_desc . ' ' . $input_asc);
 
         if ($wpsstm_tracklist->tracklist_type === 'live' ) {
 
@@ -235,7 +257,7 @@ class WPSSTM_Core_Tracklists{
         $post_links_url = $wpsstm_tracklist->get_backend_tracks_url();
         printf('<a href="%s" class="button">%s</a>',$post_links_url,__('Filter tracks','wpsstm'));
         
-         wp_nonce_field( 'wpsstm_tracklist_options_meta_box', 'wpsstm_tracklist_options_meta_box_nonce' );
+        wp_nonce_field( 'wpsstm_tracklist_options_meta_box', 'wpsstm_tracklist_options_meta_box_nonce' );
     }
 
     function ajax_reload_tracklist(){

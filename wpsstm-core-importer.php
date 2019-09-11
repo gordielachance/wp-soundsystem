@@ -478,11 +478,6 @@ class WPSSTM_Core_Importer{
             }
         }
 
-        //order
-        if ( isset($input['tracks_order']) ){
-            $new_input['tracks_order'] = $input['tracks_order'];
-        }
-
         return $new_input;
     }
     
