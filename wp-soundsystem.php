@@ -403,7 +403,7 @@ class WP_SoundSystem {
                 self::batch_delete_unused_music_terms();
             }
             
-            if ($current_version < 212){ //URGENT
+            if ($current_version < 212){
                 $results = $wpdb->query( "UPDATE `$wpdb->posts` SET `post_type` = 'wpsstm_radio' WHERE `wp_posts`.`post_type` = 'wpsstm_live_playlist'");
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `time` `subtrack_time` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'");
