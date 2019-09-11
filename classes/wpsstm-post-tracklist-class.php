@@ -1181,49 +1181,32 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     private function get_static_subtracks($track_args = array()){
         global $wpdb;
-        
-        /*
-        get subtracks from custom table
-        */
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
-        $querystr = $wpdb->prepare( "SELECT * FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
-        $rows = $wpdb->get_results( $querystr, ARRAY_A);
-
-        $post_ids = array_column($rows, 'track_id');
-
-        if (!$post_ids) $post_ids = array(0); //https://core.trac.wordpress.org/ticket/28099
-        
-        /*
-        run a tracks query to get an array of allowed track IDs (would exclude trashed tracks, etc.)
-        */
-        
         $default_track_args = array(
             'posts_per_page'=>          -1,
+            'orderby'=>                 'subtrack_position',
         );
         
         $forced_track_args = array(
             'post_type' =>              wpsstm()->post_type_track,
-            'fields' =>                 'ids',
-            'post__in' =>               $post_ids,
+            'fields' =>                 'id=>subtrack_id',
+            'tracklist_id' =>           $this->post_id,
         );
         
         $track_args = wp_parse_args($track_args,$default_track_args);
         $track_args = wp_parse_args($forced_track_args,$track_args);
 
         $query = new WP_Query( $track_args );
-        $filtered_post_ids = $query->posts;
+        $subtracks = $query->posts;
 
         $tracks = array();
-        foreach($rows as $row){
-            
-            if ( !in_array($row['track_id'],$filtered_post_ids) ) continue;
-            
+
+        foreach($subtracks as $track){
             $subtrack = new WPSSTM_Track(); //default
-            $subtrack->populate_subtrack($row['ID']);
+            $subtrack->populate_subtrack($track->subtrack_id);
             $tracks[] = $subtrack;
         }
-
+        
         return $tracks;
     }
 

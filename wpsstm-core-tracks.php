@@ -55,6 +55,7 @@ class WPSSTM_Core_Tracks{
         //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
         
         add_filter( 'posts_join', array($this,'tracks_query_left_join_subtracks'), 10, 2 );
+        add_filter( 'posts_fields', array($this,'tracks_query_subtrack_ids'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_exclude_subtracks'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_tracklist_id'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_id'), 10, 2 );
@@ -62,6 +63,7 @@ class WPSSTM_Core_Tracks{
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_position'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_favorited'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_position'), 10, 2 );
+        add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_time'), 10, 2 );
 
         add_filter( 'the_title', array($this, 'the_track_post_title'), 9, 2 );
 
@@ -466,27 +468,42 @@ class WPSSTM_Core_Tracks{
         
         return $views;
     }
-
-    function tracks_query_left_join_subtracks($join,$query){
-        global $wpdb;
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $join;
+    
+    private function is_subtracks_query($query){
         
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return false;
         
         $subtracks_exclude_query =      $query->get('exclude_subtracks');
         $subtrack_id_query =            $query->get('subtrack_id');
         $subtrack_in_query =            $query->get('subtrack__in');
         $subtrack_position_query =      $query->get('subtrack_position');
-        $subtrack_sort_query =          ($query->get('orderby') == 'subtracks');
         $tracklist_id_query =           $query->get('tracklist_id');
+        $sort_subtracks =               ( ($query->get('orderby') == 'subtrack_position') || ($query->get('orderby') == 'subtrack_time') );
 
-        $join_subtracks = ( $subtracks_exclude_query || $subtrack_id_query || $subtrack_in_query || $subtrack_sort_query || $subtrack_position_query || $tracklist_id_query  );
+        return ( $subtracks_exclude_query || $subtrack_id_query || $subtrack_in_query || $subtrack_position_query || $sort_subtracks || $tracklist_id_query  );
+    }
+
+    function tracks_query_left_join_subtracks($join,$query){
+        global $wpdb;
+        if ( !$this->is_subtracks_query($query) ) return $join;
         
-        if ($join_subtracks){
-            $join .= sprintf("LEFT JOIN %s AS subtracks ON subtracks.track_id = %s.ID",$subtracks_table,$wpdb->posts);
-        }
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $join .= sprintf("LEFT JOIN %s AS subtracks ON subtracks.track_id = %s.ID",$subtracks_table,$wpdb->posts);
 
         return $join;
+    }
+
+    function tracks_query_subtrack_ids($fields,$query) {
+        global $wpdb;
+        
+        if ( !$this->is_subtracks_query($query) ) return $fields;
+        if ($query->get('fields') !== 'id=>subtrack_id' ) return $fields;
+
+        //TOUFIX URGENT should be this below, but fucks up our queries
+        //return sprintf('%s.ID, %s.ID as subtrack_id',$wpdb->posts,'subtracks'); // etc
+        
+        return $fields . sprintf(', %s.ID as subtrack_id','subtracks'); // etc
+
     }
     
     function track_query_exclude_subtracks($where,$query){
@@ -583,11 +600,20 @@ class WPSSTM_Core_Tracks{
     function tracks_query_sort_by_subtrack_position($orderby_sql, $query){
 
         if ( $query->get('post_type') != wpsstm()->post_type_track ) return $orderby_sql;
-        if ( $query->get('orderby') != 'subtracks' ) return $orderby_sql;
+        if ( $query->get('orderby') != 'subtrack_position' ) return $orderby_sql;
 
-        if ( $query_orderby == 'track_order'){
-            $orderby_sql = 'subtracks.track_order ' . $query->get('order');
-        }
+        $orderby_sql = 'subtracks.track_order ' . $query->get('order');
+
+        return $orderby_sql;
+
+    }    
+    
+    function tracks_query_sort_by_subtrack_time($orderby_sql, $query){
+
+        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $orderby_sql;
+        if ( $query->get('orderby') != 'subtrack_time' ) return $orderby_sql;
+        
+        $orderby_sql = 'subtracks.time ' . $query->get('order');
         
         return $orderby_sql;
 
