@@ -14,6 +14,9 @@ class WPSSTM_Core_BuddyPress{
         
         add_action( 'wpsstm_love_tracklist', array($this,'love_tracklist_activity') );
         add_action( 'wpsstm_unlove_tracklist', array($this,'unlove_tracklist_activity') );
+        
+        add_action( 'bp_before_member_header_meta', array($this,'user_playing_track_meta') );
+        
     }
     
     function register_music_menu() {
@@ -320,6 +323,18 @@ class WPSSTM_Core_BuddyPress{
             'type' =>           'loved_tracklist',
         );
         bp_activity_delete_by_item_id( $args );
+    }
+    
+    function user_playing_track_meta(){
+        if ( !$track = WPSSTM_Core_Tracks::get_user_now_playing( bp_displayed_user_id() ) ) return;
+
+        $notice = sprintf(__('Currently Playing: %s','wpsstm'),'<em>' . (string)$track . '</em>');
+
+        ?>
+        <div class="item-meta">
+            <span class="activity"><?php echo $notice;?></span>
+        </div>
+        <?php
     }
     
 }
