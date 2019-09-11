@@ -219,7 +219,7 @@ class WPSSTM_Core_Importer{
 
         
         $duplicate_args = array(
-            'post_type'         => wpsstm()->post_type_live_playlist,
+            'post_type'         => wpsstm()->post_type_radio,
             'fields'            => 'ids',
             'meta_query' => array(
                 array(
@@ -269,7 +269,7 @@ class WPSSTM_Core_Importer{
         //store as wizard tracklist (author = bot user / ->is_wizard_tracklist_metakey = true)
 
         $post_args = array(
-            'post_type' =>      wpsstm()->post_type_live_playlist,
+            'post_type' =>      wpsstm()->post_type_radio,
             'post_status' =>    'publish',
             'post_author' =>    $bot_id,
             'meta_input' =>     array(

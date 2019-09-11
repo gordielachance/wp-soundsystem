@@ -54,7 +54,7 @@ class WPSSTM_Core_BuddyPress{
             'parent_url'      => $bp->displayed_user->domain . WPSSTM_BASE_SLUG . '/',
             'parent_slug'     => WPSSTM_BASE_SLUG,
             'position'        => 20,
-            'screen_function' => array($this,'view_user_live_playlists'),
+            'screen_function' => array($this,'view_user_radios'),
         ) );
         
         
@@ -129,13 +129,13 @@ class WPSSTM_Core_BuddyPress{
     User live tracklists
     */
     
-    function view_user_live_playlists() {
-        add_action( 'bp_template_title', array($this,'user_live_playlists_subnav_title') );
-        add_action( 'bp_template_content', array($this,'user_live_playlists_subnav_content') );
+    function view_user_radios() {
+        add_action( 'bp_template_title', array($this,'user_radios_subnav_title') );
+        add_action( 'bp_template_content', array($this,'user_radios_subnav_content') );
         bp_core_load_template( apply_filters( 'bp_core_template_plugin', 'members/single/plugins' ) );
     }
     
-    function user_live_playlists_subnav_title(){
+    function user_radios_subnav_title(){
         $title = sprintf(__("%s's radios",'wpsstm'),bp_get_displayed_user_fullname());
         if ( bp_is_my_profile() ) {
             $title = __('Radios','wpsstm');
@@ -144,19 +144,19 @@ class WPSSTM_Core_BuddyPress{
     }
     
 
-    function user_live_playlists_subnav_content(){
+    function user_radios_subnav_content(){
         
-        function displayed_user_live_playlists_manager_args($args){
+        function displayed_user_radios_manager_args($args){
             //member static playlists
             $new = array(
-                'post_type' =>      wpsstm()->post_type_live_playlist,
+                'post_type' =>      wpsstm()->post_type_radio,
                 'author' =>         bp_displayed_user_id()
             );
 
             return wp_parse_args($new,$args);
         }
         
-        add_filter( 'wpsstm_tracklist_list_query','displayed_user_live_playlists_manager_args' );
+        add_filter( 'wpsstm_tracklist_list_query','displayed_user_radios_manager_args' );
         wpsstm_locate_template( 'tracklists-list.php', true, false );
     }
     
@@ -186,7 +186,7 @@ class WPSSTM_Core_BuddyPress{
                 'post_type' =>                  wpsstm()->tracklist_post_types,
                 'author' =>                     null,
                 'tracklists-favorited-by' =>    bp_displayed_user_id(),
-                'post_type' =>      wpsstm()->post_type_live_playlist,
+                'post_type' =>      wpsstm()->post_type_radio,
                 //'author' =>         bp_displayed_user_id()
             );
 

@@ -78,7 +78,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $post_type = get_post_type($this->post_id);
         
         //type        
-        $this->tracklist_type = ($post_type == wpsstm()->post_type_live_playlist) ? 'live' : 'static';
+        $this->tracklist_type = ($post_type == wpsstm()->post_type_radio) ? 'live' : 'static';
 
         if ( !$this->post_id || ( !in_array($post_type,wpsstm()->tracklist_post_types) ) ){
             return new WP_Error( 'wpsstm_invalid_tracklist_post', __('Invalid tracklist post.','wpsstm') );
@@ -87,7 +87,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //options
         $db_options = (array)get_post_meta($this->post_id,self::$tracklist_options_meta_name,true);
 
-        $cache_min = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$cache_min_meta_name,true);
+        $cache_min = get_post_meta($this->post_id,WPSSTM_Core_Radios::$cache_min_meta_name,true);
         if( is_numeric($cache_min) ){
             $db_options['cache_min'] = $cache_min;
         }
@@ -118,7 +118,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $seconds = $this->seconds_before_refresh();
             $this->is_expired = ( ($seconds !== false) && ($seconds <= 0) );
             
-            $last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+            $last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Radios::$time_updated_meta_name,true);
             $last_import_time = filter_var($last_import_time, FILTER_VALIDATE_INT);
 
             if ($last_import_time){
@@ -169,7 +169,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function save_tracklist(){
 
         //capability check
-        $post_type = ($this->tracklist_type == 'static') ? wpsstm()->post_type_playlist : wpsstm()->post_type_live_playlist;
+        $post_type = ($this->tracklist_type == 'static') ? wpsstm()->post_type_playlist : wpsstm()->post_type_radio;
         $post_type_obj = get_post_type_object($post_type);
         $required_cap = ($this->post_id) ? $post_type_obj->cap->edit_posts : $post_type_obj->cap->create_posts;
 
@@ -552,7 +552,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         
         //toggle
-        $new_type = ($live) ? wpsstm()->post_type_live_playlist : wpsstm()->post_type_playlist;
+        $new_type = ($live) ? wpsstm()->post_type_radio : wpsstm()->post_type_playlist;
 
         $success = set_post_type( $this->post_id, $new_type );
 
@@ -625,11 +625,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function user_can_toggle_playlist_type(){
         
         $post_type = get_post_type($this->post_id);
-        $allowed = array(wpsstm()->post_type_live_playlist,wpsstm()->post_type_playlist);
+        $allowed = array(wpsstm()->post_type_radio,wpsstm()->post_type_playlist);
         if ( !in_array($post_type,$allowed) ) return;
 
         $post_obj =         get_post_type_object(wpsstm()->post_type_playlist);
-        $live_post_obj =    get_post_type_object(wpsstm()->post_type_live_playlist);
+        $live_post_obj =    get_post_type_object(wpsstm()->post_type_radio);
 
         $can_edit_cap =     $post_obj->cap->edit_posts;
         $can_edit_type =  current_user_can($can_edit_cap);
@@ -923,7 +923,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
         }
         
-        $this->tracklist_log('start updating live playlist...');
+        $this->tracklist_log('start updating radio...');
 
         /*
         subtracks
@@ -937,8 +937,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $meta_input = array(
             self::$remote_title_meta_name =>                            $tracklist->title,
-            WPSSTM_Core_Live_Playlists::$remote_author_meta_name =>     $tracklist->author,
-            WPSSTM_Core_Live_Playlists::$time_updated_meta_name =>      $tracklist->date_timestamp,
+            WPSSTM_Core_Radios::$remote_author_meta_name =>     $tracklist->author,
+            WPSSTM_Core_Radios::$time_updated_meta_name =>      $tracklist->date_timestamp,
         );
 
         $tracklist_post = array(
@@ -1007,7 +1007,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         if ($this->tracklist_type != 'live') return false;
         
-        $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true);
+        $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Radios::$time_updated_meta_name,true);
         if(!$updated_time) return 0;//never imported
 
         if ( !$cache_min = $this->get_options('cache_min') ) return 0; //no delay
@@ -1021,8 +1021,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function remove_import_timestamp(){
-        if ( !$last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name,true) ) return;
-        if ( !$success = delete_post_meta($this->post_id,WPSSTM_Core_Live_Playlists::$time_updated_meta_name) ) return;
+        if ( !$last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Radios::$time_updated_meta_name,true) ) return;
+        if ( !$success = delete_post_meta($this->post_id,WPSSTM_Core_Radios::$time_updated_meta_name) ) return;
         $this->is_expired = true;
     }
     

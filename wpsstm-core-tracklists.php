@@ -32,15 +32,15 @@ class WPSSTM_Core_Tracklists{
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ) );
 
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'tracks_count_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(__class__,'tracks_count_column_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_radio), array(__class__,'tracks_count_column_register') );
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'tracks_count_column_register') );
         
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'favorited_tracklist_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(__class__,'favorited_tracklist_column_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_radio), array(__class__,'favorited_tracklist_column_register') );
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'favorited_tracklist_column_register') );
         
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_playlist), array(__class__,'tracklists_columns_content') );
-        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(__class__,'tracklists_columns_content') );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_radio), array(__class__,'tracklists_columns_content') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'tracklists_columns_content') );
         
 
@@ -120,7 +120,7 @@ class WPSSTM_Core_Tracklists{
         $post_id = get_the_ID();
         $post_type = $screen->post_type;
         $post_status = get_post_status($post_id);
-        $is_radio_autodraft = ( ($post_type === wpsstm()->post_type_live_playlist) && ($post_status === 'auto-draft') );
+        $is_radio_autodraft = ( ($post_type === wpsstm()->post_type_radio) && ($post_status === 'auto-draft') );
         
         if (!$is_radio_autodraft) {
             add_meta_box( 
@@ -180,9 +180,9 @@ class WPSSTM_Core_Tracklists{
         $cache_min = wpsstm_get_array_value('cache_min',$input_data);
 
         if ( is_numeric($cache_min) ){
-            update_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name,$cache_min);
+            update_post_meta( $post_id, WPSSTM_Core_Radios::$cache_min_meta_name,$cache_min);
         }else{
-            delete_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name);
+            delete_post_meta( $post_id, WPSSTM_Core_Radios::$cache_min_meta_name);
         }
         
         //playable

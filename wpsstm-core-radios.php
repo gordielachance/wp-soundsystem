@@ -1,5 +1,5 @@
 <?php
-class WPSSTM_Core_Live_Playlists{
+class WPSSTM_Core_Radios{
     static $remote_author_meta_name = 'wpsstm_remote_author_name';
     static $time_updated_meta_name = 'wpsstm_remote_query_time';
     static $cache_min_meta_name = 'wpsstm_cache_min';
@@ -13,7 +13,7 @@ class WPSSTM_Core_Live_Playlists{
         Better register the post type and fire a tracklist notice to say that it cannot be refreshed because API key is invalid.
         */
 
-        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_live_playlist' ));
+        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_radio' ));
 
         add_filter( 'pre_get_posts', array($this,'pre_get_tracklist_by_pulse') );
         add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
@@ -22,12 +22,12 @@ class WPSSTM_Core_Live_Playlists{
         
         //backend
         add_action('admin_notices', array(__class__,'radios_notice') );
-        add_action( 'wpsstm_register_submenus', array( $this, 'backend_live_playlists_submenu' ) );
-        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_live_playlist), array(wpsstm(),'register_imported_view'), 5 );
+        add_action( 'wpsstm_register_submenus', array( $this, 'backend_radios_submenu' ) );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_radio), array(wpsstm(),'register_imported_view'), 5 );
 
     }
 
-    function register_post_type_live_playlist() {
+    function register_post_type_radio() {
 
         $labels = array(
             'name'                  => _x( 'Radios', 'Radios General Name', 'wpsstm' ),
@@ -87,7 +87,7 @@ class WPSSTM_Core_Live_Playlists{
              * plural form can't be made by simply adding an 's' to the end of the word.  For example, 
              * array( 'box', 'boxes' ).
              */
-            'capability_type'     => 'live_playlist', // string|array (defaults to 'post')
+            'capability_type'     => 'radio', // string|array (defaults to 'post')
 
             /**
              * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for 
@@ -107,39 +107,39 @@ class WPSSTM_Core_Live_Playlists{
             'capabilities' => array(
 
                 // meta caps (don't assign these to roles)
-                'edit_post'              => 'edit_live_playlist',
-                'read_post'              => 'read_live_playlist',
-                'delete_post'            => 'delete_live_playlist',
+                'edit_post'              => 'edit_radio',
+                'read_post'              => 'read_radio',
+                'delete_post'            => 'delete_radio',
 
                 // primitive/meta caps
-                'create_posts'           => 'create_live_playlists',
+                'create_posts'           => 'create_radios',
 
                 // primitive caps used outside of map_meta_cap()
-                'edit_posts'             => 'edit_live_playlists',
-                'edit_others_posts'      => 'manage_live_playlists',
-                'publish_posts'          => 'manage_live_playlists',
+                'edit_posts'             => 'edit_radios',
+                'edit_others_posts'      => 'manage_radios',
+                'publish_posts'          => 'manage_radios',
                 'read_private_posts'     => 'read',
 
                 // primitive caps used inside of map_meta_cap()
                 'read'                   => 'read',
-                'delete_posts'           => 'manage_live_playlists',
-                'delete_private_posts'   => 'manage_live_playlists',
-                'delete_published_posts' => 'manage_live_playlists',
-                'delete_others_posts'    => 'manage_live_playlists',
-                'edit_private_posts'     => 'edit_live_playlists',
-                'edit_published_posts'   => 'edit_live_playlists'
+                'delete_posts'           => 'manage_radios',
+                'delete_private_posts'   => 'manage_radios',
+                'delete_published_posts' => 'manage_radios',
+                'delete_others_posts'    => 'manage_radios',
+                'edit_private_posts'     => 'edit_radios',
+                'edit_published_posts'   => 'edit_radios'
             )
 
         );
 
-        register_post_type( wpsstm()->post_type_live_playlist, $args );
+        register_post_type( wpsstm()->post_type_radio, $args );
     }
     
     //add custom admin submenu under WPSSTM
-    function backend_live_playlists_submenu($parent_slug){
+    function backend_radios_submenu($parent_slug){
 
         //capability check
-        $post_type_slug = wpsstm()->post_type_live_playlist;
+        $post_type_slug = wpsstm()->post_type_radio;
         $post_type_obj = get_post_type_object($post_type_slug);
         
          add_submenu_page(
@@ -153,7 +153,7 @@ class WPSSTM_Core_Live_Playlists{
     }
 
     function live_tracklist_classes($classes,$tracklist){
-        if ( get_post_type($tracklist->post_id) == wpsstm()->post_type_live_playlist ){
+        if ( get_post_type($tracklist->post_id) == wpsstm()->post_type_radio ){
             $classes[] = 'wpsstm-live-tracklist';
         }
         return $classes;
@@ -201,7 +201,7 @@ class WPSSTM_Core_Live_Playlists{
     
     static function radios_notice(){
         $screen =                   get_current_screen();
-        if ( ($screen->base != 'edit') || ($screen->post_type != wpsstm()->post_type_live_playlist) ) return;
+        if ( ($screen->base != 'edit') || ($screen->post_type != wpsstm()->post_type_radio) ) return;
 
         $notice = __("Radios are how we call 'live playlists'. Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are refreshing seamlessly after a user-defined delay.  Setup the 'Tracklist Importer' metabox while editing a radio.",'wpsstm');
         printf('<div class="notice notice-warning is-dismissible"><p>%s</p></div>',$notice);
@@ -209,8 +209,8 @@ class WPSSTM_Core_Live_Playlists{
 
 }
 
-function wpsstm_live_playlists_init(){
-    new WPSSTM_Core_Live_Playlists();
+function wpsstm_radios_init(){
+    new WPSSTM_Core_Radios();
 }
 
-add_action('wpsstm_init','wpsstm_live_playlists_init');
+add_action('wpsstm_init','wpsstm_radios_init');

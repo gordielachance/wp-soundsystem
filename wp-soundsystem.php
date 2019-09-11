@@ -52,15 +52,14 @@ class WP_SoundSystem {
     */
     public $plugin_dir = '';
 
-    public $post_type_album = 'wpsstm_release';
-    public $post_type_artist = 'wpsstm_artist';
-    public $post_type_track = 'wpsstm_track';
-    public $post_type_track_link = 'wpsstm_track_link';
-    public $post_type_playlist = 'wpsstm_playlist';
-    public $post_type_live_playlist = 'wpsstm_live_playlist';
+    public $post_type_album =       'wpsstm_release';
+    public $post_type_artist =      'wpsstm_artist';
+    public $post_type_track =       'wpsstm_track';
+    public $post_type_track_link =  'wpsstm_track_link';
+    public $post_type_playlist =    'wpsstm_playlist';
+    public $post_type_radio =       'wpsstm_radio';
     
-    public $tracklist_post_types = array('wpsstm_playlist','wpsstm_live_playlist');
-    public $static_tracklist_post_types = array('wpsstm_playlist','wpsstm_live_playlist','wpsstm_release');
+    public $tracklist_post_types = array('wpsstm_playlist','wpsstm_radio','wpsstm_release');
 
     public $subtracks_table_name = 'wpsstm_subtracks';
     public $user;
@@ -297,7 +296,7 @@ class WP_SoundSystem {
                     $min = isset($metadata['remote_delay_min']) ? $metadata['remote_delay_min'] : false;
                     if( $min === false ) continue;
 
-                    update_post_meta($row->post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name, $min);
+                    update_post_meta($row->post_id, WPSSTM_Core_Radios::$cache_min_meta_name, $min);
                     
                     unset($metadata['remote_delay_min']);
                     update_post_meta($row->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name, $metadata);
@@ -405,6 +404,7 @@ class WP_SoundSystem {
             }
             
             if ($current_version < 212){ //URGENT
+                $results = $wpdb->query( "UPDATE `$wpdb->posts` SET `post_type` = 'wpsstm_radio' WHERE `wp_posts`.`post_type` = 'wpsstm_live_playlist'");
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `time` `subtrack_time` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'");
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `track_order` `subtrack_order` int(11) NOT NULL DEFAULT '0'");
@@ -412,6 +412,7 @@ class WP_SoundSystem {
                 
                 $this->create_nowplaying_post();
                 $this->create_global_favorites_post();
+
             }
 
         }
@@ -439,6 +440,7 @@ class WP_SoundSystem {
         return $success;
     }
     
+    //TOUFIX should be a radio, but breaks because then it has no URL
     private function create_import_page(){
         $post_details = array(
             'post_title' =>     __('Tracklist importer','wpsstm'),
@@ -454,6 +456,7 @@ class WP_SoundSystem {
         return $this->update_option( 'importer_page_id', $page_id );
     }
     
+    //TOUFIX should be a radio, but breaks because then it has no URL
     private function create_nowplaying_post(){
         $post_details = array(
             'post_title' =>     __('Now playing','wpsstm'),
@@ -670,7 +673,7 @@ class WP_SoundSystem {
             wpsstm()->post_type_track,
             wpsstm()->post_type_track_link,
             wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist,
+            wpsstm()->post_type_radio,
         );
 
         $is_allowed_post_type =  ( in_array($post_type,$allowed_post_types) );
@@ -753,9 +756,9 @@ class WP_SoundSystem {
         $all = array(
             
             //radios
-            'manage_live_playlists'     => array('editor','administrator'),
-            'edit_live_playlists'       => array('contributor','author','editor','administrator'),
-            'create_live_playlists'     => array('contributor','author','editor','administrator'),
+            'manage_radios'     => array('editor','administrator'),
+            'edit_radios'       => array('contributor','author','editor','administrator'),
+            'create_radios'     => array('contributor','author','editor','administrator'),
             
             //playlists
             'manage_playlists'     => array('editor','administrator'),
@@ -869,8 +872,8 @@ class WP_SoundSystem {
         }
         
         //check can create radios
-        if ( !user_can($bot_id,'create_live_playlists') ){
-            return new WP_Error( 'wpsstm_missing_capability', __("The bot user requires the 'create_live_playlists' capability.",'wpsstm'));
+        if ( !user_can($bot_id,'create_radios') ){
+            return new WP_Error( 'wpsstm_missing_capability', __("The bot user requires the 'create_radios' capability.",'wpsstm'));
         }
         
         //check can create tracks
