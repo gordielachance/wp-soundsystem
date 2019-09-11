@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 3.1.1
+Version: 3.1.2
 License: GPL2
 */
 
@@ -36,7 +36,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '3.1.1';
+    public $version = '3.1.2';
     /**
     * @public string plugin DB version
     */
@@ -258,7 +258,7 @@ class WP_SoundSystem {
             $this->create_bot_user();
             $this->create_import_page();
             $this->create_nowplaying_post();
-            $this->create_global_favorites_post();
+            $this->create_sitewide_favorites_post();
 
         }else{
 
@@ -411,7 +411,7 @@ class WP_SoundSystem {
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD subtrack_author bigint(20) UNSIGNED NULL" );
                 
                 $this->create_nowplaying_post();
-                $this->create_global_favorites_post();
+                $this->create_sitewide_favorites_post();
 
             }
 
@@ -472,9 +472,9 @@ class WP_SoundSystem {
         return $this->update_option( 'nowplaying_id', $page_id );
     }
     
-    private function create_global_favorites_post(){
+    private function create_sitewide_favorites_post(){
         $post_details = array(
-            'post_title' =>     __('Global favorites','wpsstm'),
+            'post_title' =>     __('Sitewide favorite tracks','wpsstm'),
             'post_status' =>    'publish',
             'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
             'post_type' =>      wpsstm()->post_type_playlist
@@ -484,7 +484,7 @@ class WP_SoundSystem {
         
         self::debug_log($page_id,'created global favorites post');
         
-        return $this->update_option( 'global_favorites_id', $page_id );
+        return $this->update_option( 'sitewide_favorites_id', $page_id );
     }
     
     function setup_subtracks_table(){

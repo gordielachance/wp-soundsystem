@@ -120,13 +120,13 @@ class WPSSTM_Settings {
         }
         
         /*
-        Global favorites
+        Sitewide favorites
         */
 
         //post ID
-        if ( isset ($input['global_favorites_id']) && get_post_type($input['global_favorites_id']) ){
-            if ( get_post_type($input['global_favorites_id'] ) ){ //check page exists
-                $new_input['global_favorites_id'] = $input['global_favorites_id'];
+        if ( isset ($input['sitewide_favorites_id']) && get_post_type($input['sitewide_favorites_id']) ){
+            if ( get_post_type($input['sitewide_favorites_id'] ) ){ //check page exists
+                $new_input['sitewide_favorites_id'] = $input['sitewide_favorites_id'];
             }
         }
 
@@ -261,22 +261,22 @@ class WPSSTM_Settings {
         );
         
         /*
-        Global favorites
+        Sitewide favorites
         */
 
         add_settings_section(
-            'global_favorites', // ID
-            __("Global favorites",'wpsstm'), // Title
-            array( $this, 'global_favorites_desc' ), // Callback
+            'sitewide_favorites', // ID
+            __("Sitewide favorites",'wpsstm'), // Title
+            array( $this, 'sitewide_favorites_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
 
         add_settings_field(
-            'global_favorites_id', 
+            'sitewide_favorites_id', 
             __('Playlist ID','wpsstm'), 
-            array( $this, 'global_favorites_callback' ), 
+            array( $this, 'sitewide_favorites_callback' ), 
             'wpsstm-settings-page', 
-            'global_favorites'
+            'sitewide_favorites'
         );
         
         /*
@@ -586,7 +586,7 @@ class WPSSTM_Settings {
         _e('Playlist displaying the last tracks played.','wppstm');
     }
     
-    function global_favorites_desc(){
+    function sitewide_favorites_desc(){
         _e('Playlist displaying the last favorited tracks among members.','wppstm');
     }
     
@@ -653,11 +653,11 @@ class WPSSTM_Settings {
         
     }
     
-    function global_favorites_callback(){
-        $page_id = wpsstm()->get_options('global_favorites_id');
+    function sitewide_favorites_callback(){
+        $page_id = wpsstm()->get_options('sitewide_favorites_id');
 
         printf(
-            '<input type="number" name="%s[global_favorites_id]" value="%s"/>',
+            '<input type="number" name="%s[sitewide_favorites_id]" value="%s"/>',
             wpsstm()->meta_name_options,
             $page_id
         );
