@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '220';
+    public $db_version = '221';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -257,7 +257,8 @@ class WP_SoundSystem {
             $this->setup_subtracks_table();
             $this->create_bot_user();
             $this->create_import_page();
-            $this->create_nowplaying_playlist();
+            $this->create_nowplaying_post();
+            $this->create_global_favorites_post();
 
         }else{
 
@@ -404,12 +405,18 @@ class WP_SoundSystem {
             
             if ($current_version < 216){
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD author bigint(20) UNSIGNED NULL" );
-                $this->create_nowplaying_playlist();
+                $this->create_nowplaying_post();
             }
             
             if ($current_version < 220){
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
             }
+            
+            if ($current_version < 221){
+                $this->create_global_favorites_post();
+            }
+            
+            
         }
         
         //update DB version
@@ -450,7 +457,7 @@ class WP_SoundSystem {
         return $this->update_option( 'importer_page_id', $page_id );
     }
     
-    private function create_nowplaying_playlist(){
+    private function create_nowplaying_post(){
         $post_details = array(
             'post_title' =>     __('Now playing','wpsstm'),
             'post_status' =>    'publish',
@@ -460,9 +467,24 @@ class WP_SoundSystem {
         $page_id = wp_insert_post( $post_details );
         if ( is_wp_error($page_id) ) return $page_id;
         
-        self::debug_log($page_id,'created now playing page');
+        self::debug_log($page_id,'created now playing post');
         
         return $this->update_option( 'nowplaying_id', $page_id );
+    }
+    
+    private function create_global_favorites_post(){
+        $post_details = array(
+            'post_title' =>     __('Global favorites','wpsstm'),
+            'post_status' =>    'publish',
+            'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
+            'post_type' =>      wpsstm()->post_type_playlist
+        );
+        $page_id = wp_insert_post( $post_details );
+        if ( is_wp_error($page_id) ) return $page_id;
+        
+        self::debug_log($page_id,'created global favorites post');
+        
+        return $this->update_option( 'global_favorites_id', $page_id );
     }
     
     function setup_subtracks_table(){

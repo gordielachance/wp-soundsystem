@@ -108,7 +108,7 @@ class WPSSTM_Settings {
         */
 
         //post ID
-        if ( isset ($input['nowplaying_id']) && ctype_digit($input['nowplaying_id']) ){
+        if ( isset ($input['nowplaying_id']) && get_post_type($input['nowplaying_id']) ){
             if ( get_post_type($input['nowplaying_id'] ) ){ //check page exists
                 $new_input['nowplaying_id'] = $input['nowplaying_id'];
             }
@@ -117,6 +117,17 @@ class WPSSTM_Settings {
         //delay
         if ( isset ($input['nowplaying_radio_delay']) && ctype_digit($input['nowplaying_radio_delay']) ){
             $new_input['nowplaying_radio_delay'] = $input['nowplaying_radio_delay'] * HOUR_IN_SECONDS;
+        }
+        
+        /*
+        Global favorites
+        */
+
+        //post ID
+        if ( isset ($input['global_favorites_id']) && get_post_type($input['global_favorites_id']) ){
+            if ( get_post_type($input['global_favorites_id'] ) ){ //check page exists
+                $new_input['global_favorites_id'] = $input['global_favorites_id'];
+            }
         }
 
         /*
@@ -223,30 +234,49 @@ class WPSSTM_Settings {
         );
         
         /*
-        Now Playing radio
+        Now Playing
         */
 
         add_settings_section(
-            'now_playing_playlist', // ID
+            'now_playing', // ID
             __("Now playing",'wpsstm'), // Title
-            array( $this, 'now_playing_playlist_desc' ), // Callback
+            array( $this, 'now_playing_desc' ), // Callback
             'wpsstm-settings-page' // Page
         );
 
         add_settings_field(
-            'now_playing_playlist_id', 
+            'now_playing_id', 
             __('Playlist ID','wpsstm'), 
-            array( $this, 'now_playing_playlist_callback' ), 
+            array( $this, 'now_playing_callback' ), 
             'wpsstm-settings-page', 
-            'now_playing_playlist'
+            'now_playing'
         );
         
         add_settings_field(
-            'now_playing_playlist_delay', 
+            'now_playing_delay', 
             __('Delay','wpsstm'), 
             array( $this, 'now_playing_delay_callback' ), 
             'wpsstm-settings-page', 
-            'now_playing_playlist'
+            'now_playing'
+        );
+        
+        /*
+        Global favorites
+        */
+
+        add_settings_section(
+            'global_favorites', // ID
+            __("Global favorites",'wpsstm'), // Title
+            array( $this, 'global_favorites_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+
+        add_settings_field(
+            'global_favorites_id', 
+            __('Playlist ID','wpsstm'), 
+            array( $this, 'global_favorites_callback' ), 
+            'wpsstm-settings-page', 
+            'global_favorites'
         );
         
         /*
@@ -552,8 +582,12 @@ class WPSSTM_Settings {
         _e('Page used as placeholder to import tracklists frontend.','wppstm');
     }
     
-    function now_playing_playlist_desc(){
+    function now_playing_desc(){
         _e('Playlist displaying the last tracks played.','wppstm');
+    }
+    
+    function global_favorites_desc(){
+        _e('Playlist displaying the last favorited tracks among members.','wppstm');
     }
     
     function section_radios_desc(){
@@ -589,11 +623,11 @@ class WPSSTM_Settings {
         
     }
     
-    function now_playing_playlist_callback(){
+    function now_playing_callback(){
         $page_id = wpsstm()->get_options('nowplaying_id');
 
         printf(
-            '<input type="number" name="%s[nowplaying_id]" size="4" min="0" value="%s"/>',
+            '<input type="number" name="%s[nowplaying_id]" value="%s"/>',
             wpsstm()->meta_name_options,
             $page_id
         );
@@ -616,6 +650,24 @@ class WPSSTM_Settings {
             $delay / HOUR_IN_SECONDS
         );
         _e('Hours a track remains in the playlist','wpsstm');
+        
+    }
+    
+    function global_favorites_callback(){
+        $page_id = wpsstm()->get_options('global_favorites_id');
+
+        printf(
+            '<input type="number" name="%s[global_favorites_id]" value="%s"/>',
+            wpsstm()->meta_name_options,
+            $page_id
+        );
+        
+        if ( get_post_type($page_id) ){
+            $page_title = get_the_title( $page_id );
+            $edit_url = get_edit_post_link($page_id);
+            $link_txt = sprintf(__('Edit %s','wpsstm'),'<em>' . $page_title . '</em>');
+            printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
+        }
         
     }
     
