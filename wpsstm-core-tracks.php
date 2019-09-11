@@ -491,7 +491,6 @@ class WPSSTM_Core_Tracks{
         global $wpdb;
         
         if ( !$this->is_subtracks_query($query) ) return $fields;
-        if ( $query->get('fields') !== 'subtrack=>track' ) return $fields;
 
         //TOUCHECK NOT WORKING URGENT return sprintf('%s.ID,%s.subtrack_id',$wpdb->posts,'subtracks');
 
