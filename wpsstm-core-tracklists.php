@@ -32,15 +32,15 @@ class WPSSTM_Core_Tracklists{
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ) );
 
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'tracks_count_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(__class__,'tracks_count_column_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_radio), array(__class__,'tracks_count_column_register') );
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'tracks_count_column_register') );
         
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'favorited_tracklist_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_live_playlist), array(__class__,'favorited_tracklist_column_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_radio), array(__class__,'favorited_tracklist_column_register') );
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'favorited_tracklist_column_register') );
         
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_playlist), array(__class__,'tracklists_columns_content') );
-        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_live_playlist), array(__class__,'tracklists_columns_content') );
+        add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_radio), array(__class__,'tracklists_columns_content') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'tracklists_columns_content') );
         
 
@@ -120,7 +120,7 @@ class WPSSTM_Core_Tracklists{
         $post_id = get_the_ID();
         $post_type = $screen->post_type;
         $post_status = get_post_status($post_id);
-        $is_radio_autodraft = ( ($post_type === wpsstm()->post_type_live_playlist) && ($post_status === 'auto-draft') );
+        $is_radio_autodraft = ( ($post_type === wpsstm()->post_type_radio) && ($post_status === 'auto-draft') );
         
         if (!$is_radio_autodraft) {
             add_meta_box( 
@@ -180,13 +180,17 @@ class WPSSTM_Core_Tracklists{
         $cache_min = wpsstm_get_array_value('cache_min',$input_data);
 
         if ( is_numeric($cache_min) ){
-            update_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name,$cache_min);
+            update_post_meta( $post_id, WPSSTM_Core_Radios::$cache_min_meta_name,$cache_min);
         }else{
-            delete_post_meta( $post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name);
+            delete_post_meta( $post_id, WPSSTM_Core_Radios::$cache_min_meta_name);
         }
         
         //playable
-        $new_input['playable'] = isset($input_data['playable']);
+        $new_input['playable'] = wpsstm_get_array_value('playable',$input_data);
+        
+        //order
+        $order = wpsstm_get_array_value('order',$input_data);
+        $new_input['order'] = strtoupper($order);
 
         if (!$new_input){
             $success = delete_post_meta($post_id, WPSSTM_Post_Tracklist::$tracklist_options_meta_name);
@@ -215,6 +219,24 @@ class WPSSTM_Core_Tracklists{
         );
 
         printf('<p>%s <label>%s</label></p>',$input,__('Playable','wpsstm'));
+        
+        //sort
+        $option = $wpsstm_tracklist->get_options('order');
+
+        $input_desc = sprintf(
+            '<input type="radio" name="%s[order]" value="DESC" %s /><label>%s</label>',
+            'wpsstm_tracklist_options',
+            checked($option,'DESC', false),
+            'DESC'
+        );
+        $input_asc = sprintf(
+            '<input type="radio" name="%s[order]" value="ASC" %s /><label>%s</label>',
+            'wpsstm_tracklist_options',
+            checked($option,'ASC', false),
+            'ASC'
+        );
+
+        printf('<p><strong>%s</strong></br>%s</p>',__('Sort','wpsstm'),$input_desc . ' ' . $input_asc);
 
         if ($wpsstm_tracklist->tracklist_type === 'live' ) {
 
@@ -235,7 +257,7 @@ class WPSSTM_Core_Tracklists{
         $post_links_url = $wpsstm_tracklist->get_backend_tracks_url();
         printf('<a href="%s" class="button">%s</a>',$post_links_url,__('Filter tracks','wpsstm'));
         
-         wp_nonce_field( 'wpsstm_tracklist_options_meta_box', 'wpsstm_tracklist_options_meta_box_nonce' );
+        wp_nonce_field( 'wpsstm_tracklist_options_meta_box', 'wpsstm_tracklist_options_meta_box_nonce' );
     }
 
     function ajax_reload_tracklist(){

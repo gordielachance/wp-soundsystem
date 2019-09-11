@@ -2,12 +2,7 @@
 class WPSSTM_Core_Albums{
     
     function __construct() {
-        
-        //append to playlists post types
-        wpsstm()->tracklist_post_types[] = 'wpsstm_release';
-        wpsstm()->static_tracklist_post_types[] = 'wpsstm_release';
-        
-        
+
         add_action( 'wpsstm_init_post_types', array($this,'register_post_type_album' ));
         add_action( 'wpsstm_init_post_types', array($this,'register_album_taxonomy' ));
         
@@ -62,7 +57,7 @@ class WPSSTM_Core_Albums{
         $after = array();
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-            if ( !$wp_query->get('exclude_subtracks') ){
+            if ( !$wp_query->get('subtrack_exclude') ){
                 $after['album'] = __('Album','wpsstm');
             }
         }

@@ -190,9 +190,8 @@ $(document).on( "wpsstmPlayerInit", function( event,player ) {
     });
 });
 
-$(document).on( "wpsstmSourceInit", function( event, link ) {
+$(document).on( "wpsstmTrackStart", function( event, track ) {
 
-    var track =                 link.closest('wpsstm-track');
     var scrobble_icon =         $(track.player).find('.wpsstm-player-action-scrobbler');
     var scrobbler_enabled =     scrobble_icon.hasClass('active');
 

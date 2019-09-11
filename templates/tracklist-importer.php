@@ -90,36 +90,6 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
                 </small>
             </div>
         </div>
-         <!--tracks order-->
-         <div class="wpsstm-importer-row">
-            <h4 class="wpsstm-importer-row-label"><?php _e('Order','wpsstm');?></h4>
-            <div class="wpsstm-importer-row-content">
-                <?php
-                $forced_option = null;//TOUFIX$wpsstm_tracklist->preset->get_preset_options('tracks_order');
-                $option = ($forced_option) ? $forced_option : $wpsstm_tracklist->get_importer_options('tracks_order');
-                
-                $disabled = disabled( (bool)$forced_option, true, false );
-
-                $desc_text = sprintf(
-                    '<input type="radio" name="%1s[tracks_order]" value="desc" %s %s /><span class="wizard-field-desc">%s</span>',
-                    'wpsstm_importer',
-                    checked($option, 'desc', false),
-                    $disabled,
-                    __('Descending','spiff')
-                );
-
-                $asc_text = sprintf(
-                    '<input type="radio" name="%s[tracks_order]" value="asc" %s %s /><span class="wizard-field-desc">%s</span>',
-                    'wpsstm_importer',
-                    checked($option, 'asc', false),
-                    $disabled,
-                    __('Ascending','wpsstm')
-                );
-
-                echo $desc_text." ".$asc_text;
-                ?>
-            </div>
-        </div>
         <div class="wpsstm-importer-section-label">
             <h3><?php _e('Track details','wpsstm');?></h3>
             <small>

@@ -1,4 +1,5 @@
 <?php
+//define('WPSSTM_API_URL','http://localhost:8888/la-bonne-toune/');
 define('WPSSTM_API_URL','https://api.spiff-radio.org/');
 define('WPSSTM_API_REST',WPSSTM_API_URL . 'wp-json/');
 define('WPSSTM_API_CACHE',WPSSTM_API_URL . 'wordpress/wp-content/uploads/wpsstmapi/');

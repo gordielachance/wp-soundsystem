@@ -71,6 +71,7 @@ class WpsstmTrack extends HTMLElement{
                 }
                 
                 if ( newVal == 'playing' ){
+
                     trackInstances.removeClass('track-loading').addClass('track-playing track-has-played');
                     
                     $(track.player).addClass('player-playing player-has-played');
@@ -681,5 +682,23 @@ class WpsstmTrack extends HTMLElement{
     }
     
 }
+
+$(document).on( "wpsstmTrackStart", function( event, track ) {
+    
+    var ajax_data = {
+        action:     'wpsstm_track_start',
+        track:      track.to_ajax(),   
+    };
+    
+    var request = $.ajax({
+        type:       "post",
+        url:        wpsstmL10n.ajaxurl,
+        data:       ajax_data,
+        dataType:   'json',
+    })
+    .fail(function() {
+        track.debug(ajax_data,"track start request failed");
+    })
+});
 
 window.customElements.define('wpsstm-track', WpsstmTrack);

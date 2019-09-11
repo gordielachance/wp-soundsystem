@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 3.1.1
+Version: 3.1.2
 License: GPL2
 */
 
@@ -36,11 +36,11 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '3.1.1';
+    public $version = '3.1.2';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '211';
+    public $db_version = '212';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -52,15 +52,14 @@ class WP_SoundSystem {
     */
     public $plugin_dir = '';
 
-    public $post_type_album = 'wpsstm_release';
-    public $post_type_artist = 'wpsstm_artist';
-    public $post_type_track = 'wpsstm_track';
-    public $post_type_track_link = 'wpsstm_track_link';
-    public $post_type_playlist = 'wpsstm_playlist';
-    public $post_type_live_playlist = 'wpsstm_live_playlist';
+    public $post_type_album =       'wpsstm_release';
+    public $post_type_artist =      'wpsstm_artist';
+    public $post_type_track =       'wpsstm_track';
+    public $post_type_track_link =  'wpsstm_track_link';
+    public $post_type_playlist =    'wpsstm_playlist';
+    public $post_type_radio =       'wpsstm_radio';
     
-    public $tracklist_post_types = array('wpsstm_playlist','wpsstm_live_playlist');
-    public $static_tracklist_post_types = array('wpsstm_playlist','wpsstm_live_playlist','wpsstm_release');
+    public $tracklist_post_types = array('wpsstm_playlist','wpsstm_radio','wpsstm_release');
 
     public $subtracks_table_name = 'wpsstm_subtracks';
     public $user;
@@ -102,6 +101,9 @@ class WP_SoundSystem {
         $options_default = array(
             'player_enabled'                    => true,
             'importer_page_id'                  => null,
+            'nowplaying_id'                     => null,
+            'play_history_timeout'              => 1 * DAY_IN_SECONDS, //how long a track is stored in the plays history
+            'playing_timeout'                   => 5 * MINUTE_IN_SECONDS,//how long a track is considered playing 'now'
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'bot_user_id'                       => null,
             'autolink'                          => true,
@@ -246,8 +248,8 @@ class WP_SoundSystem {
     function upgrade(){
 
         global $wpdb;
-
         $current_version = get_option("_wpsstm-db_version");
+        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
 
         if ($current_version==$this->db_version) return false;
         if(!$current_version){ //not installed
@@ -255,6 +257,8 @@ class WP_SoundSystem {
             $this->setup_subtracks_table();
             $this->create_bot_user();
             $this->create_import_page();
+            $this->create_nowplaying_post();
+            $this->create_sitewide_favorites_post();
 
         }else{
 
@@ -292,7 +296,7 @@ class WP_SoundSystem {
                     $min = isset($metadata['remote_delay_min']) ? $metadata['remote_delay_min'] : false;
                     if( $min === false ) continue;
 
-                    update_post_meta($row->post_id, WPSSTM_Core_Live_Playlists::$cache_min_meta_name, $min);
+                    update_post_meta($row->post_id, WPSSTM_Core_Radios::$cache_min_meta_name, $min);
                     
                     unset($metadata['remote_delay_min']);
                     update_post_meta($row->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name, $metadata);
@@ -398,6 +402,18 @@ class WP_SoundSystem {
                 //remove unused music terms since we hadn't cleanup functions before this version
                 self::batch_delete_unused_music_terms();
             }
+            
+            if ($current_version < 212){
+                $results = $wpdb->query( "UPDATE `$wpdb->posts` SET `post_type` = 'wpsstm_radio' WHERE `wp_posts`.`post_type` = 'wpsstm_live_playlist'");
+                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
+                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `time` `subtrack_time` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'");
+                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `track_order` `subtrack_order` int(11) NOT NULL DEFAULT '0'");
+                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD subtrack_author bigint(20) UNSIGNED NULL" );
+                
+                $this->create_nowplaying_post();
+                $this->create_sitewide_favorites_post();
+
+            }
 
         }
         
@@ -424,6 +440,7 @@ class WP_SoundSystem {
         return $success;
     }
     
+    //TOUFIX should be a radio, but breaks because then it has no URL
     private function create_import_page(){
         $post_details = array(
             'post_title' =>     __('Tracklist importer','wpsstm'),
@@ -439,6 +456,37 @@ class WP_SoundSystem {
         return $this->update_option( 'importer_page_id', $page_id );
     }
     
+    //TOUFIX should be a radio, but breaks because then it has no URL
+    private function create_nowplaying_post(){
+        $post_details = array(
+            'post_title' =>     __('Now playing','wpsstm'),
+            'post_status' =>    'publish',
+            'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
+            'post_type' =>      wpsstm()->post_type_playlist
+        );
+        $page_id = wp_insert_post( $post_details );
+        if ( is_wp_error($page_id) ) return $page_id;
+        
+        self::debug_log($page_id,'created now playing post');
+        
+        return $this->update_option( 'nowplaying_id', $page_id );
+    }
+    
+    private function create_sitewide_favorites_post(){
+        $post_details = array(
+            'post_title' =>     __('Sitewide favorite tracks','wpsstm'),
+            'post_status' =>    'publish',
+            'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
+            'post_type' =>      wpsstm()->post_type_playlist
+        );
+        $page_id = wp_insert_post( $post_details );
+        if ( is_wp_error($page_id) ) return $page_id;
+        
+        self::debug_log($page_id,'created global favorites post');
+        
+        return $this->update_option( 'sitewide_favorites_id', $page_id );
+    }
+    
     function setup_subtracks_table(){
         global $wpdb;
 
@@ -446,12 +494,13 @@ class WP_SoundSystem {
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE $subtracks_table (
-            ID bigint(20) NOT NULL AUTO_INCREMENT,
+            subtrack_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             track_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             tracklist_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             from_tracklist bigint(20) UNSIGNED NULL,
-            track_order int(11) NOT NULL DEFAULT '0',
-            time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+            subtrack_author bigint(20) UNSIGNED NULL,
+            subtrack_order int(11) NOT NULL DEFAULT '0',
+            subtrack_time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY  (ID)
         ) $charset_collate;";
 
@@ -539,7 +588,7 @@ class WP_SoundSystem {
             
             if ( is_wp_error( $valid ) ){
                 
-                $rowquerystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID = '%s'",$row->ID );
+                $rowquerystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE subtrack_id = '%s'",$row->ID );
                 $result = $wpdb->get_results ( $rowquerystr );
                 
             }else{
@@ -548,7 +597,7 @@ class WP_SoundSystem {
                 
                 if ( !is_wp_error($track_id) ){
                     
-                    $rowquerystr = $wpdb->prepare( "UPDATE `$subtracks_table` SET track_id = '%s' WHERE ID = '%s'",$track_id, $row->ID );
+                    $rowquerystr = $wpdb->prepare( "UPDATE `$subtracks_table` SET track_id = '%s' WHERE subtrack_id = '%s'",$track_id, $row->ID );
                     $result = $wpdb->get_results ( $rowquerystr );
 
                 }
@@ -624,7 +673,7 @@ class WP_SoundSystem {
             wpsstm()->post_type_track,
             wpsstm()->post_type_track_link,
             wpsstm()->post_type_playlist,
-            wpsstm()->post_type_live_playlist,
+            wpsstm()->post_type_radio,
         );
 
         $is_allowed_post_type =  ( in_array($post_type,$allowed_post_types) );
@@ -707,9 +756,9 @@ class WP_SoundSystem {
         $all = array(
             
             //radios
-            'manage_live_playlists'     => array('editor','administrator'),
-            'edit_live_playlists'       => array('contributor','author','editor','administrator'),
-            'create_live_playlists'     => array('contributor','author','editor','administrator'),
+            'manage_radios'     => array('editor','administrator'),
+            'edit_radios'       => array('contributor','author','editor','administrator'),
+            'create_radios'     => array('contributor','author','editor','administrator'),
             
             //playlists
             'manage_playlists'     => array('editor','administrator'),
@@ -823,8 +872,8 @@ class WP_SoundSystem {
         }
         
         //check can create radios
-        if ( !user_can($bot_id,'create_live_playlists') ){
-            return new WP_Error( 'wpsstm_missing_capability', __("The bot user requires the 'create_live_playlists' capability.",'wpsstm'));
+        if ( !user_can($bot_id,'create_radios') ){
+            return new WP_Error( 'wpsstm_missing_capability', __("The bot user requires the 'create_radios' capability.",'wpsstm'));
         }
         
         //check can create tracks

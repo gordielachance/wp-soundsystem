@@ -54,10 +54,6 @@ class WPSSTM_Settings {
         //reset
         if ( self::is_settings_reset() ) return;
 
-        if( isset( $input['delete-duplicate-links'] ) ){
-            WPSSTM_Core_Track_Links::delete_duplicate_links();
-        }
-
         /*
         Bot user
         */
@@ -100,10 +96,37 @@ class WPSSTM_Settings {
         Importer
         */
 
-        //importer page ID
+        //post ID
         if ( isset ($input['importer_page_id']) && ctype_digit($input['importer_page_id']) ){
             if ( get_post_type($input['importer_page_id'] ) ){ //check page exists
                 $new_input['importer_page_id'] = $input['importer_page_id'];
+            }
+        }
+        
+        /*
+        Now Playing
+        */
+
+        //post ID
+        if ( isset ($input['nowplaying_id']) && get_post_type($input['nowplaying_id']) ){
+            if ( get_post_type($input['nowplaying_id'] ) ){ //check page exists
+                $new_input['nowplaying_id'] = $input['nowplaying_id'];
+            }
+        }
+        
+        //delay
+        if ( isset ($input['play_history_timeout']) && ctype_digit($input['play_history_timeout']) ){
+            $new_input['play_history_timeout'] = $input['play_history_timeout'] * HOUR_IN_SECONDS;
+        }
+        
+        /*
+        Sitewide favorites
+        */
+
+        //post ID
+        if ( isset ($input['sitewide_favorites_id']) && get_post_type($input['sitewide_favorites_id']) ){
+            if ( get_post_type($input['sitewide_favorites_id'] ) ){ //check page exists
+                $new_input['sitewide_favorites_id'] = $input['sitewide_favorites_id'];
             }
         }
 
@@ -211,6 +234,52 @@ class WPSSTM_Settings {
         );
         
         /*
+        Now Playing
+        */
+
+        add_settings_section(
+            'now_playing', // ID
+            __("Now playing",'wpsstm'), // Title
+            array( $this, 'now_playing_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+
+        add_settings_field(
+            'now_playing_id', 
+            __('Playlist ID','wpsstm'), 
+            array( $this, 'now_playing_callback' ), 
+            'wpsstm-settings-page', 
+            'now_playing'
+        );
+        
+        add_settings_field(
+            'now_playing_delay', 
+            __('Delay','wpsstm'), 
+            array( $this, 'now_playing_delay_callback' ), 
+            'wpsstm-settings-page', 
+            'now_playing'
+        );
+        
+        /*
+        Sitewide favorites
+        */
+
+        add_settings_section(
+            'sitewide_favorites', // ID
+            __("Sitewide favorites",'wpsstm'), // Title
+            array( $this, 'sitewide_favorites_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+
+        add_settings_field(
+            'sitewide_favorites_id', 
+            __('Playlist ID','wpsstm'), 
+            array( $this, 'sitewide_favorites_callback' ), 
+            'wpsstm-settings-page', 
+            'sitewide_favorites'
+        );
+        
+        /*
         Player
         */
         add_settings_section(
@@ -301,14 +370,6 @@ class WPSSTM_Settings {
             'reset_options', 
             __('Reset Options','wpsstm'), 
             array( $this, 'reset_options_callback' ), 
-            'wpsstm-settings-page', // Page
-            'settings_maintenance'//section
-        );
-
-        add_settings_field(
-            'delete_duplicate_links', 
-            __('Delete duplicate links','wpsstm'), 
-            array( $this, 'delete_duplicate_links_callback' ), 
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
@@ -518,18 +579,15 @@ class WPSSTM_Settings {
     }
 
     function section_importer_page_desc(){
-        $desc[] = __('Page used as placeholder to import tracklists frontend.','wppstm');
-        
-        //wrap
-        $desc = array_map(
-           function ($el) {
-              return "<p>{$el}</p>";
-           },
-           $desc
-        );
-        
-        echo implode("\n",$desc);
-        
+        _e('Page used as placeholder to import tracklists frontend.','wppstm');
+    }
+    
+    function now_playing_desc(){
+        _e('Playlist displaying the last tracks played.','wppstm');
+    }
+    
+    function sitewide_favorites_desc(){
+        _e('Playlist displaying the last favorited tracks among members.','wppstm');
     }
     
     function section_radios_desc(){
@@ -559,7 +617,55 @@ class WPSSTM_Settings {
         if ( get_post_type($page_id) ){
             $page_title = get_the_title( $page_id );
             $edit_url = get_edit_post_link($page_id);
-            $link_txt = sprintf(__('Edit page %s','wpsstm'),'<em>' . $page_title . '</em>');
+            $link_txt = sprintf(__('Edit %s','wpsstm'),'<em>' . $page_title . '</em>');
+            printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
+        }
+        
+    }
+    
+    function now_playing_callback(){
+        $page_id = wpsstm()->get_options('nowplaying_id');
+
+        printf(
+            '<input type="number" name="%s[nowplaying_id]" value="%s"/>',
+            wpsstm()->meta_name_options,
+            $page_id
+        );
+        
+        if ( get_post_type($page_id) ){
+            $page_title = get_the_title( $page_id );
+            $edit_url = get_edit_post_link($page_id);
+            $link_txt = sprintf(__('Edit %s','wpsstm'),'<em>' . $page_title . '</em>');
+            printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
+        }
+        
+    }
+    
+    function now_playing_delay_callback(){
+        $delay = wpsstm()->get_options('play_history_timeout');
+        
+        printf(
+            '<input type="number" name="%s[play_history_timeout]" value="%s"/>',
+            wpsstm()->meta_name_options,
+            $delay / HOUR_IN_SECONDS
+        );
+        _e('Hours a track remains in the playlist','wpsstm');
+        
+    }
+    
+    function sitewide_favorites_callback(){
+        $page_id = wpsstm()->get_options('sitewide_favorites_id');
+
+        printf(
+            '<input type="number" name="%s[sitewide_favorites_id]" value="%s"/>',
+            wpsstm()->meta_name_options,
+            $page_id
+        );
+        
+        if ( get_post_type($page_id) ){
+            $page_title = get_the_title( $page_id );
+            $edit_url = get_edit_post_link($page_id);
+            $link_txt = sprintf(__('Edit %s','wpsstm'),'<em>' . $page_title . '</em>');
             printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
         }
         
@@ -585,7 +691,7 @@ class WPSSTM_Settings {
         if ( $bot_id = wpsstm()->get_options('bot_user_id') ){
             $userdata = get_userdata( $bot_id );
             $edit_url = get_edit_user_link($bot_id);
-            $link_txt = sprintf(__('Edit user %s','wpsstm'),'<em>' . $userdata->user_login . '</em>');
+            $link_txt = sprintf(__('Edit %s','wpsstm'),'<em>' . $userdata->user_login . '</em>');
             printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
             
         }
@@ -605,17 +711,6 @@ class WPSSTM_Settings {
             '<input type="checkbox" name="%s[reset_options]" value="on"/><label>%s</label>',
             wpsstm()->meta_name_options,
             __("Reset options to their default values.","wpsstm")
-        );
-    }
-
-    function delete_duplicate_links_callback(){
-        $count = count(WPSSTM_Core_Track_Links::get_duplicate_link_ids());
-        $desc = sprintf(__("Delete %d duplicate links (same URL & parent post).","wpsstm"),$count);
-        printf(
-            '<input type="checkbox" name="%s[delete-duplicate-links]" value="on" %s /><label>%s</label>',
-            wpsstm()->meta_name_options,
-            disabled($count,0,false),
-            $desc
         );
     }
 

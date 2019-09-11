@@ -43,7 +43,7 @@ It will search for remote links and attach them to your tracks automatically.
 Radios are how we call *live playlists*. 
 Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are refreshing seamlessly after a user-defined delay.
 
-[Check some Radios on Spiff Radio](http://spiff-radio.org/?post_type=wpsstm_live_playlist&tag=editors-pick&author=1)
+[Check some Radios on Spiff Radio](http://spiff-radio.org/?post_type=wpsstm_radio&tag=editors-pick&author=1)
 
 = Tracklist Importer =
 
@@ -127,6 +127,15 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 9. Music menu on a BuddyPress profile
 
 == Changelog ==
+
+= 3.1.2 =
+* removed 'delete_duplicate_links' setting
+* SQL queries improvements
+* subtracks : save subtrack author (pinner) in database - will be bot if tracklist is imported
+* creates a'sitewide favorites' tracklist post
+* creates a 'now playing' tracklist post with the last tracks played on the website
+* BP profile metas : now playing + last favorite
+* database upgrade: v212
 
 = 3.1.1 =
 * faster REST import

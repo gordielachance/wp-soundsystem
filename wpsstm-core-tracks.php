@@ -51,17 +51,19 @@ class WPSSTM_Core_Tracks{
         /* manager */
         add_action( 'wp', array($this,'handle_manager_action'), 8);
         add_filter( 'template_include', array($this,'manager_template'));
-        
-        //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
-        
+
         add_filter( 'posts_join', array($this,'tracks_query_left_join_subtracks'), 10, 2 );
+        add_filter( 'posts_fields', array($this,'tracks_query_subtrack_ids'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_exclude_subtracks'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_tracklist_id'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_id'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_in'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_position'), 10, 2 );
+        add_filter( 'posts_where', array($this,'track_query_where_subtrack_author'), 10, 2 );
+        add_filter( 'posts_where', array($this,'track_query_where_playing'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_favorited'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_position'), 10, 2 );
+        add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_time'), 10, 2 );
 
         add_filter( 'the_title', array($this, 'the_track_post_title'), 9, 2 );
 
@@ -71,6 +73,9 @@ class WPSSTM_Core_Tracks{
 
         add_action('wp_ajax_wpsstm_track_autolink', array($this,'ajax_track_autolink'));
         add_action('wp_ajax_nopriv_wpsstm_track_autolink', array($this,'ajax_track_autolink'));
+        
+        add_action('wp_ajax_wpsstm_track_start', array($this,'ajax_track_start'));
+        add_action('wp_ajax_nopriv_wpsstm_track_start', array($this,'ajax_track_start'));
 
         add_action('wp_ajax_nopriv_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
         add_action('wp_ajax_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
@@ -446,9 +451,9 @@ class WPSSTM_Core_Tracks{
 
         $screen =                   get_current_screen();
         $post_type =                $screen->post_type;
-        $subtracks_exclude =        get_query_var('exclude_subtracks');
+        $subtracks_exclude =        get_query_var('subtrack_exclude');
         
-        $link = add_query_arg( array('post_type'=>$post_type,'exclude_subtracks'=>true),admin_url('edit.php') );
+        $link = add_query_arg( array('post_type'=>$post_type,'subtrack_exclude'=>true),admin_url('edit.php') );
         $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
         
         $attr = array(
@@ -463,36 +468,46 @@ class WPSSTM_Core_Tracks{
         
         return $views;
     }
+    
+    private function is_subtracks_query($query){
+        
+        return ( ( $query->get('post_type') == wpsstm()->post_type_track ) && $query->get('subtrack_query') );
+
+    }
 
     function tracks_query_left_join_subtracks($join,$query){
         global $wpdb;
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $join;
+        if ( !$this->is_subtracks_query($query) ) return $join;
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        $subtracks_exclude_query =      $query->get('exclude_subtracks');
-        $subtrack_id_query =            $query->get('subtrack_id');
-        $subtrack_in_query =            $query->get('subtrack__in');
-        $subtrack_position_query =      $query->get('subtrack_position');
-        $subtrack_sort_query =          ($query->get('orderby') == 'subtracks');
-        $tracklist_id_query =           $query->get('tracklist_id');
-
-        $join_subtracks = ( $subtracks_exclude_query || $subtrack_id_query || $subtrack_in_query || $subtrack_sort_query || $subtrack_position_query || $tracklist_id_query  );
-        
-        if ($join_subtracks){
-            $join .= sprintf("LEFT JOIN %s AS subtracks ON subtracks.track_id = %s.ID",$subtracks_table,$wpdb->posts);
-        }
-
+        $join .= sprintf("INNER JOIN %s AS subtracks ON %s.ID = subtracks.track_id",$subtracks_table,$wpdb->posts);
         return $join;
+    }
+    
+    /*
+    Include the subtrack_id when fetching subtracks
+    */
+
+    function tracks_query_subtrack_ids($fields,$query) {
+        global $wpdb;
+        
+        if ( !$this->is_subtracks_query($query) ) return $fields;
+
+        //TOUCHECK SHOULD BE THIS? BUT NOT WORKING URGENT return sprintf('%s.ID,%s.subtrack_id',$wpdb->posts,'subtracks');
+
+        $fields = (array)$fields;
+        $fields[] = sprintf('%s.subtrack_id','subtracks');
+        return implode(', ',$fields);
+
     }
     
     function track_query_exclude_subtracks($where,$query){
         global $wpdb;
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        $no_subtracks = $query->get('exclude_subtracks');
+        $no_subtracks = $query->get('subtrack_exclude');
         
         if ($no_subtracks){
             $where .= sprintf(" AND subtracks.track_id IS NULL");
@@ -502,11 +517,11 @@ class WPSSTM_Core_Tracks{
     }
 
     function track_query_where_subtrack_position($where,$query){
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$subtrack_position = $query->get('subtrack_position') ) return $where;
         if ( !$tracklist_id = $query->get('tracklist_id') ) return $where;
 
-        $where.= sprintf(" AND subtracks.tracklist_id = %s AND subtracks.track_order = %s",$tracklist_id,$subtrack_position);
+        $where.= sprintf(" AND subtracks.tracklist_id = %s AND subtracks.subtrack_order = %s",$tracklist_id,$subtrack_position);
 
         //so single template is shown, instead of search results
         //TOUFIX this is maybe quite hackish, should be improved ? eg. setting $query->is_singular = true crashes wordpress.
@@ -515,8 +530,33 @@ class WPSSTM_Core_Tracks{
         return $where;
     }
     
+    function track_query_where_subtrack_author($where,$query){
+        if ( !$this->is_subtracks_query($query) ) return $where;
+        if ( !$subtrack_author = $query->get('subtrack_author') ) return $where;
+
+        $where.= sprintf(" AND subtracks.subtrack_author = %s",$subtrack_author);
+        
+        return $where;   
+    }
+    
+    /*
+    Get recents subtracks added in the 'now playing' tracklist
+    */
+    
+    function track_query_where_playing($where,$query){
+        if ( !$this->is_subtracks_query($query) ) return $where;
+        if ( !$query->get('subtrack_playing') ) return $where;
+        if ( !$nowplaying_id = wpsstm()->get_options('nowplaying_id') ) return $where;
+        
+        $seconds = wpsstm()->get_options('playing_timeout');
+
+        $where.= sprintf(" AND subtracks.tracklist_id = %s AND subtrack_time > DATE_SUB(NOW(), INTERVAL %s SECOND)",$nowplaying_id,$seconds);
+
+        return $where;   
+    }
+    
     function track_query_where_tracklist_id($where,$query){
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$tracklist_id = $query->get('tracklist_id') ) return $where;
         
         $where.= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
@@ -529,10 +569,10 @@ class WPSSTM_Core_Tracks{
     }
     
     function track_query_where_subtrack_id($where,$query){
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$subtrack_id = $query->get('subtrack_id') ) return $where;
         
-        $where.= sprintf(" AND subtracks.ID = %s",$subtrack_id);
+        $where.= sprintf(" AND subtracks.subtrack_id = %s",$subtrack_id);
         
         //so single template is shown, instead of search results
         //TOUFIX this is maybe quite hackish, should be improved ? eg. setting $query->is_singular = true crashes wordpress.
@@ -542,31 +582,30 @@ class WPSSTM_Core_Tracks{
     }
     
     function track_query_where_subtrack_in($where,$query){
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$ids_str = $query->get('subtrack__in') ) return $where;
         
         if ( is_array($ids_str) ){
             $ids_str = implode(',',$ids_str);
         }
         
-        $where .= sprintf(" AND subtracks.ID IN (%s)",$ids_str);
+        $where .= sprintf(" AND subtracks.subtrack_id IN (%s)",$ids_str);
 
         return $where;
     }
 
     function track_query_where_favorited($where,$query){
         
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
-
-        if ( !$query->get( 'loved_tracks' ) ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
+        if ( !$query->get( 'subtrack_favorites' ) ) return $where;
 
         //get all favorited tracklists
         $query_args = array(
-            'post_type' =>      wpsstm()->tracklist_post_types,
-            'posts_per_page' => -1,
-            'post_status' =>    array('publish','private','future','pending','draft'),
-            'fields' =>         'ids',
-            'tracklists-favorited-by' => true,
+            'post_type' =>                  wpsstm()->tracklist_post_types,
+            'posts_per_page' =>             -1,
+            'post_status' =>                array('publish','private','future','pending','draft'),
+            'fields' =>                     'ids',
+            'tracklists-favorited-by'=>     true,
         );
         $query = new WP_Query( $query_args );
         $ids = $query->posts;
@@ -579,12 +618,21 @@ class WPSSTM_Core_Tracks{
 
     function tracks_query_sort_by_subtrack_position($orderby_sql, $query){
 
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $orderby_sql;
-        if ( $query->get('orderby') != 'subtracks' ) return $orderby_sql;
+        if ( !$this->is_subtracks_query($query) ) return $orderby_sql;
+        if ( $query->get('orderby') != 'subtrack_position' ) return $orderby_sql;
 
-        if ( $query_orderby == 'track_order'){
-            $orderby_sql = 'subtracks.track_order ' . $query->get('order');
-        }
+        $orderby_sql = 'subtracks.subtrack_order ' . $query->get('order');
+
+        return $orderby_sql;
+
+    }    
+    
+    function tracks_query_sort_by_subtrack_time($orderby_sql, $query){
+
+        if ( !$this->is_subtracks_query($query) ) return $orderby_sql;
+        if ( $query->get('orderby') != 'subtrack_time' ) return $orderby_sql;
+        
+        $orderby_sql = 'subtracks.subtrack_time ' . $query->get('order');
         
         return $orderby_sql;
 
@@ -745,11 +793,14 @@ class WPSSTM_Core_Tracks{
     function add_query_vars_track( $qvars ) {
         $qvars[] = 'wpsstm_track_data';
         $qvars[] = 'tracklist_id';
-        $qvars[] = 'loved_tracks';
+        $qvars[] = 'subtrack_query';
+        $qvars[] = 'subtrack_playing';
+        $qvars[] = 'subtrack_author';
+        $qvars[] = 'subtrack_favorites';
         $qvars[] = 'subtrack_id';
         $qvars[] = 'subtrack__in';
         $qvars[] = 'subtrack_position';
-        $qvars[] = 'exclude_subtracks';
+        $qvars[] = 'subtrack_exclude';
         
         return $qvars;
     }
@@ -1071,6 +1122,7 @@ class WPSSTM_Core_Tracks{
             'timestamp'     => current_time('timestamp'),
             'error_code'    => null,
             'message'       => null,
+            'track'         => $wpsstm_track,
             'success'       => false,
         );
    
@@ -1096,6 +1148,37 @@ class WPSSTM_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result );
 
+    }
+    
+    function ajax_track_start(){
+
+        $ajax_data = wp_unslash($_POST);
+
+        $track = new WPSSTM_Track();
+        $track->from_array($ajax_data['track']);
+        
+        $result = array(
+            'input'         => $ajax_data,
+            'timestamp'     => current_time('timestamp'),
+            'error_code'    => null,
+            'message'       => null,
+            'track'         => $track,
+            'success'       => false,
+        );
+        
+        
+        $success = $track->insert_now_playing();
+        
+        if ( is_wp_error($success) ){
+            $result['error_code'] = $success->get_error_code();
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = $success;
+        }
+        
+        header('Content-type: application/json');
+        wp_send_json( $result );
+        
     }
     
     function ajax_track_toggle_favorite(){
@@ -1321,7 +1404,8 @@ class WPSSTM_Core_Tracks{
             'post_status' =>            'any',
             'posts_per_page'=>          -1,
             'fields' =>                 'ids',
-            'exclude_subtracks' =>      true,
+            'subtrack_query' =>         true,
+            'subtrack_exclude' =>       true,
         );
         
         $query = new WP_Query( $orphan_tracks_args );
@@ -1339,6 +1423,58 @@ class WPSSTM_Core_Tracks{
         $track = new WPSSTM_Track($post_id);
 
         return (string)$track; // = __toString()
+    }
+    
+    static function get_user_now_playing($user_id = null){
+        
+        if (!$user_id) $user_id = get_current_user_id();
+        if (!$user_id) return;
+        
+        if ( !$nowplaying_id = wpsstm()->get_options('nowplaying_id') ) return;
+
+        $track_args = array(
+            'posts_per_page'=>          1,
+            'post_type' =>              wpsstm()->post_type_track,
+            'subtrack_query' =>         true,
+            'subtrack_playing' =>       true,
+            'subtrack_author' =>        $user_id,
+            'orderby'=>                 'subtrack_time',
+            'order'=>                   'DESC',
+        );
+
+        $query = new WP_Query( $track_args );
+
+        $post = isset($query->posts[0]) ? $query->posts[0] : null;
+        if ( !$post ) return;
+        
+        $track = new WPSSTM_Track();
+        $track->populate_subtrack($post->subtrack_id);
+
+        return $track;
+    }
+    
+    static function get_last_user_favorite($user_id = null){
+
+        if ( !$love_id = WPSSTM_Core_User::get_user_favorites_id( $user_id ) ) return;
+
+        $track_args = array(
+            'post_type' =>              wpsstm()->post_type_track,
+            'posts_per_page'=>          1,
+            'subtrack_query' =>         true,
+            'tracklist_id' =>           $love_id,
+            'orderby'=>                 'subtrack_time',
+            'order'=>                   'DESC',
+        );
+
+        $query = new WP_Query( $track_args );
+
+        $post = isset($query->posts[0]) ? $query->posts[0] : null;
+        if ( !$post ) return;
+        
+        $track = new WPSSTM_Track();
+        $track->populate_subtrack($post->subtrack_id);
+
+        return $track;
     }
     
 }
