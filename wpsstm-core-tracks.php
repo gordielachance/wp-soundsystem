@@ -1407,7 +1407,34 @@ class WPSSTM_Core_Tracks{
 
         return (string)$track; // = __toString()
     }
+    
+    static function get_user_now_playing($user_id = null,$track_args = array()){
+        
+        if (!$user_id) $user_id = get_current_user_id();
+        if (!$user_id) return;
+        
+        if ( !$nowplaying_id = wpsstm()->get_options('nowplaying_id') ) return;
 
+        $default_track_args = array(
+            'posts_per_page'=>          1,
+        );
+        
+        $forced_track_args = array(
+            'post_type' =>              wpsstm()->post_type_track,
+            'subtrack_query' =>         true,
+            'subtrack_author' =>        $user_id,
+            'tracklist_id'=>            $nowplaying_id,
+            'orderby'=>                 'subtrack_time',
+            'order'=>                   'DESC',
+        );
+        
+        $track_args = wp_parse_args($track_args,$default_track_args);
+        $track_args = wp_parse_args($forced_track_args,$track_args);
+
+        $query = new WP_Query( $track_args );
+        return wpsstm_get_array_value(0,$query->posts);
+    }
+    
 }
 
 function wpsstm_tracks_init(){
