@@ -96,10 +96,21 @@ class WPSSTM_Settings {
         Importer
         */
 
-        //importer page ID
+        //page ID
         if ( isset ($input['importer_page_id']) && ctype_digit($input['importer_page_id']) ){
             if ( get_post_type($input['importer_page_id'] ) ){ //check page exists
                 $new_input['importer_page_id'] = $input['importer_page_id'];
+            }
+        }
+        
+        /*
+        Now Playing
+        */
+
+        //radio ID
+        if ( isset ($input['nowplaying_radio_id']) && ctype_digit($input['nowplaying_radio_id']) ){
+            if ( get_post_type($input['nowplaying_radio_id'] ) ){ //check page exists
+                $new_input['nowplaying_radio_id'] = $input['nowplaying_radio_id'];
             }
         }
 
@@ -204,6 +215,25 @@ class WPSSTM_Settings {
             array( $this, 'importer_page_callback' ), 
             'wpsstm-settings-page', 
             'tracklist_importer'
+        );
+        
+        /*
+        Now Playing radio
+        */
+
+        add_settings_section(
+            'now_playing_radio', // ID
+            __("'Now playing' radio",'wpsstm'), // Title
+            array( $this, 'now_playing_radio_desc' ), // Callback
+            'wpsstm-settings-page' // Page
+        );
+
+        add_settings_field(
+            'now_playing_radio_id', 
+            __('Radio ID','wpsstm'), 
+            array( $this, 'now_playing_radio_callback' ), 
+            'wpsstm-settings-page', 
+            'now_playing_radio'
         );
         
         /*
@@ -506,18 +536,11 @@ class WPSSTM_Settings {
     }
 
     function section_importer_page_desc(){
-        $desc[] = __('Page used as placeholder to import tracklists frontend.','wppstm');
-        
-        //wrap
-        $desc = array_map(
-           function ($el) {
-              return "<p>{$el}</p>";
-           },
-           $desc
-        );
-        
-        echo implode("\n",$desc);
-        
+        _e('Page used as placeholder to import tracklists frontend.','wppstm');
+    }
+    
+    function now_playing_radio_desc(){
+        _e('Page used as placeholder to display the tracks currently played by users.','wppstm');
     }
     
     function section_radios_desc(){
@@ -548,6 +571,24 @@ class WPSSTM_Settings {
             $page_title = get_the_title( $page_id );
             $edit_url = get_edit_post_link($page_id);
             $link_txt = sprintf(__('Edit page %s','wpsstm'),'<em>' . $page_title . '</em>');
+            printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
+        }
+        
+    }
+    
+    function now_playing_radio_callback(){
+        $page_id = wpsstm()->get_options('nowplaying_radio_id');
+
+        printf(
+            '<input type="number" name="%s[nowplaying_radio_id]" size="4" min="0" value="%s"/>',
+            wpsstm()->meta_name_options,
+            $page_id
+        );
+        
+        if ( get_post_type($page_id) ){
+            $page_title = get_the_title( $page_id );
+            $edit_url = get_edit_post_link($page_id);
+            $link_txt = sprintf(__('Edit radio %s','wpsstm'),'<em>' . $page_title . '</em>');
             printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
         }
         

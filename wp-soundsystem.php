@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '214';
+    public $db_version = '216';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -102,6 +102,7 @@ class WP_SoundSystem {
         $options_default = array(
             'player_enabled'                    => true,
             'importer_page_id'                  => null,
+            'nowplaying_radio_id'                => null,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'bot_user_id'                       => null,
             'autolink'                          => true,
@@ -256,6 +257,7 @@ class WP_SoundSystem {
             $this->setup_subtracks_table();
             $this->create_bot_user();
             $this->create_import_page();
+            $this->create_nowplaying_radio();
 
         }else{
 
@@ -402,8 +404,12 @@ class WP_SoundSystem {
             
             if ($current_version < 214){
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD author bigint(20) UNSIGNED NULL" );
+                
             }
-
+            
+            if ($current_version < 216){
+                $this->create_nowplaying_radio();
+            }
         }
         
         //update DB version
@@ -442,6 +448,21 @@ class WP_SoundSystem {
         self::debug_log($page_id,'created importer page');
         
         return $this->update_option( 'importer_page_id', $page_id );
+    }
+    
+    private function create_nowplaying_radio(){
+        $post_details = array(
+            'post_title' =>     __('Now playing','wpsstm'),
+            'post_status' =>    'publish',
+            'post_author' =>    get_current_user_id(),
+            'post_type' =>      wpsstm()->post_type_live_playlist
+        );
+        $page_id = wp_insert_post( $post_details );
+        if ( is_wp_error($page_id) ) return $page_id;
+        
+        self::debug_log($page_id,'created now playing page');
+        
+        return $this->update_option( 'nowplaying_radio_id', $page_id );
     }
     
     function setup_subtracks_table(){
