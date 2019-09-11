@@ -1178,7 +1178,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    private function get_static_subtracks($track_args = array()){
+    private function get_static_subtracksV0($track_args = array()){
         global $wpdb;
         
         /*
@@ -1214,13 +1214,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             if ( !in_array($row['track_id'],$filtered_post_ids) ) continue;
             
             $subtrack = new WPSSTM_Track(); //default
-            $subtrack->populate_subtrack($row['ID']);
+            $subtrack->populate_subtrack($row['subtrack_id']);
             $tracks[] = $subtrack;
         }
         return $tracks;
     }
     
-    private function get_static_subtracksV1($track_args = array()){
+    private function get_static_subtracks($track_args = array()){
         global $wpdb;
         
         //TOUFIX should be within pre_get_posts ?
@@ -1234,6 +1234,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $forced_track_args = array(
             'post_type' =>              wpsstm()->post_type_track,
             'subtrack_query' =>         true,
+            'fields' =>                 'subtrack=>track',
             'tracklist_id' =>           $this->post_id,
         );
         
@@ -1277,7 +1278,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $track_args = wp_parse_args($forced_track_args,$track_args);
         
         //subtracks table
-        $querystr = $wpdb->prepare( "SELECT ID,track_id FROM `$subtracks_table` WHERE tracklist_id = %d", $this->post_id );
+        $querystr = $wpdb->prepare( "SELECT subtrack_id,track_id FROM `$subtracks_table` WHERE tracklist_id = %d", $this->post_id );
 
         //sort subtracks
         $orderby = wpsstm_get_array_value('orderby',$track_args);
@@ -1301,7 +1302,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if( $results = $wpdb->get_results( $querystr) ){
             
             foreach($results as $entry){
-                $rows[$entry->ID] = $entry->track_id; //subtrack ID => track ID
+                $rows[$entry->subtrack_id] = $entry->track_id; //subtrack ID => track ID
             }
             
             $track_ids = array_values($rows);

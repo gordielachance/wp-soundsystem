@@ -478,8 +478,7 @@ class WPSSTM_Core_Tracks{
         if ( !$this->is_subtracks_query($query) ) return $join;
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        $join .= sprintf("LEFT JOIN %s AS subtracks ON subtracks.track_id = %s.ID",$subtracks_table,$wpdb->posts);
-
+        $join .= sprintf("INNER JOIN %s AS subtracks ON %s.ID = subtracks.track_id",$subtracks_table,$wpdb->posts);
         return $join;
     }
     
@@ -491,10 +490,12 @@ class WPSSTM_Core_Tracks{
         global $wpdb;
         
         if ( !$this->is_subtracks_query($query) ) return $fields;
+        if ( $query->get('fields') !== 'subtrack=>track' ) return $fields;
+
+        //TOUCHECK NOT WORKING URGENT return sprintf('%s.ID,%s.subtrack_id',$wpdb->posts,'subtracks');
 
         $fields = (array)$fields;
-        $fields[] = sprintf('%s.ID as subtrack_id','subtracks');
-        
+        $fields[] = sprintf('%s.subtrack_id','subtracks');
         return implode(', ',$fields);
 
     }

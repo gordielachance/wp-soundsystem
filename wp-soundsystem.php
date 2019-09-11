@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '216';
+    public $db_version = '220';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -248,7 +248,6 @@ class WP_SoundSystem {
     function upgrade(){
 
         global $wpdb;
-
         $current_version = get_option("_wpsstm-db_version");
         $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
 
@@ -407,6 +406,10 @@ class WP_SoundSystem {
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD author bigint(20) UNSIGNED NULL" );
                 $this->create_nowplaying_playlist();
             }
+            
+            if ($current_version < 220){
+                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
+            }
         }
         
         //update DB version
@@ -469,7 +472,7 @@ class WP_SoundSystem {
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE $subtracks_table (
-            ID bigint(20) NOT NULL AUTO_INCREMENT,
+            subtrack_id bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             track_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             tracklist_id bigint(20) UNSIGNED NOT NULL DEFAULT '0',
             from_tracklist bigint(20) UNSIGNED NULL,
@@ -563,7 +566,7 @@ class WP_SoundSystem {
             
             if ( is_wp_error( $valid ) ){
                 
-                $rowquerystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID = '%s'",$row->ID );
+                $rowquerystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE subtrack_id = '%s'",$row->ID );
                 $result = $wpdb->get_results ( $rowquerystr );
                 
             }else{
@@ -572,7 +575,7 @@ class WP_SoundSystem {
                 
                 if ( !is_wp_error($track_id) ){
                     
-                    $rowquerystr = $wpdb->prepare( "UPDATE `$subtracks_table` SET track_id = '%s' WHERE ID = '%s'",$track_id, $row->ID );
+                    $rowquerystr = $wpdb->prepare( "UPDATE `$subtracks_table` SET track_id = '%s' WHERE subtrack_id = '%s'",$track_id, $row->ID );
                     $result = $wpdb->get_results ( $rowquerystr );
 
                 }

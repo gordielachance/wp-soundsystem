@@ -77,7 +77,7 @@ class WPSSTM_Track{
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
-        $query = $wpdb->prepare("SELECT * FROM `$subtracks_table` WHERE ID = %s",$subtrack_id);
+        $query = $wpdb->prepare("SELECT * FROM `$subtracks_table` WHERE subtrack_id = %s",$subtrack_id);
         $subtrack = $wpdb->get_row($query);
         if (!$subtrack) return new WP_Error( 'wpsstm_invalid_subtrack_entry', __("This is not a valid subtrack entry.",'wpsstm') );
 
@@ -92,7 +92,7 @@ class WPSSTM_Track{
         }
 
         //subtrack-specific
-        $this->subtrack_id =        $subtrack->ID;
+        $this->subtrack_id =        $subtrack->subtrack_id;
         $this->subtrack_time =      $subtrack->time;
         $this->subtrack_author =    $subtrack->author;
         $this->from_tracklist =     $subtrack->tracklist_id;
@@ -224,7 +224,7 @@ class WPSSTM_Track{
         
         // !!! using wpb->prepare fucks up here, it wraps our IDs string with quotes and then the query fails.
         //$querystr = $wpdb->prepare( "SELECT `tracklist_id` FROM `$subtracks_table` WHERE `ID` IN (%s)",$subtracks_ids_str );
-        $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `ID` IN (%s)",$subtracks_ids_str );
+        $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `subtrack_id` IN (%s)",$subtracks_ids_str );
         
         $tracklist_ids = $wpdb->get_col($querystr);
         
@@ -531,7 +531,7 @@ class WPSSTM_Track{
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
-        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE ID = '%s'", $this->subtrack_id );
+        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE subtrack_id = '%s'", $this->subtrack_id );
         $result = $wpdb->get_results ( $querystr );
 
         //update tracks range
@@ -557,7 +557,7 @@ class WPSSTM_Track{
         //check we have enough informations on this track
         if ( $this->validate_track() !== true) return false;
 
-        $querystr = $wpdb->prepare( "SELECT ID FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
+        $querystr = $wpdb->prepare( "SELECT subtrack_id FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
         
         if($tracklist_id){
             $querystr.= $wpdb->prepare( " AND tracklist_id = %d",$tracklist_id);
