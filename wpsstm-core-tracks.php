@@ -1425,18 +1425,15 @@ class WPSSTM_Core_Tracks{
         return (string)$track; // = __toString()
     }
     
-    static function get_user_now_playing($user_id = null,$track_args = array()){
+    static function get_user_now_playing($user_id = null){
         
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
         
         if ( !$nowplaying_id = wpsstm()->get_options('nowplaying_id') ) return;
 
-        $default_track_args = array(
+        $track_args = array(
             'posts_per_page'=>          1,
-        );
-        
-        $forced_track_args = array(
             'post_type' =>              wpsstm()->post_type_track,
             'subtrack_query' =>         true,
             'subtrack_playing' =>       true,
@@ -1444,9 +1441,30 @@ class WPSSTM_Core_Tracks{
             'orderby'=>                 'subtrack_time',
             'order'=>                   'DESC',
         );
+
+        $query = new WP_Query( $track_args );
+
+        $post = isset($query->posts[0]) ? $query->posts[0] : null;
+        if ( !$post ) return;
         
-        $track_args = wp_parse_args($track_args,$default_track_args);
-        $track_args = wp_parse_args($forced_track_args,$track_args);
+        $track = new WPSSTM_Track();
+        $track->populate_subtrack($post->subtrack_id);
+
+        return $track;
+    }
+    
+    static function get_last_user_favorite($user_id = null){
+
+        if ( !$love_id = WPSSTM_Core_User::get_user_favorites_id( $user_id ) ) return;
+
+        $track_args = array(
+            'post_type' =>              wpsstm()->post_type_track,
+            'posts_per_page'=>          1,
+            'subtrack_query' =>         true,
+            'tracklist_id' =>           $love_id,
+            'orderby'=>                 'subtrack_time',
+            'order'=>                   'DESC',
+        );
 
         $query = new WP_Query( $track_args );
 
