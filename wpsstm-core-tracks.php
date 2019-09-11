@@ -71,6 +71,9 @@ class WPSSTM_Core_Tracks{
 
         add_action('wp_ajax_wpsstm_track_autolink', array($this,'ajax_track_autolink'));
         add_action('wp_ajax_nopriv_wpsstm_track_autolink', array($this,'ajax_track_autolink'));
+        
+        add_action('wp_ajax_wpsstm_track_start', array($this,'ajax_track_start'));
+        add_action('wp_ajax_nopriv_wpsstm_track_start', array($this,'ajax_track_start'));
 
         add_action('wp_ajax_nopriv_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
         add_action('wp_ajax_wpsstm_update_subtrack_position', array($this,'ajax_update_subtrack_position'));
@@ -1071,6 +1074,7 @@ class WPSSTM_Core_Tracks{
             'timestamp'     => current_time('timestamp'),
             'error_code'    => null,
             'message'       => null,
+            'track'         => $wpsstm_track,
             'success'       => false,
         );
    
@@ -1096,6 +1100,37 @@ class WPSSTM_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result );
 
+    }
+    
+    function ajax_track_start(){
+
+        $ajax_data = wp_unslash($_POST);
+
+        $track = new WPSSTM_Track();
+        $track->from_array($ajax_data['track']);
+        
+        $result = array(
+            'input'         => $ajax_data,
+            'timestamp'     => current_time('timestamp'),
+            'error_code'    => null,
+            'message'       => null,
+            'track'         => $track,
+            'success'       => false,
+        );
+        
+        
+        $success = $track->insert_now_playing();
+        
+        if ( is_wp_error($success) ){
+            $result['error_code'] = $success->get_error_code();
+            $result['message'] = $success->get_error_message();
+        }else{
+            $result['success'] = $success;
+        }
+        
+        header('Content-type: application/json');
+        wp_send_json( $result );
+        
     }
     
     function ajax_track_toggle_favorite(){

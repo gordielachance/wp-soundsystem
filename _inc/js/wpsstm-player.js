@@ -511,4 +511,19 @@ class WpsstmPlayer extends HTMLElement{
 
 }
 
+$(document).on( "wpsstmSourceInit", function( event, link ) {
+
+    var track =                 link.closest('wpsstm-track');
+    var scrobble_icon =         $(track.player).find('.wpsstm-player-action-scrobbler');
+    var scrobbler_enabled =     scrobble_icon.hasClass('active');
+
+    var startTrack = function(){
+        $(document).trigger('wpsstmTrackStart',track);
+    }
+
+    //start track event, fired only once
+    $(track.player.current_media).one('play', startTrack);
+
+});
+
 window.customElements.define('wpsstm-player', WpsstmPlayer);

@@ -257,7 +257,7 @@ class WP_SoundSystem {
             $this->setup_subtracks_table();
             $this->create_bot_user();
             $this->create_import_page();
-            $this->create_nowplaying_radio();
+            $this->create_nowplaying_playlist();
 
         }else{
 
@@ -402,13 +402,9 @@ class WP_SoundSystem {
                 self::batch_delete_unused_music_terms();
             }
             
-            if ($current_version < 214){
-                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD author bigint(20) UNSIGNED NULL" );
-                
-            }
-            
             if ($current_version < 216){
-                $this->create_nowplaying_radio();
+                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD author bigint(20) UNSIGNED NULL" );
+                $this->create_nowplaying_playlist();
             }
         }
         
@@ -450,12 +446,12 @@ class WP_SoundSystem {
         return $this->update_option( 'importer_page_id', $page_id );
     }
     
-    private function create_nowplaying_radio(){
+    private function create_nowplaying_playlist(){
         $post_details = array(
             'post_title' =>     __('Now playing','wpsstm'),
             'post_status' =>    'publish',
-            'post_author' =>    get_current_user_id(),
-            'post_type' =>      wpsstm()->post_type_live_playlist
+            'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
+            'post_type' =>      wpsstm()->post_type_playlist
         );
         $page_id = wp_insert_post( $post_details );
         if ( is_wp_error($page_id) ) return $page_id;

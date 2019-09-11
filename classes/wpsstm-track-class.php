@@ -1274,4 +1274,16 @@ class WPSSTM_Track{
         return $title;
     }
     
+    function insert_now_playing(){
+        $nowplaying_id = wpsstm()->get_options('nowplaying_radio_id');
+        if (!$nowplaying_id) return new WP_Error('missing_nowplaying_radio_id','Missing Now Playing Radio ID');
+        
+        $now_track = clone $this;
+        $now_track->subtrack_id = null; //reset subtrack
+        $now_track->subtrack_author = get_current_user_id();
+        
+        $tracklist = new WPSSTM_Post_Tracklist($nowplaying_id);
+        return $tracklist->insert_subtrack($now_track);
+    }
+    
 }
