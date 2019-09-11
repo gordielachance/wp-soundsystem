@@ -1431,7 +1431,18 @@ class WPSSTM_Core_Tracks{
         $track_args = wp_parse_args($forced_track_args,$track_args);
 
         $query = new WP_Query( $track_args );
-        return wpsstm_get_array_value(0,$query->posts);
+        $post = isset($query->posts[0]) ? $query->posts[0] : null;
+        if ( !$post ) return;
+        
+        $track = new WPSSTM_Track();
+
+        if($post->subtrack_id){
+            $track->populate_subtrack($post->subtrack_id);
+        }elseif($post->ID){
+            $track->populate_track_post($post->ID);
+        }
+
+        return $track;
     }
     
 }
