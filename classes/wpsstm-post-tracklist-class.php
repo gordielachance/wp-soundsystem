@@ -689,7 +689,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //get static subtracks
         $tracks = $this->get_static_subtracks();
-
         if ( is_wp_error($tracks) ) return $tracks;
 
         $this->add_tracks($tracks);
@@ -1181,15 +1180,60 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     private function get_static_subtracks($track_args = array()){
         global $wpdb;
-
+        
+        /*
+        get subtracks from custom table
+        */
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $querystr = $wpdb->prepare( "SELECT * FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY track_order ASC", $this->post_id );
+        $rows = $wpdb->get_results( $querystr, ARRAY_A);
+        $post_ids = array_column($rows, 'track_id');
+        if (!$post_ids) $post_ids = array(0); //https://core.trac.wordpress.org/ticket/28099
+        
+        /*
+        run a tracks query to get an array of allowed track IDs (would exclude trashed tracks, etc.)
+        */
+        
         $default_track_args = array(
             'posts_per_page'=>          -1,
-            'orderby'=>                 'subtrack_position',
         );
         
         $forced_track_args = array(
             'post_type' =>              wpsstm()->post_type_track,
-            'fields' =>                 'id=>subtrack_id',
+            'fields' =>                 'ids',
+            'post__in' =>               $post_ids,
+        );
+        
+        $track_args = wp_parse_args($track_args,$default_track_args);
+        $track_args = wp_parse_args($forced_track_args,$track_args);
+        $query = new WP_Query( $track_args );
+        $filtered_post_ids = $query->posts;
+        $tracks = array();
+        foreach($rows as $row){
+            
+            if ( !in_array($row['track_id'],$filtered_post_ids) ) continue;
+            
+            $subtrack = new WPSSTM_Track(); //default
+            $subtrack->populate_subtrack($row['ID']);
+            $tracks[] = $subtrack;
+        }
+        return $tracks;
+    }
+    
+    private function get_static_subtracksV1($track_args = array()){
+        global $wpdb;
+        
+        //TOUFIX should be within pre_get_posts ?
+
+        $default_track_args = array(
+            'posts_per_page'=>          -1,
+            'orderby'=>                 'subtrack_position',
+            'order'=>                   'ASC',
+        );
+        
+        $forced_track_args = array(
+            'post_type' =>              wpsstm()->post_type_track,
+            'subtrack_query' =>         true,
             'tracklist_id' =>           $this->post_id,
         );
         
@@ -1204,6 +1248,77 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         foreach($subtracks as $track){
             $subtrack = new WPSSTM_Track(); //default
             $subtrack->populate_subtrack($track->subtrack_id);
+            $tracks[] = $subtrack;
+        }
+        
+        return $tracks;
+    }
+    
+    private function get_static_subtracksV2($track_args = array()){
+        global $wpdb;
+        
+        $tracks = array();
+        $track_ids = array();
+        $rows = array();
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+
+        $default_track_args = array(
+            'posts_per_page'=>          -1,
+            'orderby'=>                 'subtrack_position',
+            'order'=>                   'ASC',
+        );
+        
+        $forced_track_args = array(
+            'post_type' =>              wpsstm()->post_type_track,
+            'fields' =>                 'ids',
+        );
+        
+        $track_args = wp_parse_args($track_args,$default_track_args);
+        $track_args = wp_parse_args($forced_track_args,$track_args);
+        
+        //subtracks table
+        $querystr = $wpdb->prepare( "SELECT ID,track_id FROM `$subtracks_table` WHERE tracklist_id = %d", $this->post_id );
+
+        //sort subtracks
+        $orderby = wpsstm_get_array_value('orderby',$track_args);
+        $order = wpsstm_get_array_value('order',$track_args);
+        
+        $subtrack_order_keys = array('subtrack_position','subtrack_time');
+        
+        if( $orderby && in_array($orderby,$subtrack_order_keys) ){
+            
+            //reset for track args
+            $track_args['orderby'] = 'post__in';
+            unset($track_args['order']);
+            
+            $querystr .= $wpdb->prepare( " ORDER BY %s", $orderby );
+        
+            if( $order ) 
+                $querystr .= $wpdb->prepare( " %s", $order );
+            
+        }
+
+        if( $results = $wpdb->get_results( $querystr) ){
+            
+            foreach($results as $entry){
+                $rows[$entry->ID] = $entry->track_id; //subtrack ID => track ID
+            }
+            
+            $track_ids = array_values($rows);
+        }else{
+            $track_ids = (array)0;
+        }
+        
+        $track_args['post__in'] = $track_ids;
+
+        //filter so we're sure not to get private posts etc etc 
+        $query = new WP_Query( $track_args );
+        $track_ids = $query->posts;
+
+        foreach($track_ids as $id){
+            $subtrack_id = array_search ($id, $rows);
+            $subtrack = new WPSSTM_Track(); //default
+            $subtrack->populate_subtrack($subtrack_id);
             $tracks[] = $subtrack;
         }
         

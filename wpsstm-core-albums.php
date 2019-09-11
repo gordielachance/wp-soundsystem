@@ -62,7 +62,7 @@ class WPSSTM_Core_Albums{
         $after = array();
         
         if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-            if ( !$wp_query->get('exclude_subtracks') ){
+            if ( !$wp_query->get('subtrack_exclude') ){
                 $after['album'] = __('Album','wpsstm');
             }
         }

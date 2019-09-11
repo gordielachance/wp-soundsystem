@@ -51,9 +51,7 @@ class WPSSTM_Core_Tracks{
         /* manager */
         add_action( 'wp', array($this,'handle_manager_action'), 8);
         add_filter( 'template_include', array($this,'manager_template'));
-        
-        //TO FIX add filters to exclude tracks if 'exclude_subtracks' query var is set
-        
+
         add_filter( 'posts_join', array($this,'tracks_query_left_join_subtracks'), 10, 2 );
         add_filter( 'posts_fields', array($this,'tracks_query_subtrack_ids'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_exclude_subtracks'), 10, 2 );
@@ -451,9 +449,9 @@ class WPSSTM_Core_Tracks{
 
         $screen =                   get_current_screen();
         $post_type =                $screen->post_type;
-        $subtracks_exclude =        get_query_var('exclude_subtracks');
+        $subtracks_exclude =        get_query_var('subtrack_exclude');
         
-        $link = add_query_arg( array('post_type'=>$post_type,'exclude_subtracks'=>true),admin_url('edit.php') );
+        $link = add_query_arg( array('post_type'=>$post_type,'subtrack_exclude'=>true),admin_url('edit.php') );
         $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
         
         $attr = array(
@@ -471,16 +469,8 @@ class WPSSTM_Core_Tracks{
     
     private function is_subtracks_query($query){
         
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return false;
-        
-        $subtracks_exclude_query =      $query->get('exclude_subtracks');
-        $subtrack_id_query =            $query->get('subtrack_id');
-        $subtrack_in_query =            $query->get('subtrack__in');
-        $subtrack_position_query =      $query->get('subtrack_position');
-        $tracklist_id_query =           $query->get('tracklist_id');
-        $sort_subtracks =               ( ($query->get('orderby') == 'subtrack_position') || ($query->get('orderby') == 'subtrack_time') );
+        return ( ( $query->get('post_type') == wpsstm()->post_type_track ) && $query->get('subtrack_query') );
 
-        return ( $subtracks_exclude_query || $subtrack_id_query || $subtrack_in_query || $subtrack_position_query || $sort_subtracks || $tracklist_id_query  );
     }
 
     function tracks_query_left_join_subtracks($join,$query){
@@ -492,27 +482,30 @@ class WPSSTM_Core_Tracks{
 
         return $join;
     }
+    
+    /*
+    Include the subtrack_id when fetching subtracks
+    */
 
     function tracks_query_subtrack_ids($fields,$query) {
         global $wpdb;
         
         if ( !$this->is_subtracks_query($query) ) return $fields;
-        if ($query->get('fields') !== 'id=>subtrack_id' ) return $fields;
 
-        //TOUFIX URGENT should be this below, but fucks up our queries
-        //return sprintf('%s.ID, %s.ID as subtrack_id',$wpdb->posts,'subtracks'); // etc
+        $fields = (array)$fields;
+        $fields[] = sprintf('%s.ID as subtrack_id','subtracks');
         
-        return $fields . sprintf(', %s.ID as subtrack_id','subtracks'); // etc
+        return implode(', ',$fields);
 
     }
     
     function track_query_exclude_subtracks($where,$query){
         global $wpdb;
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
         
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        $no_subtracks = $query->get('exclude_subtracks');
+        $no_subtracks = $query->get('subtrack_exclude');
         
         if ($no_subtracks){
             $where .= sprintf(" AND subtracks.track_id IS NULL");
@@ -522,7 +515,7 @@ class WPSSTM_Core_Tracks{
     }
 
     function track_query_where_subtrack_position($where,$query){
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$subtrack_position = $query->get('subtrack_position') ) return $where;
         if ( !$tracklist_id = $query->get('tracklist_id') ) return $where;
 
@@ -536,7 +529,7 @@ class WPSSTM_Core_Tracks{
     }
     
     function track_query_where_tracklist_id($where,$query){
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$tracklist_id = $query->get('tracklist_id') ) return $where;
         
         $where.= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
@@ -549,7 +542,7 @@ class WPSSTM_Core_Tracks{
     }
     
     function track_query_where_subtrack_id($where,$query){
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$subtrack_id = $query->get('subtrack_id') ) return $where;
         
         $where.= sprintf(" AND subtracks.ID = %s",$subtrack_id);
@@ -562,7 +555,7 @@ class WPSSTM_Core_Tracks{
     }
     
     function track_query_where_subtrack_in($where,$query){
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$ids_str = $query->get('subtrack__in') ) return $where;
         
         if ( is_array($ids_str) ){
@@ -576,17 +569,16 @@ class WPSSTM_Core_Tracks{
 
     function track_query_where_favorited($where,$query){
         
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $where;
-
-        if ( !$query->get( 'loved_tracks' ) ) return $where;
+        if ( !$this->is_subtracks_query($query) ) return $where;
+        if ( !$query->get( 'subtrack_favorites' ) ) return $where;
 
         //get all favorited tracklists
         $query_args = array(
-            'post_type' =>      wpsstm()->tracklist_post_types,
-            'posts_per_page' => -1,
-            'post_status' =>    array('publish','private','future','pending','draft'),
-            'fields' =>         'ids',
-            'tracklists-favorited-by' => true,
+            'post_type' =>                  wpsstm()->tracklist_post_types,
+            'posts_per_page' =>             -1,
+            'post_status' =>                array('publish','private','future','pending','draft'),
+            'fields' =>                     'ids',
+            'tracklists-favorited-by'=>     true,
         );
         $query = new WP_Query( $query_args );
         $ids = $query->posts;
@@ -599,7 +591,7 @@ class WPSSTM_Core_Tracks{
 
     function tracks_query_sort_by_subtrack_position($orderby_sql, $query){
 
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $orderby_sql;
+        if ( !$this->is_subtracks_query($query) ) return $orderby_sql;
         if ( $query->get('orderby') != 'subtrack_position' ) return $orderby_sql;
 
         $orderby_sql = 'subtracks.track_order ' . $query->get('order');
@@ -610,7 +602,7 @@ class WPSSTM_Core_Tracks{
     
     function tracks_query_sort_by_subtrack_time($orderby_sql, $query){
 
-        if ( $query->get('post_type') != wpsstm()->post_type_track ) return $orderby_sql;
+        if ( !$this->is_subtracks_query($query) ) return $orderby_sql;
         if ( $query->get('orderby') != 'subtrack_time' ) return $orderby_sql;
         
         $orderby_sql = 'subtracks.time ' . $query->get('order');
@@ -774,11 +766,12 @@ class WPSSTM_Core_Tracks{
     function add_query_vars_track( $qvars ) {
         $qvars[] = 'wpsstm_track_data';
         $qvars[] = 'tracklist_id';
-        $qvars[] = 'loved_tracks';
+        $qvars[] = 'subtrack_query';
+        $qvars[] = 'subtrack_favorites';
         $qvars[] = 'subtrack_id';
         $qvars[] = 'subtrack__in';
         $qvars[] = 'subtrack_position';
-        $qvars[] = 'exclude_subtracks';
+        $qvars[] = 'subtrack_exclude';
         
         return $qvars;
     }
@@ -1382,7 +1375,8 @@ class WPSSTM_Core_Tracks{
             'post_status' =>            'any',
             'posts_per_page'=>          -1,
             'fields' =>                 'ids',
-            'exclude_subtracks' =>      true,
+            'subtrack_query' =>         true,
+            'subtrack_exclude' =>       true,
         );
         
         $query = new WP_Query( $orphan_tracks_args );
