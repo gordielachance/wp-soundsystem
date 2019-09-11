@@ -1274,9 +1274,30 @@ class WPSSTM_Track{
         return $title;
     }
     
+    private function clear_now_playing(){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        $nowplaying_id = wpsstm()->get_options('nowplaying_radio_id');
+        if (!$nowplaying_id) return new WP_Error('missing_nowplaying_radio_id','Missing Now Playing Radio ID');
+        
+        if ( !$delay = wpsstm()->get_options('nowplaying_radio_delay') ) return false;
+        
+        $now = current_time('timestamp');
+        $limit = $now - $delay;
+        $limit_datetime = date("Y-m-d H:i:s", $limit);
+        
+        $query = $wpdb->prepare(" DELETE FROM `$subtracks_table` WHERE tracklist_id = %s AND time < %s",$nowplaying_id,$limit_datetime);
+        //WP_SoundSystem::debug_log($query,"clear now playing");
+        return $wpdb->query($query);
+
+    }
+    
     function insert_now_playing(){
         $nowplaying_id = wpsstm()->get_options('nowplaying_radio_id');
         if (!$nowplaying_id) return new WP_Error('missing_nowplaying_radio_id','Missing Now Playing Radio ID');
+        
+        $clear = $this->clear_now_playing();
         
         $now_track = clone $this;
         $now_track->subtrack_id = null; //reset subtrack
