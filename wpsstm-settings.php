@@ -113,6 +113,11 @@ class WPSSTM_Settings {
                 $new_input['nowplaying_radio_id'] = $input['nowplaying_radio_id'];
             }
         }
+        
+        //delay
+        if ( isset ($input['nowplaying_radio_delay']) && ctype_digit($input['nowplaying_radio_delay']) ){
+            $new_input['nowplaying_radio_delay'] = $input['nowplaying_radio_delay'];
+        }
 
         /*
         WPSSTM API
@@ -232,6 +237,14 @@ class WPSSTM_Settings {
             'now_playing_radio_id', 
             __('Radio ID','wpsstm'), 
             array( $this, 'now_playing_radio_callback' ), 
+            'wpsstm-settings-page', 
+            'now_playing_radio'
+        );
+        
+        add_settings_field(
+            'now_playing_radio_delay', 
+            __('Delay','wpsstm'), 
+            array( $this, 'now_playing_delay_callback' ), 
             'wpsstm-settings-page', 
             'now_playing_radio'
         );
@@ -591,6 +604,18 @@ class WPSSTM_Settings {
             $link_txt = sprintf(__('Edit radio %s','wpsstm'),'<em>' . $page_title . '</em>');
             printf('  <a href="%s">%s</a>',$edit_url,$link_txt);
         }
+        
+    }
+    
+    function now_playing_delay_callback(){
+        $delay = wpsstm()->get_options('nowplaying_radio_delay');
+        
+        printf(
+            '<input type="number" name="%s[nowplaying_radio_delay]" value="%s"/>',
+            wpsstm()->meta_name_options,
+            $delay
+        );
+        _e('Seconds holding history','wpsstm');
         
     }
     

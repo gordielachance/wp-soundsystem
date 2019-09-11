@@ -102,7 +102,8 @@ class WP_SoundSystem {
         $options_default = array(
             'player_enabled'                    => true,
             'importer_page_id'                  => null,
-            'nowplaying_radio_id'                => null,
+            'nowplaying_radio_id'               => null,
+            'nowplaying_radio_delay'            => 1 * DAY_IN_SECONDS,
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
             'bot_user_id'                       => null,
             'autolink'                          => true,
