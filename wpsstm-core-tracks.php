@@ -59,6 +59,7 @@ class WPSSTM_Core_Tracks{
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_id'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_in'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_subtrack_position'), 10, 2 );
+        add_filter( 'posts_where', array($this,'track_query_where_subtrack_author'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_favorited'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_position'), 10, 2 );
         add_filter( 'posts_orderby', array($this,'tracks_query_sort_by_subtrack_time'), 10, 2 );
@@ -529,6 +530,15 @@ class WPSSTM_Core_Tracks{
         return $where;
     }
     
+    function track_query_where_subtrack_author($where,$query){
+        if ( !$this->is_subtracks_query($query) ) return $where;
+        if ( !$subtrack_author = $query->get('subtrack_author') ) return $where;
+
+        $where.= sprintf(" AND subtracks.author = %s",$subtrack_author);
+        
+        return $where;   
+    }
+    
     function track_query_where_tracklist_id($where,$query){
         if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$tracklist_id = $query->get('tracklist_id') ) return $where;
@@ -768,6 +778,7 @@ class WPSSTM_Core_Tracks{
         $qvars[] = 'wpsstm_track_data';
         $qvars[] = 'tracklist_id';
         $qvars[] = 'subtrack_query';
+        $qvars[] = 'subtrack_author';
         $qvars[] = 'subtrack_favorites';
         $qvars[] = 'subtrack_id';
         $qvars[] = 'subtrack__in';
@@ -1396,7 +1407,7 @@ class WPSSTM_Core_Tracks{
 
         return (string)$track; // = __toString()
     }
-    
+
 }
 
 function wpsstm_tracks_init(){
