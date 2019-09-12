@@ -52,7 +52,8 @@ class WPSSTM_Core_Tracks{
         add_action( 'wp', array($this,'handle_manager_action'), 8);
         add_filter( 'template_include', array($this,'manager_template'));
 
-        add_filter( 'posts_join', array($this,'tracks_query_left_join_subtracks'), 10, 2 );
+        add_filter( 'posts_join', array($this,'include_subtracks_query_join'), 10, 2 );
+        add_filter( 'posts_join', array($this,'exclude_subtracks_query_join'), 10, 2 );
         add_filter( 'posts_fields', array($this,'tracks_query_subtrack_ids'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_exclude_subtracks'), 10, 2 );
         add_filter( 'posts_where', array($this,'track_query_where_tracklist_id'), 10, 2 );
@@ -452,7 +453,7 @@ class WPSSTM_Core_Tracks{
         $screen =                   get_current_screen();
         $post_type =                $screen->post_type;
         $subtracks_exclude =        get_query_var('subtrack_exclude');
-        
+
         $link = add_query_arg( array('post_type'=>$post_type,'subtrack_exclude'=>true),admin_url('edit.php') );
         $count = count(WPSSTM_Core_Tracks::get_orphan_track_ids());
         
@@ -460,7 +461,7 @@ class WPSSTM_Core_Tracks{
             'href' =>   $link,
         );
         
-        if ($subtracks_exclude === true){
+        if ($subtracks_exclude){
             $attr['class'] = 'current';
         }
 
@@ -475,12 +476,21 @@ class WPSSTM_Core_Tracks{
 
     }
 
-    function tracks_query_left_join_subtracks($join,$query){
+    function include_subtracks_query_join($join,$query){
         global $wpdb;
         if ( !$this->is_subtracks_query($query) ) return $join;
-        
+
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         $join .= sprintf("INNER JOIN %s AS subtracks ON %s.ID = subtracks.track_id",$subtracks_table,$wpdb->posts);
+        return $join;
+    }
+    
+    function exclude_subtracks_query_join($join,$query){
+        global $wpdb;
+        if ( !$query->get('subtrack_exclude') ) return $join;
+
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $join .= sprintf("LEFT JOIN %s AS subtracks ON %s.ID = subtracks.track_id",$subtracks_table,$wpdb->posts); //so we can rely on subtracks.subtrack_id = null
         return $join;
     }
     
@@ -493,6 +503,8 @@ class WPSSTM_Core_Tracks{
         
         if ( !$this->is_subtracks_query($query) ) return $fields;
 
+        if ( $query->get('fields') === 'ids' ) return $fields;//when requesting ids, we don't want several fields returned.
+
         //TOUCHECK SHOULD BE THIS? BUT NOT WORKING URGENT return sprintf('%s.ID,%s.subtrack_id',$wpdb->posts,'subtracks');
 
         $fields = (array)$fields;
@@ -503,16 +515,10 @@ class WPSSTM_Core_Tracks{
     
     function track_query_exclude_subtracks($where,$query){
         global $wpdb;
-        if ( !$this->is_subtracks_query($query) ) return $where;
-        
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        $no_subtracks = $query->get('subtrack_exclude');
-        
-        if ($no_subtracks){
-            $where .= sprintf(" AND subtracks.track_id IS NULL");
-        }
 
+        if ( !$query->get('subtrack_exclude') ) return $where;
+        
+        $where .= sprintf(" AND subtracks.track_id IS NULL");
         return $where;
     }
 
@@ -1404,7 +1410,6 @@ class WPSSTM_Core_Tracks{
             'post_status' =>            'any',
             'posts_per_page'=>          -1,
             'fields' =>                 'ids',
-            'subtrack_query' =>         true,
             'subtrack_exclude' =>       true,
         );
         
