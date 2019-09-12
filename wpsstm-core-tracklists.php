@@ -223,20 +223,20 @@ class WPSSTM_Core_Tracklists{
         //sort
         $option = $wpsstm_tracklist->get_options('order');
 
-        $input_desc = sprintf(
-            '<input type="radio" name="%s[order]" value="DESC" %s /><label>%s</label>',
-            'wpsstm_tracklist_options',
-            checked($option,'DESC', false),
-            'DESC'
-        );
         $input_asc = sprintf(
             '<input type="radio" name="%s[order]" value="ASC" %s /><label>%s</label>',
             'wpsstm_tracklist_options',
             checked($option,'ASC', false),
             'ASC'
         );
+        $input_desc = sprintf(
+            '<input type="radio" name="%s[order]" value="DESC" %s /><label>%s</label>',
+            'wpsstm_tracklist_options',
+            checked($option,'DESC', false),
+            'DESC'
+        );
 
-        printf('<p><strong>%s</strong></br>%s</p>',__('Sort','wpsstm'),$input_desc . ' ' . $input_asc);
+        printf('<p><strong>%s</strong></br>%s</p>',__('Sort','wpsstm'),$input_asc . ' ' . $input_desc);
 
         if ($wpsstm_tracklist->tracklist_type === 'live' ) {
 
