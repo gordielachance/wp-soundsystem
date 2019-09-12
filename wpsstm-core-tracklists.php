@@ -22,8 +22,7 @@ class WPSSTM_Core_Tracklists{
         add_action( 'wpsstm_init_rewrite', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
         add_filter( 'upload_mimes', array($this,'enable_xspf_uploads') );
-        
-        
+
         add_action( 'wp', array($this,'handle_tracklist_action'), 8);
         
         add_filter( 'template_include', array($this,'single_tracklist_template') );
@@ -78,6 +77,9 @@ class WPSSTM_Core_Tracklists{
         */
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
         add_action( 'save_post', array($this,'metabox_save_tracklist_options') );
+        
+        //sitewide favorites
+        add_filter( 'wpsstm_get_subtracks', array($this, 'get_sitewide_favorites'),10,2 );
 
     }
 
@@ -401,7 +403,6 @@ class WPSSTM_Core_Tracklists{
     }
 
     function content_append_tracklist_html($content){
-        global $post;
         global $wpsstm_tracklist;
 
         if( !is_singular(wpsstm()->tracklist_post_types) ) return $content;
@@ -630,34 +631,6 @@ class WPSSTM_Core_Tracklists{
 
         return $template;
     }
-    
-    /*
-    Get the IDs of all the "favorite" tracklists for every user
-    For a single user, use get_user_option( WPSSTM_Core_User::$favorites_tracklist_usermeta_key, $user_id )
-    */
-    
-    static function get_favorite_tracks_tracklist_ids(){
-        global $wpdb;
-        //get all subtracks metas
-        $querystr = $wpdb->prepare( "SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = '%s'", 'wp_' . WPSSTM_Core_User::$favorites_tracklist_usermeta_key );
-
-        $ids = $wpdb->get_col( $querystr);
-        return $ids;
-    }
-    
-    static function get_favorited_tracklist_ids($user_id = null){
-        global $wpdb;
-        //get all subtracks metas
-        $querystr = $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '%s'", WPSSTM_Core_User::$loved_tracklist_meta_key );
-
-        if ($user_id){
-            $querystr .= $wpdb->prepare( " AND meta_value = '%s'", $user_id );
-        }
-
-        $ids = $wpdb->get_col( $querystr);
-        return $ids;
-        
-    }
 
     function pre_get_posts_loved_tracklists( $query ) {
 
@@ -665,7 +638,7 @@ class WPSSTM_Core_Tracklists{
             
         if($user_id === true) $user_id = null; //no specific user ID set, get every favorited tracklists
         
-        if ( $ids = self::get_favorited_tracklist_ids($user_id) ){
+        if ( $ids = WPSSTM_Core_User::get_favorited_tracklist_ids($user_id) ){
             $query->set ( 'post__in', $ids );
         }else{
             $query->set ( 'post__in', array(0) ); //force no results
@@ -733,6 +706,36 @@ class WPSSTM_Core_Tracklists{
             $title = WPSSTM_Post_Tracklist::get_tracklist_title($post_id);
         }
         return $title;
+    }
+    
+    function get_sitewide_favorites($tracks,$tracklist){
+        $page_id = wpsstm()->get_options('sitewide_favorites_id');
+        if ( $tracklist->post_id != $page_id ) return $tracks;
+        
+        $track_args = array(
+            'posts_per_page'=>          50,
+            'orderby'=>                 'subtrack_time',
+            'order'=>                   'desc',
+            'post_type' =>              wpsstm()->post_type_track,
+            'subtrack_query' =>         true,
+            'subtrack_favorites' =>     true,
+            'fields' =>                 'subtrack=>track',
+        );
+
+        $query = new WP_Query( $track_args );
+        $subtracks = $query->posts;
+
+        $tracks = array();
+
+        foreach($subtracks as $track){
+            $subtrack = new WPSSTM_Track(); //default
+            $subtrack->populate_subtrack($track->subtrack_id);
+            $tracks[] = $subtrack;
+        }
+
+        return $tracks;
+        
+        
     }
 
 }

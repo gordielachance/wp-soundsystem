@@ -6,10 +6,10 @@ class WPSSTM_Core_User{
     static $loved_tracklist_meta_key = 'wpsstm_user_favorite';
 
     /*
-    Get the ID of the favorites tracklist for a user, or create it and store option
+    Get the ID of the 'favorite tracks' tracklist for a user, or create it and store option
     */
     
-    public static function get_user_favorites_id($user_id = null){
+    public static function get_user_favorites_tracklist_id($user_id = null){
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
 
@@ -22,6 +22,37 @@ class WPSSTM_Core_User{
         }
 
         return $love_id;
+        
+    }
+    
+    /*
+    Get the IDs of the 'favorite tracks' tracklists for everyone
+    */
+    
+    static function get_sitewide_favorites_tracklist_ids(){
+        global $wpdb;
+        //get all subtracks metas
+        $querystr = $wpdb->prepare( "SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = '%s'", 'wp_' . self::$favorites_tracklist_usermeta_key );
+
+        $ids = $wpdb->get_col( $querystr);
+        return $ids;
+    }
+    
+    /*
+    Get the IDs of the favorite tracklists, enventually filtered by a user
+    */
+    
+    static function get_favorited_tracklist_ids($user_id = null){
+        global $wpdb;
+        //get all subtracks metas
+        $querystr = $wpdb->prepare( "SELECT post_id FROM $wpdb->postmeta WHERE meta_key = '%s'", WPSSTM_Core_User::$loved_tracklist_meta_key );
+
+        if ($user_id){
+            $querystr .= $wpdb->prepare( " AND meta_value = '%s'", $user_id );
+        }
+
+        $ids = $wpdb->get_col( $querystr);
+        return $ids;
         
     }
     

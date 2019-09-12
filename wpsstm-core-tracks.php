@@ -606,16 +606,10 @@ class WPSSTM_Core_Tracks{
         if ( !$query->get( 'subtrack_favorites' ) ) return $where;
 
         //get all favorited tracklists
-        $query_args = array(
-            'post_type' =>                  wpsstm()->tracklist_post_types,
-            'posts_per_page' =>             -1,
-            'post_status' =>                array('publish','private','future','pending','draft'),
-            'fields' =>                     'ids',
-            'tracklists-favorited-by'=>     true,
-        );
-        $query = new WP_Query( $query_args );
-        $ids = $query->posts;
-        
+        if ( !$ids = WPSSTM_Core_User::get_sitewide_favorites_tracklist_ids() ){
+            $ids = array(0);//so won't fetch anything
+        }
+
         $ids_str = implode(',',$ids);
         $where .= sprintf(" AND subtracks.tracklist_id IN (%s)",$ids_str);
 
@@ -1460,7 +1454,7 @@ class WPSSTM_Core_Tracks{
     
     static function get_last_user_favorite($user_id = null){
 
-        if ( !$love_id = WPSSTM_Core_User::get_user_favorites_id( $user_id ) ) return;
+        if ( !$love_id = WPSSTM_Core_User::get_user_favorites_tracklist_id( $user_id ) ) return;
 
         $track_args = array(
             'post_type' =>              wpsstm()->post_type_track,

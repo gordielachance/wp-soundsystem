@@ -477,7 +477,7 @@ class WPSSTM_Track{
         }
 
         //create user favorite tracklist
-        if ( !$tracklist_id = WPSSTM_Core_User::get_user_favorites_id($user_id) ){
+        if ( !$tracklist_id = WPSSTM_Core_User::get_user_favorites_tracklist_id($user_id) ){
             remove_action('wpsstm_love_tracklist', array('WPSSTM_Core_BuddyPress','love_tracklist_activity') ); //no BP activity at tracklist creation / TOUFIX TOUCHECK
             $tracklist_id = WPSSTM_Core_User::create_user_favorites_tracklist($user_id);
             if ( is_wp_error($tracklist_id) ){
@@ -573,7 +573,7 @@ class WPSSTM_Track{
         //get subtracks
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
-        $ids = WPSSTM_Core_Tracklists::get_favorite_tracks_tracklist_ids();
+        $ids = WPSSTM_Core_User::get_sitewide_favorites_tracklist_ids();
 
         if ( !$ids || is_wp_error($ids)  ){
             return $ids;

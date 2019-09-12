@@ -686,8 +686,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //get static subtracks
         $tracks = $this->get_static_subtracks();
+        
+        $tracks = apply_filters('wpsstm_get_subtracks',$tracks,$this);
         if ( is_wp_error($tracks) ) return $tracks;
-
+        
         $this->add_tracks($tracks);
         
     }
@@ -1073,7 +1075,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             do_action('wpsstm_queue_track',$track,$this->post_id);
             
             //favorites ?
-            if ( $this->post_id == WPSSTM_Core_User::get_user_favorites_id() ){
+            if ( $this->post_id == WPSSTM_Core_User::get_user_favorites_tracklist_id() ){
                 do_action('wpsstm_love_track',$track,true);
             }
         }
@@ -1107,7 +1109,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         do_action('wpsstm_dequeue_track',$track,$this->post_id);
 
         //favorites ?
-        if ( $this->post_id == WPSSTM_Core_User::get_user_favorites_id() ){
+        if ( $this->post_id == WPSSTM_Core_User::get_user_favorites_tracklist_id() ){
             do_action('wpsstm_love_track',$track,false);
         }
 
@@ -1206,7 +1208,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $subtrack->populate_subtrack($track->subtrack_id);
             $tracks[] = $subtrack;
         }
-        
+
         return $tracks;
     }
 
