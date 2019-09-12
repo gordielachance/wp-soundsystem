@@ -211,8 +211,6 @@ class WPSSTM_Core_Tracklists{
         
         //playable
         $option = $wpsstm_tracklist->get_options('playable');
-        
-        var_dump($option);
 
         $input = sprintf(
             '<input type="checkbox" name="%s[playable]" value="on" %s />',
