@@ -204,19 +204,19 @@ input.wpsstm-fullwidth {
 }
 
 /* line 6, ../scss/wpsstm-frontend-importer.scss */
-#wpsstm-importer-services ul {
+#wpsstm-importers ul {
   margin: 0;
   padding: 0;
 }
 /* line 9, ../scss/wpsstm-frontend-importer.scss */
-#wpsstm-importer-services ul li {
+#wpsstm-importers ul li {
   width: 100px;
   height: 100px;
   display: inline-block;
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 /* line 14, ../scss/wpsstm-frontend-importer.scss */
-#wpsstm-importer-services ul li img {
+#wpsstm-importers ul li img {
   width: 100%;
   height: auto;
 }

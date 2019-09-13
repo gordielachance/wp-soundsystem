@@ -350,19 +350,19 @@ input.wpsstm-fullwidth {
 }
 
 /* line 155, ../scss/wpsstm-importer.scss */
-#frontend-importer #wpsstm-importer-services ul {
+#frontend-importer #wpsstm-importers ul {
   margin: 0;
   padding: 0;
 }
 /* line 158, ../scss/wpsstm-importer.scss */
-#frontend-importer #wpsstm-importer-services ul li {
+#frontend-importer #wpsstm-importers ul li {
   width: 100px;
   height: 100px;
   display: inline-block;
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 /* line 163, ../scss/wpsstm-importer.scss */
-#frontend-importer #wpsstm-importer-services ul li img {
+#frontend-importer #wpsstm-importers ul li img {
   width: 100%;
   height: auto;
 }
