@@ -42,16 +42,12 @@ global $wpsstm_tracklist;
     </form>
     
     <?php
-    
-    //services
-    wpsstm_locate_template( 'frontend-importer-services.php', true, false); //we need $require_once = false here or Jetpack will fuck up
-
-    //bangs
-    wpsstm_locate_template( 'frontend-importer-bangs.php', true, false); //we need $require_once = false here or Jetpack will fuck up
+    //importers
+    wpsstm_locate_template( 'importers-list.php', true, false); //we need $require_once = false here or Jetpack will fuck up
 
     //recent
     if ( wpsstm()->get_options('recent_wizard_entries') ) {
-        wpsstm_locate_template( 'frontend-importer-entries.php', true, false );  //we need $require_once = false here or Jetpack will fuck up
+        wpsstm_locate_template( 'importer-entries.php', true, false );  //we need $require_once = false here or Jetpack will fuck up
     }
     
     ?>

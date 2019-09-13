@@ -2,13 +2,20 @@
 @import "compass/typography/text/ellipsis";
 @import "_wpsstm-shared";
 
-#wpsstm-importer{
+#wpsstm-metabox-importer{
 
     h3{
         font-weight: bold;
     }
     h4{
         
+    }
+    
+    #wpsstm-importer-services{
+        li{
+            width: 40px;
+            height: 40px;
+        }
     }
 
     .wpsstm-importer-row{
@@ -201,42 +208,44 @@
     }
 }
 
-#frontend-importer{
-    #wpsstm-importer-services{
-        ul{
-            margin:0;
-            padding:0;
-            li{
-                width:100px;
-                height:100px;
-                display:inline-block;
-                border: 1px solid rgba(0, 0, 0, 0.1);
-                img{
-                    width:100%;
-                    height:auto;
-                }
+#wpsstm-importer-urls{
+    display:none;
+}
 
+#wpsstm-importer-services{
+    ul{
+        margin:0;
+        padding:0;
+        li{
+            width:100px;
+            height:100px;
+            display:inline-block;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            img{
+                width:100%;
+                height:auto;
             }
+
         }
     }
+}
 
-    #wpsstm-frontend-importer-recent{
-        ul{
-            list-style: none;
-            padding:0;
-            margin:0;
-            li{
-                position:relative;
-                line-height: 1em;
-                line-height:1.5em;
-                a{
-                    @include display-flex();
-                    strong{
-                        margin-right:.25em;
-                    }
-                    > *{
-                        @extend .wpsstm-ellipsis;
-                    }
+#wpsstm-frontend-importer-recent{
+    ul{
+        list-style: none;
+        padding:0;
+        margin:0;
+        li{
+            position:relative;
+            line-height: 1em;
+            line-height:1.5em;
+            a{
+                @include display-flex();
+                strong{
+                    margin-right:.25em;
+                }
+                > *{
+                    @extend .wpsstm-ellipsis;
                 }
             }
         }

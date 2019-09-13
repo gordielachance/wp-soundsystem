@@ -3,8 +3,7 @@
 class WPSSTM_Core_Importer{
 
     static $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
-    static $importer_services_transient_name = 'wpsstmapi_services_links';
-    static $importer_bangs_transient_name = 'wpsstmapi_bangs_links';
+    static $importers_transient_name = 'wpsstmapi_importers';
 
     function __construct(){
 
@@ -557,36 +556,52 @@ class WPSSTM_Core_Importer{
 
     }
     
-    static function get_import_services(){
+    static function get_importers(){
         
-        $services = get_transient( self::$importer_services_transient_name );
+        $importers = get_transient( self::$importers_transient_name );
 
-        if (false === $services){
-            $services = WPSSTM_Core_API::api_request('import/services/get');
+        if (false === $importers){
+            $importers = WPSSTM_Core_API::api_request('import/services/get');
 
-            if ( is_wp_error($services) ) return false;
+            if ( is_wp_error($importers) ) return false;
 
-            set_transient( self::$importer_services_transient_name, $services, 1 * DAY_IN_SECONDS );
+            set_transient( self::$importers_transient_name, $importers, 1 * DAY_IN_SECONDS );
         }
         
-        return $services;
+        return $importers;
     }
     
-    static function get_import_bangs(){
-        $bangs = get_transient( self::$importer_bangs_transient_name );
+    static function get_importers_by_domain(){
+        $importers = self::get_importers();
+        if ( is_wp_error($importers) ) return $importers;
+        
+        /*
+        sort importers by domain
+        */
+        
+        $domains = array();
+        
+        foreach((array)$importers as $importer){
+            $url = $importer['url'];
+            $domain = wpsstm_get_url_domain($url);
+            $key = sanitize_title($domain);
 
-        if (false === $bangs){
-            $bangs = WPSSTM_Core_API::api_request('import/bangs/get');
+            //first one of this domain
+            if ( !isset($domains[$key]) ){
+                $domains[$key]['image'] = $importer['image'];
+                $domains[$key]['name'] = $importer['name'];
+            }else{
+                $domains[$key]['name'] .= ', ' . $importer['name'];
+            }
+            
+            //set item
+            $domains[$key]['importers'] = $importer;
 
-            if ( is_wp_error($bangs) ) return false;
-
-            set_transient( self::$importer_bangs_transient_name, $bangs, 1 * DAY_IN_SECONDS );
         }
         
-        return $bangs;
+        return $domains;
     }
-    
-    
+
     function ajax_importer_debug(){
         $ajax_data = wp_unslash($_POST);
         $post_id = wpsstm_get_array_value('tracklist_id',$ajax_data);

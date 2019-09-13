@@ -3,8 +3,7 @@ var $ = jQuery.noConflict();
 $( document ).ready(function() {
     
     /* Backend */
-    $("#wpsstm-importer").tabs();
-    $("#wpsstm-single-track-setup").tabs();
+    $("#wpsstm-metabox-importer").tabs();
     
     /*
     advanced selectors
@@ -30,7 +29,6 @@ $( document ).ready(function() {
     
 });
 
-
 //load debug
 $(document).on('click', '.wpsstm-debug-log-bt', function(e) {
     var bt = $(this);
@@ -38,7 +36,7 @@ $(document).on('click', '.wpsstm-debug-log-bt', function(e) {
     var output = container.find('#wpsstm-debug-json');
     var ajax_data = {
         action:         'wpsstm_get_importer_debug',
-        tracklist_id:   container.get(0).getAttribute('data-wpsstm-tracklist-id')
+        tracklist_id:   bt.get(0).getAttribute('data-wpsstm-tracklist-id')
     };
     
     bt.addClass('wpsstm-loading');

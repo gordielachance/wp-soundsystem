@@ -1,3 +1,5 @@
+//https://developers.google.com/web/fundamentals/web-components/customelements
+
 var $ = jQuery.noConflict();
 
 //json
@@ -138,5 +140,8 @@ $('wpsstm-tracklist,.wpsstm-standalone-track').each(function(index,tracklist) {
 
 });
 
-
-//https://developers.google.com/web/fundamentals/web-components/customelements
+//supported importers URLs bt
+$('#wpsstm-list-urls-bt').click(function(e) {
+    e.preventDefault();
+    $('#wpsstm-importer-urls').toggle();
+});
