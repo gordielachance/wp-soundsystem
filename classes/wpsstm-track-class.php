@@ -8,14 +8,14 @@ class WPSSTM_Track{
     public $artist;
     public $album;
     public $duration; //in milliseconds
-    public $musicbrainz_id = null; //set 'null' so we can check later (by setting it to false) if it has been requested
+    public $musicbrainz_id = null;
     public $spotify_id = null;
     
     public $image_url; //remote image URL
     public $location;
     
     var $link;
-    public $links = null; //set 'null' so we can check later (by setting it to false) it has been populated
+    public $links = array();
     var $current_link = -1;
     var $link_count = 0;
     var $in_link_loop = false;
@@ -458,7 +458,7 @@ class WPSSTM_Track{
         $this->track_log(
             array(
                 'post_id'=>$this->post_id,
-                'links'=>count($new_ids),
+                'links_saved'=>sprintf( '%s/%s',count($new_ids),count($this->links) ),
                 'track'=>json_encode($this->to_array())
             ), "Saved track details" ); 
 
