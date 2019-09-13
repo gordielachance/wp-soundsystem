@@ -798,9 +798,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
             $track = new WPSSTM_Track();
 
-            //location
-            $track->location = wpsstm_get_array_value('location',$xspf_track);
-
             //identifier
 
             //title
@@ -879,7 +876,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         $playlist->add_tracks($playlist_tracks);
-        
+
         return $playlist;
         
     }
