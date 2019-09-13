@@ -831,6 +831,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 foreach($link_urls as $url){
                     $link = new WPSSTM_Track_Link();
                     $link->permalink_url = $url;
+                    $link->is_bot = true;
                     $addlinks[] = $link;
                 }
 
