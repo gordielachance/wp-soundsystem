@@ -389,55 +389,55 @@ class WPSSTM_Core_Importer{
             //regex
             //uses a table so the style matches with the global form (WP-core styling)
             ?>
-            <div class="wpsstm-importer-selector-advanced">
-                <?php
-                if ($info){
-                    printf('<p class="wpsstm-importer-track-selector-desc">%s</p>',$info);
-                }
-                ?>
-                <table class="form-table">
-                    <tbody>
-                        <tr>
-                            <th scope="row"><?php _e('Tag attribute','wpsstm');?></th>
-                            <td>        
-                                <div>
-                                    <?php
+        </div>
+        <div class="wpsstm-importer-selector-advanced">
+            <?php
+            if ($info){
+                printf('<p class="wpsstm-importer-track-selector-desc">%s</p>',$info);
+            }
+            ?>
+            <table class="form-table">
+                <tbody>
+                    <tr>
+                        <th scope="row"><?php _e('Tag attribute','wpsstm');?></th>
+                        <td>        
+                            <div>
+                                <?php
 
-                                    printf(
-                                        '<span class="wpsstm-importer-selector-attr"><input name="%s[selectors][%s][attr]" type="text" value="%s" %s/></span>',
-                                        'wpsstm_importer',
-                                        $selector,
-                                        $attr,
-                                        $attr_disabled
-                                    );
-                                    ?>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row"><?php _e('Regex pattern','wpsstm');?></th>
-                            <td>        
-                                <div>
-                                    <?php
+                                printf(
+                                    '<p class="wpsstm-importer-selector-attr"><input class="wpsstm-fullwidth" name="%s[selectors][%s][attr]" type="text" value="%s" %s/></p>',
+                                    'wpsstm_importer',
+                                    $selector,
+                                    $attr,
+                                    $attr_disabled
+                                );
+                                ?>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><?php _e('Regex pattern','wpsstm');?></th>
+                        <td>        
+                            <div>
+                                <?php
 
-                                    printf(
-                                        '<p class="wpsstm-importer-selector-regex">
-                                        <span>~</span>
-                                        <input class="regex" name="%s[selectors][%s][regex]" type="text" value="%s" %s />
-                                        <span>~mi</span>
-                                        </p>',
-                                        'wpsstm_importer',
-                                        $selector,
-                                        $regex,
-                                        $regex_disabled
-                                    );
-                                    ?>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                                printf(
+                                    '<p class="wpsstm-importer-selector-regex">
+                                    <span>~</span>
+                                    <input class="regex" name="%s[selectors][%s][regex]" type="text" value="%s" %s />
+                                    <span>~mi</span>
+                                    </p>',
+                                    'wpsstm_importer',
+                                    $selector,
+                                    $regex,
+                                    $regex_disabled
+                                );
+                                ?>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
         <?php
         

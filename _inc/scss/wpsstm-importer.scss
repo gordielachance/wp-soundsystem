@@ -100,34 +100,38 @@
         }
 
         .wpsstm-importer-selector{
-            
-            .wpsstm-importer-selector-advanced{
-                display: none;
-                &.active{
-                    display: block;
+            @include display-flex();
+            justify-content: center;
+            align-items: center;
+            input[type="text"]{
+                flex-grow: 1;
+            }
+        }
+        
+        .wpsstm-importer-selector-advanced{
+            display: none;
+            &.active{
+                display: block;
+            }
+            .wpsstm-importer-track-selector-desc{
+                font-style:italic;
+                code{
+                    font-style:normal;
                 }
-                .wpsstm-importer-track-selector-desc{
-                    font-style:italic;
-                    code{
-                        font-style:normal;
-                    }
+            }
+            table{
+                td {
+                    color: #999;
+                    padding: 5px;
+                    font-family: Consolas, Monaco, monospace;
                 }
-                table{
-                    td {
-                        color: #999;
-                        padding: 5px;
-                        font-family: Consolas, Monaco, monospace;
-                    }
-                    .wpsstm-importer-selector-regex {
-                        @include display-flex();
-                        color:lightgrey;
-                        input {
-                            color: #999;
-                        }
-                    }
+                .wpsstm-importer-selector-regex {
+                    @include display-flex();
+                    color:lightgrey;
                 }
             }
         }
+        
     }
     
     //tabs
