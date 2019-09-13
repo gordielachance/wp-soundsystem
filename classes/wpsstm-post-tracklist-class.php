@@ -91,7 +91,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $db_options['cache_min'] = $cache_min;
         }
 
-        $this->default_options['order'] = ( $this->tracklist_type === 'live' ) ? 'DESC' : 'ASC';
         $this->options = array_replace_recursive($this->default_options,(array)$db_options);//last one has priority
 
         $this->feed_url =       get_post_meta($this->post_id, self::$feed_url_meta_name, true );
