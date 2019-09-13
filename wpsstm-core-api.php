@@ -128,25 +128,26 @@ class WPSSTM_Core_API {
         }
         
         $rest_url = WPSSTM_API_REST . WPSSTM_API_NAMESPACE . '/' .$endpoint;
-
-        //parameters
-        if ($params){
-            $url_params = rawurlencode_deep( $params );
-            $rest_url = add_query_arg($url_params,$rest_url);
-        }
-
-        //Create request
-        //we can't use WP_REST_Request here since it is remote API
         
         //build headers
         $api_args = array(
-            'method' =>     $method, //TOUFIX TOUCHECK compatible with wp_remote_get ?
+            'method' =>     $method,
             'timeout' =>    wpsstm()->get_options('wpsstmapi_timeout'),
             'headers'=>     array(
                 'Accept' =>         'application/json',
             )
         );
-        
+
+        //parameters
+        if ($params){
+            if ($method == 'GET'){
+                $url_params = http_build_query($params);
+                $rest_url .= '?' . $url_params;
+            }elseif ($method == 'POST' || $method == 'PUT') {
+                $api_args['body'] = $params;
+            }
+        }
+
         $token = self::has_valid_api_token() ? wpsstm()->get_options('wpsstmapi_token') : null;
         //token
         if ( $token ){
@@ -155,7 +156,7 @@ class WPSSTM_Core_API {
         
         WP_SoundSystem::debug_log(array('endpoint'=>$endpoint,'params'=>$params,'args'=>$api_args,'method'=>$method,'url'=>$rest_url),'remote API query...');
 
-        $request = wp_remote_get($rest_url,$api_args);
+        $request = wp_remote_request($rest_url,$api_args);
 
         if ( is_wp_error($request) ){
             WP_SoundSystem::debug_log($request->get_error_message());
