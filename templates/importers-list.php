@@ -7,6 +7,30 @@ $importers = WPSSTM_Core_Importer::get_importers();
 if (!$importers || is_wp_error($importers) ) return;
 
 /*
+URLs
+*/
+
+$url_importers = array_filter($importers, function($importer) {return $importer['type']==='url'; }); //only URLs
+
+//sort alphabetically
+usort($url_importers, function ($a, $b) { return strcasecmp($a["name"], $b["name"]); });
+
+foreach((array)$url_importers as $importer){
+    $url_items[] = sprintf('<span>%s</span> <small>%s: %s</small>',$importer['name'],__('eg.','wpsstm'),$importer['label']);
+}
+
+
+
+//wrap
+$list_urls = array_map(
+   function ($el) {
+      return "<li>{$el}</li>";
+   },
+   $url_items
+);
+$list_urls = sprintf('<ul id="wpsstm-importer-urls">%s</ul>',implode("\n",$list_urls));
+
+/*
 Bangs
 */
 
@@ -27,25 +51,10 @@ $list_bangs = array_map(
 
 //supported URL shortcut
 $urls_el = sprintf('<a id="wpsstm-list-urls-bt" href="#">%s</a>',__('supported URL','wpsstm'));
-$list_bangs[] = sprintf('<li>%s</li>',sprintf(__('...Or type any %s!','wpsstm'),$urls_el));
+$list_bangs[] = sprintf('<li>%s%s</li>',sprintf(__('...Or type any %s!','wpsstm'),$urls_el),$list_urls);
 
 
-/*
-URLs
-*/
 
-$url_importers = array_filter($importers, function($importer) {return $importer['type']==='url'; }); //only URLs
-
-foreach((array)$url_importers as $importer){
-    $url_items[] = sprintf('<span>%s</span> <small>%s: %s</small>',$importer['name'],__('eg.','wpsstm'),$importer['label']);
-}
-//wrap
-$list_urls = array_map(
-   function ($el) {
-      return "<li>{$el}</li>";
-   },
-   $url_items
-);
 
 /*
 services
@@ -78,16 +87,6 @@ if ( $domains && !is_wp_error($domains) ){
             <h4><?php _e('Bangs','wpsstm');?> (<small><?php _e('shortcuts','wpsstm');?>)</small></h4>
             <ul>
                 <?php echo implode("\n",$list_bangs); ?>
-            </ul>
-        </div>
-        <?php
-    }
-    if ($list_urls){
-        ?>
-        <div id="wpsstm-importer-urls">
-            <h4><?php _e('Supported URLs','wpsstm');?></h4>
-            <ul>
-                <?php echo implode("\n",$list_urls); ?>
             </ul>
         </div>
         <?php
