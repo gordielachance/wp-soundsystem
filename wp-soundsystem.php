@@ -220,6 +220,10 @@ class WP_SoundSystem {
 	
     function activate_wpsstm() {
         self::debug_log('activation');
+        
+        //clear some transients
+        WPSSTM_Settings::clear_premium_transients();
+        
         $this->add_custom_capabilites();
     }
     
