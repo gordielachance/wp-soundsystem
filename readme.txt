@@ -128,13 +128,15 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= 3.1.2 =
+= 3.1.5 =
 * removed 'delete_duplicate_links' setting
 * SQL queries improvements
 * subtracks : save subtrack author (pinner) in database - will be bot if tracklist is imported
 * creates a'sitewide favorites' tracklist post
 * creates a 'now playing' tracklist post with the last tracks played on the website
 * BP profile metas : now playing + last favorite
+* Improved importers code
+* New filter 'wpsstm_get_subtracks'
 * database upgrade: v212
 
 = 3.1.1 =
