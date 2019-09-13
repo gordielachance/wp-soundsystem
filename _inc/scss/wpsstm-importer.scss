@@ -100,12 +100,6 @@
         }
 
         .wpsstm-importer-selector{
-            @include display-flex();
-            justify-content: center;
-            align-items: center;
-            input[type="text"]{
-                flex-grow: 1;
-            }
             
             .wpsstm-importer-selector-advanced{
                 display: none;
@@ -113,7 +107,6 @@
                     display: block;
                 }
                 .wpsstm-importer-track-selector-desc{
-                    padding: 1em;
                     font-style:italic;
                     code{
                         font-style:normal;

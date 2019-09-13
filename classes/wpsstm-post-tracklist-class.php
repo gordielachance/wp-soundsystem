@@ -805,15 +805,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             //creator
             $track->artist = wpsstm_get_array_value('creator',$xspf_track);
 
-            //annotation
-
-            //info
+            //album
+            $track->album = wpsstm_get_array_value('album',$xspf_track);
 
             //image
             $track->image_url = wpsstm_get_array_value('image',$xspf_track);
-
-            //album
-            $track->album = wpsstm_get_array_value('album',$xspf_track);
 
             //trackNum
             $track->position = wpsstm_get_array_value('trackNum',$xspf_track);

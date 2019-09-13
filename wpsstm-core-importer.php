@@ -379,7 +379,7 @@ class WPSSTM_Core_Importer{
             
             
             printf(
-                '<input type="text" class="wpsstm-importer-selector-jquery" name="%s[selectors][%s][path]" value="%s" %s />',
+                '<input type="text" class="wpsstm-importer-selector-jquery wpsstm-fullwidth" name="%s[selectors][%s][path]" value="%s" %s />',
                 'wpsstm_importer',
                 $selector,
                 $path,

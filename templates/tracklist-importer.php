@@ -90,7 +90,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
             <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_image');?></div>
         </div>
         <div id="wpsstm-importer-single-track-links" class="wpsstm-importer-row">
-            <h4 class="wpsstm-importer-row-label"><?php _e('Track Link URLs Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
+            <h4 class="wpsstm-importer-row-label"><?php _e('Links Selector','wpsstm'); echo WPSSTM_Core_Importer::regex_link()?></h4>
             <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block('track_link_urls');?></div>
         </div>
     </div>
