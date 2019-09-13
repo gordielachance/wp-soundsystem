@@ -98,7 +98,7 @@ function wpsstm_is_xpsf_url($url){
     $ext = null;
 
     //we don't want url parameters
-    if ( $url = parse_url($url) ) { 
+    if ( ( $url = parse_url($url) ) && isset($url['path']) ) {
        $ext = pathinfo($url['path'], PATHINFO_EXTENSION);
     }
 
