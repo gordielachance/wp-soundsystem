@@ -1170,26 +1170,23 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    private function get_static_subtracks($track_args = array()){
+    private function get_static_subtracks(){
         global $wpdb;
+
+        //TOUFIX TOUCHECK use WP CACHE ?
+        //https://codex.wordpress.org/Class_Reference/WP_Object_Cache
         
         //TOUFIX should be within pre_get_posts ?
 
-        $default_track_args = array(
+        $track_args = array(
             'posts_per_page'=>          -1,
             'orderby'=>                 'subtrack_position',
             'order'=>                   $this->get_options('order'),
-        );
-        
-        $forced_track_args = array(
             'post_type' =>              wpsstm()->post_type_track,
             'subtrack_query' =>         true,
             'fields' =>                 'subtrack=>track',
             'tracklist_id' =>           $this->post_id,
         );
-        
-        $track_args = wp_parse_args($track_args,$default_track_args);
-        $track_args = wp_parse_args($forced_track_args,$track_args);
 
         $query = new WP_Query( $track_args );
         $subtracks = $query->posts;
