@@ -1,6 +1,5 @@
 <?php
 
-
 class WPSSTM_Track{
     public $post_id = null;
     
@@ -83,31 +82,21 @@ class WPSSTM_Track{
     }
     
     function populate_subtrack($subtrack_id){
-        global $wpdb;
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
-        //TOUFIX TOUCHECK should be a regular WP query
+        $track_args = array(
+            'posts_per_page'=>          1,
+            'post_type' =>              wpsstm()->post_type_track,
+            'subtrack_query' =>         true,
+            'subtrack_id' =>            $subtrack_id
+        );
 
-        $query = $wpdb->prepare("SELECT * FROM `$subtracks_table` WHERE subtrack_id = %s",$subtrack_id);
-        $subtrack = $wpdb->get_row($query);
-        if (!$subtrack) return new WP_Error( 'wpsstm_invalid_subtrack_entry', __("This is not a valid subtrack entry.",'wpsstm') );
-
-        //track
-        $track_id = $subtrack->track_id;
-        $success = $this->populate_track_post($track_id);
-        if ( is_wp_error($success) ) return $success;
-
-        //tracklist
-        if ($tracklist_id = $subtrack->tracklist_id){
-            $this->tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-        }
-
-        //subtrack-specific
-        $this->subtrack_id =        $subtrack->subtrack_id;
-        $this->subtrack_time =      $subtrack->subtrack_time;
-        $this->subtrack_author =    $subtrack->subtrack_author;
-        $this->position =           $subtrack->subtrack_order;
-        $this->from_tracklist =     $subtrack->tracklist_id;
+        $query = new WP_Query( $track_args );
+        $posts = $query->posts;
+        
+        $post = isset($posts[0]) ? $posts[0] : null;
+        
+        if (!$post) return;//TOUFIX URGENT should return error ?
+        $this->populate_from_post_obj($post);
     }
     
     function from_array( $args ){
@@ -1316,6 +1305,34 @@ class WPSSTM_Track{
         
         $tracklist = new WPSSTM_Post_Tracklist($nowplaying_id);
         return $tracklist->insert_subtrack($now_track);
+    }
+    
+    public function populate_from_post_obj(WP_Post $post){
+
+            $this->post_id =            filter_var($post->ID, FILTER_VALIDATE_INT);
+            $this->subtrack_id =        filter_var($post->subtrack_id, FILTER_VALIDATE_INT);
+            $this->subtrack_time =      $post->subtrack_time;
+            $this->subtrack_author =    $post->subtrack_author;
+            $this->position =           filter_var($post->subtrack_order, FILTER_VALIDATE_INT);
+            $this->from_tracklist =     filter_var($post->tracklist_id, FILTER_VALIDATE_INT);
+            $this->tracklist = $this;
+            
+            /*
+            Get basic infos : artist, title & album.
+            Since WP caches terms alongside with the query results, we can get those without hitting the DB
+            https://wordpress.stackexchange.com/a/227450/70449
+            */
+            $artists =  get_the_terms($this->post_id,WPSSTM_Core_Tracks::$artist_taxonomy);
+            $titles =   get_the_terms($this->post_id,WPSSTM_Core_Tracks::$track_taxonomy);
+            $albums =   get_the_terms($this->post_id,WPSSTM_Core_Tracks::$album_taxonomy);
+            
+            //TOUFIX TOUCHECK we should not have to check for is_wp_error here.
+            //but fails in local tracklist #104124
+
+            $this->artist =     ( !is_wp_error($artists) && isset( $artists[0] ) ) ? $artists[0]->name : null;
+            $this->title =      ( !is_wp_error($titles) && isset( $titles[0] ) ) ? $titles[0]->name : null;
+            $this->album =      ( !is_wp_error($albums) && isset( $albums[0] ) ) ? $albums[0]->name : null;
+
     }
     
 }

@@ -689,6 +689,19 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //get static subtracks
         $tracks = $this->get_static_subtracks();
+        
+        /*
+        $i = 0;
+        $executionStartTime = microtime(true);
+        while ($i <= 10) {
+            $tracks = $this->get_static_subtracks();
+            $i++;
+        }
+        $executionEndTime = microtime(true);
+        $seconds = $executionEndTime - $executionStartTime;
+        
+        print_r($seconds);die();
+        */
 
         $tracks = apply_filters('wpsstm_get_subtracks',$tracks,$this);
         if ( is_wp_error($tracks) ) return $tracks;
@@ -1192,36 +1205,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $subtracks = array();
 
         foreach($posts as $post){
-            
             /*
             Populate track by not hitting the DB, so we remain fast
             */
-
             $subtrack = new WPSSTM_Track();
-            $subtrack->post_id =            filter_var($post->ID, FILTER_VALIDATE_INT);
-            $subtrack->subtrack_id =        filter_var($post->subtrack_id, FILTER_VALIDATE_INT);
-            $subtrack->subtrack_time =      $post->subtrack_time;
-            $subtrack->subtrack_author =    $post->subtrack_author;
-            $subtrack->position =           filter_var($post->subtrack_order, FILTER_VALIDATE_INT);
-            $subtrack->from_tracklist =     filter_var($post->tracklist_id, FILTER_VALIDATE_INT);
-            $subtrack->tracklist = $this;
-            
-            /*
-            Get basic infos : artist, title & album.
-            Since WP caches terms alongside with the query results, we can get those without hitting the DB
-            https://wordpress.stackexchange.com/a/227450/70449
-            */
-            $artists =  get_the_terms($subtrack->post_id,WPSSTM_Core_Tracks::$artist_taxonomy);
-            $titles =   get_the_terms($subtrack->post_id,WPSSTM_Core_Tracks::$track_taxonomy);
-            $albums =   get_the_terms($subtrack->post_id,WPSSTM_Core_Tracks::$album_taxonomy);
-            
-            //TOUFIX TOUCHECK we should not have to check for is_wp_error here.
-            //but fails in local tracklist #104124
-
-            $subtrack->artist =     ( !is_wp_error($artists) && isset( $artists[0] ) ) ? $artists[0]->name : null;
-            $subtrack->title =      ( !is_wp_error($titles) && isset( $titles[0] ) ) ? $titles[0]->name : null;
-            $subtrack->album =      ( !is_wp_error($albums) && isset( $albums[0] ) ) ? $albums[0]->name : null;
-
+            $subtrack->populate_from_post_obj($post);
             $subtracks[] = $subtrack;
         }
 
