@@ -105,6 +105,7 @@ class WPSSTM_Core_Tracks{
     function populate_global_subtrack($query){
         global $wpsstm_track;
 
+        if ( !$query->is_main_query() ) return;
         if ( !$subtrack_id = $query->get( 'subtrack_id' ) ) return;
         
         $success = $wpsstm_track->populate_subtrack($subtrack_id);
@@ -471,7 +472,7 @@ class WPSSTM_Core_Tracks{
     }
     
     private function is_subtracks_query($query){
-        
+
         return ( ( $query->get('post_type') == wpsstm()->post_type_track ) && $query->get('subtrack_query') );
 
     }
@@ -577,7 +578,7 @@ class WPSSTM_Core_Tracks{
         if ( !$subtrack_id = $query->get('subtrack_id') ) return $where;
         
         $where.= sprintf(" AND subtracks.subtrack_id = %s",$subtrack_id);
-        
+
         //so single template is shown, instead of search results
         //TOUFIX this is maybe quite hackish, should be improved ? eg. setting $query->is_singular = true crashes wordpress.
         $query->is_single = true; 
