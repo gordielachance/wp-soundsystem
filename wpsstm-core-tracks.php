@@ -108,9 +108,10 @@ class WPSSTM_Core_Tracks{
         if ( !$query->is_main_query() ) return;
         if ( !$subtrack_id = $query->get( 'subtrack_id' ) ) return;
         
-        $success = $wpsstm_track->populate_subtrack($subtrack_id);
+        $subtrack_post = WPSSTM_Core_Tracks::get_subtrack_post($subtrack_id);
+        $wpsstm_track = new WPSSTM_Track($subtrack_post);
         
-        if ( is_wp_error($success) ){
+        if ( !$wpsstm_track->post_id ){
             $error_msg = $success->get_error_message();
             $wpsstm_track->track_log($error_msg,'error populating subtrack');
             ///
@@ -130,7 +131,7 @@ class WPSSTM_Core_Tracks{
 
         if ( !is_single() || !$post_id || ( $post_type != wpsstm()->post_type_track ) ) return;
 
-        $success = $wpsstm_track->populate_track_post($post_id);
+        $wpsstm_track = new WPSSTM_Track($post_id);
         $wpsstm_track->track_log("Populated global frontend track");
         
     }
@@ -145,8 +146,8 @@ class WPSSTM_Core_Tracks{
         if ( !$is_track_backend  ) return;
 
         $post_id = get_the_ID();
-        
-        $success = $wpsstm_track->populate_track_post($post_id);
+
+        $wpsstm_track = new WPSSTM_Track($post_id);
         $wpsstm_track->track_log("Populated global backend track");
         
     }
@@ -1256,8 +1257,9 @@ class WPSSTM_Core_Tracks{
         $new_pos = wpsstm_get_array_value('new_pos',$ajax_data);
         $result['new_pos'] = $new_pos;
         
-        $track = new WPSSTM_Track();
-        $track->populate_subtrack($subtrack_id);
+        $subtrack_post = WPSSTM_Core_Tracks::get_subtrack_post($subtrack_id);
+        $track = new WPSSTM_Track($subtrack_post);
+        
         $result['track'] = $track->to_array();
 
         $success = $track->move_subtrack($new_pos);
@@ -1445,8 +1447,7 @@ class WPSSTM_Core_Tracks{
         $post = isset($query->posts[0]) ? $query->posts[0] : null;
         if ( !$post ) return;
         
-        $track = new WPSSTM_Track();
-        $track->populate_from_post_obj($post);
+        $track = new WPSSTM_Track($post);
 
         return $track;
     }
@@ -1469,10 +1470,26 @@ class WPSSTM_Core_Tracks{
         $post = isset($query->posts[0]) ? $query->posts[0] : null;
         if ( !$post ) return;
         
-        $track = new WPSSTM_Track();
-        $subtrack->populate_from_post_obj($post);
+        $track = new WPSSTM_Track($post);
 
         return $track;
+    }
+    
+    static function get_subtrack_post($subtrack_id){
+        
+        $track_args = array(
+            'posts_per_page'=>          1,
+            'post_type' =>              wpsstm()->post_type_track,
+            'subtrack_query' =>         true,
+            'subtrack_id' =>            $subtrack_id
+        );
+
+        $query = new WP_Query( $track_args );
+        $posts = $query->posts;
+        
+        $post = isset($posts[0]) ? $posts[0] : null;
+        
+        return $post;
     }
     
 }

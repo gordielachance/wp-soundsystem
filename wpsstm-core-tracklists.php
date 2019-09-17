@@ -728,8 +728,7 @@ class WPSSTM_Core_Tracklists{
         $tracks = array();
 
         foreach($posts as $post){
-            $subtrack = new WPSSTM_Track(); //default
-            $subtrack->populate_from_post_obj($post);
+            $subtrack = new WPSSTM_Track($post); //default
             $tracks[] = $subtrack;
         }
 

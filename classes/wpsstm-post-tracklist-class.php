@@ -1106,8 +1106,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         
         foreach ($subtrack_ids as $subtrack_id){
-            $subtrack = new WPSSTM_Track();
-            $subtrack->populate_subtrack($subtrack_id);
+            
+            $subtrack_post = WPSSTM_Core_Tracks::get_subtrack_post($subtrack_id);
+            $subtrack = new WPSSTM_Track($subtrack_post);
+
             $success = $subtrack->unlink_subtrack();
 
             if ( is_wp_error($success) ){
@@ -1208,8 +1210,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             /*
             Populate track by not hitting the DB, so we remain fast
             */
-            $subtrack = new WPSSTM_Track();
-            $subtrack->populate_from_post_obj($post);
+            $subtrack = new WPSSTM_Track($post);
             $subtracks[] = $subtrack;
         }
 

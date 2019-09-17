@@ -128,6 +128,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= *** =
+* get_static_subtracks() about 4 times faster !
+
 = 3.1.5 =
 * removed 'delete_duplicate_links' setting
 * SQL queries improvements

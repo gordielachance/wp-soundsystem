@@ -37,68 +37,30 @@ class WPSSTM_Track{
         /*
         Track
         */
-        if ($post){
-            if ( is_a($post,'WP_Post') ){
-                $this->populate_track_post($post->ID);
-            }elseif ( is_int($post) ) {
-                $post_id = filter_var($post, FILTER_VALIDATE_INT); //cast to int
-                $this->populate_track_post($post_id);
-            }
-        }
+
+        $this->populate_track_post($post);
 
         /*
         Tracklist
         */
+        $this->tracklist = new WPSSTM_Post_Tracklist();
         if ($tracklist){
             if ( is_a($tracklist,'WPSSTM_Post_Tracklist') ){
                 $this->tracklist = $tracklist;
             }else{
                 $this->tracklist = new WPSSTM_Post_Tracklist($tracklist);
             }
-        }else{
-            $this->tracklist = new WPSSTM_Post_Tracklist();
         }
+        
+        /*
+        Metas
+        */
+        
+        //$this->populate_track_metas(); //TOUFIX URGENT
 
 
     }
 
-    function populate_track_post($post_id = null){
-        
-        if (!$post_id) $post_id = $this->post_id;
-        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
-        
-        if ( get_post_type($post_id) != wpsstm()->post_type_track ){
-            return new WP_Error( 'wpsstm_invalid_track_entry', __("This is not a valid track entry.",'wpsstm') );
-        }
-
-        $this->post_id          = $post_id;
-        $this->title            = wpsstm_get_post_track($this->post_id);
-        $this->artist           = wpsstm_get_post_artist($this->post_id);
-        $this->album            = wpsstm_get_post_album($this->post_id);
-        $this->image_url        = wpsstm_get_post_image_url($this->post_id);
-        $this->duration         = wpsstm_get_post_duration($this->post_id);
-        $this->did_autolink     = $this->autolink_check();
-        
-    }
-    
-    function populate_subtrack($subtrack_id){
-        
-        $track_args = array(
-            'posts_per_page'=>          1,
-            'post_type' =>              wpsstm()->post_type_track,
-            'subtrack_query' =>         true,
-            'subtrack_id' =>            $subtrack_id
-        );
-
-        $query = new WP_Query( $track_args );
-        $posts = $query->posts;
-        
-        $post = isset($posts[0]) ? $posts[0] : null;
-        
-        if (!$post) return;//TOUFIX URGENT should return error ?
-        $this->populate_from_post_obj($post);
-    }
-    
     function from_array( $args ){
         
         if ( !is_array($args) ) return;
@@ -135,7 +97,8 @@ class WPSSTM_Track{
 
         //subtrack or track id ?
         if ($this->subtrack_id){
-            return $this->populate_subtrack($this->subtrack_id);
+            $post = WPSSTM_Core_Tracks::get_subtrack_post($subtrack_id);
+            return $this->populate_track_post($post);
         }elseif ( $this->post_id ){
             return $this->populate_track_post($this->post_id);
         }
@@ -449,7 +412,7 @@ class WPSSTM_Track{
         wp_set_post_terms( $post_id,$this->title, WPSSTM_Core_Tracks::$track_taxonomy );
         wp_set_post_terms( $post_id,$this->album, WPSSTM_Core_Tracks::$album_taxonomy );
 
-        //repopulate datas
+        //repopulate track
         $this->populate_track_post($post_id);
 
         //save track links from parser if any
@@ -548,6 +511,7 @@ class WPSSTM_Track{
     /*
     retrieve the subtracks IDs that matches a track, eventually filtered by tracklist ID
     //TOUFIX albums should be enabled ? TOCHECK carefully.
+    //TOUFIX URGENT maybe we can use a regular query here ?
     */
     function get_subtrack_matches($tracklist_id = null){
         global $wpdb;
@@ -1307,32 +1271,53 @@ class WPSSTM_Track{
         return $tracklist->insert_subtrack($now_track);
     }
     
-    public function populate_from_post_obj(WP_Post $post){
+    /*
+    Populate the basic track informations
+    Post : int|WP_Post|null
+    */
 
-            $this->post_id =            filter_var($post->ID, FILTER_VALIDATE_INT);
-            $this->subtrack_id =        filter_var($post->subtrack_id, FILTER_VALIDATE_INT);
+    private function populate_track_post($post = null){
+
+        $post = get_post($post);
+        if ( get_post_type($post) != wpsstm()->post_type_track ) return;
+
+        $this->post_id =    $post->ID;
+
+        /*
+        Get basic infos : artist, title & album.
+        Since WP caches terms alongside with the query results, we can get those without hitting the DB
+        https://wordpress.stackexchange.com/a/227450/70449
+        */
+
+        $this->artist =     wpsstm_get_post_artist($this->post_id);
+        $this->title =      wpsstm_get_post_track($this->post_id);
+        $this->album =      wpsstm_get_post_album($this->post_id);
+
+        /*
+        Subtrack
+        */
+
+        if ( isset($post->subtrack_id) ){
+            $this->subtrack_id =        $post->subtrack_id;
             $this->subtrack_time =      $post->subtrack_time;
             $this->subtrack_author =    $post->subtrack_author;
-            $this->position =           filter_var($post->subtrack_order, FILTER_VALIDATE_INT);
-            $this->from_tracklist =     filter_var($post->tracklist_id, FILTER_VALIDATE_INT);
-            $this->tracklist = $this;
-            
-            /*
-            Get basic infos : artist, title & album.
-            Since WP caches terms alongside with the query results, we can get those without hitting the DB
-            https://wordpress.stackexchange.com/a/227450/70449
-            */
-            $artists =  get_the_terms($this->post_id,WPSSTM_Core_Tracks::$artist_taxonomy);
-            $titles =   get_the_terms($this->post_id,WPSSTM_Core_Tracks::$track_taxonomy);
-            $albums =   get_the_terms($this->post_id,WPSSTM_Core_Tracks::$album_taxonomy);
-            
-            //TOUFIX TOUCHECK we should not have to check for is_wp_error here.
-            //but fails in local tracklist #104124
+            $this->position =           $post->subtrack_order;
+            $this->from_tracklist =     $post->tracklist_id;
+        }
+        
+        return $this->post_id;
 
-            $this->artist =     ( !is_wp_error($artists) && isset( $artists[0] ) ) ? $artists[0]->name : null;
-            $this->title =      ( !is_wp_error($titles) && isset( $titles[0] ) ) ? $titles[0]->name : null;
-            $this->album =      ( !is_wp_error($albums) && isset( $albums[0] ) ) ? $albums[0]->name : null;
-
+    }
+    
+    /*
+    Populate extended track informations, usually post metas
+    */
+    
+    private function populate_track_metas(){
+        if (!$this->post_id) return;
+        $this->image_url        = wpsstm_get_post_image_url($this->post_id);
+        $this->duration         = wpsstm_get_post_duration($this->post_id);
+        $this->did_autolink     = $this->autolink_check();
     }
     
 }
