@@ -115,6 +115,7 @@ class WP_SoundSystem {
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
             'ajax_tracks'                       => true,
+            'ajax_links'                        => false,
             'ajax_autolink'                     => true,
         );
         

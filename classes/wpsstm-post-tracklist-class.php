@@ -693,13 +693,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //refresh radio ?
         
         if ( $this->tracklist_type === 'live' ){
-            $refresh_now = ( $this->is_expired && (
-                    ( wpsstm()->get_options('ajax_tracks') && wp_doing_ajax() ) || 
-                    ( !wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() ) 
-                ) 
-            );
 
-            if ( $refresh_now ){
+            $wait_for_ajax = ( wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() );
+
+            if ( $this->is_expired && !$wait_for_ajax ){
                 $synced = $this->sync_radio();
                 if ( is_wp_error($synced) ) return $synced;
             }

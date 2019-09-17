@@ -1,19 +1,25 @@
 <?php
-
 global $wpsstm_track;
 $wpsstm_track->populate_links();
 
-//should we autoload links when the template is displayed ?
-$init_autolink = ( !$wpsstm_track->have_links() && !wpsstm()->get_options('ajax_autolink') && !wp_doing_ajax() );
-
-if ( $init_autolink ){
+/*
+Autolink ?
+*/
+$wait_for_ajax = ( wpsstm()->get_options('ajax_autolink') && !wp_doing_ajax() );
+if ( !$wpsstm_track->have_links() && !$wait_for_ajax ){
     $wpsstm_track->autolink();
 }
-?>
 
-<div class="wpsstm-track-links-list">
-    <?php
-    if ( $wpsstm_track->have_links() ) {
+/*
+List links
+*/
+
+if ( $wpsstm_track->have_links() ) {
+    
+    ?>
+    <div class="wpsstm-track-links-list">
+        <?php
+
         while ( $wpsstm_track->have_links() ) {
 
             $wpsstm_track->the_track_link();
@@ -30,7 +36,8 @@ if ( $init_autolink ){
             <?php
 
         }
-    }
-    ?>
-</div>
-<?php 
+
+        ?>
+    </div>
+    <?php
+}

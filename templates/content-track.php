@@ -41,8 +41,10 @@ $wpsstm_track->populate_track_metas();
     </div>
     <?php
     //track links
-    wpsstm_locate_template( 'content-track-links.php', true, false );
+    $wait_for_ajax = ( wpsstm()->get_options('ajax_links') && !wp_doing_ajax() );
+    if ( !$wait_for_ajax ) { //load links now ?
+        wpsstm_locate_template( 'content-track-links.php', true, false );
+    }
 
-    
     ?>
 </wpsstm-track>
