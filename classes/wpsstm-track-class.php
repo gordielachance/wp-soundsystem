@@ -33,37 +33,46 @@ class WPSSTM_Track{
     
     public $notices = array();
     
-    function __construct( $post_id = null, $tracklist = null ){
-        
-        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
-        
+    function __construct( $post = null, $tracklist = null ){
+
+        /*
+        Track
+        */
+        if ($post){
+            if ( is_a($post,'WP_Post') ){
+                $this->populate_track_post($post->ID);
+            }elseif ( is_int($post) ) {
+                $post_id = filter_var($post, FILTER_VALIDATE_INT); //cast to int
+                $this->populate_track_post($post_id);
+            }
+        }
+
         /*
         Tracklist
         */
-        $this->tracklist = new WPSSTM_Post_Tracklist();
-
-        //has track ID
-        if ( is_int($post_id) ) {
-            $this->populate_track_post($post_id);
-        }
-        
         if ($tracklist){
             if ( is_a($tracklist,'WPSSTM_Post_Tracklist') ){
                 $this->tracklist = $tracklist;
             }else{
                 $this->tracklist = new WPSSTM_Post_Tracklist($tracklist);
             }
+        }else{
+            $this->tracklist = new WPSSTM_Post_Tracklist();
         }
+
 
     }
 
-    function populate_track_post($track_id){
+    function populate_track_post($post_id = null){
         
-        if ( get_post_type($track_id) != wpsstm()->post_type_track ){
+        if (!$post_id) $post_id = $this->post_id;
+        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
+        
+        if ( get_post_type($post_id) != wpsstm()->post_type_track ){
             return new WP_Error( 'wpsstm_invalid_track_entry', __("This is not a valid track entry.",'wpsstm') );
         }
 
-        $this->post_id          = $track_id;
+        $this->post_id          = $post_id;
         $this->title            = wpsstm_get_post_track($this->post_id);
         $this->artist           = wpsstm_get_post_artist($this->post_id);
         $this->album            = wpsstm_get_post_album($this->post_id);
@@ -76,6 +85,8 @@ class WPSSTM_Track{
     function populate_subtrack($subtrack_id){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        //TOUFIX TOUCHECK should be a regular WP query
 
         $query = $wpdb->prepare("SELECT * FROM `$subtracks_table` WHERE subtrack_id = %s",$subtrack_id);
         $subtrack = $wpdb->get_row($query);

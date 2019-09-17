@@ -42,22 +42,22 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     public $classes = array();
 
-    function __construct($post_id = null ){
+    function __construct($post = null ){
         
-        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
-        
+        if ($post){
+            if ( is_a($post,'WP_Post') ){
+                $this->populate_tracklist_post($post->ID);
+            }elseif ( is_int($post) ) {
+                $this->populate_tracklist_post($post);
+            }
+        }
+
         $pagination_args = array(
             'per_page'      => 0, //TO FIX default option
             'current_page'  => ( isset($_REQUEST[$this->paged_var]) ) ? $_REQUEST[$this->paged_var] : 1
         );
 
         $this->set_tracklist_pagination($pagination_args);
-
-        //has tracklist ID
-        if ( is_int($post_id) ) {
-            $this->post_id = $post_id;
-            $this->populate_tracklist_post();
-        }
 
     }
     
@@ -72,17 +72,20 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return get_post_meta($post_id,self::$remote_title_meta_name,true);
     }
     
-    function populate_tracklist_post(){
+    function populate_tracklist_post($post_id = null){
         
-        $post_type = get_post_type($this->post_id);
+        if (!$post_id) $post_id = $this->post_id;
+        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
         
+        if ( !in_array( get_post_type($post_id),wpsstm()->tracklist_post_types) ){
+            return new WP_Error( 'wpsstm_invalid_track_entry', __("This is not a valid tracklist entry.",'wpsstm') );
+        }
+        
+        $this->post_id = $post_id;
+
         //type        
         $this->tracklist_type = ($post_type == wpsstm()->post_type_radio) ? 'live' : 'static';
 
-        if ( !$this->post_id || ( !in_array($post_type,wpsstm()->tracklist_post_types) ) ){
-            return new WP_Error( 'wpsstm_invalid_tracklist_post', __('Invalid tracklist post.','wpsstm') );
-        }
-        
         //options
         $db_options = (array)get_post_meta($this->post_id,self::$tracklist_options_meta_name,true);
 
@@ -688,7 +691,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $tracks = apply_filters('wpsstm_get_subtracks',$tracks,$this);
         if ( is_wp_error($tracks) ) return $tracks;
-        
+
         $this->add_tracks($tracks);
         
     }
