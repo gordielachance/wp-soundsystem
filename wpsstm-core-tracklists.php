@@ -723,13 +723,13 @@ class WPSSTM_Core_Tracklists{
         );
 
         $query = new WP_Query( $track_args );
-        $subtracks = $query->posts;
+        $posts = $query->posts;
 
         $tracks = array();
 
-        foreach($subtracks as $track){
+        foreach($posts as $post){
             $subtrack = new WPSSTM_Track(); //default
-            $subtrack->populate_subtrack($track->subtrack_id);
+            $subtrack->populate_from_post_obj($post);
             $tracks[] = $subtrack;
         }
 

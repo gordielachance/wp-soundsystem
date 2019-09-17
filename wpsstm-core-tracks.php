@@ -1446,7 +1446,7 @@ class WPSSTM_Core_Tracks{
         if ( !$post ) return;
         
         $track = new WPSSTM_Track();
-        $track->populate_subtrack($post->subtrack_id);
+        $track->populate_from_post_obj($post);
 
         return $track;
     }
@@ -1470,7 +1470,7 @@ class WPSSTM_Core_Tracks{
         if ( !$post ) return;
         
         $track = new WPSSTM_Track();
-        $track->populate_subtrack($post->subtrack_id);
+        $subtrack->populate_from_post_obj($post);
 
         return $track;
     }
