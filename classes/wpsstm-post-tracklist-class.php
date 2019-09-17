@@ -76,8 +76,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         if (!$post_id) $post_id = $this->post_id;
         $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
+        $post_type = get_post_type($post_id);
         
-        if ( !in_array( get_post_type($post_id),wpsstm()->tracklist_post_types) ){
+        if ( !in_array( $post_type,wpsstm()->tracklist_post_types) ){
             return new WP_Error( 'wpsstm_invalid_track_entry', __("This is not a valid tracklist entry.",'wpsstm') );
         }
         
@@ -685,10 +686,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 if ( is_wp_error($synced) ) return $synced;
             }
         }
-
+        
         //get static subtracks
         $tracks = $this->get_static_subtracks();
-        
+
         $tracks = apply_filters('wpsstm_get_subtracks',$tracks,$this);
         if ( is_wp_error($tracks) ) return $tracks;
 
