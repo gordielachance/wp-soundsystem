@@ -505,10 +505,8 @@ class WPSSTM_Core_Tracks{
 
         if ( $query->get('fields') === 'ids' ) return $fields;//when requesting ids, we don't want several fields returned.
 
-        //TOUCHECK SHOULD BE THIS? BUT NOT WORKING URGENT return sprintf('%s.ID,%s.subtrack_id',$wpdb->posts,'subtracks');
-
         $fields = (array)$fields;
-        $fields[] = sprintf('%s.subtrack_id','subtracks');
+        $fields[] = sprintf('%s.*','subtracks');
         return implode(', ',$fields);
 
     }
