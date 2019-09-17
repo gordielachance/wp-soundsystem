@@ -230,19 +230,37 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $this->post_id;
         
     }
+    
+    /*
+    Get the HTML tracklist. 
+    This function is among others called through 'the_content' filter.
+    To avoid computing the HTML several times (heavy load times) when get_the_content is called (eg. by Jetpack), cache the result during page load.
+    //TOUFIX TOUCHECK maybe we should NOT hook this on the_content, but how else could we append it then ?
+    */
 
     function get_tracklist_html(){
         global $wpsstm_tracklist;
-        $old_tracklist = $wpsstm_tracklist; //store temp
-        $wpsstm_tracklist = $this;
+        
+        $html = wp_cache_get( 'tracklist_html', 'wpsstm' );
+        
+        if ( false === $html ) {
+            
+            $old_tracklist = $wpsstm_tracklist; //store temp
+            $wpsstm_tracklist = $this;
 
-        ob_start();
-        wpsstm_locate_template( 'content-tracklist.php', true, false );
-        $content = ob_get_clean();
-        
-        $wpsstm_tracklist = $old_tracklist; //restore global
-        
-        return $content;
+            $wpsstm_tracklist->tracklist_log('start','get tracklist HTML');
+            ob_start();
+            wpsstm_locate_template( 'content-tracklist.php', true, false );
+            $html = ob_get_clean();
+            $wpsstm_tracklist->tracklist_log('stop','get tracklist HTML');
+
+            $wpsstm_tracklist = $old_tracklist; //restore global
+            
+            
+            wp_cache_set( 'tracklist_html', $html, 'wpsstm' );
+        } 
+
+        return $html;
 
 
     }
@@ -689,8 +707,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         //get static subtracks
         $tracks = $this->get_static_subtracks();
-        
+
         /*
+        
+        //test query times
+        
         $i = 0;
         $executionStartTime = microtime(true);
         while ($i <= 10) {
@@ -702,6 +723,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         print_r($seconds);die();
         */
+
 
         $tracks = apply_filters('wpsstm_get_subtracks',$tracks,$this);
         if ( is_wp_error($tracks) ) return $tracks;
