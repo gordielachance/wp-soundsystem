@@ -532,8 +532,7 @@ class WPSSTM_Core_Track_Links{
 
         //autolink & save
         if ( isset($_POST['wpsstm_track_autolink']) ){
-            $track->did_autolink = false;
-            $success = $track->autolink();
+            $success = $track->autolink(true);
         }
     }
     

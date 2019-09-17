@@ -1,5 +1,7 @@
 <?php
 global $wpsstm_track;
+$wpsstm_track->populate_track_metas();
+
 ?>
 <wpsstm-track <?php echo $wpsstm_track->get_track_attr();?>>
     <div class="wpsstm-track-row">

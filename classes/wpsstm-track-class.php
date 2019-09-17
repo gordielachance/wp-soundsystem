@@ -11,7 +11,7 @@ class WPSSTM_Track{
     public $spotify_id = null;
     
     public $image_url; //remote image URL
-    public $location;
+    public $autolinked; //last time autolinked
     
     var $link;
     public $links = array();
@@ -27,9 +27,7 @@ class WPSSTM_Track{
     public $subtrack_time = null;
     public $subtrack_author = null;
     public $from_tracklist = null;
-    
-    public $did_autolink = null;
-    
+
     public $notices = array();
     
     function __construct( $post = null, $tracklist = null ){
@@ -51,14 +49,6 @@ class WPSSTM_Track{
                 $this->tracklist = new WPSSTM_Post_Tracklist($tracklist);
             }
         }
-        
-        /*
-        Metas
-        */
-        
-        //$this->populate_track_metas(); //TOUFIX URGENT
-
-
     }
 
     function from_array( $args ){
@@ -97,7 +87,7 @@ class WPSSTM_Track{
 
         //subtrack or track id ?
         if ($this->subtrack_id){
-            $post = WPSSTM_Core_Tracks::get_subtrack_post($subtrack_id);
+            $post = WPSSTM_Core_Tracks::get_subtrack_post($this->subtrack_id);
             return $this->populate_track_post($post);
         }elseif ( $this->post_id ){
             return $this->populate_track_post($this->post_id);
@@ -622,32 +612,27 @@ class WPSSTM_Track{
         
     }
     
-    private function autolink_check(){
+    /*
+    Check if a track has been autolinked recently
+    */
+    
+    private function did_autolink(){
 
-        /*
-        Check if a track has been autolinkd recently
-        */
-        
-        if ($this->did_autolink === null){
-            $last_autolinkd  = get_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, true );
-            if (!$last_autolinkd) return false;
+        if (!$this->autolinked) return false;
 
-            $now = current_time( 'timestamp' );
-            $seconds = $now - $last_autolinkd;
+        $now = current_time( 'timestamp' );
+        $seconds = $now - $this->autolinked;
 
-            $max_seconds = wpsstm()->get_options('autolink_timeout');
-            $this->did_autolink = ($seconds < $max_seconds);
-        }
+        $max_seconds = wpsstm()->get_options('autolink_timeout');
+        return ($seconds < $max_seconds);
 
-        return $this->did_autolink;
- 
     }
 
     /*
     Retrieve autolinks for a track
     */
     
-    function autolink(){
+    function autolink($force = false){
 
         $new_links = array();
         $links_auto = array();
@@ -655,7 +640,7 @@ class WPSSTM_Track{
         $can_autolink = WPSSTM_Core_Track_Links::can_autolink();
         if ( $can_autolink !== true ) return $can_autolink;
         
-        if ( $this->did_autolink ) {
+        if ( !$force && ( $did_autolink = $this->did_autolink() ) ){
             return new WP_Error( 'wpsstm_autolink_disabled', __("Track has already been autolinkd recently.",'wpsstm') );
         }
         
@@ -669,7 +654,6 @@ class WPSSTM_Track{
         */
         $now = current_time('timestamp');
         update_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, $now );
-        $this->did_autolink = true;
         
         /*
         Hook filter here to add autolinks (array)
@@ -991,7 +975,7 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
-            'can-autolink' =>                   ( $can_autolink && !$this->did_autolink),
+            'can-autolink' =>                   ( $can_autolink && !$this->did_autolink() ),
             'wpsstm-playable' =>                wpsstm()->get_options('player_enabled'),
         );
 
@@ -1298,11 +1282,11 @@ class WPSSTM_Track{
         */
 
         if ( isset($post->subtrack_id) ){
-            $this->subtrack_id =        $post->subtrack_id;
+            $this->subtrack_id =        filter_var($post->subtrack_id, FILTER_VALIDATE_INT);
             $this->subtrack_time =      $post->subtrack_time;
-            $this->subtrack_author =    $post->subtrack_author;
-            $this->position =           $post->subtrack_order;
-            $this->from_tracklist =     $post->tracklist_id;
+            $this->subtrack_author =    filter_var($post->subtrack_author, FILTER_VALIDATE_INT);
+            $this->position =           filter_var($post->subtrack_order, FILTER_VALIDATE_INT);
+            $this->from_tracklist =     filter_var($post->tracklist_id, FILTER_VALIDATE_INT);
         }
         
         return $this->post_id;
@@ -1313,11 +1297,11 @@ class WPSSTM_Track{
     Populate extended track informations, usually post metas
     */
     
-    private function populate_track_metas(){
+    public function populate_track_metas(){
         if (!$this->post_id) return;
         $this->image_url        = wpsstm_get_post_image_url($this->post_id);
         $this->duration         = wpsstm_get_post_duration($this->post_id);
-        $this->did_autolink     = $this->autolink_check();
+        $this->autolinked       = get_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, true );
     }
     
 }

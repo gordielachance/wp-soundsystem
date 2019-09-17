@@ -126,12 +126,9 @@ class WPSSTM_Core_Tracks{
         global $post;
         global $wpsstm_track;
 
-        $post_id = get_the_ID();
-        $post_type = get_post_type($post_id);
+        if ( !is_single() || ( get_post_type() != wpsstm()->post_type_track ) ) return;
 
-        if ( !is_single() || !$post_id || ( $post_type != wpsstm()->post_type_track ) ) return;
-
-        $wpsstm_track = new WPSSTM_Track($post_id);
+        $wpsstm_track = new WPSSTM_Track($post);
         $wpsstm_track->track_log("Populated global frontend track");
         
     }
@@ -145,9 +142,7 @@ class WPSSTM_Core_Tracks{
         $is_track_backend = ( $screen->id == wpsstm()->post_type_track );
         if ( !$is_track_backend  ) return;
 
-        $post_id = get_the_ID();
-
-        $wpsstm_track = new WPSSTM_Track($post_id);
+        $wpsstm_track = new WPSSTM_Track($post);
         $wpsstm_track->track_log("Populated global backend track");
         
     }
@@ -164,7 +159,7 @@ class WPSSTM_Core_Tracks{
         $is_already_populated = ($wpsstm_track && ($wpsstm_track->post_id == $post->ID) );
         if ($is_already_populated) return;
 
-        $wpsstm_track = new WPSSTM_Track($post->ID);
+        $wpsstm_track = new WPSSTM_Track($post);
     }
 
     //TOUFIX needed ?

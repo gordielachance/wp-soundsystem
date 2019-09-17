@@ -134,7 +134,6 @@ class WPSSTM_Tracklist{
 			do_action_ref_array( 'wpsstm_tracks_loop_start', array( &$this ) );
 
         $wpsstm_track = $this->next_subtrack();
-        //$this->setup_subtrack_data( $wpsstm_track );
 	}
 
 	/**
