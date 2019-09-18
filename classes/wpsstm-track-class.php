@@ -12,6 +12,7 @@ class WPSSTM_Track{
     
     public $image_url; //remote image URL
     public $autolinked; //last time autolinked
+    public $classes = array('wpsstm-track');
     
     var $link;
     public $links = array();
@@ -178,7 +179,7 @@ class WPSSTM_Track{
         // !!! using wpb->prepare fucks up here, it wraps our IDs string with quotes and then the query fails.
         //$querystr = $wpdb->prepare( "SELECT `tracklist_id` FROM `$subtracks_table` WHERE `subtrack_id` IN (%s)",$subtracks_ids_str );
         $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `subtrack_id` IN (%s)",$subtracks_ids_str );
-        
+
         $tracklist_ids = $wpdb->get_col($querystr);
         
         return array_unique($tracklist_ids);
@@ -505,7 +506,7 @@ class WPSSTM_Track{
     */
     function get_subtrack_matches($tracklist_id = null){
         global $wpdb;
-        
+
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
         //check we have enough informations on this track
@@ -984,16 +985,18 @@ class WPSSTM_Track{
     
     function get_track_class(){
 
-        $classes = array(
-            'wpsstm-track',
+        $add_classes = array(
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
-            is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
+            is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,//TOUFIX URGENT NEEDED ?
             ( ( $autoplay_id = wpsstm_get_array_value('subtrack_autoplay',$_GET) ) && ($autoplay_id == $this->subtrack_id) ) ? 'track-autoplay' : null,
-
         );
 
+        $classes = array_merge($this->classes,$add_classes);
+        $classes = array_filter(array_unique($classes));
+        
         $classes = apply_filters('wpsstm_track_classes',$classes,$this);
-        return array_filter(array_unique($classes));
+
+        return $classes;
     }
     
     /*
