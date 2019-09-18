@@ -196,7 +196,7 @@ class WPSSTM_Track{
 
             $tracklist_post_type = get_post_type($tracklist_id);
 
-            $playlist_url = get_permalink($tracklist_id);
+            $playlist_url = ( is_admin() ) ? get_edit_post_link($tracklist_id) : get_permalink($tracklist_id);
             $title = get_the_title($tracklist_id);
             $title_short = wpsstm_shorten_text($title);
 
