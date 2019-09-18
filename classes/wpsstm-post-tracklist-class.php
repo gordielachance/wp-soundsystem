@@ -705,10 +705,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //get static subtracks
         $tracks = $this->get_static_subtracks();
 
-        /*
         
         //test query times
-        
+        /*
         $i = 0;
         $executionStartTime = microtime(true);
         while ($i <= 10) {
@@ -720,7 +719,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         print_r($seconds);die();
         */
-
 
         $tracks = apply_filters('wpsstm_get_subtracks',$tracks,$this);
         if ( is_wp_error($tracks) ) return $tracks;
@@ -1208,7 +1206,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    private function get_static_subtracks(){
+    public function get_static_subtracks(){
         global $wpdb;
 
         $track_args = array(
@@ -1222,7 +1220,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         );
 
         $query = new WP_Query( $track_args );
+
         $posts = $query->posts;
+        $duplicates = WPSSTM_Core_Tracks::get_subtracks_duplicates($posts);
+        $duplicate_ids = array_map(create_function('$o', 'return $o->subtrack_id;'), $duplicates);
+        
         $subtracks = array();
 
         foreach($posts as $post){
@@ -1230,6 +1232,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             Populate track by not hitting the DB, so we remain fast
             */
             $subtrack = new WPSSTM_Track($post);
+            $subtrack->classes[] = 'wpsstm-subtrack';
+            
+            if( in_array($post->subtrack_id,$duplicate_ids) ){
+                $subtrack->classes[] = 'wpsstm-subtrack-duplicate';
+            }
+            
             $subtracks[] = $subtrack;
         }
 
