@@ -25,7 +25,6 @@ class WPSSTM_Core_Tracks{
         add_action( 'admin_head',  array($this, 'populate_global_track_backend'),1);
         add_action( 'the_post', array($this,'populate_global_track_loop'),10,2);
 
-        
         add_filter( 'query_vars', array($this,'add_query_vars_track') );
         add_action( 'wp', array($this,'handle_track_action'), 8);
 
@@ -43,6 +42,7 @@ class WPSSTM_Core_Tracks{
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'tracks_columns_register') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(__class__,'register_orphan_tracks_view') );
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(__class__,'register_tracklist_tracks_view') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_imported_view'), 5 );
 
         //track shortcode
@@ -467,6 +467,30 @@ class WPSSTM_Core_Tracks{
         return $views;
     }
     
+    static function register_tracklist_tracks_view($views){
+
+        $screen =                   get_current_screen();
+        $post_type =                $screen->post_type;
+        $tracklist_id =             get_query_var('tracklist_id');
+        $tracklist =                new WPSSTM_Post_Tracklist($tracklist_id);
+
+        if (!$tracklist->post_id) return $views;
+
+        $link = $tracklist->get_backend_tracks_url();
+
+        $tracks = $tracklist->get_static_subtracks();
+        $count = count($tracks);
+        
+        $attr = array(
+            'href' =>   $link,
+            'class' =>  'current',
+        );
+
+        $views['tracklist'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),get_the_title($tracklist_id),$count);
+        
+        return $views;
+    }
+    
     private function is_subtracks_query($query){
 
         return ( ( $query->get('post_type') == wpsstm()->post_type_track ) && $query->get('subtrack_query') );
@@ -559,12 +583,8 @@ class WPSSTM_Core_Tracks{
     function track_query_where_tracklist_id($where,$query){
         if ( !$this->is_subtracks_query($query) ) return $where;
         if ( !$tracklist_id = $query->get('tracklist_id') ) return $where;
-        
-        $where.= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
 
-        //so single template is shown, instead of search results
-        //TOUFIX this is maybe quite hackish, should be improved ? eg. setting $query->is_singular = true crashes wordpress.
-        $query->is_single = true; 
+        $where.= sprintf(" AND subtracks.tracklist_id = %s",$tracklist_id);
 
         return $where;
     }
@@ -631,7 +651,7 @@ class WPSSTM_Core_Tracks{
         
         return $orderby_sql;
 
-    }    
+    }
 
     function register_track_post_type() {
 
