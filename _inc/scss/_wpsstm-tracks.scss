@@ -129,8 +129,9 @@ wpsstm-track{
         @extend .wpsstm-loading-icon;
     }
 
-    &.wpsstm-invalid-track{
-        background:rgba(255, 0, 0, 0.10);
+    &.wpsstm-invalid-track,
+    &.wpsstm-subtrack-duplicate{
+        background:rgba(255, 0, 0, 0.10)!important;
     }
     
     &:nth-child(odd){
