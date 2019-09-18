@@ -47,8 +47,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if ($post){
             if ( is_a($post,'WP_Post') ){
                 $this->populate_tracklist_post($post->ID);
-            }elseif ( is_int($post) ) {
-                $this->populate_tracklist_post($post);
+            }elseif ( $post_id = filter_var($post, FILTER_VALIDATE_INT) ){
+                $this->populate_tracklist_post($post_id);
             }
         }
 
@@ -1371,9 +1371,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $links_url = admin_url('edit.php');
         $links_url = add_query_arg( 
             array(
-                'post_type' =>      wpsstm()->post_type_track,
-                'tracklist_id' =>   $this->post_id,
-                //'post_status' => 'publish'
+                'post_type'=>       wpsstm()->post_type_track,
+                'tracklist_id'=>    $this->post_id,
+                'subtrack_query'=>  true,
+                //'post_status'=>   'publish'
             ),$links_url 
         );
         return $links_url;
