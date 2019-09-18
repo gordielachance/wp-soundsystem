@@ -114,8 +114,8 @@ class WP_SoundSystem {
             'details_engines'                   => array('musicbrainz','spotify'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
-            'ajax_tracks'                       => true,
-            'ajax_links'                        => false,
+            'ajax_tracks'                       => false,//URGENT
+            'ajax_links'                        => true,//URGENT
             'ajax_autolink'                     => true,
         );
         
@@ -649,7 +649,7 @@ class WP_SoundSystem {
             'debug'                 => (WP_DEBUG),
             'ajaxurl'               => admin_url( 'admin-ajax.php' ),
             'ajax_tracks'           => wpsstm()->get_options('ajax_tracks'),
-            'autolink'              => ( wpsstm()->get_options('autolink') && wpsstm()->get_options('ajax_autolink') ), 
+            'ajax_links'            => wpsstm()->get_options('ajax_links'),
         );
 
         wp_localize_script( 'wpsstm-functions', 'wpsstmL10n', $datas );

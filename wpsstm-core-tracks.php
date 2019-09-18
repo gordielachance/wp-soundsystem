@@ -72,8 +72,8 @@ class WPSSTM_Core_Tracks{
         AJAX
         */
 
-        add_action('wp_ajax_wpsstm_track_autolink', array($this,'ajax_track_autolink'));
-        add_action('wp_ajax_nopriv_wpsstm_track_autolink', array($this,'ajax_track_autolink'));
+        add_action('wp_ajax_wpsstm_get_track_links', array($this,'ajax_track_get_links'));
+        add_action('wp_ajax_nopriv_wpsstm_get_track_links', array($this,'ajax_track_get_links'));
         
         add_action('wp_ajax_wpsstm_track_start', array($this,'ajax_track_start'));
         add_action('wp_ajax_nopriv_wpsstm_track_start', array($this,'ajax_track_start'));
@@ -1103,7 +1103,7 @@ class WPSSTM_Core_Tracks{
         wp_send_json( $result ); 
     }
 
-    function ajax_track_autolink(){
+    function ajax_track_get_links(){
         
         global $wpsstm_track;
 
@@ -1121,22 +1121,12 @@ class WPSSTM_Core_Tracks{
             'success'       => false,
         );
    
-        //autolink
-        $new_ids = array();
-        $new_ids = $wpsstm_track->autolink();
+        ob_start();
+        wpsstm_locate_template( 'content-track-links.php', true, false );
+        $content = ob_get_clean();
 
-        if ( is_wp_error($new_ids) ){
-            $result['error_code'] = $new_ids->get_error_code();
-            $result['message'] = $new_ids->get_error_message();
-        }else{
-            
-            ob_start();
-            wpsstm_locate_template( 'content-track-links.php', true, false );
-            $content = ob_get_clean();
-
-            $result['html'] = $content;
-            $result['success'] = true;
-        }
+        $result['html'] = $content;
+        $result['success'] = true;
         
         $result['track'] = $wpsstm_track->to_array(); //maybe we have a new post ID here, if the track has been created
 
@@ -1307,7 +1297,7 @@ class WPSSTM_Core_Tracks{
         
         WP_SoundSystem::debug_log($_POST,'testing autolink AJAX');
         
-        $this->ajax_track_autolink();
+        $this->ajax_track_get_links();
     }
 
     function delete_track_links($post_id){

@@ -302,7 +302,7 @@ class WpsstmPlayer extends HTMLElement{
 
         //which one should we play?
         tracks_playable = tracks_playable.filter(function (track) {
-            return ( track.playable || (track.can_autolink && wpsstmL10n.autolink) );
+            return ( track.playable || track.ajax_links );
         });
 
         
@@ -340,7 +340,7 @@ class WpsstmPlayer extends HTMLElement{
 
         //which one should we play?
         tracks_playable = tracks_playable.filter(function (track) {
-            return ( track.playable || (track.can_autolink && wpsstmL10n.autolink) );
+            return ( track.playable || track.ajax_links );
         });
 
         //shuffle ?
@@ -429,7 +429,7 @@ class WpsstmPlayer extends HTMLElement{
         }
         
         /*
-        Eventually autolink track
+        Eventually load track links
         */
 
         requestedTrack.debug('request track');
@@ -443,8 +443,8 @@ class WpsstmPlayer extends HTMLElement{
             if(sourceLinks.length){
                 trackready.resolve();
             }else{
-                if ( requestedTrack.can_autolink && wpsstmL10n.autolink ){
-                    trackready = requestedTrack.track_autolink();
+                if ( requestedTrack.ajax_links ){
+                    trackready = requestedTrack.append_links();
                 }else{
                     trackready.reject();
                 }
