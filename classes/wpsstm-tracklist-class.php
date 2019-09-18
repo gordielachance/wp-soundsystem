@@ -63,10 +63,8 @@ class WPSSTM_Tracklist{
 
         $valid_tracks = $rejected_tracks = array();
         $error_codes = array();
-        
-        $pending_tracks = array_unique($tracks);
-        
-        foreach($pending_tracks as $track){
+
+        foreach($tracks as $track){
             $valid = $track->validate_track();
             if ( is_wp_error($valid) ){
 
