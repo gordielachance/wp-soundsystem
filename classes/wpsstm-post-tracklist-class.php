@@ -1366,7 +1366,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     /*
     Reindex 'subtrack_order' based on subtrack_time
-    //TOUFIX URGENT not working : https://wordpress.stackexchange.com/questions/348607/use-mysql-variable-in-a-wpdb-query
     */
     
     function reset_subtracks_order(){
@@ -1374,8 +1373,37 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         
         if (!$this->post_id) return false;
-        $querystr = $wpdb->prepare("set @ROW = 0;UPDATE `$subtracks_table` SET `subtrack_order` = @ROW := @ROW+1 WHERE tracklist_id='%d' ORDER BY `subtrack_time` ASC", $this->post_id );
-        return $wpdb->query($querystr);
+
+        /*
+        TOUFIX TOUCHECK
+        //https://wordpress.stackexchange.com/questions/348607/use-mysql-variable-in-a-wpdb-query/348679
+        find a way to do this in a single query ? It is possible with PHPMyAdmin:
+        set @ROW = 0;UPDATE `$subtracks_table` SET `subtrack_order` = @ROW := @ROW+1 WHERE tracklist_id='176226' ORDER BY `subtrack_time` ASC
+        */
+        
+        //get subtracks
+        $querystr = $wpdb->prepare("SELECT subtrack_id FROM `$subtracks_table` WHERE tracklist_id='%d' ORDER BY `subtrack_time`,`subtrack_order`",$this->post_id);
+        if ( !$ids = $wpdb->get_col($querystr) ) return;
+        
+        //update order
+        $i = 0;
+        $total_rows_updated = 0;
+        foreach($ids as $id){
+            
+            $i++;
+            
+            $rows_updated = $wpdb->update( 
+                $subtracks_table, //table
+                array('subtrack_order'=>$i), //data
+                array('subtrack_id'=>$id) //where
+            );
+            
+            $total_rows_updated+=$rows_updated;
+            
+        }
+        
+        $this->tracklist_log(array('post_id'=>$this->post_id,'rows'=>count($ids),'updated'=>$total_rows_updated),"reindexed tracklist positions");
+
     }
 
 }
