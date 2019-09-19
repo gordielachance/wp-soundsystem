@@ -251,15 +251,9 @@ class WP_SoundSystem {
     }
 
     function upgrade(){
-        
-        /*
-        URGENT
-        $tracklist = new WPSSTM_Post_Tracklist(176226);
-        $success = $tracklist->reset_subtracks_order();
-        var_dump($success);die();
-        */
 
         global $wpdb;
+
         $current_version = get_option("_wpsstm-db_version");
         $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
 
@@ -428,6 +422,7 @@ class WP_SoundSystem {
             }
             
             if ($current_version < 213){
+
                 $this->batch_delete_duplicate_subtracks();
                 $this->batch_reorder_subtracks();
             }
@@ -566,7 +561,7 @@ class WP_SoundSystem {
         global $wpdb;
         $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
         $querystr = "SELECT subtrack_id,track_id,tracklist_id, COUNT(*) as countOf FROM `$subtracks_table` GROUP BY track_id,tracklist_id HAVING countOf > 1";
-        $dupe_ids = $wpdb->get_col($querystr);
+        if ( !$dupe_ids = $wpdb->get_col($querystr) ) return;
         $dupe_ids = implode(',',$dupe_ids);
         
         $querystr = sprintf("DELETE FROM `$subtracks_table` WHERE subtrack_id IN(%s)",$dupe_ids );
@@ -578,7 +573,7 @@ class WP_SoundSystem {
         global $wpdb;
         $types_str = "'" . implode ( "', '", $this->tracklist_post_types ) . "'";
         $querystr = sprintf( "SELECT ID FROM `$wpdb->posts` WHERE post_type IN(%s)",$types_str);
-        $tracklist_ids = $wpdb->get_col($querystr);
+        if ( !$tracklist_ids = $wpdb->get_col($querystr) ) return;
 
         foreach($tracklist_ids as $id){
             $tracklist = new WPSSTM_Post_Tracklist($id);
