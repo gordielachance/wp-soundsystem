@@ -251,6 +251,13 @@ class WP_SoundSystem {
     }
 
     function upgrade(){
+        
+        /*
+        URGENT
+        $tracklist = new WPSSTM_Post_Tracklist(176226);
+        $success = $tracklist->reset_subtracks_order();
+        var_dump($success);die();
+        */
 
         global $wpdb;
         $current_version = get_option("_wpsstm-db_version");
@@ -422,6 +429,7 @@ class WP_SoundSystem {
             
             if ($current_version < 213){
                 $this->batch_delete_duplicate_subtracks();
+                $this->batch_reorder_subtracks();
             }
         }
         
@@ -563,6 +571,19 @@ class WP_SoundSystem {
         
         $querystr = sprintf("DELETE FROM `$subtracks_table` WHERE subtrack_id IN(%s)",$dupe_ids );
         return $wpdb->get_results ( $querystr );
+        
+    }
+    
+    private function batch_reorder_subtracks(){
+        global $wpdb;
+        $types_str = "'" . implode ( "', '", $this->tracklist_post_types ) . "'";
+        $querystr = sprintf( "SELECT ID FROM `$wpdb->posts` WHERE post_type IN(%s)",$types_str);
+        $tracklist_ids = $wpdb->get_col($querystr);
+
+        foreach($tracklist_ids as $id){
+            $tracklist = new WPSSTM_Post_Tracklist($id);
+            $success = $tracklist->reset_subtracks_order();
+        }
         
     }
     

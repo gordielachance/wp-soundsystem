@@ -1363,5 +1363,19 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         );
         return $links_url;
     }
+    
+    /*
+    Reindex 'subtrack_order' based on subtrack_time
+    //TOUFIX URGENT not working : https://wordpress.stackexchange.com/questions/348607/use-mysql-variable-in-a-wpdb-query
+    */
+    
+    function reset_subtracks_order(){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        
+        if (!$this->post_id) return false;
+        $querystr = $wpdb->prepare("set @ROW = 0;UPDATE `$subtracks_table` SET `subtrack_order` = @ROW := @ROW+1 WHERE tracklist_id='%d' ORDER BY `subtrack_time` ASC", $this->post_id );
+        return $wpdb->query($querystr);
+    }
 
 }
