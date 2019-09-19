@@ -169,21 +169,12 @@ class WPSSTM_Track{
     function get_in_tracklists_ids(){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        $subtracks_ids = $this->get_subtrack_matches();
 
-        if ( is_wp_error($subtracks_ids) ) return $subtracks_ids;
-        if ( !$subtracks_ids ) return;
-
-        $subtracks_ids_str = implode(',',$subtracks_ids);
-        
-        // !!! using wpb->prepare fucks up here, it wraps our IDs string with quotes and then the query fails.
-        //$querystr = $wpdb->prepare( "SELECT `tracklist_id` FROM `$subtracks_table` WHERE `subtrack_id` IN (%s)",$subtracks_ids_str );
-        $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `subtrack_id` IN (%s)",$subtracks_ids_str );
+        $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `track_id`=%d",$this->post_id );
 
         $tracklist_ids = $wpdb->get_col($querystr);
         
-        return array_unique($tracklist_ids);
+        return $tracklist_ids;
 
     }
 
@@ -498,29 +489,6 @@ class WPSSTM_Track{
         }
         
         return $result;
-    }
-
-    /*
-    retrieve the subtracks IDs that matches a track, eventually filtered by tracklist ID
-    //TOUFIX albums should be enabled ? TOCHECK carefully.
-    //TOUFIX URGENT maybe we can use a regular query here ?
-    */
-    function get_subtrack_matches($tracklist_id = null){
-        global $wpdb;
-
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-
-        //check we have enough informations on this track
-        if ( $this->validate_track() !== true) return false;
-
-        $querystr = $wpdb->prepare( "SELECT subtrack_id FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
-        
-        if($tracklist_id){
-            $querystr.= $wpdb->prepare( " AND tracklist_id = %d",$tracklist_id);
-        }
-
-        return $wpdb->get_col( $querystr);
-
     }
     
     function get_favoriters(){
