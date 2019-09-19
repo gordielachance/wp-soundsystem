@@ -32,6 +32,8 @@ class WPSSTM_Track{
     public $notices = array();
     
     function __construct( $post = null, $tracklist = null ){
+        
+        $this->tracklist = new WPSSTM_Post_Tracklist();
 
         /*
         Track
@@ -42,7 +44,6 @@ class WPSSTM_Track{
         /*
         Tracklist
         */
-        $this->tracklist = new WPSSTM_Post_Tracklist();
         if ($tracklist){
             if ( is_a($tracklist,'WPSSTM_Post_Tracklist') ){
                 $this->tracklist = $tracklist;
@@ -1289,7 +1290,8 @@ class WPSSTM_Track{
             $this->subtrack_time =      $post->subtrack_time;
             $this->subtrack_author =    filter_var($post->subtrack_author, FILTER_VALIDATE_INT);
             $this->position =           filter_var($post->subtrack_order, FILTER_VALIDATE_INT);
-            $this->from_tracklist =     filter_var($post->tracklist_id, FILTER_VALIDATE_INT);
+            $this->tracklist =          new WPSSTM_Post_Tracklist($post->tracklist_id);
+            $this->from_tracklist =     filter_var($post->from_tracklist, FILTER_VALIDATE_INT);
         }
         
         return $this->post_id;
