@@ -146,6 +146,18 @@ class WPSSTM_Core_Tracklists{
         
     }
     
+    function metabox_playlist_contentWIP($post){
+        global $wpsstm_tracklist;
+        require_once($this->plugin_dir . 'classes/wpsstm-subtracks-table-class.php');
+        
+        $subtracks = $wpsstm_tracklist->get_static_subtracks();
+
+        $table = new Wpsstm_Subtrack_List_Table();
+        $table->data = $subtracks;
+        $table->prepare_items();
+        $table->display();
+    }
+    
     function metabox_playlist_content( $post ){
         global $wpsstm_tracklist;
         $output = $wpsstm_tracklist->get_tracklist_html();
