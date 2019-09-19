@@ -129,8 +129,7 @@ wpsstm-track{
         @extend .wpsstm-loading-icon;
     }
 
-    &.wpsstm-invalid-track,
-    &.wpsstm-subtrack-duplicate{
+    &.wpsstm-invalid-track{
         background:rgba(255, 0, 0, 0.10)!important;
     }
     

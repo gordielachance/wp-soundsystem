@@ -944,8 +944,8 @@ wpsstm-track .wpsstm-track-links ul {
   margin: 0;
 }
 /* line 132, ../scss/_wpsstm-tracks.scss */
-wpsstm-track.wpsstm-invalid-track {
-  background: rgba(255, 0, 0, 0.1);
+wpsstm-track.wpsstm-invalid-track{
+  background: rgba(255, 0, 0, 0.1)!important;
 }
 /* line 136, ../scss/_wpsstm-tracks.scss */
 wpsstm-track:nth-child(odd) {

@@ -422,24 +422,12 @@ class WPSSTM_Core_Tracks{
                 echo $output;
             break;
             case 'track-links':
-                
-                $published_str = $pending_str = null;
 
-                $links_published_query = $wpsstm_track->query_links();
-                $links_pending_query = $wpsstm_track->query_links(array('post_status'=>'pending'));
+                $links_query = $wpsstm_track->query_links();
 
                 $url = admin_url('edit.php');
                 $url = add_query_arg( array('post_type'=>wpsstm()->post_type_track_link,'parent_track'=>$wpsstm_track->post_id,'post_status'=>'publish'),$url );
-                $published_str = sprintf('<a href="%s">%d</a>',$url,$links_published_query->post_count);
-                
-                if ($links_pending_query->post_count){
-                    $url = admin_url('edit.php');
-                    $url = add_query_arg( array('post_type'=>wpsstm()->post_type_track_link,'parent_track'=>$wpsstm_track->post_id,'post_status'=>'pending'),$url );
-                    $pending_link = sprintf('<a href="%s">%d</a>',$url,$links_pending_query->post_count);
-                    $pending_str = sprintf('<small> +%s</small>',$pending_link);
-                }
-                
-                echo $published_str . $pending_str;
+                echo sprintf('<a href="%s">%d</a>',$url,$links_query->post_count);
                 
             break;
         }

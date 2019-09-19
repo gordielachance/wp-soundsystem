@@ -200,7 +200,7 @@ class WPSSTM_Core_Radios{
     }
     
     static function radios_notice(){
-        $screen =                   get_current_screen();
+        $screen = get_current_screen();
         if ( ($screen->base != 'edit') || ($screen->post_type != wpsstm()->post_type_radio) ) return;
 
         $notice = __("Radios are how we call 'live playlists'. Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are refreshing seamlessly after a user-defined delay.  Setup the 'Tracklist Importer' metabox while editing a radio.",'wpsstm');
