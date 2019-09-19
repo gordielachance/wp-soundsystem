@@ -20,7 +20,7 @@ class WPSSTM_Core_Tracks{
         Be sure it works frontend, backend, and on post-new.php page
         */
         $wpsstm_track = new WPSSTM_Track();
-        add_action( 'parse_query', array($this,'populate_global_subtrack'));
+        add_action( 'parse_query', array($this,'subtrack_query_to_post'));
         add_action( 'wp',  array($this, 'populate_global_track_frontend'),1 );
         add_action( 'admin_head',  array($this, 'populate_global_track_backend'),1);
         add_action( 'the_post', array($this,'populate_global_track_loop'),10,2);
@@ -100,10 +100,9 @@ class WPSSTM_Core_Tracks{
     }
 
     /*
-    Set global $wpsstm_track 
+    Edit query so that it populates the correct post (track), based on the subtrack ID.
     */
-    function populate_global_subtrack($query){
-        global $wpsstm_track;
+    function subtrack_query_to_post($query){
 
         if ( !$query->is_main_query() ) return;
         if ( !$subtrack_id = $query->get( 'subtrack_id' ) ) return;
@@ -111,8 +110,7 @@ class WPSSTM_Core_Tracks{
         $subtrack_post = WPSSTM_Core_Tracks::get_subtrack_post($subtrack_id);
 
         if ( !$subtrack_post ){
-            $error_msg = $success->get_error_message();
-            $wpsstm_track->track_log($error_msg,'error populating subtrack');
+            WP_SoundSystem::debug_log($subtrack_id,'error populating subtrack');
             ///
             $query->set_404();
             status_header( 404 );
@@ -121,7 +119,6 @@ class WPSSTM_Core_Tracks{
             $query->is_single = true;
             $query->query_vars['p'] = $subtrack_post->ID;
         }
-
     }
     
     function populate_global_track_frontend(){
