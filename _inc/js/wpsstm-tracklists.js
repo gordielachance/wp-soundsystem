@@ -148,10 +148,11 @@ class WpsstmTracklist extends HTMLElement{
             }else{
                 
                 var rows = queue_tracks_form.find('.wpsstm-new-track');
+                var doReload = false;
                 var ajaxCalls = [];
                 
                 queue_tracks_form.addClass('wpsstm-freeze');
-                
+
                 rows.each(function( index ) {
                     var row = $(this);
                     var track = new WpsstmTrack();
@@ -159,17 +160,23 @@ class WpsstmTracklist extends HTMLElement{
                     track.track_title = row.find('input[name="wpsstm_track_data[title]"]').val();
                     track.track_album = row.find('input[name="wpsstm_track_data[album]"]').val();
                     
-                    var ajax = tracklist.new_subtrack(track,row);
+                    var ajax = tracklist.new_subtrack(track,row).done(function() { //at least one track added, we'll need to reload the tracklist
+                        doReload = true;
+                        row.remove();
+                    });
+
                     ajaxCalls.push(ajax);
                     
                 });
-                
-                //chain all ajax calls
-                $.when.apply( undefined, ajaxCalls ).then(function( data, textStatus, jqXHR ) {
-                    queue_tracks_form.removeClass('wpsstm-freeze');
-                    tracklist.reload_tracklist();
-                });
 
+                //TOUFIX URGENT
+                //should be fired when all promises have returned a response, no matter if it succeeded or not.
+                $.when.apply($, ajaxCalls).always(function(){
+                    queue_tracks_form.removeClass('wpsstm-freeze');
+                    if (doReload){
+                        tracklist.reload_tracklist();
+                    }
+                })
             }
 
         });
@@ -467,6 +474,7 @@ class WpsstmTracklist extends HTMLElement{
     new_subtrack(track,row){
         
         var tracklist = this;
+        var success = $.Deferred();
 
         var ajax_data = {
             action:         'wpsstm_tracklist_new_subtrack',
@@ -474,7 +482,7 @@ class WpsstmTracklist extends HTMLElement{
             tracklist_id:   tracklist.post_id
         };
 
-        return $.ajax({
+        var ajax = $.ajax({
 
             type:       "post",
             url:        wpsstmL10n.ajaxurl,
@@ -482,22 +490,28 @@ class WpsstmTracklist extends HTMLElement{
             dataType:   'json',
 
             beforeSend: function() {
-                row.removeClass('action-error').addClass('action-loading');
+                row.removeClass('action-error').addClass('action-loading wpsstm-freeze');
             },
             success: function(data){
                 if (data.success === false) {
                     console.log(data);
+                    success.reject();
+                }else{
+                    success.resolve();
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 console.log(xhr.status);
                 console.log(thrownError);
                 row.addClass('action-error');
+                success.reject();
             },
             complete: function() {
-                row.removeClass('action-loading');
+                row.removeClass('action-loading wpsstm-freeze');
             }
         })
+        
+        return success.promise();
     }
     
     
