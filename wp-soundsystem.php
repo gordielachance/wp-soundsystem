@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '212';
+    public $db_version = '213';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -419,7 +419,10 @@ class WP_SoundSystem {
                 $this->create_sitewide_favorites_post();
 
             }
-
+            
+            if ($current_version < 213){
+                $this->batch_delete_duplicate_subtracks();
+            }
         }
         
         //update DB version
@@ -545,6 +548,22 @@ class WP_SoundSystem {
             wp_delete_term( $term->term_id, $term->taxonomy );
         }
 
+    }
+    
+    /*
+    Get the subtracks that have the same track ID & tracklist ID
+    //TOUFIX this returns the firsts subtracks IDs, while it would be preferable to get the last ones. 'ORDER BY subtrack_id DESC' does nothing.
+    */
+    private function batch_delete_duplicate_subtracks(){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+        $querystr = "SELECT subtrack_id,track_id,tracklist_id, COUNT(*) as countOf FROM `$subtracks_table` GROUP BY track_id,tracklist_id HAVING countOf > 1";
+        $dupe_ids = $wpdb->get_col($querystr);
+        $dupe_ids = implode(',',$dupe_ids);
+        
+        $querystr = sprintf("DELETE FROM `$subtracks_table` WHERE subtrack_id IN(%s)",$dupe_ids );
+        return $wpdb->get_results ( $querystr );
+        
     }
     
     private static function batch_delete_orphan_tracks(){
