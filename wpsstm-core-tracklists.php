@@ -146,7 +146,7 @@ class WPSSTM_Core_Tracklists{
         
     }
     
-    function metabox_playlist_contentWIP($post){
+    function metabox_playlist_content($post){
         global $wpsstm_tracklist;
         require_once($this->plugin_dir . 'classes/wpsstm-subtracks-table-class.php');
         
@@ -158,7 +158,7 @@ class WPSSTM_Core_Tracklists{
         $table->display();
     }
     
-    function metabox_playlist_content( $post ){
+    function metabox_playlist_contentOLD( $post ){
         global $wpsstm_tracklist;
         $output = $wpsstm_tracklist->get_tracklist_html();
         echo $output;

@@ -368,13 +368,23 @@ class WPSSTM_Core_Tracks{
         $post_type_slug = wpsstm()->post_type_track;
         $post_type_obj = get_post_type_object($post_type_slug);
         
-         add_submenu_page(
-                $parent_slug,
-                $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
-                $post_type_obj->labels->name, //submenu title
-                $post_type_obj->cap->edit_posts, //cap required
-                sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
-         );
+        //tracks
+        add_submenu_page(
+            $parent_slug,
+            $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
+            $post_type_obj->labels->name, //submenu title
+            $post_type_obj->cap->edit_posts, //cap required
+            sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
+        );
+        
+        //subtracks
+        add_submenu_page(
+            $parent_slug,
+            __( 'Subtracks', 'wpsstm' ), //page title
+            __( 'Subtracks', 'wpsstm' ), //submenu title
+            $post_type_obj->cap->edit_posts, //cap required
+            sprintf('edit.php?postAA_type=%s',$post_type_slug) //url or slug
+        );
         
     }
 

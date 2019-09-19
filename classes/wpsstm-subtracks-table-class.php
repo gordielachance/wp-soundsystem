@@ -190,10 +190,40 @@ class Wpsstm_Subtrack_List_Table extends WP_List_Table{
         return -$result;
     }
     
+    protected function extra_tablenav( $which ) {
+        global $wpsstm_tracklist;
+        ?>
+        <div class="alignleft actions">
+        <?php
+        if ( 'top' == $which && !is_singular() ) {
+            
+            if ($wpsstm_tracklist->tracklist_type === 'live'){
+                //Sync
+                //TOUFIX URGENT
+                /*
+                $link_args = array(
+                    'page'      => 'pending-importation',
+                    'action'    => 'import_pin'
+                );
+
+                printf(
+                    '<a class="button" href="%1$s">%2$s</a>',
+                    'URL',
+                    __('Refresh Radio','wpsstm')
+                );
+                */
+            }
+        }
+        ?>
+        </div>
+        <?php
+    }
+    
     function get_bulk_actions() {
         $actions = array(
             'unlink'    => __('Unlink','wpsstm'),
             'autolink'  => __('Autolink','wpsstm'),
+            'delete'    => __('Delete','wpsstm'),
         );
         
         //data engine lookup
@@ -205,17 +235,24 @@ class Wpsstm_Subtrack_List_Table extends WP_List_Table{
         return $actions;
     }
     
-    function process_bulk_action() {        
+    function process_bulk_action(){
+        
+        $ids = wpsstm_get_array_value('ids',$_GET);
+        
+        print_r($ids);die("zibb");
+        
+        switch ( $this->current_action() ){
       
-        if( 'delete'===$this->current_action() ) {
-            die("tizzz");
-          //  wp_die('Items deleted (or they would be if we had items to delete)!');
-           foreach($_GET['id'] as $id) {
-                //$id will be a string containing the ID of the video
-                //i.e. $id = "123";                
-                delete_this_video($id);
-            }
-        }        
+            case 'delete':
+                die("tizzz");
+              //  wp_die('Items deleted (or they would be if we had items to delete)!');
+               foreach($_GET['id'] as $id) {
+                    //$id will be a string containing the ID of the video
+                    //i.e. $id = "123";                
+                    delete_this_video($id);
+                }
+            break;
+        }
     }
 
 }

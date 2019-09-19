@@ -128,8 +128,16 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= *** =
+= XXX =
 * get_static_subtracks() about 4 times faster !
+* cache get_tracklist_html()
+* new tracklist option 'ajax_links'
+* new 'tracklist' view in the tracks backend
+* new class Wpsstm_Subtrack_List_Table WIP
+* DO NOT queue a track if it is already part of the tracklist
+* bew fb batch_delete_duplicate_subtracks()
+* new fn batch_reorder_subtracks()
+* database upgrade: v213
 
 = 3.1.5 =
 * removed 'delete_duplicate_links' setting
