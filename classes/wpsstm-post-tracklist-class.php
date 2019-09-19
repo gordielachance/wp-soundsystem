@@ -1164,6 +1164,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if (!$track->post_id){
             return new WP_Error( 'wpsstm_missing_track_id', __('Missing track ID.','wpsstm') );
         }
+        
+        //check track is not already part of this playlist
+        if ( $tracklist_ids = $track->get_in_tracklists_ids() ){
+            if ( in_array($this->post_id,$tracklist_ids) ){
+                return new WP_Error( 'wpsstm_duplicate_subtrack', __("This track is already added to the tracklist.",'wpsstm') );
+            }
+        }
 
         $track_data = array(
             'track_id' =>   $track->post_id
