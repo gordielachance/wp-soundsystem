@@ -652,34 +652,6 @@ class WPSSTM_Core_Tracks{
         return $orderby_sql;
 
     }
-    
-    /*
-    Filter subtracks to return the ones that have a same track ID (duplicates)
-    Posts are sorted so that the highest subtrack ID is considered as the duplicate one.
-    */
-    
-    public static function get_subtracks_duplicates($posts){
-        
-        $unique_ids = array();
-        $duplicates = array();
-
-        $sorted_posts = $posts;
-        usort($sorted_posts,function($a,$b){
-            return $a->subtrack_id > $b->subtrack_id;
-        });
-
-        foreach($sorted_posts as $post){
-
-            $existing = array_search($post->ID,$unique_ids);
-            if ($existing){
-                $duplicates[] = $post;
-                continue;
-            }
-            $unique_ids[] = $post->ID;
-        }
-
-        return $duplicates;
-    }
 
     function register_track_post_type() {
 
