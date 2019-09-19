@@ -107,17 +107,19 @@ class WPSSTM_Core_Tracks{
 
         if ( !$query->is_main_query() ) return;
         if ( !$subtrack_id = $query->get( 'subtrack_id' ) ) return;
-        
+
         $subtrack_post = WPSSTM_Core_Tracks::get_subtrack_post($subtrack_id);
-        $wpsstm_track = new WPSSTM_Track($subtrack_post);
-        
-        if ( !$wpsstm_track->post_id ){
+
+        if ( !$subtrack_post ){
             $error_msg = $success->get_error_message();
             $wpsstm_track->track_log($error_msg,'error populating subtrack');
             ///
             $query->set_404();
             status_header( 404 );
             nocache_headers();
+        }else{
+            $query->is_single = true;
+            $query->query_vars['p'] = $subtrack_post->ID;
         }
 
     }
