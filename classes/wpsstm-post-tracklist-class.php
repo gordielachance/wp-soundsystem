@@ -611,7 +611,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $tracklist_obj = get_post_type_object($post_type);
         $can_edit_tracklist = current_user_can($tracklist_obj->cap->edit_post,$this->post_id);
-        
+
         return $can_edit_tracklist;
     }
         
@@ -1114,33 +1114,20 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function dequeue_track(WPSSTM_Track $track){
         
         $this->tracklist_log($track->to_array(),"dequeue track");
-        
-        $subtrack_ids = $track->get_subtrack_matches($this->post_id);
-        if ( is_wp_error($subtrack_ids) ) return $subtrack_ids;
-        
-        if (!$subtrack_ids){
-            return new WP_Error( 'wpsstm_no_track_matches', __('No matches for this track in the tracklist.','wpsstm') );
+
+        $success = $track->unlink_subtrack();
+
+        if ( is_wp_error($success) ){
+            $track->track_log(array('subtrack'=>$track->subtrack_id,'error'=>$success),"Error while unqueuing subtrack" );
+            return $success;
         }
         
-        foreach ($subtrack_ids as $subtrack_id){
-            
-            $subtrack_post = WPSSTM_Core_Tracks::get_subtrack_post($subtrack_id);
-            $subtrack = new WPSSTM_Track($subtrack_post);
-
-            $success = $subtrack->unlink_subtrack();
-
-            if ( is_wp_error($success) ){
-                $track->track_log($subtrack->to_array(),"Error while unqueuing subtrack" );
-            }
-
-        }
-        
-        do_action('wpsstm_dequeue_track',$track,$this->post_id);
-
         //favorites ?
         if ( $this->post_id == WPSSTM_Core_User::get_user_favorites_tracklist_id() ){
             do_action('wpsstm_love_track',$track,false);
         }
+        
+        do_action('wpsstm_dequeue_track',$track,$this->post_id);
 
         return true;
         
@@ -1222,26 +1209,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $query = new WP_Query( $track_args );
 
         $posts = $query->posts;
-        $duplicates = WPSSTM_Core_Tracks::get_subtracks_duplicates($posts);
-        $duplicate_ids = array_map(create_function('$o', 'return $o->subtrack_id;'), $duplicates);
-        
-        $subtracks = array();
 
-        foreach($posts as $post){
-            /*
-            Populate track by not hitting the DB, so we remain fast
-            */
-            $subtrack = new WPSSTM_Track($post);
-            $subtrack->classes[] = 'wpsstm-subtrack';
-            
-            if( in_array($post->subtrack_id,$duplicate_ids) ){
-                $subtrack->classes[] = 'wpsstm-subtrack-duplicate';
-            }
-            
-            $subtracks[] = $subtrack;
-        }
-
-        return $subtracks;
+        return $posts;
     }
 
     function get_html_metas(){
