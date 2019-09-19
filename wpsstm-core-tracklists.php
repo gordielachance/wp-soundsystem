@@ -78,6 +78,7 @@ class WPSSTM_Core_Tracklists{
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
         add_action( 'save_post', array($this,'metabox_save_tracklist_options') );
         
+        
         //sitewide favorites
         add_filter( 'wpsstm_get_subtracks', array($this, 'get_sitewide_favorites'),10,2 );
 
@@ -146,19 +147,7 @@ class WPSSTM_Core_Tracklists{
         
     }
     
-    function metabox_playlist_content($post){
-        global $wpsstm_tracklist;
-        require_once($this->plugin_dir . 'classes/wpsstm-subtracks-table-class.php');
-        
-        $subtracks = $wpsstm_tracklist->get_static_subtracks();
-
-        $table = new Wpsstm_Subtrack_List_Table();
-        $table->data = $subtracks;
-        $table->prepare_items();
-        $table->display();
-    }
-    
-    function metabox_playlist_contentOLD( $post ){
+    function metabox_playlist_content( $post ){
         global $wpsstm_tracklist;
         $output = $wpsstm_tracklist->get_tracklist_html();
         echo $output;
@@ -218,6 +207,7 @@ class WPSSTM_Core_Tracklists{
         return $success;
 
     }
+
     
     function metabox_tracklist_options_content( $post ){
         
