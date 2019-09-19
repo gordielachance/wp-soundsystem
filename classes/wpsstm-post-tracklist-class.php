@@ -1177,7 +1177,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $subtrack_data['tracklist_id'] =        $this->post_id;
             $subtrack_data['from_tracklist'] =      $track->from_tracklist;
             $subtrack_data['subtrack_author'] =     ($author = $track->subtrack_author) ? $author : get_current_user_id();
-            $subtrack_data['subtrack_order'] =      $this->get_subtracks_count() + 1;
+            $subtrack_data['subtrack_order'] =      $this->get_last_subtrack_pos() + 1;
             
             $track_data = array_merge($track_data,$subtrack_data);
         }
@@ -1265,6 +1265,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if (!$this->post_id) return false;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
         $querystr = $wpdb->prepare( "SELECT COUNT(*) FROM `$subtracks_table` WHERE tracklist_id = %d", $this->post_id );
+        return $wpdb->get_var($querystr);
+    }
+    
+    function get_last_subtrack_pos(){
+        global $wpdb;
+        if (!$this->post_id) return false;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $querystr = $wpdb->prepare( "SELECT MAX(subtrack_order) FROM `$subtracks_table` WHERE tracklist_id = %d", $this->post_id );
         return $wpdb->get_var($querystr);
     }
 

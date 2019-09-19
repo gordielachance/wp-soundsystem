@@ -286,7 +286,7 @@ class WPSSTM_Track{
         $old_pos = $this->position;
         $new_pos = filter_var($new_pos, FILTER_VALIDATE_INT); //cast to int
         $tracklist_id = $this->tracklist->post_id;
-        $tracks_count = $this->tracklist->get_subtracks_count();
+        $last_pos = $this->tracklist->get_last_subtrack_pos();
         
         
         if ( !$this->subtrack_id ){
@@ -297,7 +297,7 @@ class WPSSTM_Track{
             return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required tracklist ID missing.",'wpsstm') );
         }
         
-        if ( !is_int($new_pos) || ($new_pos < 1) || ($new_pos > $tracks_count) ){
+        if ( !is_int($new_pos) || ($new_pos < 1) || ($new_pos > $last_pos) ){
             return new WP_Error( 'wpsstm_invalid_position', __("Invalid subtrack position.",'wpsstm') );
         }
         
