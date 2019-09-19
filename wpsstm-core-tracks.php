@@ -975,6 +975,20 @@ class WPSSTM_Core_Tracks{
     function metabox_track_options_content( $post ){
         global $wpsstm_track;
         
+        /*
+        playlists manager
+        */
+        
+        $manager = '';
+        
+        //in playlists
+        
+        if ( $in_playlists = $wpsstm_track->get_parents_list() ){
+            $manager .= sprintf('<p>%s</p>',$in_playlists);
+        }
+        
+        //manager bt
+        
         $classes =  array('wpsstm-action-popup button');
 
         $attr = array(
@@ -984,7 +998,11 @@ class WPSSTM_Core_Tracks{
         );
         
         $attr_str = wpsstm_get_html_attr($attr);
-        printf('<a %s>%s</a>',$attr_str,__('Playlists manager','wpsstm'));
+        $manager.= sprintf('<p><a %s>%s</a></p>',$attr_str,__('Playlists manager','wpsstm'));
+        
+        //
+        printf('<div><label>%s</label>%s</div>',__('Playlists','wpsstm'),$manager);
+        
     }
     
     /**
