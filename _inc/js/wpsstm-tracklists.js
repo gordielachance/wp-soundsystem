@@ -169,7 +169,7 @@ class WpsstmTracklist extends HTMLElement{
                     
                 });
 
-                //TOUFIX URGENT
+                //TOUFIX BROKEN
                 //should be fired when all promises have returned a response, no matter if it succeeded or not.
                 $.when.apply($, ajaxCalls).always(function(){
                     queue_tracks_form.removeClass('wpsstm-freeze');

@@ -1378,7 +1378,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         TOUFIX TOUCHECK
         //https://wordpress.stackexchange.com/questions/348607/use-mysql-variable-in-a-wpdb-query/348679
         find a way to do this in a single query ? It is possible with PHPMyAdmin:
-        set @ROW = 0;UPDATE `$subtracks_table` SET `subtrack_order` = @ROW := @ROW+1 WHERE tracklist_id='176226' ORDER BY `subtrack_time` ASC
+        set @ROW = 0;UPDATE `$subtracks_table` SET `subtrack_order` = @ROW := @ROW+1 WHERE tracklist_id='176226' ORDER BY `subtrack_time`,`subtrack_order`
         */
         
         //get subtracks

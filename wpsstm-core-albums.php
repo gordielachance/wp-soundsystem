@@ -209,7 +209,7 @@ class WPSSTM_Core_Albums{
             'labels'                     => $labels,
             'hierarchical'               => false,
             'public'                     => false,
-            'show_ui'                    => true,
+            'show_ui'                    => false,
             'show_admin_column'          => false,
             'show_in_nav_menus'          => false,
             'show_tagcloud'              => false,
