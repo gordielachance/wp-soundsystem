@@ -1368,9 +1368,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     Reindex 'subtrack_order' based on subtrack_time
     */
     
-    function reset_subtracks_order(){
+    function reindex_subtracks_by($by){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $querystr = null;
         
         if (!$this->post_id) return false;
 
@@ -1381,28 +1382,44 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         set @ROW = 0;UPDATE `$subtracks_table` SET `subtrack_order` = @ROW := @ROW+1 WHERE tracklist_id='176226' ORDER BY `subtrack_time`,`subtrack_order`
         */
         
+        switch($by){
+            case 'time':
+                $querystr = $wpdb->prepare("SELECT subtrack_id FROM `$subtracks_table` WHERE tracklist_id='%d' ORDER BY `subtrack_time`,`subtrack_order`",$this->post_id);
+            break;
+            case 'position':
+                $querystr = $wpdb->prepare("SELECT subtrack_id FROM `$subtracks_table` WHERE tracklist_id='%d' ORDER BY `subtrack_order`",$this->post_id);
+            break;
+        }
+        
+        if (!$querystr){
+            return new WP_Error( 'wpsstm_reindex_subtracks', __("No query defined for reindexing.",'wpsstm') );
+        }
+        
         //get subtracks
-        $querystr = $wpdb->prepare("SELECT subtrack_id FROM `$subtracks_table` WHERE tracklist_id='%d' ORDER BY `subtrack_time`,`subtrack_order`",$this->post_id);
-        if ( !$ids = $wpdb->get_col($querystr) ) return;
+        if ( !$ids = $wpdb->get_col($querystr) ) return false;
         
         //update order
         $i = 0;
-        $total_rows_updated = 0;
+        $total_updated = 0;
         foreach($ids as $id){
             
             $i++;
             
-            $rows_updated = $wpdb->update( 
+            $updated = $wpdb->update( 
                 $subtracks_table, //table
                 array('subtrack_order'=>$i), //data
                 array('subtrack_id'=>$id) //where
             );
             
-            $total_rows_updated+=$rows_updated;
+            $total_updated+=$updated;
             
         }
         
-        $this->tracklist_log(array('post_id'=>$this->post_id,'rows'=>count($ids),'updated'=>$total_rows_updated),"reindexed tracklist positions");
+        if($total_updated){
+            $this->tracklist_log(array('post_id'=>$this->post_id,'rows'=>count($ids),'by'=>$by,'updated'=>$total_updated),"reindexed tracklist positions");
+        }
+
+        return $total_updated;
 
     }
 

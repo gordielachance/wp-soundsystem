@@ -114,7 +114,7 @@ class WP_SoundSystem {
             'details_engines'                   => array('musicbrainz','spotify'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
-            'ajax_radios'                       => false,//URGENT//use ajax to sync radios
+            'ajax_radios'                       => false,//URGENT//use ajax to sync radios ?
             'ajax_links'                        => true,//URGENT
             'ajax_autolink'                     => true,
         );
@@ -424,7 +424,7 @@ class WP_SoundSystem {
             if ($current_version < 213){
 
                 $this->batch_delete_duplicate_subtracks();
-                $this->batch_reorder_subtracks();
+                $this->batch_reindex_subtracks_by('time');
             }
         }
         
@@ -569,16 +569,31 @@ class WP_SoundSystem {
         
     }
     
-    private function batch_reorder_subtracks(){
+    private function batch_reindex_subtracks_by($by){
         global $wpdb;
         $types_str = "'" . implode ( "', '", $this->tracklist_post_types ) . "'";
         $querystr = sprintf( "SELECT ID FROM `$wpdb->posts` WHERE post_type IN(%s)",$types_str);
-        if ( !$tracklist_ids = $wpdb->get_col($querystr) ) return;
+        if ( !$ids = $wpdb->get_col($querystr) ) return;
 
-        foreach($tracklist_ids as $id){
+        $updated = 0;
+        $errors = 0;
+        
+        foreach($ids as $id){
             $tracklist = new WPSSTM_Post_Tracklist($id);
-            $success = $tracklist->reset_subtracks_order();
+            $success = $tracklist->reindex_subtracks_by($by);
+            if ( !$success ) continue;
+            
+            if ( is_wp_error($success) ){
+                $errors++;
+            }else{
+                $updated++;
+            }
         }
+
+        WP_SoundSystem::debug_log(array('total'=>count($ids),'by'=>$by,'updated'=>$updated,'errors'=>$errors),"reindexed tracklists");
+        
+        return $updated;
+        
         
     }
     
