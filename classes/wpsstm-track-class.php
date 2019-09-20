@@ -89,8 +89,7 @@ class WPSSTM_Track{
 
         //subtrack or track id ?
         if ($this->subtrack_id){
-            $post = WPSSTM_Core_Tracks::get_subtrack_post($this->subtrack_id);
-            return $this->populate_track_post($post);
+            return $this->populate_subtrack_id($this->subtrack_id);
         }elseif ( $this->post_id ){
             return $this->populate_track_post($this->post_id);
         }
@@ -1265,7 +1264,26 @@ class WPSSTM_Track{
         return $this->post_id;
 
     }
-    
+
+    private function populate_subtrack_id($subtrack_id){
+        
+        //get post
+        $track_args = array(
+            'post_type' =>              wpsstm()->post_type_track,
+            'subtrack_query' =>         true,
+            'subtrack_id' =>            $subtrack_id
+        );
+
+        $query = new WP_Query( $track_args );
+        $posts = $query->posts;
+        
+        $post = isset($posts[0]) ? $posts[0] : null;
+        if (!$post) return;
+
+        //populate post
+        return $this->populate_subtrack_track_post($post);
+    }
+
     /*
     Populate extended track informations, usually post metas
     */
