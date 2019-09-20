@@ -126,7 +126,7 @@ $('wpsstm-tracklist,.wpsstm-standalone-track').each(function(index,tracklist) {
 
     tracklist.setAttribute('id','wpsstm-tracklist-'+index);
 
-    if (wpsstmL10n.ajax_tracks && tracklist.isExpired){
+    if (wpsstmL10n.ajax_tracklists && tracklist.isExpired){
         tracklist.reload_tracklist();
     }else{
 

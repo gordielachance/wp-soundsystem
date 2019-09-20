@@ -694,7 +694,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         if ( $this->tracklist_type === 'live' ){
 
-            $wait_for_ajax = ( wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() );
+            $wait_for_ajax = ( wpsstm()->get_options('ajax_tracklists') && !wp_doing_ajax() );
 
             if ( $this->is_expired && !$wait_for_ajax ){
                 $synced = $this->sync_radio();
