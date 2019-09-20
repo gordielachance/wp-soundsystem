@@ -114,7 +114,7 @@ class WP_SoundSystem {
             'details_engines'                   => array('musicbrainz','spotify'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
-            'ajax_tracklists'                       => false,//URGENT
+            'ajax_radios'                       => false,//URGENT//use ajax to sync radios
             'ajax_links'                        => true,//URGENT
             'ajax_autolink'                     => true,
         );
@@ -683,7 +683,7 @@ class WP_SoundSystem {
         $datas = array(
             'debug'                 => (WP_DEBUG),
             'ajaxurl'               => admin_url( 'admin-ajax.php' ),
-            'ajax_tracklists'           => wpsstm()->get_options('ajax_tracklists'),
+            'ajax_radios'           => wpsstm()->get_options('ajax_radios'),
             'ajax_links'            => wpsstm()->get_options('ajax_links'),
         );
 

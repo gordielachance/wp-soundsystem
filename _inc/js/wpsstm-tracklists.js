@@ -184,7 +184,7 @@ class WpsstmTracklist extends HTMLElement{
         /*
         Refresh
         */
-        if (wpsstmL10n.ajax_tracklists){
+        if (wpsstmL10n.ajax_radios){
             var refresh_bt = $(tracklist).find(".wpsstm-reload-bt");
             refresh_bt.click(function(e) {
                 e.preventDefault();
