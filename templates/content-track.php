@@ -1,6 +1,11 @@
 <?php
 global $wpsstm_track;
-$wpsstm_track->populate_track_metas();
+$wait_for_ajax = ( wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() );
+
+if (!$wait_for_ajax){
+    $wpsstm_track->populate_track_metas();
+}
+
 
 ?>
 <wpsstm-track <?php echo $wpsstm_track->get_track_attr();?>>
@@ -41,7 +46,7 @@ $wpsstm_track->populate_track_metas();
     </div>
     <?php
     //track links
-    $wait_for_ajax = ( wpsstm()->get_options('ajax_links') && !wp_doing_ajax() );
+    
     if ( !$wait_for_ajax ) { //load links now ?
         wpsstm_locate_template( 'content-track-links.php', true, false );
     }

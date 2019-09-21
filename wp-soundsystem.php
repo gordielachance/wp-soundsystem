@@ -115,7 +115,7 @@ class WP_SoundSystem {
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
             'ajax_radios'                       => false,//URGENT//use ajax to sync radios ?
-            'ajax_links'                        => true,//URGENT
+            'ajax_tracks'                       => true,//URGENT
             'ajax_autolink'                     => true,
         );
         
@@ -699,7 +699,7 @@ class WP_SoundSystem {
             'debug'                 => (WP_DEBUG),
             'ajaxurl'               => admin_url( 'admin-ajax.php' ),
             'ajax_radios'           => wpsstm()->get_options('ajax_radios'),
-            'ajax_links'            => wpsstm()->get_options('ajax_links'),
+            'ajax_tracks'            => wpsstm()->get_options('ajax_tracks'),
         );
 
         wp_localize_script( 'wpsstm-functions', 'wpsstmL10n', $datas );

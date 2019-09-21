@@ -126,7 +126,7 @@ class WpsstmTrack extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['trackstatus','wpsstm-playable','ajax-links','data-sources-count'];
+        return ['trackstatus','wpsstm-playable','ajax-tracks','data-sources-count'];
     }
     
     get status() {
@@ -150,16 +150,16 @@ class WpsstmTrack extends HTMLElement{
         }
     }
     
-    get ajax_links() {
-        return this.hasAttribute('ajax-links');
+    get ajax_tracks() {
+        return this.hasAttribute('ajax-tracks');
     }
 
-    set ajax_links(value) {
+    set ajax_tracks(value) {
         var isChecked = Boolean(value);
         if (isChecked) {
-            this.setAttribute('ajax-links',true);
+            this.setAttribute('ajax-tracks',true);
         } else {
-            this.removeAttribute('ajax-links');
+            this.removeAttribute('ajax-tracks');
         }
     }
 
@@ -301,7 +301,7 @@ class WpsstmTrack extends HTMLElement{
                 track_instances.removeAttr("wpsstm-playable");
             }
             
-            track_instances.removeAttr("ajax-links");
+            track_instances.removeAttr("ajax-tracks");
 
         })
         .fail(function() {
@@ -568,7 +568,7 @@ class WpsstmTrack extends HTMLElement{
         //keep only tracks that have not links populated yet
         tracks_slice = tracks_slice.filter(function (index) {
             var playable_links = $(this).find('wpsstm-track-link[wpsstm-playable]');
-            return this.ajax_links;
+            return this.ajax_tracks;
         });
         
         /*

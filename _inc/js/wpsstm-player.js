@@ -302,7 +302,7 @@ class WpsstmPlayer extends HTMLElement{
 
         //which one should we play?
         tracks_playable = tracks_playable.filter(function (track) {
-            return ( track.playable || track.ajax_links );
+            return ( track.playable || track.ajax_tracks );
         });
 
         
@@ -340,7 +340,7 @@ class WpsstmPlayer extends HTMLElement{
 
         //which one should we play?
         tracks_playable = tracks_playable.filter(function (track) {
-            return ( track.playable || track.ajax_links );
+            return ( track.playable || track.ajax_tracks );
         });
 
         //shuffle ?
@@ -443,7 +443,7 @@ class WpsstmPlayer extends HTMLElement{
             if(sourceLinks.length){
                 trackready.resolve();
             }else{
-                if ( requestedTrack.ajax_links ){
+                if ( requestedTrack.ajax_tracks ){
                     trackready = requestedTrack.append_links();
                 }else{
                     trackready.reject();

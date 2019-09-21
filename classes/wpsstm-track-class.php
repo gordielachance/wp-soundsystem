@@ -945,6 +945,7 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
             'can-autolink' =>                   ( $can_autolink && !$this->did_autolink() ),
+            'ajax-tracks' =>                    ( wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() ),
             'wpsstm-playable' =>                wpsstm()->get_options('player_enabled'),
         );
 
