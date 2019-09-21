@@ -1282,7 +1282,7 @@ class WPSSTM_Track{
         if (!$post) return;
 
         //populate post
-        return $this->populate_subtrack_track_post($post);
+        return $this->populate_track_post($post);
     }
 
     /*
