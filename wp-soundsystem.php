@@ -555,12 +555,11 @@ class WP_SoundSystem {
     
     /*
     Get the subtracks that have the same track ID & tracklist ID
-    //TOUFIX this returns the firsts subtracks IDs, while it would be preferable to get the last ones. 'ORDER BY subtrack_id DESC' does nothing.
     */
     private function batch_delete_duplicate_subtracks(){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
-        $querystr = "SELECT subtrack_id,track_id,tracklist_id, COUNT(*) as countOf FROM `$subtracks_table` GROUP BY track_id,tracklist_id HAVING countOf > 1";
+        $querystr = "SELECT subtrack_id,track_id,tracklist_id, COUNT(*) as countOf FROM `$subtracks_table` GROUP BY track_id,tracklist_id HAVING countOf > 1 ORDER BY MAX(subtrack_id)";
         if ( !$dupe_ids = $wpdb->get_col($querystr) ) return;
         $dupe_ids = implode(',',$dupe_ids);
         
