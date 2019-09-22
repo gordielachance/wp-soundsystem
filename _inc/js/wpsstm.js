@@ -72,16 +72,6 @@ $(document).on('click', 'a.wpsstm-close-notice', function(e) {
     notice.remove();
 });
 
-//queue tracks in player on tracklist init/refresh
-var bottomPlayer = $('wpsstm-player#wpsstm-bottom-player').get(0);
-if (bottomPlayer){
-    $(document).on( "wpsstmTracklistReady", function( event,tracklist ) {
-        if (tracklist.playable){
-            bottomPlayer.queueContainer(tracklist);
-        }
-    });
-}
-
 //action popups
 $(document).on('click', 'a.wpsstm-action-popup,li.wpsstm-action-popup>a', function(e) {
     e.preventDefault();

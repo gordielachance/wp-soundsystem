@@ -52,35 +52,7 @@ class WpsstmPlayer extends HTMLElement{
         var debug = {message:msg,player:this};
         wpsstm_debug(debug);
     }
-    
-    listenQueue(){
-        
-        var player = this;
-        
-        /*
-        Toggle display the player when the queue is updated
-        */
 
-        return new MutationObserver(function(mutationsList){
-            for(var mutation of mutationsList) {
-                
-                if (mutation.type == 'childList') {
-
-                    var tracks = $(player).find('wpsstm-track');
-
-                    //show player if it has a queue
-                    var showPlayer = ( tracks.length > 0);
-                    $(player).toggleClass('active',showPlayer);
-
-                    //clean tracks history
-                    var queueTracks =  $(player).find('wpsstm-track').toArray();
-                    player.tracksHistory = player.tracksHistory.filter(item => queueTracks.includes(item));
-                }
-            }
-        });
-        
-    }
-    
     render(){
 
         var player = this;
@@ -89,32 +61,7 @@ class WpsstmPlayer extends HTMLElement{
         ///
         player.shuffle_el =   $('#wpsstm-player-shuffle');
         player.loop_el =      $('#wpsstm-player-loop');
-        
-        /* Watch for queue changes*/
-        var queueNode = $(player).find('.player-queue').get(0);
-        var queueUpdated = player.listenQueue();
-        queueUpdated.observe(queueNode,{childList: true});
 
-        //Scroll to page track
-        $(player).on('click', '.wpsstm-track-position', function(e) {
-            e.preventDefault();
-            var track = this.closest('wpsstm-track');
-            var pageTrack = track.pageNode;
-
-            //https://stackoverflow.com/a/6677069/782013
-            $('html, body').animate({
-                scrollTop: $(pageTrack).offset().top - ( $(window).height() / 3) //not at the very top
-            }, 500);
-
-        });
-
-        //toggle queue
-        $(player).find('.wpsstm-player-action-queue').click(function(e) {
-            e.preventDefault();
-            $(this).toggleClass('active');
-            $(player).find('.player-queue').toggleClass('active');
-        });
-        
         //previous
         $(player).find('#wpsstm-player-extra-previous-track').click(function(e) {
             e.preventDefault();
@@ -213,9 +160,10 @@ class WpsstmPlayer extends HTMLElement{
 
     }
     
-    queueContainer(container){
+    /*
+    queueContainerOLD(container){
         var player = this;
-        
+
         $(container).addClass('tracks-container');
         var tracks = $(container).find('wpsstm-track');
         var icon = $(container).find('.wpsstm-tracklist-play-bt');
@@ -223,26 +171,13 @@ class WpsstmPlayer extends HTMLElement{
 
         tracks.each(function(index, track) {
 
-            var queueTrack = player.queueTrack(track);
-
             if ( $(track).hasClass('track-autoplay') ){
-                autoplayTrackIdx = Array.from(track.parentNode.children).indexOf(track);
+                autoplayTrackIdx = Array.from(track.parentNode.children).indexOf(track); //TOUFIX URGENT
             }
         });
         
         player.debug("Queued tracks: " + tracks.length );
         
-        //container play icon
-        $(container).on('click', '.wpsstm-tracklist-play-bt', function(e) {
-
-            var tracks = $(player).find('wpsstm-track');
-            var activeTrack = tracks.filter('.track-active').get(0);
-            var trackIdx = tracks.index( activeTrack );
-            trackIdx = (trackIdx > 0) ? trackIdx : 0;
-
-            player.play_queue(trackIdx);
-        });
-
         //autoplay
         if (typeof autoplayTrackIdx !== 'undefined'){
             player.debug("autoplay track #" + autoplayTrackIdx);
@@ -250,39 +185,13 @@ class WpsstmPlayer extends HTMLElement{
         }
 
     }
-
-    queueTrack(track){
-        var player = this;
-        var playerQueue = $(player).find('.player-queue').get(0);
-
-        //show play BT
-        $(track).find('.wpsstm-track-action-play').show();
-        //clone page track & append to queue
-        var queueTrack = $(track).clone().get(0);
-        
-        //set player
-        track.player = player;
-        queueTrack.player = player;
-
-        queueTrack.pageNode = track;
-        playerQueue.append(queueTrack);
-        //
-
-        //post track
-        track.queueNode = queueTrack;
-        
-        player.refresh_queue_tracks_positions();
-
-        return queueTrack;
-        
-    }
+    */
 
     get_previous_track_idx(){
         var player = this;
         var tracks_playable = [];
 
-        var queue = $(player.current_track.parentNode);
-        var tracks = queue.find('wpsstm-track');
+        var tracks = $(player).closest('wpsstm-tracklist').find('wpsstm-track');
         var current_track_idx = tracks.index( $(player.current_track) );
         if (current_track_idx == -1) return; //index not found
         
@@ -302,7 +211,7 @@ class WpsstmPlayer extends HTMLElement{
 
         //which one should we play?
         tracks_playable = tracks_playable.filter(function (track) {
-            return ( track.playable || track.ajax_tracks );
+            return ( track.playable || track.ajax_details );
         });
 
         
@@ -321,8 +230,7 @@ class WpsstmPlayer extends HTMLElement{
         var player = this;
         var tracks_playable = [];
 
-        var queue = $(player.current_track.parentNode);
-        var tracks = queue.find('wpsstm-track')
+        var tracks = $(player).closest('wpsstm-tracklist').find('wpsstm-track');
         var current_track_idx = tracks.index( $(player.current_track) );
         if (current_track_idx == -1) return; //index not found
         
@@ -340,7 +248,7 @@ class WpsstmPlayer extends HTMLElement{
 
         //which one should we play?
         tracks_playable = tracks_playable.filter(function (track) {
-            return ( track.playable || track.ajax_tracks );
+            return ( track.playable || track.ajax_details );
         });
 
         //shuffle ?
@@ -358,8 +266,7 @@ class WpsstmPlayer extends HTMLElement{
     
     previous_track_jump(){
         var player = this;
-        var queue = $(player.current_track.parentNode);
-        var tracks = queue.find('wpsstm-track');
+        var tracks = $(player).closest('wpsstm-tracklist').find('wpsstm-track');
         var current_track_idx = tracks.index( $(player.current_track) );
         var track_idx = player.get_previous_track_idx();
 
@@ -373,8 +280,7 @@ class WpsstmPlayer extends HTMLElement{
     
     next_track_jump(){
         var player = this;
-        var queue = $(player.current_track.parentNode);
-        var tracks = queue.find('wpsstm-track');
+        var tracks = $(player).closest('wpsstm-tracklist').find('wpsstm-track');
         var current_track_idx = tracks.index( $(player.current_track) );
         var track_idx = player.get_next_track_idx();
 
@@ -390,7 +296,7 @@ class WpsstmPlayer extends HTMLElement{
         
         */
         if (track_idx < current_track_idx){
-            var tracklist = player.current_track.pageNode.closest('wpsstm-tracklist');
+            var tracklist = $(player).closest('wpsstm-tracklist');
             $(tracklist).trigger('wpsstmTracklistLoop',[player]);
         }
 
@@ -401,10 +307,9 @@ class WpsstmPlayer extends HTMLElement{
         
         track_idx = (typeof track_idx !== 'undefined') ? track_idx : 0;
         link_idx = (typeof link_idx !== 'undefined') ? link_idx : 0;
-        var allTracks = $(player).find('.player-queue wpsstm-track');
-        var requestedTrack = $(player).find('.player-queue wpsstm-track').get(track_idx);
+        var allTracks = $(player).closest('wpsstm-tracklist').find('wpsstm-track');
+        var requestedTrack = allTracks.get(track_idx);
         var requestedLink = $(requestedTrack).find('wpsstm-track-link').get(link_idx);
-        var requestedTrackInstances = requestedTrack.get_instances();
 
         if (player.current_track){
 
@@ -429,7 +334,7 @@ class WpsstmPlayer extends HTMLElement{
         }
         
         /*
-        Eventually load track links
+        Eventually load track details
         */
 
         requestedTrack.debug('request track');
@@ -443,8 +348,8 @@ class WpsstmPlayer extends HTMLElement{
             if(sourceLinks.length){
                 trackready.resolve();
             }else{
-                if ( requestedTrack.ajax_tracks ){
-                    trackready = requestedTrack.append_links();
+                if ( requestedTrack.ajax_details ){
+                    trackready = requestedTrack.load_details();
                 }else{
                     trackready.reject();
                 }
@@ -476,15 +381,6 @@ class WpsstmPlayer extends HTMLElement{
 
     }
 
-    refresh_queue_tracks_positions(){
-        var player = this;
-        var all_rows = $(player).find( 'wpsstm-track' );
-        jQuery.each( all_rows, function( key, value ) {
-            var position = jQuery(this).find('.wpsstm-track-position [itemprop="position"]');
-            position.text(key + 1);
-        });
-    }
-
     render_queue_controls(){
         
         var player = this;
@@ -514,7 +410,7 @@ class WpsstmPlayer extends HTMLElement{
 $(document).on( "wpsstmSourceInit", function( event, link ) {
 
     var track =                 link.closest('wpsstm-track');
-    var scrobble_icon =         $(track.player).find('.wpsstm-player-action-scrobbler');
+    var scrobble_icon =         $(track.tracklist.player).find('.wpsstm-player-action-scrobbler');
     var scrobbler_enabled =     scrobble_icon.hasClass('active');
 
     var startTrack = function(){
@@ -522,7 +418,7 @@ $(document).on( "wpsstmSourceInit", function( event, link ) {
     }
 
     //start track event, fired only once
-    $(track.player.current_media).one('play', startTrack);
+    $(track.tracklist.player.current_media).one('play', startTrack);
 
 });
 

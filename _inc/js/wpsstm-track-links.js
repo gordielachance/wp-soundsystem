@@ -33,7 +33,6 @@ class WpsstmLink extends HTMLElement{
         if (!isValueChanged) return;
         
         var source = this;
-        var sourceInstances = source.get_instances();
 
         //source.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
 
@@ -41,20 +40,20 @@ class WpsstmLink extends HTMLElement{
             case 'linkstatus':
 
                 if ( !newVal ){
-                    sourceInstances.removeClass('link-active link-loading link-playing');                    
+                    $(source).removeClass('link-active link-loading link-playing');                    
                 }
                 
                 if (newVal == 'request'){
                     source.debug("request source: " + source.src);
-                    sourceInstances.addClass('link-active link-loading');
+                    $(source).addClass('link-active link-loading');
                 }
                 
                 if ( newVal == 'playing' ){
-                    sourceInstances.removeClass('link-loading').addClass('link-playing link-has-played');
+                    $(source).removeClass('link-loading').addClass('link-playing link-has-played');
                 }
                 
                 if ( newVal == 'paused' ){
-                    sourceInstances.removeClass('link-playing');
+                    $(source).removeClass('link-playing');
                 }
                 
                 
@@ -100,12 +99,7 @@ class WpsstmLink extends HTMLElement{
         var debug = {message:msg,link:this};
         wpsstm_debug(debug);
     }
-    
-    get_instances(){
-        var self = this;
-        return $(document).find('wpsstm-track-link[data-wpsstm-link-id="'+self.post_id+'"]');
-    }
-    
+
     render(){
         var self = this;
         
@@ -129,20 +123,17 @@ class WpsstmLink extends HTMLElement{
             var linkIdx = Array.from(link.parentNode.children).indexOf(link);
 
             var track = self.track;
-            if (track.queueNode){ //page track, get the queue track
-                track = track.queueNode;
-            }
 
             var trackIdx = Array.from(track.parentNode.children).indexOf(track);
 
-            if(track.player){
+            if(track.tracklist.player){
                 //toggle tracklist links
                 if ( !$(track).hasClass('track-playing') ){
                     var list = $(track).find('.wpsstm-track-links-list');
                     $( list ).removeClass('active');
                 }
 
-                track.player.play_queue(trackIdx,linkIdx);
+                track.tracklist.player.play_queue(trackIdx,linkIdx);
             }
 
         });
@@ -217,9 +208,6 @@ class WpsstmLink extends HTMLElement{
     play_link(){
         var link = this;
         var track = this.track;
-        var track_instances = link.track.get_instances();
-        var link_instances = link.get_instances();
-        var tracks_container = track_instances.parents('.tracks-container');
         var success = $.Deferred();
         
         if( !link.playable ){
@@ -228,61 +216,61 @@ class WpsstmLink extends HTMLElement{
         }
 
         ///
-        $(link.track.player.current_media).off(); //remove old events
+        $(link.track.tracklist.player.current_media).off(); //remove old events
         link.status = 'request';
-        link.track.player.current_link = link;
+        link.track.tracklist.player.current_link = link;
         $(document).trigger( "wpsstmSourceInit",[link] ); //custom event
 
         /*
         register new events
         */
 
-        $(track.player.current_media).on('loadeddata', function() {
-            track.player.debug('source loaded');
-            track.player.current_media.play();
+        $(track.tracklist.player.current_media).on('loadeddata', function() {
+            track.tracklist.player.debug('source loaded');
+            track.tracklist.player.current_media.play();
         });
 
-        $(track.player.current_media).on('error', function(error) {
+        $(track.tracklist.player.current_media).on('error', function(error) {
             link.playable = false;
             link.status = '';
             track.status = '';
             success.reject(error);
         });
 
-        $(track.player.current_media).on('play', function() {
+        $(track.tracklist.player.current_media).on('play', function() {
             link.status = 'playing';
             track.status = 'playing';
             success.resolve();
         });
 
-        $(track.player.current_media).on('pause', function() {
+        $(track.tracklist.player.current_media).on('pause', function() {
             link.status = 'paused';
             track.status = 'paused';
         });
 
-        $(track.player.current_media).on('ended', function() {
+        $(track.tracklist.player.current_media).on('ended', function() {
 
-            track.player.debug('media - ended');
+            track.tracklist.player.debug('media - ended');
             link.status = '';
             
             //Play next song if any
-            track.player.next_track_jump();
+            track.tracklist.player.next_track_jump();
             
             
         });
 
         success.done(function(v) {
-            track.player.tracksHistory.push(track);
-            link_instances.playable = true;
+            track.tracklist.player.tracksHistory.push(track);
+            link.playable = true;
             //TOUFIX ajax --> +1 track play; user now playing...
         })
         success.fail(function() {
-            link_instances.playable = false;
+            link.playable = false;
         })
 
         ////
-        track.player.current_media.setSrc(link.src);
-        track.player.current_media.load();
+        track.tracklist.player.current_media.setSrc(link.src);
+        track.tracklist.player.current_media.load();
         
         ////
 

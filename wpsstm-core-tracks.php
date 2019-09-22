@@ -73,8 +73,8 @@ class WPSSTM_Core_Tracks{
         /*
         AJAX
         */
-        add_action('wp_ajax_wpsstm_get_track_links', array($this,'ajax_track_get_links'));
-        add_action('wp_ajax_nopriv_wpsstm_get_track_links', array($this,'ajax_track_get_links'));
+        add_action('wp_ajax_wpsstm_get_track_details', array($this,'ajax_get_track_details'));
+        add_action('wp_ajax_nopriv_wpsstm_get_track_details', array($this,'ajax_get_track_details'));
         
         add_action('wp_ajax_wpsstm_track_start', array($this,'ajax_track_start'));
         add_action('wp_ajax_nopriv_wpsstm_track_start', array($this,'ajax_track_start'));
@@ -85,8 +85,6 @@ class WPSSTM_Core_Tracks{
         add_action('wp_ajax_wpsstm_track_toggle_favorite', array($this,'ajax_track_toggle_favorite'));
         add_action('wp_ajax_wpsstm_subtrack_dequeue', array($this,'ajax_subtrack_dequeue'));
         add_action('wp_ajax_wpsstm_track_trash', array($this,'ajax_track_trash'));
-
-        //add_action('wp', array($this,'test_autolink_ajax') );
 
         add_action('wp_ajax_wpsstm_update_track_links_order', array($this,'ajax_update_track_links_order'));
 
@@ -1118,7 +1116,7 @@ class WPSSTM_Core_Tracks{
         wp_send_json( $result ); 
     }
 
-    function ajax_track_get_links(){
+    function ajax_get_track_details(){
         
         global $wpsstm_track;
 
@@ -1137,7 +1135,7 @@ class WPSSTM_Core_Tracks{
         );
    
         ob_start();
-        wpsstm_locate_template( 'content-track-links.php', true, false );
+        wpsstm_locate_template( 'content-track.php', true, false );
         $content = ob_get_clean();
 
         $result['html'] = $content;
@@ -1300,19 +1298,6 @@ class WPSSTM_Core_Tracks{
 
         header('Content-type: application/json');
         wp_send_json( $result );
-    }
-
-    function test_autolink_ajax(){
-        
-        if ( is_admin() ) return;
-    
-        $_POST = array(
-            'track' => array('artist'=>'U2','title'=>'Sunday Bloody Sunday')
-        );
-        
-        WP_SoundSystem::debug_log($_POST,'testing autolink AJAX');
-        
-        $this->ajax_track_get_links();
     }
 
     function delete_track_links($post_id){

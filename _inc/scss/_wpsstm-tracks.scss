@@ -102,7 +102,6 @@ wpsstm-track{
     }
     
     .wpsstm-track-action-play{
-        display:none; //display using JS
         margin:0;
     }
     
@@ -113,7 +112,7 @@ wpsstm-track{
     &.track-playing .wpsstm-track-action-play:before{
         content:"\f04c"; //.fa-pause;
     }
-    &:not([ajax-tracks]):not([wpsstm-playable]) .wpsstm-track-action-play:before{
+    &:not([ajax-details]):not([wpsstm-playable]) .wpsstm-track-action-play:before{
         content:"\f071"; //.fa-exclamation-triangle;
     }
 
@@ -174,7 +173,7 @@ wpsstm-track{
         }
     }
     
-    &.track-links-loading{
+    &.track-details-loading{
         @extend .wpsstm-freeze;
         @include striped-bg();
     }

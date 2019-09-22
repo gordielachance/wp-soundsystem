@@ -234,20 +234,20 @@ wpsstm-tracklist{
     
     //play BT
 
-    &:not(.tracks-container-has-played){
+    &:not(.tracklist-has-played){
         .wpsstm-tracklist-play-bt{
             animation: opacityPulse 1s linear infinite;
         }
     }
-    &.tracks-container-loading .wpsstm-tracklist-play-bt .wpsstm-icon{
+    &.tracklist-loading .wpsstm-tracklist-play-bt .wpsstm-icon{
         @extend .wpsstm-loading-icon;
         @extend .wpsstm-freeze;
     }
-    &:not(.tracks-container-playing) .wpsstm-tracklist-play-bt .wpsstm-icon:before{
+    &:not(.tracklist-playing) .wpsstm-tracklist-play-bt .wpsstm-icon:before{
         content:"\f04b"; //.fa-play
     }
     
-    &.tracks-container-has-played{
+    &.tracklist-has-played{
         .wpsstm-tracklist-cover{
             .wpsstm-tracklist-play-bt{
                 display:none;
@@ -258,7 +258,7 @@ wpsstm-tracklist{
         }
     }
 
-    &.tracks-container-playing{
+    &.tracklist-playing{
         .wpsstm-tracklist-play-bt .wpsstm-icon:before{
             content:"\f04c"; //.fa-pause;
         }

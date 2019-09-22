@@ -14,12 +14,6 @@ $notice = $wpsstm_tracklist->importer_notice();
 <wpsstm-tracklist class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php
     wpsstm_locate_template( 'content-tracklist-header.php', true, false );
-
-    //actions
-    if ( $actions = $wpsstm_tracklist->get_tracklist_actions() ){
-        $list = get_actions_list($actions,'tracklist');
-        echo $list;
-    }
     
     /*
     Notices
@@ -37,6 +31,18 @@ $notice = $wpsstm_tracklist->importer_notice();
     */
 
     if ( $wpsstm_tracklist->have_subtracks() ) {
+        
+        //actions
+        if ( $actions = $wpsstm_tracklist->get_tracklist_actions() ){
+            $list = get_actions_list($actions,'tracklist');
+            echo $list;
+        }
+        
+        /*
+        Player
+        */
+        wpsstm_locate_template( 'player.php', true, false );
+        
     ?>
         <div class="wpsstm-tracks-list">
             <?php

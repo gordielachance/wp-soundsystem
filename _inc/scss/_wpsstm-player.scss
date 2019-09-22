@@ -4,20 +4,7 @@ $player-bg-color:#222;
 $player-text-color:#FFF;
 
 wpsstm-player{
-    
-    &:not(.active){
-        display:none;
-    }
-    
-    &#wpsstm-bottom-player{
-        position:fixed;
-        width:100%;
-        padding:0;
-        bottom: 0;
-        min-height:0em;
-        z-index: 50;
-    }
-
+    display:block;
     background:$player-bg-color;
     color:$player-text-color;
     a,a:hover,a:focus{
@@ -45,15 +32,6 @@ wpsstm-player{
 
                 span{
                     display:none;
-                }
-                
-                &.wpsstm-player-action-queue{
-                    &:before{
-                        content: "\f078";//.chevron-down;
-                    }
-                    &.active:before{
-                        content: "\f077";//.fa-chevron-up;
-                    }
                 }
 
                 &.wpsstm-player-action-scrobbler{
@@ -92,18 +70,6 @@ wpsstm-player{
             width:100%!important;
         }
     }
-    
-    .player-queue{
-        display:initial;
-        overflow:auto;
-        max-height: 50vh;
-        &:not(.active){
-            wpsstm-track:not(.track-active){
-                display:none;
-            }
-        }
-    }
-
 }
 
 /*
