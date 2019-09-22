@@ -45,14 +45,14 @@ class WpsstmTrack extends HTMLElement{
 
                 if ( !newVal ){
                     $(track).removeClass('track-active track-loading');
-                    $(track.tracklist.player).removeClass('player-playing');
+                    $(track.tracklist).removeClass('tracklist-playing');
 
                     track.end_track();
                 }
 
                 if (newVal == 'request'){
-                    track.tracklist.player.current_track = track;
-                    track.tracklist.player.render_queue_controls();
+                    track.tracklist.current_track = track;
+                    track.tracklist.render_queue_controls();
                     $(track).addClass('track-active track-loading');
                     $(track.tracklist).addClass('tracklist-loading tracklist-has-played');
                 }
@@ -60,13 +60,10 @@ class WpsstmTrack extends HTMLElement{
                 if ( newVal == 'playing' ){
 
                     $(track).removeClass('track-loading').addClass('track-playing track-has-played');
-                    
-                    $(track.tracklist.player).addClass('player-playing player-has-played');
                     $(track.tracklist).removeClass('tracklist-loading').addClass('tracklist-playing tracklist-has-played');
                 }
                 
                 if ( newVal == 'paused' ){
-                    $(track.tracklist.player).removeClass('player-playing');
                     $(track.tracklist).removeClass('tracklist-playing');
                     $(track).removeClass('track-playing');
                 }
@@ -228,8 +225,6 @@ class WpsstmTrack extends HTMLElement{
         //play/pause
         $(track).on('click','.wpsstm-track-action-play', function(e) {
             e.preventDefault();
-            
-            if (!track.tracklist.player) return;
 
             var trackIdx = Array.from(track.parentNode.children).indexOf(track);
 
@@ -238,8 +233,7 @@ class WpsstmTrack extends HTMLElement{
             var linkIdx = links.index( activeLink );
             linkIdx = (linkIdx > 0) ? linkIdx : 0;
 
-            track.tracklist.player.play_queue(trackIdx,linkIdx);
-
+            track.tracklist.play_queue(trackIdx,linkIdx);
 
         });
         
@@ -485,6 +479,8 @@ class WpsstmTrack extends HTMLElement{
             success.resolve();
             return success.promise();
         }
+        
+        
 
         var link_play = track.play_first_available_link(link_idx);
 
@@ -502,7 +498,7 @@ class WpsstmTrack extends HTMLElement{
 
         success.fail(function() {
             track.playable = false;
-            track.tracklist.player.next_track_jump();
+            track.tracklist.next_track_jump();
         })
 
         return success.promise();
@@ -571,8 +567,8 @@ class WpsstmTrack extends HTMLElement{
         track.debug("end_track");
         $(track).removeClass('track-playing');
 
-        if (track.tracklist.player && track.tracklist.player.current_link){
-            track.tracklist.player.current_media.pause();
+        if (track.tracklist && track.tracklist.current_link){
+            track.tracklist.current_media.pause();
             $(track).find('wpsstm-track-link').removeClass('link-playing link-active');
         }
 

@@ -7,6 +7,15 @@ wpsstm-player{
     display:block;
     background:$player-bg-color;
     color:$player-text-color;
+    
+    &.wpsstm-bottom-player{
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        left: 0;
+        z-index: 50;
+    }
+    
     a,a:hover,a:focus{
         color:$player-text-color;
     }

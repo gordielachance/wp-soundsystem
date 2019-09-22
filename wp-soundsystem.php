@@ -150,7 +150,6 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-post-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-track-link-class.php';
-        require $this->plugin_dir . 'classes/wpsstm-player-class.php';
         
         //include APIs/services stuff (lastfm,youtube,spotify,etc.)
         $this->load_services();
@@ -699,6 +698,8 @@ class WP_SoundSystem {
             'ajaxurl'               => admin_url( 'admin-ajax.php' ),
             'ajax_radios'           => wpsstm()->get_options('ajax_radios'),
             'ajax_tracks'            => wpsstm()->get_options('ajax_tracks'),
+            'leave_page_text'       =>      __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),
+            'plugin_path'           =>      trailingslashit( get_bloginfo('url') ) . WPINC . '/js/mediaelement/', //do not forget final slash here
         );
 
         wp_localize_script( 'wpsstm-functions', 'wpsstmL10n', $datas );

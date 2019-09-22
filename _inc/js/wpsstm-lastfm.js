@@ -162,11 +162,11 @@ class WpsstmLastFM {
     
 }
 
-$(document).on( "wpsstmPlayerInit", function( event,player ) {
+$(document).on( "wpsstmPlayerInit", function( event,tracklist ) {
     
-    var player = this;
+    var tracklist = this;
 
-    var scrobble_icon =         $(player).find('.wpsstm-player-action-scrobbler');
+    var scrobble_icon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
 
     //click toggle scrobbling
     scrobble_icon.click(function(e) {
@@ -191,8 +191,8 @@ $(document).on( "wpsstmPlayerInit", function( event,player ) {
 });
 
 $(document).on( "wpsstmTrackStart", function( event, track ) {
-
-    var scrobble_icon =         $(track.tracklist.player).find('.wpsstm-player-action-scrobbler');
+    var tracklist =             $(track).closest('wpsstm-tracklist');
+    var scrobble_icon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
     var scrobbler_enabled =     scrobble_icon.hasClass('active');
 
     var nowPlayingTrack = function(){
@@ -212,7 +212,7 @@ $(document).on( "wpsstmTrackStart", function( event, track ) {
     }
 
     var ScrobbleTrack = function() {
-        var duration = track.tracklist.player.current_media.duration;
+        var duration = track.tracklist.current_media.duration;
         if ( duration < 30) return;
 
         if (scrobbler_enabled){
@@ -236,10 +236,10 @@ $(document).on( "wpsstmTrackStart", function( event, track ) {
     }
 
     //now playing
-    $(track.tracklist.player.current_media).one('play', nowPlayingTrack);
+    $(track.tracklist.current_media).one('play', nowPlayingTrack);
 
     //track end
-    $(track.tracklist.player.current_media).one('ended', ScrobbleTrack);
+    $(track.tracklist.current_media).one('ended', ScrobbleTrack);
 
 });
 
