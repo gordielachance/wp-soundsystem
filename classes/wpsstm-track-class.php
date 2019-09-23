@@ -934,6 +934,8 @@ class WPSSTM_Track{
     
     function get_track_attr($args=array()){
         global $wpsstm_tracklist;
+        
+        $ajax_details = ( wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() );//should we load the track details through ajax ?
         $can_autolink = ( WPSSTM_Core_Track_Links::can_autolink() === true);
 
         $attr = array(
@@ -944,8 +946,8 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
-            'can-autolink' =>                   ( $can_autolink && !$this->did_autolink() ),
-            'ajax-details' =>                   ( wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() ),//should we need the track details through ajax ?
+            'ajax-details' =>                   $ajax_details,
+            'can-autolink' =>                   ( !$ajax_details && $can_autolink && !$this->did_autolink() ),
             'wpsstm-playable' =>                wpsstm()->get_options('player_enabled'),
         );
 

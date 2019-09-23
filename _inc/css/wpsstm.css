@@ -933,7 +933,7 @@ wpsstm-track.track-playing .wpsstm-track-action-play:before {
   content: "\f04c";
 }
 /* line 115, ../scss/_wpsstm-tracks.scss */
-wpsstm-track:not([ajax-details]):not([wpsstm-playable]) .wpsstm-track-action-play:before {
+wpsstm-track:not([can-autolink]):not([wpsstm-playable]) .wpsstm-track-action-play:before {
   content: "\f071";
 }
 /* line 120, ../scss/_wpsstm-tracks.scss */
@@ -990,7 +990,7 @@ wpsstm-track:not(.favorited-track) .wpsstm-track-action.action-unfavorite {
   display: none;
 }
 /* line 176, ../scss/_wpsstm-tracks.scss */
-wpsstm-track.track-details-loading {
+wpsstm-track.track-details-loading,wpsstm-track.track-links-loading {
   background-size: 30px 30px;
   background-image: linear-gradient(45deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.05) 50%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0) 75%, rgba(0, 0, 0, 0));
   animation: barberpole 0.5s linear infinite;

@@ -4,6 +4,7 @@ $wpsstm_track->populate_links();
 
 /*
 Autolink ?
+//TOUFIX URGENT
 */
 $wait_for_ajax = ( wpsstm()->get_options('ajax_autolink') && !wp_doing_ajax() );
 if ( !$wpsstm_track->have_links() && !$wait_for_ajax ){

@@ -110,7 +110,7 @@ class WpsstmTrack extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['trackstatus','wpsstm-playable','ajax-details','data-sources-count'];
+        return ['trackstatus','wpsstm-playable','can-autolink','data-sources-count'];
     }
     
     get status() {
@@ -134,19 +134,18 @@ class WpsstmTrack extends HTMLElement{
         }
     }
     
-    get ajax_details() {
-        return this.hasAttribute('ajax-details');
+    get can_autolink() {
+        return this.hasAttribute('can-autolink');
     }
 
-    set ajax_details(value) {
+    set can_autolink(value) {
         var isChecked = Boolean(value);
         if (isChecked) {
-            this.setAttribute('ajax-details',true);
+            this.setAttribute('can-autolink',true);
         } else {
-            this.removeAttribute('ajax-details');
+            this.removeAttribute('can-autolink');
         }
     }
-
     debug(msg){
         var debug = {message:msg,track:this};
         wpsstm_debug(debug);
@@ -275,6 +274,51 @@ class WpsstmTrack extends HTMLElement{
         });
 
         return ajax;
+    }
+    
+    track_autolink() {
+
+        var track = this;
+
+        track.addClass('track-links-loading');
+
+        var ajax_data = {
+            action:     'wpsstm_get_track_links_autolinked',
+            track:      track.to_ajax(),   
+        };
+
+        var autolink_request = $.ajax({
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
+        })
+        .done(function(data) {
+
+            if ( data.success ){
+                
+                var newLinksContainer = $(data.html);
+                var newLinks = newLinksContainer.find('wpsstm-track-link');
+
+                track.find('.wpsstm-track-links-list').empty().append(newLinks);
+                
+            }else{
+                track.debug(ajax_data,"autolink failed");
+                track.removeAttr("wpsstm-playable");
+            }
+            
+            track.removeAttr("can-autolink");
+
+        })
+        .fail(function() {
+            track.debug(ajax_data,"autolink ajax request failed");
+            track.removeAttr("wpsstm-playable");
+        })
+        .always(function() {
+            track.removeClass('track-links-loading');
+        });
+
+        return autolink_request;
     }
 
     //reduce object for communication between JS & PHP
@@ -493,7 +537,9 @@ class WpsstmTrack extends HTMLElement{
         })
 
         success.done(function(v) {
-            track.next_tracks_links();
+            if (wpsstmL10n.autolink){
+                track.next_tracks_autolink();
+            }
         })
 
         success.fail(function() {
@@ -502,6 +548,48 @@ class WpsstmTrack extends HTMLElement{
         })
 
         return success.promise();
+
+    }
+    
+    /*
+    preload links for the X next tracks
+    */
+    next_tracks_autolink(){
+        var track = this;
+        var tracks = $(track.tracklist).find('wpsstm-track');
+
+        var max_items = 3; //number of following tracks to preload //TOUFIX should be in php options
+        var track_index = tracks.index( track );
+        if (track_index < 0) return; //index not found
+
+        //keep only tracks after this one
+        var rtrack_in = track_index + 1;
+        var next_tracks = tracks.slice( rtrack_in );
+        
+        //consider only the next X tracks
+        var tracks_slice = next_tracks.slice( 0, max_items );
+
+        //keep only tracks that needs to be autolinked
+        tracks_slice = tracks_slice.filter(function (index) {
+            var playable_links = $(this).find('wpsstm-track-link[wpsstm-playable]');
+            return ( this.can_autolink && !playable_links.length );
+        });
+        
+        /*
+        TOUFIX TOUCHECK this preloads the tracks SEQUENCIALLY
+        var results = [];
+        return tracks_slice.toArray().reduce((promise, track) => {
+            return promise.then((result) => {
+                return track.track_autolink().then(result => results.push(result));
+            })
+            .catch(console.error);
+        }, Promise.resolve());
+        */
+        
+        $(tracks_slice).each(function(index, track_to_preload) {	
+            track_to_preload.track_autolink();	
+        });
+        
 
     }
     

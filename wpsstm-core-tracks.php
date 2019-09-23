@@ -76,6 +76,9 @@ class WPSSTM_Core_Tracks{
         add_action('wp_ajax_wpsstm_get_track_details', array($this,'ajax_get_track_details'));
         add_action('wp_ajax_nopriv_wpsstm_get_track_details', array($this,'ajax_get_track_details'));
         
+        add_action('wp_ajax_wpsstm_get_track_links_autolinked', array($this,'ajax_get_track_links_autolinked'));
+        add_action('wp_ajax_nopriv_wpsstm_get_track_links_autolinked', array($this,'ajax_get_track_links_autolinked'));
+        
         add_action('wp_ajax_wpsstm_track_start', array($this,'ajax_track_start'));
         add_action('wp_ajax_nopriv_wpsstm_track_start', array($this,'ajax_track_start'));
 
@@ -1119,11 +1122,11 @@ class WPSSTM_Core_Tracks{
     function ajax_get_track_details(){
         
         global $wpsstm_track;
-
         $ajax_data = wp_unslash($_POST);
-
+        
         $wpsstm_track = new WPSSTM_Track();
-        $wpsstm_track->from_array($ajax_data['track']);
+        $track_arr = wpsstm_get_array_value('track',$ajax_data);
+        $wpsstm_track->from_array($track_arr);
         
         $result = array(
             'input'         => $ajax_data,
@@ -1146,6 +1149,44 @@ class WPSSTM_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result );
 
+    }
+    
+    function ajax_get_track_links_autolinked(){
+        
+        global $wpsstm_track;
+        $ajax_data = wp_unslash($_POST);
+        
+        $wpsstm_track = new WPSSTM_Track();
+        $track_arr = wpsstm_get_array_value('track',$ajax_data);
+        $wpsstm_track->from_array($track_arr);
+        
+        $result = array(
+            'input'         => $ajax_data,
+            'timestamp'     => current_time('timestamp'),
+            'error_code'    => null,
+            'message'       => null,
+            'track'         => $wpsstm_track,
+            'success'       => false,
+        );
+   
+        //autolink
+        $new_ids = array();
+        $new_ids = $wpsstm_track->autolink();
+        if ( is_wp_error($new_ids) ){
+            $result['error_code'] = $new_ids->get_error_code();
+            $result['message'] = $new_ids->get_error_message();
+        }else{
+            
+            ob_start();
+            wpsstm_locate_template( 'content-track-links.php', true, false );
+            $content = ob_get_clean();
+            $result['html'] = $content;
+            $result['success'] = true;
+        }
+        
+        $result['track'] = $wpsstm_track->to_array(); //maybe we have a new post ID here, if the track has been created
+        header('Content-type: application/json');
+        wp_send_json( $result );
     }
     
     function ajax_track_start(){
