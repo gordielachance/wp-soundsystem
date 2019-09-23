@@ -40,7 +40,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     var $preset;
     
-    public $classes = array();
+    public $classes = array('wpsstm-post-tracklist','tracklist-bottom-player');
 
     function __construct($post = null ){
         

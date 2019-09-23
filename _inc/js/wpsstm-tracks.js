@@ -37,6 +37,7 @@ class WpsstmTrack extends HTMLElement{
         if (!isValueChanged) return;
         
         var track = this;
+        if (!track.tracklist) return; //ignore player track //URGENT TOUCHECK
 
         //track.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
 

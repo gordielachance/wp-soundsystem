@@ -2,7 +2,6 @@
 
 global $wpsstm_tracklist;
 $wpsstm_tracklist->populate_subtracks();
-$wpsstm_tracklist->classes[] = 'wpsstm-post-tracklist';
 
 //imported tracklist notice
 //TOUFIX is this the right place ?

@@ -849,8 +849,9 @@ class WpsstmTracklist extends HTMLElement{
         */
 
         var playerTrackContainer = tracklist.$player.find('.player-track');
-        var playerTrack = $(tracklist.current_track).html();
-        playerTrackContainer.html(playerTrack);
+        var playerTrack = $(tracklist.current_track).clone();
+        playerTrack.tracklist = tracklist;
+        playerTrackContainer.empty().append(playerTrack);
         
         /*
         Previous track bt

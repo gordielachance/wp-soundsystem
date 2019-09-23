@@ -43,6 +43,17 @@ wpsstm-tracklist{
         }
     }
     
+    &.tracklist-bottom-player wpsstm-player{
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        left: 0;
+        z-index: 50;
+    }
+    &:not(.tracklist-active).tracklist-bottom-player wpsstm-player{
+        display:none;
+    }
+    
     &.tracklist-expired{
         .wpsstm-reload-bt{
             animation: opacityPulse 1s linear infinite;
