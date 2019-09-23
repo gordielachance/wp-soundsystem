@@ -2,6 +2,7 @@
 global $wpsstm_tracklist;
 ?>
 <wpsstm-player class="wpsstm-bottom-player">
+    <div class="player-row player-track wpsstm-track"><!--loaded through JS--></div>     
     <div class="player-row">
             <span id="" class="wpsstm-player-extra wpsstm-previous-track-bt"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></span>
             <span id="wpsstm-audio-container">

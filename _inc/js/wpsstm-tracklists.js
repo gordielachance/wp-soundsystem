@@ -310,7 +310,7 @@ class WpsstmTracklist extends HTMLElement{
                 tracklist.$loopTracksBt.removeClass('active');
             }
             
-            tracklist.render_queue_controls();
+            tracklist.update_player();
 
         });
         
@@ -785,7 +785,10 @@ class WpsstmTracklist extends HTMLElement{
             tracklist.current_track.status = '';
         }
 
-        requestedTrack.debug('request track');
+        
+        console.log("REQUESTEDTRACK");
+        console.log(requestedTrack);
+        
         requestedTrack.status = 'request';
         
         /*
@@ -793,6 +796,8 @@ class WpsstmTracklist extends HTMLElement{
         */
         
         var trackready = $.Deferred();
+        trackready.resolve();//URGENT
+        /*
 
         if ( requestedTrack.playable ){
             var sourceLinks = $(requestedTrack).find('wpsstm-track-link').filter('[wpsstm-playable]');
@@ -801,7 +806,7 @@ class WpsstmTracklist extends HTMLElement{
                 trackready.resolve();
             }else{
                 if ( requestedTrack.ajax_details ){
-                    trackready = requestedTrack.load_details();
+                    trackready = requestedTrack.track_autolink();
                 }else{
                     trackready.reject();
                 }
@@ -810,6 +815,7 @@ class WpsstmTracklist extends HTMLElement{
         }else{
             trackready.reject();
         }
+        */
         
         /*
         Track is now ready (or not, here I come)
@@ -819,7 +825,8 @@ class WpsstmTracklist extends HTMLElement{
             function (value) { //success
                 //check that it still the same track that is requested
                 if (tracklist.current_track !== requestedTrack) return;
-                
+                console.log("TRACKREADY");
+                console.log(requestedTrack);
                 requestedTrack.play_track(link_idx);
 
             }, function (error) { //error
@@ -833,9 +840,17 @@ class WpsstmTracklist extends HTMLElement{
 
     }
 
-    render_queue_controls(){
+    update_player(){
         
         var tracklist = this;
+        
+        /*
+        Current Track
+        */
+
+        var playerTrackContainer = tracklist.$player.find('.player-track');
+        var playerTrack = $(tracklist.current_track).html();
+        playerTrackContainer.html(playerTrack);
         
         /*
         Previous track bt

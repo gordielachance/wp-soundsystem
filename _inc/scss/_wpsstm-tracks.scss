@@ -1,7 +1,7 @@
 @import "compass/css3";
 @import "compass/typography/text/ellipsis";
 
-wpsstm-track{
+.wpsstm-track{
     display:block;
     position:relative;
     padding:0;
@@ -246,7 +246,6 @@ wpsstm-track{
     }
 
 }
-
 
 ul.wpsstm-track-loved-by-list,ul.wpsstm-track-parents{
     @extend .comma-list;

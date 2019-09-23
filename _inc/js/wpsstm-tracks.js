@@ -51,10 +51,13 @@ class WpsstmTrack extends HTMLElement{
                 }
 
                 if (newVal == 'request'){
+
                     track.tracklist.current_track = track;
-                    track.tracklist.render_queue_controls();
                     $(track).addClass('track-active track-loading');
-                    $(track.tracklist).addClass('tracklist-loading tracklist-has-played');
+                    $(track.tracklist).addClass('tracklist-loading tracklist-active tracklist-has-played');
+                    
+                    track.tracklist.update_player();
+                    
                 }
                 
                 if ( newVal == 'playing' ){
@@ -161,6 +164,9 @@ class WpsstmTrack extends HTMLElement{
         track.track_album =         $(track).find('[itemprop="inAlbum"]').text();
         track.post_id =             Number($(track).attr('data-wpsstm-track-id'));
         track.subtrack_id =         Number($(track).attr('data-wpsstm-subtrack-id'));
+        
+        console.log("RENDER");
+        console.log(track.tracklist);
         
         var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
 
