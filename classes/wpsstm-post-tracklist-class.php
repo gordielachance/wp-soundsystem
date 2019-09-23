@@ -248,11 +248,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $old_tracklist = $wpsstm_tracklist; //store temp
             $wpsstm_tracklist = $this;
 
-            $wpsstm_tracklist->tracklist_log('start','get tracklist HTML');
             ob_start();
             wpsstm_locate_template( 'content-tracklist.php', true, false );
             $html = ob_get_clean();
-            $wpsstm_tracklist->tracklist_log('stop','get tracklist HTML');
 
             $wpsstm_tracklist = $old_tracklist; //restore global
             
