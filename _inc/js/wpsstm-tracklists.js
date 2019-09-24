@@ -252,9 +252,9 @@ class WpsstmTracklist extends HTMLElement{
         //container play icon
         $(tracklist).on('click', '.wpsstm-tracklist-play-bt', function(e) { //TOUFIX URGENT
 
-            var tracks = $(tracklist).find('wpsstm-track');
-            var activeTrack = tracks.filter('.track-active').get(0);
-            var trackIdx = tracks.index( activeTrack );
+            var $tracks = tracklist.get_queue();
+            var activeTrack = $tracks.filter('.track-active').get(0);
+            var trackIdx = $tracks.index( activeTrack );
             trackIdx = (trackIdx > 0) ? trackIdx : 0;
 
             tracklist.play_queue(trackIdx);
@@ -355,7 +355,7 @@ class WpsstmTracklist extends HTMLElement{
         Subtracks
         */
 
-        var tracks = $(tracklist).find('wpsstm-track');
+        var $tracks = tracklist.get_queue();
 
         //sort subtracks
         var startSortIdx, endSortIdx;
@@ -367,7 +367,7 @@ class WpsstmTracklist extends HTMLElement{
             },
             update: function(event, ui) {
                 endSortIdx = ui.item.index();
-                var track = tracks.get(startSortIdx);
+                var track = $tracks.get(startSortIdx);
                 var old_position = Number($(track).attr('data-wpsstm-subtrack-position'));
                 var new_position = ui.item.index() + 1;
 
@@ -641,12 +641,12 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = this;
         var tracks_playable = [];
 
-        var tracks = $(tracklist).find('wpsstm-track');
-        var activeTrack = tracks.filter('.track-active').get(0);
-        var current_track_idx = tracks.index( $(activeTrack) );
+        var $tracks = tracklist.get_queue();
+        var activeTrack = $tracks.filter('.track-active').get(0);
+        var current_track_idx = $tracks.index( $(activeTrack) );
         if (current_track_idx == -1) return; //index not found
         
-        var tracksArr = tracks.toArray();
+        var tracksArr = $tracks.toArray();
 
         if (tracksArr){
 
@@ -672,7 +672,7 @@ class WpsstmTracklist extends HTMLElement{
         }
 
         var previous_track = tracks_playable[0];
-        var previous_track_idx = ( previous_track ) ? tracks.index( previous_track ) : undefined;
+        var previous_track_idx = ( previous_track ) ? $tracks.index( previous_track ) : undefined;
         
         return previous_track_idx;
     }
@@ -681,12 +681,12 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = this;
         var tracks_playable = [];
 
-        var tracks = $(tracklist).find('wpsstm-track');
-        var activeTrack = tracks.filter('.track-active').get(0);
-        var current_track_idx = tracks.index( $(activeTrack) );
+        var $tracks = tracklist.get_queue();
+        var activeTrack = $tracks.filter('.track-active').get(0);
+        var current_track_idx = $tracks.index( $(activeTrack) );
         if (current_track_idx == -1) return; //index not found
         
-        var tracksArr = tracks.toArray();
+        var tracksArr = $tracks.toArray();
 
         if (tracksArr){
             var tracks_playable = tracksArr.slice(current_track_idx+1); //tracks after this one
@@ -709,7 +709,7 @@ class WpsstmTracklist extends HTMLElement{
         }
 
         var next_track = tracks_playable[0];
-        var next_track_idx = ( next_track ) ? tracks.index( next_track ) : undefined;
+        var next_track_idx = ( next_track ) ? $tracks.index( next_track ) : undefined;
 
         //console.log("get_next_track_idx: current: " + current_track_idx + ", next;" + next_track_idx);
 
@@ -718,8 +718,8 @@ class WpsstmTracklist extends HTMLElement{
     
     previous_track_jump(){
         var tracklist = this;
-        var tracks = $(tracklist).find('wpsstm-track');
-        var current_track_idx = tracks.index( $(tracklist.current_track) );
+        var $tracks = tracklist.get_queue();
+        var current_track_idx = $tracks.index( $(tracklist.current_track) );
         var track_idx = tracklist.get_previous_track_idx();
 
         if (typeof track_idx !== 'undefined'){
@@ -732,8 +732,8 @@ class WpsstmTracklist extends HTMLElement{
     
     next_track_jump(){
         var tracklist = this;
-        var tracks = $(tracklist).find('wpsstm-track');
-        var current_track_idx = tracks.index( $(tracklist.current_track) );
+        var $tracks = tracklist.get_queue();
+        var current_track_idx = $tracks.index( $(tracklist.current_track) );
         var track_idx = tracklist.get_next_track_idx();
 
         if (typeof track_idx !== 'undefined'){
@@ -758,9 +758,20 @@ class WpsstmTracklist extends HTMLElement{
         
         track_idx = (typeof track_idx !== 'undefined') ? track_idx : 0;
         link_idx = (typeof link_idx !== 'undefined') ? link_idx : 0;
-        var allTracks = $(tracklist).find('wpsstm-track');
-        var requestedTrack = allTracks.get(track_idx);
+        var $tracks = tracklist.get_queue();
+        var requestedTrack = $tracks.get(track_idx);
         var requestedLink = $(requestedTrack).find('wpsstm-track-link').get(link_idx);
+        
+        var currentIdx = Array.from($tracks).indexOf(tracklist.current_track);
+        
+        console.log(
+            {
+                requested_idx:track_idx,
+                current_idx:currentIdx,
+                requested:requestedTrack,
+                current:tracklist.current_track
+            }
+        )
 
         if (tracklist.current_track){
 
@@ -784,10 +795,7 @@ class WpsstmTracklist extends HTMLElement{
             tracklist.current_track.status = '';
         }
 
-        
-        console.log("REQUESTEDTRACK");
-        console.log(requestedTrack);
-        
+        tracklist.current_track = requestedTrack;
         requestedTrack.status = 'request';
         
         /*
@@ -824,8 +832,6 @@ class WpsstmTracklist extends HTMLElement{
             function (value) { //success
                 //check that it still the same track that is requested
                 if (tracklist.current_track !== requestedTrack) return;
-                console.log("TRACKREADY");
-                console.log(requestedTrack);
                 requestedTrack.play_track(link_idx);
 
             }, function (error) { //error
@@ -848,9 +854,21 @@ class WpsstmTracklist extends HTMLElement{
         */
 
         var playerTrackContainer = tracklist.$player.find('.player-track');
-        var playerTrack = $(tracklist.current_track).clone();
-        playerTrack.tracklist = tracklist;
-        playerTrackContainer.empty().append(playerTrack);
+        var $currenTrack = $(tracklist.current_track);
+        var $clone = $currenTrack.clone();
+        
+        //Scroll to page track
+        $clone.on('click', '.wpsstm-track-position', function(e) {
+            e.preventDefault();
+
+            //https://stackoverflow.com/a/6677069/782013
+            $('html, body').animate({
+                scrollTop: $currenTrack.offset().top - ( $(window).height() / 3) //not at the very top
+            }, 500);
+
+        });
+        
+        playerTrackContainer.empty().append( $clone );
         
         /*
         Previous track bt
@@ -866,6 +884,11 @@ class WpsstmTracklist extends HTMLElement{
         var next_track_idx = tracklist.get_next_track_idx();
         var hasNextTrack = (typeof next_track_idx !== 'undefined');
         tracklist.$nextTrackBt.toggleClass('active',hasNextTrack);
+    }
+    
+    get_queue(){
+        var tracklist = this;
+        return $(tracklist).find('.wpsstm-tracks-list wpsstm-track');
     }
     
 }
