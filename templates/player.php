@@ -3,7 +3,7 @@ global $wpsstm_tracklist;
 ?>
 <wpsstm-player>
     <div class="player-row player-track"><!--loaded through JS--></div>     
-    <div class="player-row">
+    <div class="player-row player-controls">
             <span id="" class="wpsstm-player-extra wpsstm-previous-track-bt"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></span>
             <span id="wpsstm-audio-container">
                 <audio <?php echo $wpsstm_tracklist->get_audio_attr();?>></audio>

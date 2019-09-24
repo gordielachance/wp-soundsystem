@@ -16,14 +16,18 @@ wpsstm-player{
         width:100%;
         padding:0;
         margin:0;
-        @include display-flex();
-        > * {
-            padding:0;
-            margin:0;
-            border:none;
-            @extend .wpsstm-align-both;
-            @include flex-grow(1);
+
+        &.player-controls{
+            @include display-flex();
+            > * {
+                padding:0;
+                margin:0;
+                border:none;
+                @extend .wpsstm-align-both;
+                @include flex-grow(1);
+            }
         }
+        
         .wpsstm-player-actions{
             margin-right:.5em;
             @include flex-shrink(0);
