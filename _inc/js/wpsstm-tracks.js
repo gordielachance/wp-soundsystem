@@ -235,7 +235,7 @@ class WpsstmTrack extends HTMLElement{
             var linkIdx = links.index( activeLink );
             linkIdx = (linkIdx > 0) ? linkIdx : 0;
 
-            track.tracklist.play_queue(trackIdx,linkIdx);
+            track.tracklist.play_queue_track(trackIdx,linkIdx);
 
         });
         
@@ -526,8 +526,6 @@ class WpsstmTrack extends HTMLElement{
             success.resolve();
             return success.promise();
         }
-        
-        
 
         var link_play = track.play_first_available_link(link_idx);
 

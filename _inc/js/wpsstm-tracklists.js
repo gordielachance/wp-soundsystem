@@ -257,7 +257,7 @@ class WpsstmTracklist extends HTMLElement{
             var trackIdx = $tracks.index( activeTrack );
             trackIdx = (trackIdx > 0) ? trackIdx : 0;
 
-            tracklist.play_queue(trackIdx);
+            tracklist.play_queue_track(trackIdx);
         });
         
         /*
@@ -723,7 +723,7 @@ class WpsstmTracklist extends HTMLElement{
         var track_idx = tracklist.get_previous_track_idx();
 
         if (typeof track_idx !== 'undefined'){
-            tracklist.play_queue(track_idx);
+            tracklist.play_queue_track(track_idx);
         }else{
             tracklist.debug("no previous track");
             tracklist.current_track.status = '';
@@ -737,7 +737,7 @@ class WpsstmTracklist extends HTMLElement{
         var track_idx = tracklist.get_next_track_idx();
 
         if (typeof track_idx !== 'undefined'){
-            tracklist.play_queue(track_idx);
+            tracklist.play_queue_track(track_idx);
         }else{
             tracklist.debug("no next track");
             tracklist.current_track.status = '';
@@ -753,7 +753,7 @@ class WpsstmTracklist extends HTMLElement{
 
     }
     
-    play_queue(track_idx,link_idx){
+    play_queue_track(track_idx,link_idx){
         var tracklist = this;
         
         track_idx = (typeof track_idx !== 'undefined') ? track_idx : 0;
@@ -856,6 +856,7 @@ class WpsstmTracklist extends HTMLElement{
         var playerTrackContainer = tracklist.$player.find('.player-track');
         var $currenTrack = $(tracklist.current_track);
         var $clone = $currenTrack.clone();
+        playerTrackContainer.empty().append( $clone );
         
         //Scroll to page track
         $clone.on('click', '.wpsstm-track-position', function(e) {
@@ -868,7 +869,6 @@ class WpsstmTracklist extends HTMLElement{
 
         });
         
-        playerTrackContainer.empty().append( $clone );
         
         /*
         Previous track bt
@@ -890,7 +890,7 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = this;
         return $(tracklist).find('.wpsstm-tracks-list wpsstm-track');
     }
-    
+ 
 }
 
 window.customElements.define('wpsstm-tracklist', WpsstmTracklist);
