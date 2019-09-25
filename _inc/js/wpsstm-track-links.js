@@ -101,38 +101,30 @@ class WpsstmLink extends HTMLElement{
     }
 
     render(){
-        var self = this;
-        
-        self.track =            self.closest('wpsstm-track');
+        var link =              this;
+        link.track =            $(link).closest('wpsstm-track').get(0);
 
-        self.index =            Number($(self).attr('data-wpsstm-link-idx'));
-        self.post_id =          Number($(self).attr('data-wpsstm-link-id'));
-        self.src =              $(self).attr('data-wpsstm-stream-src');
-        self.type =             $(self).attr('data-wpsstm-stream-type');
+        link.index =            Number($(link).attr('data-wpsstm-link-idx'));
+        link.post_id =          Number($(link).attr('data-wpsstm-link-id'));
+        link.src =              $(link).attr('data-wpsstm-stream-src');
+        link.type =             $(link).attr('data-wpsstm-stream-type');
 
         //delete link
-        $(self).on('click', '.wpsstm-track-link-action-trash', function(e) {
+        $(link).on('click', '.wpsstm-track-link-action-trash', function(e) {
             e.preventDefault();
-            self.trash_link();
+            link.trash_link();
         });
         
         //play link
-        $(self).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link[wpsstm-playable] .wpsstm-link-title', function(e) {
+        $(link).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link[wpsstm-playable] .wpsstm-link-title', function(e) {
             e.preventDefault();
-            var link = this.closest('wpsstm-track-link');
+            var link = $(this).closest('wpsstm-track-link').get(0);
+            var track = link.track;
+            
             var linkIdx = Array.from(link.parentNode.children).indexOf(link);
-
-            var track = self.track;
-
             var trackIdx = Array.from(track.parentNode.children).indexOf(track);
 
-            //toggle tracklist links
-            if ( !$(track).hasClass('track-playing') ){
-                var list = $(track).find('.wpsstm-track-links-list');
-                $( list ).removeClass('active');
-            }
-
-            track.tracklist.play_queue(trackIdx,linkIdx);
+            track.tracklist.play_queue_track(trackIdx,linkIdx);
 
         });
 
@@ -140,17 +132,17 @@ class WpsstmLink extends HTMLElement{
 
     //reduce object for communication between JS & PHP
     to_ajax(){
-        var self = this;
+        var link = this;
         var allowed = ['index','post_id'];
-        var filtered = Object.keys(self)
+        var filtered = Object.keys(link)
         .filter(key => allowed.includes(key))
         .reduce((obj, key) => {
-        obj[key] = self[key];
+        obj[key] = link[key];
         return obj;
         }, {});
         
         //track
-        filtered.track = self.track.to_ajax();
+        filtered.track = link.track.to_ajax();
 
         return filtered;
     }
