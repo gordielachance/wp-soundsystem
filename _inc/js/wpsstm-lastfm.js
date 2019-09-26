@@ -155,9 +155,21 @@ class WpsstmLastFM {
         return success.promise();
     }
         
-    debug(msg){
-        var prefix = "WpsstmLastFM";
-        wpsstm_debug(msg,prefix);
+    debug(msg,data){
+        //msg
+        if (typeof msg !== 'object'){
+            msg = '[lastFM] ' + msg;
+        }
+        
+        //data
+        if (typeof data !== 'object'){
+            msg = msg + ' - ' + data;
+            //data = {};
+        }
+
+        //data.lastfm = this;
+
+        wpsstm_debug(msg,data);
     }
     
 }

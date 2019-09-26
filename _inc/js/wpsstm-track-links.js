@@ -95,9 +95,21 @@ class WpsstmLink extends HTMLElement{
     ///
     ///
     
-    debug(msg){
-        var debug = {message:msg,link:this};
-        wpsstm_debug(debug);
+    debug(msg,data){
+        //msg
+        if (typeof msg !== 'object'){
+            msg = '[link] ' + msg;
+        }
+        
+        //data
+        if (typeof data !== 'object'){
+            msg = msg + ' - ' + data;
+            data = {};
+        }
+
+        data.link = this;
+        
+        wpsstm_debug(msg,data);
     }
 
     render(){
@@ -120,7 +132,7 @@ class WpsstmLink extends HTMLElement{
             e.preventDefault();
             var link = $(this).closest('wpsstm-track-link').get(0);
             var track = link.track;
-            
+
             var linkIdx = Array.from(link.parentNode.children).indexOf(link);
             var trackIdx = Array.from(track.parentNode.children).indexOf(track);
 

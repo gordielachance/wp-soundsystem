@@ -149,9 +149,22 @@ class WpsstmTrack extends HTMLElement{
             this.removeAttribute('can-autolink');
         }
     }
-    debug(msg){
-        var debug = {message:msg,track:this};
-        wpsstm_debug(debug);
+    debug(msg,data){
+        
+        //msg
+        if (typeof msg !== 'object'){
+            msg = '[track] ' + msg;
+        }
+        
+        //data
+        if (typeof data !== 'object'){
+            msg = msg + ' - ' + data;
+            data = {};
+        }
+
+        data.track = this;
+
+        wpsstm_debug(msg,data);
     }
 
     render(){
@@ -234,7 +247,7 @@ class WpsstmTrack extends HTMLElement{
             var activeLink = links.filter('.link-active').get(0);
             var linkIdx = links.index( activeLink );
             linkIdx = (linkIdx > 0) ? linkIdx : 0;
-
+            
             track.tracklist.play_queue_track(trackIdx,linkIdx);
 
         });

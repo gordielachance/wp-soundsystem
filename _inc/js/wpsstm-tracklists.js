@@ -108,9 +108,21 @@ class WpsstmTracklist extends HTMLElement{
     ///
     ///
     
-    debug(msg){
-        var debug = {message:msg,tracklist:this};
-        wpsstm_debug(debug);
+    debug(msg,data){
+        //msg
+        if (typeof msg !== 'object'){
+            msg = '[tracklist] ' + msg;
+        }
+
+        //data
+        if (typeof data !== 'object'){
+            msg = msg + ' - ' + data;
+            data = {};
+        }
+
+        data.tracklist = this;
+        
+        wpsstm_debug(msg,data);
     }
 
     render(){
@@ -254,10 +266,10 @@ class WpsstmTracklist extends HTMLElement{
 
             var $tracks = tracklist.get_queue();
             var activeTrack = $tracks.filter('.track-active').get(0);
-            var trackIdx = $tracks.index( activeTrack );
-            trackIdx = (trackIdx > 0) ? trackIdx : 0;
+            var track_idx = $tracks.index( activeTrack );
+            track_idx = (track_idx > 0) ? track_idx : 0;
 
-            tracklist.play_queue_track(trackIdx);
+            tracklist.play_queue_track(track_idx);
         });
         
         /*
@@ -772,10 +784,13 @@ class WpsstmTracklist extends HTMLElement{
                 current:tracklist.current_track
             }
         )
+        
+        /*
+        Check for a reclick
+        */
 
         if (tracklist.current_track){
 
-            //reclick
             if ( ( tracklist.current_track === requestedTrack ) && ( tracklist.current_link === requestedLink) ){
 
                 requestedTrack.debug('reclick');

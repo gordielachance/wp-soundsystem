@@ -22,13 +22,25 @@ function wpsstm_js_notice(msg,preprendTo){
 
 }
 
-function wpsstm_debug(msg,prefix){
+function wpsstm_debug(msg,data){
     if (!wpsstmL10n.debug) return;
+    
+    //data
+    if (typeof data !== 'object'){
+        msg = msg + ' - ' + data;
+        data = undefined;
+    }
+
+    //msg
     if (typeof msg === 'object'){
         console.log(msg);
     }else{
-        if (!prefix) prefix = 'wpsstm';
-        console.log(prefix + ': ' + msg);
+        console.log('[wpsstm]' + msg);
+    }
+    
+    //data
+    if (typeof data !== 'undefined'){
+        console.log(data);
     }
 }
 
