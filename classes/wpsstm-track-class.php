@@ -948,7 +948,7 @@ class WPSSTM_Track{
             'data-wpsstm-track-id' =>           $this->post_id,
             'ajax-details' =>                   $ajax_details,
             'can-autolink' =>                   ( !$ajax_details && $can_autolink && !$this->did_autolink() ),
-            'wpsstm-playable' =>                wpsstm()->get_options('player_enabled'),
+            'wpsstm-playable' =>                ( !$ajax_details && wpsstm()->get_options('player_enabled') ),
         );
 
         return wpsstm_get_html_attr($attr);

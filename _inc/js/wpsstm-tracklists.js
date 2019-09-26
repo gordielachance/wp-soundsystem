@@ -773,18 +773,7 @@ class WpsstmTracklist extends HTMLElement{
         var $tracks = tracklist.get_queue();
         var requestedTrack = $tracks.get(track_idx);
         var requestedLink = $(requestedTrack).find('wpsstm-track-link').get(link_idx);
-        
-        var currentIdx = Array.from($tracks).indexOf(tracklist.current_track);
-        
-        console.log(
-            {
-                requested_idx:track_idx,
-                current_idx:currentIdx,
-                requested:requestedTrack,
-                current:tracklist.current_track
-            }
-        )
-        
+
         /*
         Check for a reclick
         */
@@ -872,6 +861,7 @@ class WpsstmTracklist extends HTMLElement{
         var $currenTrack = $(tracklist.current_track);
         var $clone = $currenTrack.clone();
         playerTrackContainer.empty().append( $clone );
+        $clone.get(0).queueIdx = tracklist.current_track.queueIdx; //update queueIdx so it matches the current track
         
         //Scroll to page track
         $clone.on('click', '.wpsstm-track-position', function(e) {

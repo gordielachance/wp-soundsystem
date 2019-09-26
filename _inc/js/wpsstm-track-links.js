@@ -56,7 +56,8 @@ class WpsstmLink extends HTMLElement{
                     $(source).removeClass('link-playing');
                 }
                 
-                
+            break;
+
         }
         
         
@@ -134,9 +135,8 @@ class WpsstmLink extends HTMLElement{
             var track = link.track;
 
             var linkIdx = Array.from(link.parentNode.children).indexOf(link);
-            var trackIdx = Array.from(track.parentNode.children).indexOf(track);
 
-            track.tracklist.play_queue_track(trackIdx,linkIdx);
+            track.tracklist.play_queue_track(track.queueIdx,linkIdx);
 
         });
 
@@ -278,6 +278,10 @@ class WpsstmLink extends HTMLElement{
 
         return success.promise();
 
+    }
+    
+    get_instances(){
+        return $('wpsstm-track-link[data-wpsstm-link-id="'+this.post_id+'"]');
     }
 
 }

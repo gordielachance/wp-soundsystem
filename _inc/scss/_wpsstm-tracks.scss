@@ -112,7 +112,7 @@
     &.track-playing .wpsstm-track-action-play:before{
         content:"\f04c"; //.fa-pause;
     }
-    &:not([can-autolink]):not([wpsstm-playable]) .wpsstm-track-action-play:before{
+    &:not([wpsstm-playable]):not([can-autolink]):not([ajax-details]) .wpsstm-track-action-play:before{
         content:"\f071"; //.fa-exclamation-triangle;
     }
 

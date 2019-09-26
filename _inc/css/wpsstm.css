@@ -945,7 +945,7 @@ ul.tracklist-list > li:hover .wpsstm-tracklist-actions {
   content: "\f04c";
 }
 /* line 115, ../scss/_wpsstm-tracks.scss */
-.wpsstm-track:not([can-autolink]):not([wpsstm-playable]) .wpsstm-track-action-play:before {
+.wpsstm-track:not([wpsstm-playable]):not([can-autolink]):not([ajax-details]) .wpsstm-track-action-play:before {
   content: "\f071";
 }
 /* line 120, ../scss/_wpsstm-tracks.scss */
@@ -1136,7 +1136,7 @@ wpsstm-track-link .wpsstm-track-link-actions > * {
   content: "\f04c";
 }
 /* line 72, ../scss/_wpsstm-track-links.scss */
-.wpsstm-track-links-list wpsstm-track-link[playable="false"] .wpsstm-track-link-action-play:before {
+.wpsstm-track-links-list wpsstm-track-link:not([wpsstm-playable]) .wpsstm-track-link-action-play:before {
   content: "\f071";
 }
 /* line 77, ../scss/_wpsstm-track-links.scss */

@@ -4,6 +4,7 @@ class WpsstmTrack extends HTMLElement{
     constructor() {
         super(); //required to be first
         
+        this.queueIdx =             undefined;
         this.position =             undefined;
         this.track_artist =         undefined;
         this.track_title =          undefined;
@@ -163,13 +164,13 @@ class WpsstmTrack extends HTMLElement{
         }
 
         data.track = this;
-
         wpsstm_debug(msg,data);
     }
 
     render(){
         
         var track =                 this;
+        track.queueIdx =            Array.from(track.parentNode.children).indexOf(track);
         track.tracklist =           $(track).closest('wpsstm-tracklist').get(0);
         track.position =            Number($(track).attr('data-wpsstm-subtrack-position')); //index in tracklist
         track.track_artist =        $(track).find('[itemprop="byArtist"]').text();
@@ -241,14 +242,12 @@ class WpsstmTrack extends HTMLElement{
         $(track).on('click','.wpsstm-track-action-play', function(e) {
             e.preventDefault();
 
-            var trackIdx = Array.from(track.parentNode.children).indexOf(track);
-
             var links = $(track).find('wpsstm-track-link');
             var activeLink = links.filter('.link-active').get(0);
             var linkIdx = links.index( activeLink );
             linkIdx = (linkIdx > 0) ? linkIdx : 0;
             
-            track.tracklist.play_queue_track(trackIdx,linkIdx);
+            track.tracklist.play_queue_track(track.queueIdx,linkIdx);
 
         });
         
@@ -674,6 +673,10 @@ class WpsstmTrack extends HTMLElement{
             $(track).find('wpsstm-track-link').removeClass('link-playing link-active');
         }
 
+    }
+    
+    get_instances(){
+        return $('wpsstm-track[data-wpsstm-track-id="'+this.post_id+'"]');
     }
     
 }
