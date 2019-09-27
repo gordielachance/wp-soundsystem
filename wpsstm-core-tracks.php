@@ -116,7 +116,10 @@ class WPSSTM_Core_Tracks{
             $query->set_404();
             status_header( 404 );
             nocache_headers();
+            return;
         }
+        
+        $query->is_single = true; //so single template is shown, instead of search results
 
     }
     
@@ -127,6 +130,7 @@ class WPSSTM_Core_Tracks{
         $post_id = get_the_ID();
         $post_type = get_post_type($post_id);
 
+        if ( $subtrack_id = get_query_var( 'subtrack_id' ) ) return;
         if ( !is_single() || !$post_id || ( $post_type != wpsstm()->post_type_track ) ) return;
 
         $success = $wpsstm_track->populate_track_post($post_id);
