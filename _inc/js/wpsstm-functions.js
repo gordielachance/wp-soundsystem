@@ -1,5 +1,34 @@
 var $ = jQuery.noConflict();
 
+$.fn.wpsstmJsonViewer = function() {
+
+    this.filter( "textarea" ).each(function() {
+        
+        var $input = $(this);
+        var $container = $input.closest('.wpsstm-json');
+        var $output = $container.find('.wpsstm-json-output');
+        
+        //setup dom
+        if ( $container.length == 0 ){
+            $input.addClass('wpsstm-json-input');
+            $input.wrap( "<div class='wpsstm-json'></div>" );
+            var $container = $(this).parent();
+            var $output = $("<div class='wpsstm-json-output'></div>");
+            $container.append($output);
+        }
+
+        //
+        var data = $input.val();
+        if (data){
+            var json = JSON.parse(data);
+            $output.jsonViewer(json,{collapsed: true,rootCollapsable:false});
+        }
+    });
+
+    return this;
+
+};
+
 function wpsstm_js_notice(msg,preprendTo){
     
     if (typeof preprendTo === 'undefined'){

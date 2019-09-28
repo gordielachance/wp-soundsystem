@@ -612,23 +612,11 @@ class WPSSTM_Core_Importer{
             'error_code' =>     null,
             'message' =>        null,
             'success' =>        false,
-            'json_url' =>       null,
             'json' =>           null,
             'tracklist' =>      $tracklist->to_array(),
         );
-                                          
-        /*
-        get JSON
-        */
-        
-        if (!$tracklist->import_id){
-            $json = new WP_Error('wpsstm_missing_import_id',__('Missing import ID','wpsstm'));
-        }else{
-            $json_url = WPSSTM_API_CACHE . sprintf('%s-feedback.json',$tracklist->import_id);
-            $result['json_url'] = $json_url;
-            $response = wp_remote_get( $json_url );
-            $json = wp_remote_retrieve_body( $response );
-        }
+
+        $json = $tracklist->get_json_feedback();
         
         if ( is_wp_error($json) ){
             $result['error_code'] = $json->get_error_code();

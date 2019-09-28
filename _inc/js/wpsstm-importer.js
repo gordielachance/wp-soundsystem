@@ -30,15 +30,15 @@ $( document ).ready(function() {
     //load debug
     $('.wpsstm-debug-log-bt').click(function(e) {
         var bt = $(this);
-        var container = bt.parents('#wpsstm-importer');
-        var output = container.find('#wpsstm-debug-json');
+        var container = bt.parents('#wpsstm-metabox-importer');
+        var $textarea = container.find('#wpsstm-importer-step-debug .wpsstm-json-input');
         var ajax_data = {
             action:         'wpsstm_get_importer_debug',
             tracklist_id:   bt.get(0).getAttribute('data-wpsstm-tracklist-id')
         };
 
         bt.addClass('wpsstm-loading');
-        output.text('');
+        $textarea.val('');
 
         var request = $.ajax({
             type:       "post",
@@ -50,8 +50,8 @@ $( document ).ready(function() {
         request.done(function(data) {
 
             if ( data.success && data.json ){
-                var json = JSON.parse(data.json);
-                output.jsonViewer(json,{collapsed: true,rootCollapsable:false});
+                $textarea.val(data.json);
+                $textarea.wpsstmJsonViewer();
             }else{
                 console.log(data);
             }

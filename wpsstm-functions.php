@@ -24,22 +24,6 @@ function wpsstm_get_array_value($keys = null, $array){
 }
 
 /**
-* Make a nested HTML list from a multi-dimensionnal array.
-*/
-
-function wpsstm_get_json_viewer($input,$parent_slugs=array() ){
-    
-    if ( !$input ) return;
-    if( is_array($input) ) $input = json_encode($input);
-    
-    $input = sprintf('<textarea class="wpsstm-json-input wpsstm-fullwidth">%s</textarea>',$input);
-    $output = sprintf('<div class="wpsstm-json-output"></div>');
-    return sprintf('<div class="wpsstm-json">%s%s</div>',$input,$output);
-    
-
-}
-
-/**
  * Outputs the html readonly attribute.  Inspired by core function disabled().
  *
  * Compares the first two arguments and if identical marks as readonly

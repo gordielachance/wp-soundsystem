@@ -1420,5 +1420,26 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $total_updated;
 
     }
+    
+    function get_json_feedback(){
+        if (!$this->import_id){
+            return new WP_Error('wpsstm_missing_import_id',__('Missing import ID','wpsstm'));
+        }
+        
+        $json_url = WPSSTM_API_CACHE . sprintf('%s-feedback.json',$this->import_id);
+        $response = wp_remote_get( $json_url );
+        $json = wp_remote_retrieve_body( $response );
+        
+        //check for json errors
+        $data = json_decode($json);
+        $json_error = json_last_error();
+        if ($json_error !== JSON_ERROR_NONE) {
+            return new WP_Error('wpsstm_json_feedback_error',sprintf(__('Error while decoding JSON feedback: %s','wpsstm'),$json_error));
+        }
+        
+        return $json;
+        
+    }
+
 
 }
