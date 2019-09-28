@@ -388,29 +388,22 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
         
         //favorite / unfavorite
-        if ( get_current_user_id() ){
-
-            $actions['favorite'] = array(
-                'text' =>      __('Favorite','wpsstm'),
-                'href' =>       $this->get_tracklist_action_url('favorite'),
-                'desc' =>       __('Add tracklist to favorites','wpsstm'),
-                'classes' =>    array('action-favorite'),
-            );
-            $actions['unfavorite'] = array(
-                'text' =>      __('Unfavorite','wpsstm'),
-                'href' =>       $this->get_tracklist_action_url('unfavorite'),
-                'desc' =>       __('Remove tracklist from favorites','wpsstm'),
-                'classes' =>    array('action-unfavorite'),
-            );
-
-        }else{ //call to action
-            $actions['favorite'] = array(
-                'text' =>      __('Favorite','wpsstm'),
-                'href' =>       '#',
-                'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                'classes' =>    array('action-favorite','wpsstm-tooltip'),
-            );
-        }
+        
+        $url_favorite = $this->get_tracklist_action_url('favorite');
+        $url_unfavorite = $this->get_tracklist_action_url('unfavorite');
+        
+        $actions['favorite'] = array(
+            'text' =>      __('Favorite','wpsstm'),
+            'href' =>       get_current_user_id() ? $url_favorite : wp_login_url($url_favorite),
+            'desc' =>       __('Add tracklist to favorites','wpsstm'),
+            'classes' =>    array('action-favorite'),
+        );
+        $actions['unfavorite'] = array(
+            'text' =>      __('Unfavorite','wpsstm'),
+            'href' =>       get_current_user_id() ? $url_unfavorite : wp_login_url($url_unfavorite),
+            'desc' =>       __('Remove tracklist from favorites','wpsstm'),
+            'classes' =>    array('action-unfavorite'),
+        );
 
         //toggle type
         if ( $this->feed_url && $this->user_can_toggle_playlist_type() ){

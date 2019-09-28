@@ -796,40 +796,26 @@ class WPSSTM_Track{
         //favorite
         if ( wpsstm()->get_options('playlists_manager') ){
             
-            if ( get_current_user_id() ){
-                
-                if ( $can_manage_playlists ){
-                    $actions['favorite'] = array(
-                        'text' =>      __('Favorite','wpsstm'),
-                        'href' =>       $this->get_track_action_url('favorite'),
-                        'desc' =>       __('Add track to favorites','wpsstm'),
-                        'classes' =>    array('action-favorite'),
-                    );
+            $url_favorite = $this->get_track_action_url('favorite');
+            $url_unfavorite = $this->get_track_action_url('unfavorite');
+            
+            $actions['favorite'] = array(
+                'text' =>      __('Favorite','wpsstm'),
+                'href' =>       get_current_user_id() ? $url_favorite : wp_login_url($url_favorite),
+                'desc' =>       __('Add track to favorites','wpsstm'),
+                'classes' =>    array('action-favorite'),
+            );
 
-                    $actions['unfavorite'] = array(
-                        'text' =>      __('Favorite','wpsstm'),
-                        'href' =>       $this->get_track_action_url('unfavorite'),
-                        'desc' =>       __('Remove track from favorites','wpsstm'),
-                        'classes' =>    array('action-unfavorite'),
-                    );
-                }else{
-                    $actions['favorite'] = array(
-                        'text' =>      __('Favorite','wpsstm'),
-                        'href' =>       '#',
-                        'desc' =>       __("Missing required capability.",'wpsstm'),
-                        'classes' =>    array('action-favorite','wpsstm-disabled-action','wpsstm-tooltip'),
-                    );
-                }
-                
-            }else{
-                
-                $actions['favorite'] = array(
-                    'text' =>      __('Favorite','wpsstm'),
-                    'href' =>       '#',
-                    'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                    'classes' =>    array('action-favorite','wpsstm-disabled-action','wpsstm-tooltip'),
-                );
-                
+            $actions['unfavorite'] = array(
+                'text' =>      __('Favorite','wpsstm'),
+                'href' =>       get_current_user_id() ? $url_unfavorite : wp_login_url($url_unfavorite),
+                'desc' =>       __('Remove track from favorites','wpsstm'),
+                'classes' =>    array('action-unfavorite'),
+            );
+            
+            if ( get_current_user_id() && !$can_manage_playlists ){
+                $actions['favorite'][] = 'wpsstm-disabled-action';
+                $actions['unfavorite'][] = 'wpsstm-disabled-action';
             }
 
         }
@@ -869,32 +855,17 @@ class WPSSTM_Track{
         //playlists manager
         if ( wpsstm()->get_options('playlists_manager') ){
             
-            if ( get_current_user_id() ){
+            $url = $this->get_track_action_url('manage');
             
-                if ( $can_manage_playlists ){ 
-                    $actions['toggle-tracklists'] = array(
-                        'text' =>      __('Playlists manager','wpsstm'),
-                        'href' =>       $this->get_track_action_url('manage'),
-                        'classes' =>    array('wpsstm-action-popup'),
-                    );
-                }else{
-                    $actions['toggle-tracklists'] = array(
-                        'text' =>      __('Favorite','wpsstm'),
-                        'href' =>       '#',
-                        'desc' =>       __("Missing required capability.",'wpsstm'),
-                        'classes' =>    array('wpsstm-disabled-action','wpsstm-tooltip'),
-                    );
-                }
-            }else{
-                $actions['toggle-tracklists'] = array(
-                    'text' =>      __('Playlists manager','wpsstm'),
-                    'href' =>       '#',
-                    'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                    'classes' =>    array('wpsstm-disabled-action','wpsstm-tooltip'),
-                );
+            $actions['toggle-tracklists'] = array(
+                'text' =>      __('Playlists manager','wpsstm'),
+                'href' =>       get_current_user_id() ? $url : wp_login_url($url),
+                'classes' =>    array('wpsstm-action-popup'),
+            );
+            
+            if ( get_current_user_id() && !$can_manage_playlists ){
+                $actions['toggle-tracklists'][] = 'wpsstm-disabled-action';
             }
-
-        }else{
 
         }
 
