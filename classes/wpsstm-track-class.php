@@ -794,7 +794,7 @@ class WPSSTM_Track{
         }
 
         //favorite
-        if ( wpsstm()->get_options('playlists_manager') ){
+        if ( wpsstm()->get_options('playlists_manager') && ( !get_current_user_id() || $can_manage_playlists ) ){
             
             $url_favorite = $this->get_track_action_url('favorite');
             $url_unfavorite = $this->get_track_action_url('unfavorite');
@@ -812,11 +812,6 @@ class WPSSTM_Track{
                 'desc' =>       __('Remove track from favorites','wpsstm'),
                 'classes' =>    array('action-unfavorite'),
             );
-            
-            if ( get_current_user_id() && !$can_manage_playlists ){
-                $actions['favorite'][] = 'wpsstm-disabled-action';
-                $actions['unfavorite'][] = 'wpsstm-disabled-action';
-            }
 
         }
 

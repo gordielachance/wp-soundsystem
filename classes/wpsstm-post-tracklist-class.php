@@ -368,27 +368,17 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         );
         
         //export
-        if ( !get_current_user_id() ){
-            $dl_link = $this->get_tracklist_action_url('export');
-            $dl_link = add_query_arg(array('dl'=>true),$dl_link);
-            $actions['export'] = array(
-                'text' =>       __('Export', 'wpsstm'),
-                'classes' =>    array('wpsstm-advanced-action'),
-                'desc' =>       __('Export to XSPF', 'wpsstm'),
-                'href' =>       $dl_link,
-                'target' =>     '_blank',
-            );
-        }else{ //call to action
-            $actions['export'] = array(
-                'text' =>       __('Export', 'wpsstm'),
-                'classes' =>    array('wpsstm-advanced-action','wpsstm-freeze'),
-                'desc' =>       __('Export to XSPF (logged users only)', 'wpsstm'),
-                'href' =>       '#',
-            );
-        }
+        $url_export = $this->get_tracklist_action_url('export');
+        $url_export = add_query_arg(array('dl'=>true),$url_export);
+        $actions['export'] = array(
+            'text' =>       __('Export', 'wpsstm'),
+            'classes' =>    array('wpsstm-advanced-action'),
+            'desc' =>       __('Export to XSPF', 'wpsstm'),
+            'href' =>       get_current_user_id() ? $url_export : wp_login_url($url_export),
+            'target' =>     '_blank',
+        );
         
         //favorite / unfavorite
-        
         $url_favorite = $this->get_tracklist_action_url('favorite');
         $url_unfavorite = $this->get_tracklist_action_url('unfavorite');
         
