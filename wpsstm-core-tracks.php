@@ -1136,12 +1136,8 @@ class WPSSTM_Core_Tracks{
             'track'         => $wpsstm_track,
             'success'       => false,
         );
-   
-        ob_start();
-        wpsstm_locate_template( 'content-track.php', true, false );
-        $content = ob_get_clean();
 
-        $result['html'] = $content;
+        $result['html'] = $wpsstm_track->get_track_html();
         $result['success'] = true;
         
         $result['track'] = $wpsstm_track->to_array(); //maybe we have a new post ID here, if the track has been created
