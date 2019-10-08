@@ -357,7 +357,7 @@ class WPSSTM_Core_Track_Links{
             $is_premium = WPSSTM_Core_API::is_premium();
             $is_enabled = wpsstm()->get_options('autolink');
             $can_autolink = ( WPSSTM_Core_Track_Links::can_autolink() === true);
-            $sleeping = get_post_meta( $wpsstm_track->post_id, self::$autolink_time_metakey, true );
+            $autolinked_time = get_post_meta( $wpsstm_track->post_id, self::$autolink_time_metakey, true );
         
         
             if( $is_enabled ){
@@ -374,16 +374,20 @@ class WPSSTM_Core_Track_Links{
                 
                 
                 //has been autolinked notice
-                if ( $sleeping ){
-                    $now = current_time( 'timestamp' );
-                    $next_refresh = $now + wpsstm()->get_options('autolink_timeout');
+                if ( $autolinked_time ){
 
-                    $refreshed = human_time_diff( $now, $next_refresh );
-                    $refreshed = sprintf(__('This track has been autolinked already.  Wait %s before next request.','wpsstm'),$refreshed);
+                    $autolinked_date = date_i18n( get_option( 'date_format' ), $autolinked_time );
+                    $notice = sprintf(__('This track has been autolinked on the %s.','wpsstm'),$autolinked_date);
+                    
+                    if ( $wpsstm_track->did_autolink() ){
+                        $now = current_time( 'timestamp' );
+                        $next_refresh = $autolinked_time + wpsstm()->get_options('autolink_timeout');
+                        $next_refresh = human_time_diff( $now, $next_refresh );
+                        $notice.= '  '.sprintf(__('Wait %s before next request.','wpsstm'),$next_refresh);
+                        $notice.= '  '.sprintf('<input id="wpsstm-unset-autolink-bt" type="submit" name="wpsstm_unset_autolink" class="button" value="%s">',__('Release','wpsstm'));
+                    }
 
-                    $unset_autolink_bt = sprintf('<input id="wpsstm-unset-autolink-bt" type="submit" name="wpsstm_unset_autolink" class="button" value="%s">',__('Release','wpsstm'));
-
-                    printf('<p class="wpsstm-notice">%s %s</p>',$refreshed,$unset_autolink_bt);
+                    printf('<p class="wpsstm-notice">%s</p>',$notice);
                 }
                 
             }
