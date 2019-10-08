@@ -807,16 +807,14 @@ class WpsstmTracklist extends HTMLElement{
         */
         
         var trackready = $.Deferred();
-        trackready.resolve();//URGENT
-        /*
-
         if ( requestedTrack.playable ){
             var sourceLinks = $(requestedTrack).find('wpsstm-track-link').filter('[wpsstm-playable]');
 
             if(sourceLinks.length){
                 trackready.resolve();
             }else{
-                if ( requestedTrack.ajax_details ){
+                if ( requestedTrack.ajax_autolink ){
+                    requestedTrack.debug("DO LOAD AUTOLINK");//URGENT
                     trackready = requestedTrack.track_autolink();
                 }else{
                     trackready.reject();
@@ -826,7 +824,6 @@ class WpsstmTracklist extends HTMLElement{
         }else{
             trackready.reject();
         }
-        */
         
         /*
         Track is now ready (or not, here I come)

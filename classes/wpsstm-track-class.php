@@ -51,6 +51,7 @@ class WPSSTM_Track{
                 $this->tracklist = new WPSSTM_Post_Tracklist($tracklist);
             }
         }
+
     }
 
     function from_array( $args ){
@@ -566,6 +567,7 @@ class WPSSTM_Track{
         $this->link_count = 0;
 
         if ($this->post_id){
+            
             $args = array(
                 'fields' =>             'ids',
             );
@@ -658,7 +660,7 @@ class WPSSTM_Track{
         
         //repopulate links
         $this->populate_links();
-        
+
         $this->track_log(array('track_id'=>$this->post_id,'links_found'=>$this->link_count,'links_saved'=>count($new_ids)),'autolink results');
         
         return $new_ids;
@@ -899,7 +901,6 @@ class WPSSTM_Track{
     }
     
     function get_track_attr($args=array()){
-        global $wpsstm_tracklist;
         
         $ajax_details = ( wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() );//should we load the track details through ajax ?
         $can_autolink = ( WPSSTM_Core_Track_Links::can_autolink() === true);
@@ -913,7 +914,7 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
             'ajax-details' =>                   $ajax_details,
-            'can-autolink' =>                   ( !$ajax_details && $can_autolink && !$this->did_autolink() ),
+            'ajax-autolink' =>                  ( !$ajax_details && $can_autolink && !$this->did_autolink() ),
             'wpsstm-playable' =>                ( !$ajax_details && wpsstm()->get_options('player_enabled') ),
         );
 
@@ -1257,7 +1258,7 @@ class WPSSTM_Track{
     Populate extended track informations, usually post metas
     */
     
-    public function populate_track_metas(){
+    public function load_track_details(){
         if (!$this->post_id) return;
         $this->image_url        = wpsstm_get_post_image_url($this->post_id);
         $this->duration         = wpsstm_get_post_duration($this->post_id);

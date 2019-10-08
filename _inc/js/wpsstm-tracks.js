@@ -12,6 +12,8 @@ class WpsstmTrack extends HTMLElement{
         this.subtrack_id =          undefined;
         this.post_id =              undefined;
         this.tracklist =            undefined;
+        this.ajax_autolink =        undefined;
+        this.ajax_details =         undefined;
 
         // Setup a click listener on <wpsstm-tracklist> itself.
         this.addEventListener('click', e => {
@@ -114,7 +116,7 @@ class WpsstmTrack extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['trackstatus','wpsstm-playable','can-autolink','data-sources-count'];
+        return ['trackstatus','wpsstm-playable','data-sources-count'];
     }
     
     get status() {
@@ -137,19 +139,7 @@ class WpsstmTrack extends HTMLElement{
             this.removeAttribute('wpsstm-playable');
         }
     }
-    
-    get can_autolink() {
-        return this.hasAttribute('can-autolink');
-    }
 
-    set can_autolink(value) {
-        var isChecked = Boolean(value);
-        if (isChecked) {
-            this.setAttribute('can-autolink',true);
-        } else {
-            this.removeAttribute('can-autolink');
-        }
-    }
     debug(msg,data){
         
         //msg
@@ -178,6 +168,8 @@ class WpsstmTrack extends HTMLElement{
         track.track_album =         $(track).find('[itemprop="inAlbum"]').text();
         track.post_id =             Number($(track).attr('data-wpsstm-track-id'));
         track.subtrack_id =         Number($(track).attr('data-wpsstm-subtrack-id'));
+        track.ajax_autolink =       track.hasAttribute('ajax-autolink');
+        track.ajax_details =        track.hasAttribute('ajax-details');
 
         var toggleLinksEl = $(track).find('.wpsstm-track-action-toggle-links');
 
@@ -188,7 +180,7 @@ class WpsstmTrack extends HTMLElement{
             $(this).parents('.wpsstm-track').find('.wpsstm-track-links-list').toggleClass('active');
         });
         
-        if ( track.hasAttribute('ajax-details') ){
+        if ( track.ajax_details ){
             track.load_details();
         }
         
@@ -256,6 +248,7 @@ class WpsstmTrack extends HTMLElement{
     load_details() {
 
         var track = this;
+        var success = $.Deferred();
 
         $(track).addClass('track-details-loading');
 
@@ -278,17 +271,23 @@ class WpsstmTrack extends HTMLElement{
                 //swap nodes
                 track.parentNode.insertBefore(newTrack,track);
                 track.parentNode.removeChild(track);
+                
+                success.resolve(newTrack);
+                
 
+            }else{
+                success.reject();
             }
         })
         .fail(function() {
             track.debug(ajax_data,"failed loading track details");
+            success.reject();
         })
         .always(function() {
             $(track).removeClass('track-details-loading');
         });
 
-        return ajax;
+        return success.promise();
     }
     
     track_autolink() {
@@ -322,7 +321,7 @@ class WpsstmTrack extends HTMLElement{
                 track.removeAttr("wpsstm-playable");
             }
             
-            track.removeAttr("can-autolink");
+            track.removeAttr("ajax-autolink");
 
         })
         .fail(function() {
@@ -585,7 +584,7 @@ class WpsstmTrack extends HTMLElement{
         //keep only tracks that needs to be autolinked
         tracks_slice = tracks_slice.filter(function (index) {
             var playable_links = $(this).find('wpsstm-track-link[wpsstm-playable]');
-            return ( this.can_autolink && !playable_links.length );
+            return ( this.ajax_autolink && !playable_links.length );
         });
         
         /*
