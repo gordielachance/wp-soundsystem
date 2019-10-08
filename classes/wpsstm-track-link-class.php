@@ -16,26 +16,18 @@ class WPSSTM_Track_Link{
     var $duration; //in seconds
     var $track;
 
-    function __construct($post_id = null){
-
-        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
-
-        //has track ID
-        if ( is_int($post_id) ) {
-            $this->post_id = $post_id;
-            $this->populate_link_post();
-        }
-
+    function __construct($post = null ){
         $this->track = new WPSSTM_Track(); //default
-
+        $this->populate_link_post($post);
     }
     
-    function populate_link_post(){
+    function populate_link_post($post = null){
 
-        if ( !$this->post_id || ( get_post_type($this->post_id) != wpsstm()->post_type_track_link ) ){
-            return new WP_Error( 'wpsstm_invalid_track_link', __('Not a valid track link','wpsstm') );
-        }
-        
+        $post = get_post($post);
+        if ( get_post_type($post) != wpsstm()->post_type_track_link ) return;
+
+        $this->post_id =    $post->ID;
+
         $this->title = get_the_title($this->post_id);
         $this->permalink_url = get_post_meta($this->post_id,WPSSTM_Core_Track_Links::$link_url_metakey,true);
         $this->index = get_post_field('menu_order', $this->post_id);
