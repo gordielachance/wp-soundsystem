@@ -51,7 +51,7 @@ function wpsstm_js_notice(msg,preprendTo){
 
 }
 
-function wpsstm_debug(msg,data){
+function wpsstm_debug(data,msg){
     if (!wpsstmL10n.debug) return;
     
     //data

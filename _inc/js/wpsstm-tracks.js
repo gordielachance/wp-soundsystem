@@ -92,7 +92,7 @@ class WpsstmTrack extends HTMLElement{
                 var $container = $(track).find('.wpsstm-track-links-list');
                 var $links = $container.find('wpsstm-track-link');
                 var $sources = $links.filter('[wpsstm-playable]');
-                track.playable = ($sources.length > 0);
+                track.playable = ( ($sources.length > 0) || track.can_autolink );
 
                 // sort links
                 $container.sortable({
@@ -148,21 +148,19 @@ class WpsstmTrack extends HTMLElement{
         }
     }
 
-    debug(msg,data){
+    debug(data,msg){
         
-        //msg
-        if (typeof msg !== 'object'){
-            msg = '[track] ' + msg;
+        //add prefix
+        if (this.post_id){
+            var prefix = '[track:'+this.post_id+']';
+            if (typeof msg === 'undefined'){
+                msg = prefix;
+            }else{
+                msg = prefix + ' ' + msg;
+            }
         }
         
-        //data
-        if (typeof data !== 'object'){
-            msg = msg + ' - ' + data;
-            data = {};
-        }
-
-        data.track = this;
-        wpsstm_debug(msg,data);
+        wpsstm_debug(data,msg);
     }
 
     render(){
@@ -207,11 +205,6 @@ class WpsstmTrack extends HTMLElement{
         var $links = $(track).find('wpsstm-track-link');
         track.setAttribute('data-links-count',$links.length);
 
-        var $sources = $links.filter('[wpsstm-playable]');
-        if (!$sources.length && !track.can_autolink){
-            track.playable = false;
-        }
-        
         /*
         Track Actions
         */

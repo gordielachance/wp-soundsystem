@@ -96,21 +96,19 @@ class WpsstmLink extends HTMLElement{
     ///
     ///
     
-    debug(msg,data){
-        //msg
-        if (typeof msg !== 'object'){
-            msg = '[link] ' + msg;
+    debug(data,msg){
+        
+        //add prefix
+        if (this.post_id){
+            var prefix = '[link:'+this.post_id+']';
+            if (typeof msg === 'undefined'){
+                msg = prefix;
+            }else{
+                msg = prefix + ' ' + msg;
+            }
         }
         
-        //data
-        if (typeof data !== 'object'){
-            msg = msg + ' - ' + data;
-            data = {};
-        }
-
-        data.link = this;
-        
-        wpsstm_debug(msg,data);
+        wpsstm_debug(data,msg);
     }
 
     render(){
@@ -228,7 +226,7 @@ class WpsstmLink extends HTMLElement{
         */
 
         $(track.tracklist.current_media).on('loadeddata', function() {
-            track.tracklist.debug('source loaded');
+            track.tracklist.debug('source loaded',link.src);
             track.tracklist.current_media.play();
         });
 

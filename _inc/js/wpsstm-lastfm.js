@@ -155,21 +155,16 @@ class WpsstmLastFM {
         return success.promise();
     }
         
-    debug(msg,data){
-        //msg
-        if (typeof msg !== 'object'){
-            msg = '[lastFM] ' + msg;
-        }
-        
-        //data
-        if (typeof data !== 'object'){
-            msg = msg + ' - ' + data;
-            //data = {};
+    debug(data,msg){
+
+        var prefix = '[lastfm]';
+        if (typeof msg === 'undefined'){
+            msg = prefix;
+        }else{
+            msg = prefix + ' ' + msg;
         }
 
-        //data.lastfm = this;
-
-        wpsstm_debug(msg,data);
+        wpsstm_debug(data,msg);
     }
     
 }
