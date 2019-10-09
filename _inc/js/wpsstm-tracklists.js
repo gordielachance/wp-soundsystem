@@ -367,6 +367,12 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = this;
         var success = $.Deferred();
         
+        var abord_reload = function(e) {
+            if ( (e.key === "Escape") ) { // escape key maps to keycode `27`
+                request.abort();
+            }
+        }
+        
         //stop player
         //TOUFIX URGENT
         
@@ -407,8 +413,8 @@ class WpsstmTracklist extends HTMLElement{
                     //TOUFIX URGENT we should maybe keep the player so we keep going with the Autoplay policy ?
                     
                     tracklist.replaceWith( newTracklist );
-                    
-                    $(newTracklist).trigger('loaded');
+                    tracklist = newTracklist;
+
                     success.resolve(newTracklist);
                 }
             },
@@ -420,14 +426,9 @@ class WpsstmTracklist extends HTMLElement{
             complete: function() {
                 $(tracklist).removeClass('tracklist-reloading');
                 $(document).unbind( "keyup.reloadtracklist", abord_reload );
+                $(tracklist).trigger('loaded');
             }
         })
-        
-        var abord_reload = function(e) {
-             if ( (e.key === "Escape") ) { // escape key maps to keycode `27`
-                request.abort();
-            }
-        }
         
         return success.promise();
     }
