@@ -2,6 +2,9 @@
 
 var $ = jQuery.noConflict();
 
+
+
+
 //json viewer
 $( ".wpsstm-json-input" ).wpsstmJsonViewer();
 
@@ -22,6 +25,9 @@ $('.wpsstm-artist-autocomplete').each(function() {
     var input_el = $(this);
     input_el.autocomplete({
         source: function( request, response ) {
+            
+            input_el.addClass('input-loading');
+            
             $.ajax({
                 type: "post",
                 dataType: "json",
@@ -29,28 +35,24 @@ $('.wpsstm-artist-autocomplete').each(function() {
                 data: {
                     action:             'wpsstm_search_artists',
                     search:              request.term + '*', //wildcard!
-                },
-                beforeSend: function() {
-                    input_el.addClass('input-loading');
-                },
-                success: function( ajax ) {
-                    if(ajax.success){
-                        var artists = ajax.data.artists;
-                        response($.map(artists, function(artist){
-                            return artist.name;
-                        }));
-                    }else{
-                        console.log(ajax);
-                    }
-
-                },
-                error: function(XMLHttpRequest, textStatus, errorThrown) { 
-                    console.log("status: " + textStatus + ", error: " + errorThrown); 
-                },
-                complete: function() {
-                    input_el.removeClass('input-loading');
                 }
-            });
+            })
+            .done(function( ajax ) {
+                if(ajax.success){
+                    var artists = ajax.data.artists;
+                    response($.map(artists, function(artist){
+                        return artist.name;
+                    }));
+                }else{
+                    console.log(ajax);
+                }
+            })
+            .fail(function(XMLHttpRequest, textStatus, errorThrown) { 
+                console.log("status: " + textStatus + ", error: " + errorThrown); 
+            })
+            .always(function() {
+                input_el.removeClass('input-loading');
+            })
         },
         delay: 500,
         minLength: 2,

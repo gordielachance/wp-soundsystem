@@ -93,28 +93,26 @@ class WpsstmLastFM {
             track:              track_obj.to_ajax(),
             playback_start:     Math.round( $.now() /1000), //time in sec
         };
+        
+        $(self.scrobble_icon).addClass('lastfm-loading');
 
         var ajax = $.ajax({
-
             type: "post",
             url: wpsstmL10n.ajaxurl,
             data:ajax_data,
             dataType: 'json',
-            beforeSend: function() {
-                $(self.scrobble_icon).addClass('lastfm-loading');
-            },
-            success: function(data){
+        })
+        .done(function(data){
                 if (data.success === false) {
                     console.log(data);
                     success.reject();
                 }else{
                     success.resolve();
                 }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
                 console.log(xhr.status);
                 console.log(thrownError);
-            },
         })
         
         return success.promise();

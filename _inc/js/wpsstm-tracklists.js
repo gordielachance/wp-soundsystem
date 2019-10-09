@@ -382,52 +382,51 @@ class WpsstmTracklist extends HTMLElement{
             action:     'wpsstm_reload_tracklist',
             tracklist:      tracklist.to_ajax(),
         };
+        
+        $(tracklist).addClass('tracklist-reloading');
+        $(document).bind( "keyup.reloadtracklist", abord_reload ); //use namespace - https://acdcjunior.github.io/jquery-creating-specific-event-and-removing-it-only.html
 
         var request = $.ajax({
             type:           "post",
             url:            wpsstmL10n.ajaxurl,
             data:           ajax_data,
-            dataType:       'json',
-            beforeSend:     function() {
-                $(tracklist).addClass('tracklist-reloading');
-                $(document).bind( "keyup.reloadtracklist", abord_reload ); //use namespace - https://acdcjunior.github.io/jquery-creating-specific-event-and-removing-it-only.html
-            },
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                    success.reject();
-                }else{
-                    
-                    var newTracklist = $(data.html).get(0);
-                    
-                    /*
-                    If the tracklist WAS playing, keep those classes (used for autoplay).
-                    */
+            dataType:       'json'
+        })
+        .done(function(data){
+            if (data.success === false) {
+                console.log(data);
+                success.reject();
+            }else{
 
-                    if (autoplay){
-                        $(newTracklist).find('wpsstm-track:first-child').addClass('track-autoplay');
-                    }
+                var newTracklist = $(data.html).get(0);
 
-                    //swap content
-                    
-                    //TOUFIX URGENT we should maybe keep the player so we keep going with the Autoplay policy ?
-                    
-                    tracklist.replaceWith( newTracklist );
-                    tracklist = newTracklist;
+                /*
+                If the tracklist WAS playing, keep those classes (used for autoplay).
+                */
 
-                    success.resolve(newTracklist);
+                if (autoplay){
+                    $(newTracklist).find('wpsstm-track:first-child').addClass('track-autoplay');
                 }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.status);
-                console.log(thrownError);
-                success.reject(thrownError);
-            },
-            complete: function() {
-                $(tracklist).removeClass('tracklist-reloading');
-                $(document).unbind( "keyup.reloadtracklist", abord_reload );
-                $(tracklist).trigger('loaded');
+
+                //swap content
+
+                //TOUFIX URGENT we should maybe keep the player so we keep going with the Autoplay policy ?
+
+                tracklist.replaceWith( newTracklist );
+                tracklist = newTracklist;
+
+                success.resolve(newTracklist);
             }
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+            success.reject(thrownError);
+        })
+        .always(function () {
+            $(tracklist).removeClass('tracklist-reloading');
+            $(document).unbind( "keyup.reloadtracklist", abord_reload );
+            $(tracklist).trigger('loaded');
         })
         
         return success.promise();
@@ -447,40 +446,39 @@ class WpsstmTracklist extends HTMLElement{
             tracklist:  tracklist.to_ajax(),   
             do_love:    do_love,
         };
+        
+        link_el.removeClass('action-error');
+        link_el.addClass('action-loading');
 
         return $.ajax({
             type:       "post",
             url:        wpsstmL10n.ajaxurl,
             data:       ajax_data,
             dataType:   'json',
-            beforeSend: function() {
-                link_el.removeClass('action-error');
-                link_el.addClass('action-loading');
-            },
-            success: function(data){
+        })
+        .done(function(data){
 
-                if (data.success === false) {
-                    console.log(data);
-                    link_el.addClass('action-error');
-                    if (data.notice){
-                        wpsstm_js_notice(data.notice);
-                    }
-                }else{
-                    if (do_love){
-                        $(tracklist).addClass('favorited-tracklist');
-                    }else{
-                        $(tracklist).removeClass('favorited-tracklist');
-                    }
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
+            if (data.success === false) {
+                console.log(data);
                 link_el.addClass('action-error');
-                console.log(xhr.status);
-                console.log(thrownError);
-            },
-            complete: function() {
-                link_el.removeClass('action-loading');
+                if (data.notice){
+                    wpsstm_js_notice(data.notice);
+                }
+            }else{
+                if (do_love){
+                    $(tracklist).addClass('favorited-tracklist');
+                }else{
+                    $(tracklist).removeClass('favorited-tracklist');
+                }
             }
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
+            link_el.addClass('action-error');
+            console.log(xhr.status);
+            console.log(thrownError);
+        })
+        .always(function() {
+            link_el.removeClass('action-loading');
         })
     }
     
@@ -535,35 +533,33 @@ class WpsstmTracklist extends HTMLElement{
             new_pos:    new_pos,
             track:      track.to_ajax(),
         };
+        
+        $(track).addClass('track-loading');
+        link_el.removeClass('action-error');
+        link_el.addClass('action-loading');
 
         $.ajax({
             type: "post",
             url:        wpsstmL10n.ajaxurl,
             data:       ajax_data,
-            dataType: 'json',
-            beforeSend: function() {
-                $(track).addClass('track-loading');
-                link_el.removeClass('action-error');
-                link_el.addClass('action-loading');
-            },
-            success: function(data){
-
-                if (data.success === false) {
-                    link_el.addClass('action-error');
-                    console.log(data);
-                }else{
-                    tracklist.refresh_tracks_positions();
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
+            dataType: 'json'
+        })
+        .done(function(data){
+            if (data.success === false) {
                 link_el.addClass('action-error');
-                console.log(xhr.status);
-                console.log(thrownError);
-            },
-            complete: function() {
-                $(track).removeClass('track-loading');
-                link_el.removeClass('action-loading');
+                console.log(data);
+            }else{
+                tracklist.refresh_tracks_positions();
             }
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
+            link_el.addClass('action-error');
+            console.log(xhr.status);
+            console.log(thrownError);
+        })
+        .always(function() {
+            $(track).removeClass('track-loading');
+            link_el.removeClass('action-loading');
         })
 
     }
@@ -592,6 +588,8 @@ class WpsstmTracklist extends HTMLElement{
             track:          track.to_ajax(),
             tracklist_id:   tracklist.post_id
         };
+        
+        row.removeClass('action-error').addClass('action-loading wpsstm-freeze');
 
         var ajax = $.ajax({
 
@@ -599,27 +597,23 @@ class WpsstmTracklist extends HTMLElement{
             url:        wpsstmL10n.ajaxurl,
             data:       ajax_data,
             dataType:   'json',
-
-            beforeSend: function() {
-                row.removeClass('action-error').addClass('action-loading wpsstm-freeze');
-            },
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                    success.reject();
-                }else{
-                    success.resolve();
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.status);
-                console.log(thrownError);
-                row.addClass('action-error');
+        })
+        .done(function(data){
+            if (data.success === false) {
+                console.log(data);
                 success.reject();
-            },
-            complete: function() {
-                row.removeClass('action-loading wpsstm-freeze');
+            }else{
+                success.resolve();
             }
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+            row.addClass('action-error');
+            success.reject();
+        })
+        .always(function() {
+            row.removeClass('action-loading wpsstm-freeze');
         })
         
         return success.promise();

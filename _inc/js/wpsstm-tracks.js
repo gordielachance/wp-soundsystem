@@ -384,18 +384,17 @@ class WpsstmTrack extends HTMLElement{
             track:      track.to_ajax(),   
             do_love:    do_love,
         };
+        
+        $links.removeClass('action-error').addClass('action-loading');
 
         return $.ajax({
 
             type:       "post",
             url:        wpsstmL10n.ajaxurl,
             data:       ajax_data,
-            dataType:   'json',
-
-            beforeSend: function() {
-                $links.removeClass('action-error').addClass('action-loading');
-            },
-            success: function(data){
+            dataType:   'json'
+        })
+        .done(function(data){
 
                 if (data.success === false) {
                     console.log(data);
@@ -410,15 +409,14 @@ class WpsstmTrack extends HTMLElement{
                         $instances.removeClass('favorited-track');
                     }
                 }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
                 console.log(xhr.status);
                 console.log(thrownError);
                 $links.addClass('action-error');
-            },
-            complete: function() {
+        })
+        .always(function() {
                 $links.removeClass('action-loading');
-            }
         })
     }
     
@@ -431,16 +429,16 @@ class WpsstmTrack extends HTMLElement{
             action:         'wpsstm_subtrack_dequeue',
             track:          track.to_ajax(),
         };
+        
+        $links.removeClass('action-error').addClass('action-loading');
 
         $.ajax({
             type:       "post",
             url:        wpsstmL10n.ajaxurl,
             data:       ajax_data,
-            dataType:   'json',
-            beforeSend: function() {
-                $links.removeClass('action-error').addClass('action-loading');
-            },
-            success: function(data){
+            dataType:   'json'
+        })
+        .done(function(data){
 
                 if (data.success === false) {
                     $links.addClass('action-error');
@@ -449,15 +447,14 @@ class WpsstmTrack extends HTMLElement{
                     $instances.remove();
                     track.tracklist.refresh_tracks_positions();
                 }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
                 $links.addClass('action-error');
                 console.log(xhr.status);
                 console.log(thrownError);
-            },
-            complete: function() {
-                $links.removeClass('action-loading');
-            }
+        })
+        .always(function() {
+            $links.removeClass('action-loading');
         })
 
     }
@@ -472,32 +469,31 @@ class WpsstmTrack extends HTMLElement{
             action:     'wpsstm_track_trash',
             track:      track.to_ajax(),
         };
+        
+        $links.removeClass('action-error').addClass('action-loading');
 
         $.ajax({
             type:       "post",
             url:        wpsstmL10n.ajaxurl,
             data:       ajax_data,
-            dataType:   'json',
-            beforeSend: function() {
-                $links.removeClass('action-error').addClass('action-loading');
-            },
-            success: function(data){
-                if (data.success === false) {
-                    $links.addClass('action-error');
-                    console.log(data);
-                }else{
-                    $instances.remove();
-                    track.tracklist.refresh_tracks_positions();
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
+            dataType:   'json'
+        })
+        .done(function(data){
+            if (data.success === false) {
                 $links.addClass('action-error');
-                console.log(xhr.status);
-                console.log(thrownError);
-            },
-            complete: function() {
-                $links.removeClass('action-loading');
+                console.log(data);
+            }else{
+                $instances.remove();
+                track.tracklist.refresh_tracks_positions();
             }
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
+            $links.addClass('action-error');
+            console.log(xhr.status);
+            console.log(thrownError);
+        })
+        .always(function() {
+            $links.removeClass('action-loading');
         })
 
     }
@@ -517,30 +513,28 @@ class WpsstmTrack extends HTMLElement{
         
         //track.debug(ajax_data,"update_links_order");
 
+        $instances.addClass('track-details-loading');
+        
         var ajax = jQuery.ajax({
             type: "post",
             url: wpsstmL10n.ajaxurl,
             data:ajax_data,
-            dataType: 'json',
-            beforeSend: function() {
-                $instances.addClass('track-details-loading');
-            },
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                    success.reject();
-                }else{
-                    success.resolve();
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.status);
-                console.log(thrownError);
+            dataType: 'json'
+        })
+        .done(function(data){
+            if (data.success === false) {
+                console.log(data);
                 success.reject();
+            }else{
+                success.resolve();
             }
         })
-
-        ajax.always(function() {
+        .fail(function (xhr, ajaxOptions, thrownError) {
+            console.log(xhr.status);
+            console.log(thrownError);
+            success.reject();
+        })
+        .always(function() {
             $instances.removeClass('track-details-loading');
         });
         
