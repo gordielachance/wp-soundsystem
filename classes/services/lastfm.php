@@ -32,13 +32,15 @@ class WPSSTM_LastFM{
         add_action( 'init', array($this,'setup_lastfm_user') ); //TO FIX only if player is loaded ?
         add_action( 'wp', array($this,'after_app_auth') );
         add_action( 'wp_head',array($this,'app_auth_notice'),11);
+        
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
+        add_action( 'admin_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
         
         add_filter('wpsstm_get_player_actions', array($this,'get_lastfm_actions'));
         
         /*backend*/
         add_action( 'admin_init', array( $this, 'lastfm_settings_init' ) );
-        add_action( 'admin_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
+        
         
         /*
         AJAX
@@ -200,7 +202,7 @@ class WPSSTM_LastFM{
         //wp_enqueue_style( 'wpsstm-lastfm',  wpsstm()->plugin_url . '_inc/css/wpsstm-lastfm.css', null, wpsstm()->version );
         
         //JS
-        wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . '_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version);
+        wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . '_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version, true);
         
         $scrobble_along = ( $this->can_scrobble_along() === true );
         

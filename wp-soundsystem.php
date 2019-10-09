@@ -187,8 +187,8 @@ class WP_SoundSystem {
         
         add_action( 'init', array($this, 'upgrade'), 9);
 
-        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
-        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 11 );
+        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 11 );
 
         add_action('edit_form_after_title', array($this,'metabox_reorder'));
         
