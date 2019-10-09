@@ -60,8 +60,8 @@ class WpsstmTracklist extends HTMLElement{
         this.$nextTrackBt =     undefined;
 
         //Setup listeners
-        this.addEventListener('queueLoop', this._queueLoopEvent);
-        this.addEventListener('loaded', this._loadedEvent);
+        $(this).on('queueLoop',WpsstmTracklist._queueLoopEvent);
+        $(this).on('loaded', WpsstmTracklist._loadedEvent);
     }
     connectedCallback(){
         //console.log("TRACKLIST CONNECTED!");
@@ -136,34 +136,6 @@ class WpsstmTracklist extends HTMLElement{
         tracklist.$nextTrackBt =        $(tracklist).find('.wpsstm-next-track-bt');
 
         tracklist.init_tracklist_expiration();
-        
-        /*
-        Player
-        */
-        
-        $(tracklist).find('audio').mediaelementplayer({
-            classPrefix: 'mejs-',
-            // All the config related to HLS
-            hls: {
-                debug:          wpsstmL10n.debug,
-                autoStartLoad:  true
-            },
-            pluginPath: wpsstmL10n.plugin_path, //'https://cdnjs.com/libraries/mediaelement/'
-            //audioWidth: '100%',
-            stretching: 'responsive',
-            features: ['playpause','loop','progress','current','duration','volume'],
-            loop: false,
-            success: function(mediaElement, originalNode, MEplayer) {
-                tracklist.current_media = mediaElement;
-                tracklist.debug("MediaElementJS ready");
-                tracklist.dispatchEvent(new CustomEvent('playerReady'));
-                alert("TRACKLIST playerReady EVENT");
-            },error(mediaElement) {
-                // Your action when mediaElement had an error loading
-                //TO FIX is this required ?
-                console.log("mediaElement error");
-            }
-        });
 
         /*
         New subtracks
@@ -386,7 +358,7 @@ class WpsstmTracklist extends HTMLElement{
         if (wpsstmL10n.ajax_radios && tracklist.isExpired){
             tracklist.reload_tracklist();
         }else{
-            tracklist.dispatchEvent(new CustomEvent('loaded'));
+            $(tracklist).trigger('loaded');
         }
         
     }
@@ -431,9 +403,12 @@ class WpsstmTracklist extends HTMLElement{
                     }
 
                     //swap content
+                    
+                    //TOUFIX URGENT we should maybe keep the player so we keep going with the Autoplay policy ?
+                    
                     tracklist.replaceWith( newTracklist );
                     
-                    newTracklist.dispatchEvent(new CustomEvent('loaded'));
+                    $(newTracklist).trigger('loaded');
                     success.resolve(newTracklist);
                 }
             },
@@ -760,7 +735,7 @@ class WpsstmTracklist extends HTMLElement{
         
         */
         if (track_idx < current_track_idx){
-            tracklist.dispatchEvent(new CustomEvent('queueLoop'));
+            $(tracklist).trigger('queueLoop');
         }
 
     }
@@ -895,22 +870,55 @@ class WpsstmTracklist extends HTMLElement{
         return this.$player.find('.player-track wpsstm-track').get(0);
     }
     
-    _queueLoopEvent(){
-        var tracklist = this;
+    static _queueLoopEvent(e){
+        var tracklist = e.target;
         if ( wpsstmL10n.ajax_radios && tracklist.isExpired ){
             tracklist.reload_tracklist(true);
         }
     }
     
-    _loadedEvent(){
-        var tracklist = this;
+    static _loadedEvent(e){
+        var tracklist = e.target;
+
         tracklist.debug("Tracklist loaded");
+        
+        //load track details ?
+        
         var $tracks = tracklist.get_queue();
         $tracks.each(function( index ) {
-            if ( this.ajax_details ){
-                this.load_details();
+            var track = this;
+            if ( track.ajax_details ){
+                track.load_details();
             }
         });
+
+        /*
+        Init player
+        */
+        
+        $(tracklist).find('audio').mediaelementplayer({
+            classPrefix: 'mejs-',
+            // All the config related to HLS
+            hls: {
+                debug:          wpsstmL10n.debug,
+                autoStartLoad:  true
+            },
+            pluginPath: wpsstmL10n.plugin_path, //'https://cdnjs.com/libraries/mediaelement/'
+            //audioWidth: '100%',
+            stretching: 'responsive',
+            features: ['playpause','loop','progress','current','duration','volume'],
+            loop: false,
+            success: function(mediaElement, originalNode, MEplayer) {
+                tracklist.current_media = mediaElement;
+                tracklist.debug("MediaElementJS ready");
+                $(document).trigger("wpsstmPlayerReady",[tracklist]);
+            },error(mediaElement) {
+                // Your action when mediaElement had an error loading
+                //TO FIX is this required ?
+                console.log("mediaElement error");
+            }
+        });
+        
     }
  
 }

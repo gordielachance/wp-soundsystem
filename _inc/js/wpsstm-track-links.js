@@ -11,7 +11,7 @@ class WpsstmLink extends HTMLElement{
         this.type =             undefined;
 
         //Setup listeners
-        this.addEventListener('sourceInit', this._sourceInitEvent);
+        $(this).on('sourceInit', this._sourceInitEvent);
     }
     connectedCallback(){
         //console.log("LINK CONNECTED!");
@@ -67,7 +67,7 @@ class WpsstmLink extends HTMLElement{
                     if (!isPlayerLink){
                         $(link.track.tracklist.current_media).off(); //remove old events
                         link.track.tracklist.current_link = link;
-                        link.dispatchEvent(new CustomEvent('sourceInit'));
+                        $(link).trigger('sourceInit');
 
                         link.track.status = 'request';
                     }
@@ -312,16 +312,14 @@ class WpsstmLink extends HTMLElement{
         return $('wpsstm-track-link[data-wpsstm-link-id="'+this.post_id+'"]');
     }
     
-    _sourceInitEvent(){
-        var link = this;
+    _sourceInitEvent(e){
+        var link = e.target;
         var track = link.track;
 
-        var startTrack = function(){
-            link.track.dispatchEvent(new CustomEvent('start'));
-        }
-
         //start track event, fired only once
-        $(link.track.tracklist.current_media).one('play', startTrack);
+        $(link.track.tracklist.current_media).one('play', function(){
+            $(document).trigger("wpsstmTrackStart",[track]);
+        });
     }
 
 }
