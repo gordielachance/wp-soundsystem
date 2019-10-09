@@ -203,8 +203,7 @@ $(document).on( "wpsstmPlayerInit", function( event,tracklist ) {
 });
 
 $(document).on( "wpsstmTrackStart", function( event, track ) {
-    var tracklist =             $(track).closest('wpsstm-tracklist');
-    var scrobble_icon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
+    var scrobble_icon =         $(track.tracklist).find('.wpsstm-player-action-scrobbler');
     var scrobbler_enabled =     scrobble_icon.hasClass('active');
 
     var nowPlayingTrack = function(){
