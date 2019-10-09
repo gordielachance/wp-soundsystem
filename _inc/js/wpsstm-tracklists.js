@@ -794,7 +794,6 @@ class WpsstmTracklist extends HTMLElement{
                 requestedTrack.play_track(link_idx);
 
             }, function (error) { //error
-                requestedTrack.status = '';
                 tracklist.next_track_jump();
                 return;
             }
