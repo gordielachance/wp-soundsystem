@@ -12,7 +12,6 @@ class WpsstmTrack extends HTMLElement{
         this.subtrack_id =          undefined;
         this.post_id =              undefined;
         this.tracklist =            undefined;
-        this.can_autolink =         undefined;
         this.ajax_details =         undefined;
     }
     connectedCallback(){
@@ -148,9 +147,22 @@ class WpsstmTrack extends HTMLElement{
     set playable(value) {
         var isChecked = Boolean(value);
         if (isChecked) {
-            this.setAttribute('wpsstm-playable',true);
+            this.setAttribute('wpsstm-playable','');
         } else {
             this.removeAttribute('wpsstm-playable');
+        }
+    }
+    
+    get can_autolink() {
+        return this.hasAttribute('can-autolink');
+    }
+    
+    set can_autolink(value) {
+        var isChecked = Boolean(value);
+        if (isChecked) {
+            this.setAttribute('can-autolink','');
+        } else {
+            this.removeAttribute('can-autolink');
         }
     }
 
@@ -322,7 +334,9 @@ class WpsstmTrack extends HTMLElement{
         })
         .done(function(data) {
             
-            $instances.removeAttr('can-autolink');
+            $instances.toArray().forEach(function(item) {
+                item.can_autolink = false;
+            });
 
             if ( data.success ){
                 
@@ -333,8 +347,11 @@ class WpsstmTrack extends HTMLElement{
                 success.resolve();
                 
             }else{
-                track.debug(ajax_data,"autolink failed");
-                $instances.removeAttr("wpsstm-playable");
+                track.debug(data.error_code,"autolink failed");
+                
+                $instances.toArray().forEach(function(item) {
+                    item.playable = false;
+                });
                 
                 success.reject();
                 
@@ -343,7 +360,11 @@ class WpsstmTrack extends HTMLElement{
         })
         .fail(function() {
             track.debug(ajax_data,"autolink ajax request failed");
-            $instances.removeAttr("wpsstm-playable");
+            
+            $instances.toArray().forEach(function(item) {
+                item.playable = false;
+            });
+            
             success.reject();
         })
         .always(function() {
@@ -572,7 +593,11 @@ class WpsstmTrack extends HTMLElement{
         })
 
         success.fail(function() {
-            $instances.attr('wpsstm-playable',false);
+            
+            $instances.toArray().forEach(function(item) {
+                item.playable = false;
+            });
+            
             track.tracklist.next_track_jump();
         })
 

@@ -291,11 +291,20 @@ class WpsstmLink extends HTMLElement{
 
         success.done(function(v) {
             track.tracklist.tracksHistory.push(track);
-            $instances.attr('wpsstm-playable',true);
+            
+            $instances.toArray().forEach(function(item) {
+                item.playable = true;
+            });
+            
+            
             //TOUFIX ajax --> +1 track play; user now playing...
         })
         success.fail(function() {
-            $instances.attr('wpsstm-playable',false);
+            
+            $instances.toArray().forEach(function(item) {
+                item.playable = false;
+            });
+            
         })
 
         ////
