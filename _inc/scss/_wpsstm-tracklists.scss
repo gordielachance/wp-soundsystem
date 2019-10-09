@@ -43,14 +43,14 @@ wpsstm-tracklist{
         }
     }
     
-    &.tracklist-bottom-player wpsstm-player{
+    &.tracklist-bottom-player .wpsstm-player{
         position: fixed;
         bottom: 0;
         width: 100%;
         left: 0;
         z-index: 50;
     }
-    &:not(.tracklist-active).tracklist-bottom-player wpsstm-player{
+    &:not(.tracklist-active).tracklist-bottom-player .wpsstm-player{
         display:none;
     }
     
@@ -66,94 +66,96 @@ wpsstm-tracklist{
         font-size:.9em;
         text-align:center;
         
-        @include display-flex();
-        
-        .wpsstm-tracklist-cover{
-            position:relative;
-            width:25%;
-            max-width:250px;
-            @include flex-shrink(0);
-            box-sizing: content-box;
-            > div{
-                width: 100%;
-                padding-top: 100%; /* 1:1 Aspect Ratio */
-                background: rgba(0, 0, 0, 0.05);
-            }
-            .wpsstm-tracklist-play-bt{
-                position: absolute;
-                top: calc(50% - 1em);
-                left: calc(50% - 1em);
-                width: 2em;
-                height: 2em;
-                line-height: 2em;
-                font-size: 2em;
-                text-align: center;
-                text-align: center;
-                border: 1px solid #DDD;
-                border-radius: 50%;
-                background: white;
-                @extend .wpsstm-can-click;
-                z-index: 1;
-            }
-            img{
-                width: 100%;
-                height: 100%;
-                vertical-align: top;
-                object-fit: cover;
-                position:absolute;
-                top: 0;
-                left: 0;
-            }
-        }
-        
-        .wpsstm-tracklist-data{
-            margin:1em;
-            @include flex-grow(1);
-            .wpsstm-live-tracklist-icon{
-                position: absolute;
-                top: 0;
-                right: 0;
-                width: 2em;
-                height: 2em;
-                background: #efef90;
-                border-radius: 50%;
-                @extend .wpsstm-align-both;
-                > *{
-                    font-size:.5em;
+        .wpsstm-tracklist-infos{
+            @include display-flex();
+
+            .wpsstm-tracklist-cover{
+                position:relative;
+                width:25%;
+                max-width:250px;
+                @include flex-shrink(0);
+                box-sizing: content-box;
+                > div{
+                    width: 100%;
+                    padding-top: 100%; /* 1:1 Aspect Ratio */
+                    background: rgba(0, 0, 0, 0.05);
+                }
+                .wpsstm-tracklist-play-bt{
+                    position: absolute;
+                    top: calc(50% - 1em);
+                    left: calc(50% - 1em);
+                    width: 2em;
+                    height: 2em;
+                    line-height: 2em;
+                    font-size: 2em;
+                    text-align: center;
+                    text-align: center;
+                    border: 1px solid #DDD;
+                    border-radius: 50%;
+                    background: white;
+                    @extend .wpsstm-can-click;
+                    z-index: 1;
+                }
+                img{
+                    width: 100%;
+                    height: 100%;
+                    vertical-align: top;
+                    object-fit: cover;
+                    position:absolute;
+                    top: 0;
+                    left: 0;
                 }
             }
 
-            .wpsstm-tracklist-title{
-                font-size:1.5em;
-                margin:0;
-                margin-bottom:.5em;
-            }
-            
-            >ul{
-                text-align: right;
-                list-style: none;
-                font-size:.8em;
-                opacity:.5;
-                > li{
-                    @extend .wpsstm-icon;
-                    margin-top: 0;
-                    line-height: 1.25em;
-                    &.wpsstm-tracklist-date{
-                        >time{
-                            @extend .wpsstm-icon;
-                            &.wpsstm-tracklist-updated:before{
-                                content:"\f017"; //.fa-clock-o
-                            }
-                            &.wpsstm-tracklist-refresh-time:before{
-                                content:"\f021"; //.fa-refresh
+            .wpsstm-tracklist-data{
+                margin:1em;
+                @include flex-grow(1);
+                .wpsstm-live-tracklist-icon{
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    width: 2em;
+                    height: 2em;
+                    background: #efef90;
+                    border-radius: 50%;
+                    @extend .wpsstm-align-both;
+                    > *{
+                        font-size:.5em;
+                    }
+                }
+
+                .wpsstm-tracklist-title{
+                    font-size:1.5em;
+                    margin:0;
+                    margin-bottom:.5em;
+                }
+
+                >ul{
+                    text-align: right;
+                    list-style: none;
+                    font-size:.8em;
+                    opacity:.5;
+                    > li{
+                        @extend .wpsstm-icon;
+                        margin-top: 0;
+                        line-height: 1.25em;
+                        &.wpsstm-tracklist-date{
+                            >time{
+                                @extend .wpsstm-icon;
+                                &.wpsstm-tracklist-updated:before{
+                                    content:"\f017"; //.fa-clock-o
+                                }
+                                &.wpsstm-tracklist-refresh-time:before{
+                                    content:"\f021"; //.fa-refresh
+                                }
                             }
                         }
-                    }
-                    &.wpsstm-live-tracklist-link:before{
-                        content:"\f0c1";
-                    }
-                    &.wpsstm-tracklist-tracks-count:before{
-                        content:"\f0ca"; //.fa-list-ul
+                        &.wpsstm-live-tracklist-link:before{
+                            content:"\f0c1";
+                        }
+                        &.wpsstm-tracklist-tracks-count:before{
+                            content:"\f0ca"; //.fa-list-ul
+                        }
                     }
                 }
             }

@@ -1,7 +1,7 @@
 <?php
 global $wpsstm_tracklist;
 ?>
-<wpsstm-player>
+<section class="wpsstm-player">
     <div class="player-row player-track"><!--loaded through JS--></div>     
     <div class="player-row player-controls">
             <span id="" class="wpsstm-player-extra wpsstm-previous-track-bt"><a href="#"><i class="fa fa-backward" aria-hidden="true"></i></a></span>
@@ -19,4 +19,4 @@ global $wpsstm_tracklist;
             }                       
             ?>
     </div>
-</wpsstm-player>
+</section>

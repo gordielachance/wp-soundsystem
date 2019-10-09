@@ -114,7 +114,7 @@ class WP_SoundSystem {
             'details_engines'                   => array('musicbrainz','spotify'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
-            'ajax_radios'                       => false,//URGENT//use ajax to sync radios ?
+            'ajax_radios'                       => true,//use ajax to sync radios ?
             'ajax_tracks'                       => true,//use ajax to load each track details (metas, static links...) ?
             'ajax_autolink'                     => true,
         );

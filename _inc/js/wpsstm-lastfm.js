@@ -3,6 +3,8 @@ var $ = jQuery.noConflict();
 class WpsstmLastFM {
     constructor(){
         this.lastfm_scrobble_along =    parseInt(wpsstmLastFM.lastfm_scrobble_along);
+        document.querySelector('wpsstm-tracklist').addEventListener("playerReady", this._initPlayerEvent);
+        document.querySelector('wpsstm-track').addEventListener("start", this._nowPlayingTrackEvent);
     }
 
     enable_scrobbler(do_enable){
@@ -167,63 +169,45 @@ class WpsstmLastFM {
         wpsstm_debug(data,msg);
     }
     
-}
+    function _initPlayerEvent(){
+        alert("LASTFM: TRACKLIST playerReady EVENT RECEIVED");
+        var tracklist = this;
+        var scrobble_icon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
 
-$(document).on( "wpsstmPlayerInit", function( event,tracklist ) {
-    
-    var tracklist = this;
+        //click toggle scrobbling
+        scrobble_icon.click(function(e) {
+            e.preventDefault();
 
-    var scrobble_icon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
+            scrobble_icon.addClass('lastfm-loading');
 
-    //click toggle scrobbling
-    scrobble_icon.click(function(e) {
-        e.preventDefault();
-        
-        scrobble_icon.addClass('lastfm-loading');
-        
-        var do_enable = !scrobble_icon.hasClass('active');
-        var ajax_toggle = wpsstm_lastfm.enable_scrobbler(do_enable);
+            var do_enable = !scrobble_icon.hasClass('active');
+            var ajax_toggle = wpsstm_lastfm.enable_scrobbler(do_enable);
 
-        ajax_toggle.done(function() {
-            scrobble_icon.toggleClass('active',do_enable);
-        })
-        .fail(function() {
-            scrobble_icon.addClass('scrobbler-error');
-        })
-        .always(function() {
-            scrobble_icon.removeClass('lastfm-loading');
+            ajax_toggle.done(function() {
+                scrobble_icon.toggleClass('active',do_enable);
+            })
+            .fail(function() {
+                scrobble_icon.addClass('scrobbler-error');
+            })
+            .always(function() {
+                scrobble_icon.removeClass('lastfm-loading');
+            });
+
         });
-        
-    });
-});
-
-$(document).on( "wpsstmTrackStart", function( event, track ) {
-    var scrobble_icon =         $(track.tracklist).find('.wpsstm-player-action-scrobbler');
-    var scrobbler_enabled =     scrobble_icon.hasClass('active');
-
-    var nowPlayingTrack = function(){
-        if (!scrobbler_enabled) return;
-        
-        scrobble_icon.addClass('lastfm-loading');
-        
-        var ajax = wpsstm_lastfm.updateNowPlaying(track);
-
-        ajax.fail(function() {
-            scrobble_icon.addClass('scrobbler-error');
-        })
-        .always(function() {
-            scrobble_icon.removeClass('lastfm-loading');
-        });
-        
     }
+    
+    function _startTrackEvent(){
+        alert("LASTFM: TRACK start EVENT RECEIVED");
+        var track =                 this;
+        var scrobble_icon =         $(track.tracklist).find('.wpsstm-player-action-scrobbler');
+        var scrobbler_enabled =     scrobble_icon.hasClass('active');
 
-    var ScrobbleTrack = function() {
-        var duration = track.tracklist.current_media.duration;
-        if ( duration < 30) return;
+        var nowPlayingTrack = function(){
+            if (!scrobbler_enabled) return;
 
-        if (scrobbler_enabled){
+            scrobble_icon.addClass('lastfm-loading');
 
-            var ajax =  wpsstm_lastfm.user_scrobble(track);
+            var ajax = wpsstm_lastfm.updateNowPlaying(track);
 
             ajax.fail(function() {
                 scrobble_icon.addClass('scrobbler-error');
@@ -231,23 +215,41 @@ $(document).on( "wpsstmTrackStart", function( event, track ) {
             .always(function() {
                 scrobble_icon.removeClass('lastfm-loading');
             });
-            
-        }
-        
-        //bot scrobble
-        if (wpsstm_lastfm.lastfm_scrobble_along){
-            wpsstm_lastfm.bot_scrobble(track);
+
         }
 
+        var ScrobbleTrack = function() {
+            var duration = track.tracklist.current_media.duration;
+            if ( duration < 30) return;
+
+            if (scrobbler_enabled){
+
+                var ajax =  wpsstm_lastfm.user_scrobble(track);
+
+                ajax.fail(function() {
+                    scrobble_icon.addClass('scrobbler-error');
+                })
+                .always(function() {
+                    scrobble_icon.removeClass('lastfm-loading');
+                });
+
+            }
+
+            //bot scrobble
+            if (wpsstm_lastfm.lastfm_scrobble_along){
+                wpsstm_lastfm.bot_scrobble(track);
+            }
+
+        }
+
+        //now playing
+        $(track.tracklist.current_media).one('play', nowPlayingTrack);
+
+        //track end
+        $(track.tracklist.current_media).one('ended', ScrobbleTrack);
     }
-
-    //now playing
-    $(track.tracklist.current_media).one('play', nowPlayingTrack);
-
-    //track end
-    $(track.tracklist.current_media).one('ended', ScrobbleTrack);
-
-});
+    
+}
 
 
 var wpsstm_lastfm = new WpsstmLastFM();

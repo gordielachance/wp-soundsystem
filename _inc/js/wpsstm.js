@@ -104,24 +104,6 @@ $(document).on('click', 'a.wpsstm-action-popup,li.wpsstm-action-popup>a', functi
 
 });
 
-$('wpsstm-tracklist,.wpsstm-standalone-track').each(function(index,tracklist) {
-
-    tracklist.setAttribute('id','wpsstm-tracklist-'+index);
-
-    if (wpsstmL10n.ajax_radios && tracklist.isExpired){
-        tracklist.reload_tracklist();
-    }else{
-
-
-        /*
-        Since wpsstmTracklistReady is fired when the tracklist is inserted, it will be fired before document.ready.
-        So fire it once more at init.
-        */
-        $(document).trigger("wpsstmTracklistReady",[tracklist]);
-    }
-
-});
-
 //supported importers URLs bt
 $('#wpsstm-list-urls-bt').click(function(e) {
     e.preventDefault();
