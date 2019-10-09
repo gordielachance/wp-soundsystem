@@ -624,8 +624,7 @@ class WpsstmTracklist extends HTMLElement{
         var tracks_playable = [];
 
         var $tracks = tracklist.get_queue();
-        var activeTrack = $tracks.filter('.track-active').get(0);
-        var current_track_idx = $tracks.index( $(activeTrack) );
+        var current_track_idx = $tracks.index( $(tracklist.current_track) );
         if (current_track_idx == -1) return; //index not found
         
         var tracksArr = $tracks.toArray();
@@ -664,8 +663,7 @@ class WpsstmTracklist extends HTMLElement{
         var tracks_playable = [];
 
         var $tracks = tracklist.get_queue();
-        var activeTrack = $tracks.filter('.track-active').get(0);
-        var current_track_idx = $tracks.index( $(activeTrack) );
+        var current_track_idx = $tracks.index( $(tracklist.current_track) );
         if (current_track_idx == -1) return; //index not found
         
         var tracksArr = $tracks.toArray();
