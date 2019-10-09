@@ -379,7 +379,7 @@ class WPSSTM_Core_Track_Links{
                     $autolinked_date = date_i18n( get_option( 'date_format' ), $autolinked_time );
                     $notice = sprintf(__('This track has been autolinked on the %s.','wpsstm'),$autolinked_date);
                     
-                    if ( $wpsstm_track->did_autolink() ){
+                    if ( $wpsstm_track->is_autolink_paused() ){
                         $now = current_time( 'timestamp' );
                         $next_refresh = $autolinked_time + wpsstm()->get_options('autolink_timeout');
                         $next_refresh = human_time_diff( $now, $next_refresh );
@@ -431,7 +431,10 @@ class WPSSTM_Core_Track_Links{
             <h3><?php _e('Manual','wpsstm');?></h3>
         
             <div class="wpsstm-track-links">
-                <?php wpsstm_locate_template( 'content-track-links.php', true, false );?>
+                <?php 
+                $wpsstm_track->populate_links();
+                wpsstm_locate_template( 'content-track-links.php', true, false );
+                ?>
                 <p class="wpsstm-new-links-container">
                     <?php
                     $input_attr = array(

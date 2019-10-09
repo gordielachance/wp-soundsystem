@@ -11,7 +11,6 @@ class WPSSTM_Track{
     public $spotify_id = null;
     
     public $image_url; //remote image URL
-    public $autolinked; //last time autolinked
     public $classes = array('wpsstm-track');
     
     var $link;
@@ -28,7 +27,16 @@ class WPSSTM_Track{
     public $subtrack_time = null;
     public $subtrack_author = null;
     public $from_tracklist = null;
-
+    
+    public $supported = array(
+        'track-thumbnails',
+        'track-durations',
+        'track-links',
+        'track-autolink',
+    );
+    
+    public $populated_details = false; //wheter or not we have populated details for the track
+    
     public $notices = array();
     
     function __construct( $post = null, $tracklist = null ){
@@ -94,6 +102,10 @@ class WPSSTM_Track{
         }elseif ( $this->post_id ){
             return $this->populate_track_post($this->post_id);
         }
+    }
+    
+    function is_supported($key){
+        return in_array($key,$this->supported);
     }
     
     /*
@@ -241,10 +253,10 @@ class WPSSTM_Track{
     
     function get_track_html(){
         global $wpsstm_track;
+
         $old_track = $wpsstm_track; //store temp
         $wpsstm_track = $this;
-        $wpsstm_track->local_track_lookup(); //check for this track in the database (if it has no ID) //TOUFIX TOUCHECK useful ?
-        
+
         ob_start();
         wpsstm_locate_template( 'content-track.php', true, false );
         $content = ob_get_clean();
@@ -574,7 +586,14 @@ class WPSSTM_Track{
             $query = $this->query_links($args);
 
             $link_ids = $query->posts;
+
+            if ( !$link_ids && $this->is_supported('track-autolink') && !wpsstm()->get_options('ajax_autolink') ){
+                $autolink_ids = $this->autolink();
+                $link_ids = ( !is_wp_error($autolink_ids) ) ? $autolink_ids : null;
+            }
+            
             $this->add_links($link_ids);
+            
         }else{
             $this->add_links($this->links); //so we're sure the links count is set
         }
@@ -587,14 +606,15 @@ class WPSSTM_Track{
     Check if a track has been autolinked recently
     */
     
-    private function did_autolink(){
+    public function is_autolink_paused(){
 
-        if (!$this->autolinked) return false;
+        if ( !$autolinked = get_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, true ) ) return;
 
         $now = current_time( 'timestamp' );
-        $seconds = $now - $this->autolinked;
+        $seconds = $now - $autolinked;
 
         $max_seconds = wpsstm()->get_options('autolink_timeout');
+
         return ($seconds < $max_seconds);
 
     }
@@ -604,6 +624,8 @@ class WPSSTM_Track{
     */
     
     function autolink($force = false){
+        
+        $this->track_log('DO TRACK AUTOLINK');
 
         $new_links = array();
         $links_auto = array();
@@ -611,7 +633,7 @@ class WPSSTM_Track{
         $can_autolink = WPSSTM_Core_Track_Links::can_autolink();
         if ( $can_autolink !== true ) return $can_autolink;
         
-        if ( !$force && ( $did_autolink = $this->did_autolink() ) ){
+        if ( !$force && ( $this->is_autolink_paused() ) ){
             return new WP_Error( 'wpsstm_autolink_disabled', __("Track has already been autolinkd recently.",'wpsstm') );
         }
         
@@ -657,9 +679,6 @@ class WPSSTM_Track{
 
         $this->add_links($new_links);
         $new_ids = $this->batch_create_links();
-        
-        //repopulate links
-        $this->populate_links();
 
         $this->track_log(array('track_id'=>$this->post_id,'links_found'=>$this->link_count,'links_saved'=>count($new_ids)),'autolink results');
         
@@ -901,9 +920,6 @@ class WPSSTM_Track{
     }
     
     function get_track_attr($args=array()){
-        
-        $ajax_details = ( wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() );//should we load the track details through ajax ?
-        $can_autolink = ( WPSSTM_Core_Track_Links::can_autolink() === true);
 
         $attr = array(
             'itemscope' =>                      true,
@@ -913,9 +929,9 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
-            'ajax-details' =>                   $ajax_details,
-            'ajax-autolink' =>                  ( !$ajax_details && $can_autolink && !$this->did_autolink() ),
-            'wpsstm-playable' =>                ( !$ajax_details && wpsstm()->get_options('player_enabled') ),
+            'can-autolink' =>                   !$this->is_autolink_paused(),
+            'has-details' =>                    $this->populated_details,
+            'wpsstm-playable' =>                wpsstm()->get_options('player_enabled'),
         );
 
         return wpsstm_get_html_attr($attr);
@@ -946,7 +962,6 @@ class WPSSTM_Track{
         $add_links = array();
         if(!$input_links) return;
 
-        
         foreach ((array)$input_links as $link){
 
             if ( is_a($link, 'WPSSTM_Track_Link') ){
@@ -958,7 +973,6 @@ class WPSSTM_Track{
                     $link_obj->from_array($link_args);
                 }else{ //link ID
                     $link_id = $link;
-                    //TO FIX check for int ?
                     $link_obj = new WPSSTM_Track_Link($link_id);
                 }
             }
@@ -966,6 +980,7 @@ class WPSSTM_Track{
             $valid = $link_obj->validate_link();
 
             if ( is_wp_error($valid) ){
+
                 $code = $valid->get_error_code();
                 $error_msg = $valid->get_error_message($code);
                 $link_obj->link_log(array('error'=>$error_msg,'link'=>$link_obj),"Unable to add link");
@@ -1234,6 +1249,27 @@ class WPSSTM_Track{
         return $this->post_id;
 
     }
+    
+    /*
+    Populate extended track informations, usually post metas
+    */
+    
+    public function populate_track_details(){
+        if (!$this->post_id) return;
+
+        if( $this->is_supported('track-thumbnails') ){
+            $this->image_url        = wpsstm_get_post_image_url($this->post_id);
+        }
+        if( $this->is_supported('track-durations') ){
+            $this->duration         = wpsstm_get_post_duration($this->post_id);
+        }
+
+        if ( $this->is_supported('track-links') ){
+            $this->populate_links();
+        }
+        
+        $this->populated_details = true;
+    }
 
     private function populate_subtrack_id($subtrack_id){
         
@@ -1252,17 +1288,6 @@ class WPSSTM_Track{
 
         //populate post
         return $this->populate_track_post($post);
-    }
-
-    /*
-    Populate extended track informations, usually post metas
-    */
-    
-    public function load_track_details(){
-        if (!$this->post_id) return;
-        $this->image_url        = wpsstm_get_post_image_url($this->post_id);
-        $this->duration         = wpsstm_get_post_duration($this->post_id);
-        $this->autolinked       = get_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, true );
     }
     
 }

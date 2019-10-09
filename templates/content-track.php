@@ -1,11 +1,9 @@
 <?php
 global $wpsstm_track;
-$wait_for_ajax = ( wpsstm()->get_options('ajax_tracks') && !wp_doing_ajax() );
 
-if (!$wait_for_ajax){
-    $wpsstm_track->load_track_details();
+if ( !wpsstm()->get_options('ajax_tracks') ){
+    $wpsstm_track->populate_track_details();
 }
-
 
 ?>
 <wpsstm-track <?php echo $wpsstm_track->get_track_attr();?>>
@@ -46,10 +44,7 @@ if (!$wait_for_ajax){
     </div>
     <?php
     //track links
-    
-    if ( !$wait_for_ajax ) { //load links now ?
-        wpsstm_locate_template( 'content-track-links.php', true, false );
-    }
+    wpsstm_locate_template( 'content-track-links.php', true, false );
 
     ?>
 </wpsstm-track>

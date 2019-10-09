@@ -1,25 +1,16 @@
 <?php
 global $wpsstm_track;
-$wpsstm_track->populate_links();
-
-/*
-Autolink ?
-//TOUFIX URGENT
-*/
-$wait_for_ajax = ( wpsstm()->get_options('ajax_autolink') && !wp_doing_ajax() );
-if ( !$wpsstm_track->have_links() && !$wait_for_ajax ){
-    $wpsstm_track->autolink();
-}
 
 /*
 List links
+Render container even if there is no links, as it is used by JS.
 */
 
-if ( $wpsstm_track->have_links() ) {
-    
-    ?>
-    <div class="wpsstm-track-links-list">
-        <?php
+?>
+<div class="wpsstm-track-links-list">
+    <?php
+
+    if ( $wpsstm_track->have_links() ) {
 
         while ( $wpsstm_track->have_links() ) {
 
@@ -37,8 +28,8 @@ if ( $wpsstm_track->have_links() ) {
             <?php
 
         }
+    }
 
-        ?>
-    </div>
-    <?php
-}
+    ?>
+</div>
+<?php

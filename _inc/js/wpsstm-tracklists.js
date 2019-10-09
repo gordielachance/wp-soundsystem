@@ -805,22 +805,10 @@ class WpsstmTracklist extends HTMLElement{
         /*
         Autolink ?
         */
-        
+
         var trackready = $.Deferred();
-        if ( requestedTrack.playable ){
-            var sourceLinks = $(requestedTrack).find('wpsstm-track-link').filter('[wpsstm-playable]');
-
-            if(sourceLinks.length){
-                trackready.resolve();
-            }else{
-                if ( requestedTrack.ajax_autolink ){
-                    requestedTrack.debug("DO LOAD AUTOLINK");//URGENT
-                    trackready = requestedTrack.track_autolink();
-                }else{
-                    trackready.reject();
-                }
-            }
-
+        if ( requestedTrack.playable && requestedTrack.can_autolink ){
+            trackready = requestedTrack.track_autolink();
         }else{
             trackready.reject();
         }

@@ -1127,6 +1127,7 @@ class WPSSTM_Core_Tracks{
         $wpsstm_track = new WPSSTM_Track();
         $track_arr = wpsstm_get_array_value('track',$ajax_data);
         $wpsstm_track->from_array($track_arr);
+        $wpsstm_track->populate_track_details();
         
         $result = array(
             'input'         => $ajax_data,
@@ -1163,15 +1164,21 @@ class WPSSTM_Core_Tracks{
             'message'       => null,
             'track'         => $wpsstm_track,
             'success'       => false,
+            'autolink_ids'  => array(),
         );
    
         //autolink
-        $new_ids = array();
         $new_ids = $wpsstm_track->autolink();
+        
         if ( is_wp_error($new_ids) ){
+            
             $result['error_code'] = $new_ids->get_error_code();
             $result['message'] = $new_ids->get_error_message();
+            
         }else{
+            
+            $result['autolink_ids'] = $new_ids;
+            $wpsstm_track->populate_links();
             
             ob_start();
             wpsstm_locate_template( 'content-track-links.php', true, false );
