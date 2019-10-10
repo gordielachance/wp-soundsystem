@@ -185,7 +185,7 @@ class WpsstmTrack extends HTMLElement{
         
         var track =                 this;
         track.queueIdx =            Array.from(track.parentNode.children).indexOf(track);
-        track.tracklist =           $(track).closest('wpsstm-tracklist').get(0);
+        track.tracklist =           track.closest('wpsstm-tracklist');
         track.position =            Number($(track).attr('data-wpsstm-subtrack-position')); //index in tracklist
         track.track_artist =        $(track).find('[itemprop="byArtist"]').text();
         track.track_title =         $(track).find('[itemprop="name"]').text();

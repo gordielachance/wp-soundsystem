@@ -93,10 +93,11 @@ function wpsstm_shuffle(array) {
 }
 
 /*
-Because we can't (?) switch the outerHTML of nodes, custom-hackish method to update attributes and content.
+Update a node with the content and attributes of another one
+So we don't have to delete and create a new node, we keep the listeners, etc.
 */
 
-function wpsstmSwapNode(oldNode,newNode){
+function wpsstmSwapNode(newNode,oldNode){
 
     //check both nodes have the same tag
     if (oldNode.tagName !== newNode.tagName){

@@ -148,8 +148,7 @@ class WpsstmLink extends HTMLElement{
 
     render(){
         var link =              this;
-        link.track =            $(link).closest('wpsstm-track').get(0);
-
+        link.track =            link.closest('wpsstm-track');
         link.index =            Number($(link).attr('data-wpsstm-link-idx'));
         link.post_id =          Number($(link).attr('data-wpsstm-link-id'));
         link.src =              $(link).attr('data-wpsstm-stream-src');
@@ -243,8 +242,6 @@ class WpsstmLink extends HTMLElement{
     play_link(){
         var link = this;
         var $instances = this.get_instances();
-        var track = this.track;
-        var $track_instances = track.get_instances();
         var success = $.Deferred();
         
         if( !link.playable ){
@@ -258,6 +255,9 @@ class WpsstmLink extends HTMLElement{
         /*
         register new events
         */
+        
+        var track = link.track;
+        var $track_instances = track.get_instances();
 
         $(track.tracklist.current_media).on('loadeddata', function() {
             track.tracklist.debug('source loaded',link.src);

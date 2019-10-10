@@ -215,7 +215,8 @@ class WpsstmTracklist extends HTMLElement{
             refresh_bt.click(function(e) {
                 e.preventDefault();
                 tracklist.debug("clicked 'refresh' bt");
-                tracklist.reload_tracklist();
+                var autoplay = (tracklist.current_track);
+                tracklist.reload_tracklist(autoplay);
             });
         }
         
@@ -355,12 +356,15 @@ class WpsstmTracklist extends HTMLElement{
             }
         });
         
-        if (wpsstmL10n.ajax_radios && tracklist.isExpired){
-            tracklist.reload_tracklist();
-        }else{
-            $(tracklist).trigger('loaded');
-        }
-        
+        //init tracklist
+        $( document ).ready(function() {
+            tracklist.debug(" DOMready !");
+            if (wpsstmL10n.ajax_radios && tracklist.isExpired){
+                tracklist.reload_tracklist();
+            }else{
+                $(tracklist).trigger('loaded');
+            }
+        });
     }
 
     reload_tracklist(autoplay){
@@ -372,11 +376,11 @@ class WpsstmTracklist extends HTMLElement{
                 request.abort();
             }
         }
-        
-        //stop player
-        //TOUFIX URGENT
-        
-        tracklist.debug("reload tracklist... autoplay ?" + autoplay);
+
+        tracklist.debug("reload tracklist...");
+        if (autoplay){
+            tracklist.debug("...and autoplay !");
+        }
         
         var ajax_data = {
             action:     'wpsstm_reload_tracklist',
@@ -384,6 +388,12 @@ class WpsstmTracklist extends HTMLElement{
         };
         
         $(tracklist).addClass('tracklist-reloading');
+        
+        //stop player
+        if (tracklist.current_track){
+            tracklist.current_track.status = '';
+        }
+
         $(document).bind( "keyup.reloadtracklist", abord_reload ); //use namespace - https://acdcjunior.github.io/jquery-creating-specific-event-and-removing-it-only.html
 
         var request = $.ajax({
@@ -864,6 +874,7 @@ class WpsstmTracklist extends HTMLElement{
     
     static _queueLoopEvent(e){
         var tracklist = e.target;
+        tracklist.debug("Tracklist loop");
         if ( wpsstmL10n.ajax_radios && tracklist.isExpired ){
             tracklist.reload_tracklist(true);
         }
@@ -873,17 +884,31 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = e.target;
 
         tracklist.debug("Tracklist loaded");
-        
-        //load track details ?
-        
+
         var $tracks = tracklist.get_queue();
+        
+        /*
+        AJAX load details ?
+        */
         $tracks.each(function( index ) {
             var track = this;
             if ( track.ajax_details ){
                 track.load_details();
             }
         });
-
+        
+        /*
+        Autoplay
+        */
+        var autoplayTrack = $tracks.filter('.track-autoplay').get(0);
+        if (autoplayTrack){
+            var autoplayIdx = $tracks.index( autoplayTrack );
+            $(document).one('wpsstmPlayerReady',function(){
+                tracklist.debug("autoplay track #" + autoplayIdx);
+                tracklist.play_queue_track(autoplayIdx);
+            });
+        }
+        
         /*
         Init player
         */
@@ -910,7 +935,7 @@ class WpsstmTracklist extends HTMLElement{
                 console.log("mediaElement error");
             }
         });
-        
+  
     }
  
 }
