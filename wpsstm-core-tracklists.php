@@ -250,7 +250,7 @@ class WPSSTM_Core_Tracklists{
             $option = $wpsstm_tracklist->get_options('cache_min');
 
             $input = sprintf(
-                '<input type="number" name="%s[cache_min]" size="4" min="0" value="%s" />',
+                '<input type="number" name="%s[cache_min]" size="4" min="1" value="%s" />',
                 'wpsstm_tracklist_options',
                 $option
             );

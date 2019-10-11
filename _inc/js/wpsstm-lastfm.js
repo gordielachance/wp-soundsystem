@@ -224,7 +224,7 @@ class WpsstmLastFM {
         }
 
         var ScrobbleTrack = function() {
-            var duration = track.tracklist.current_media.duration;
+            var duration = track.tracklist.mediaElement.duration;
             if ( duration < 30) return;
 
             if (scrobbler_enabled){
@@ -248,10 +248,10 @@ class WpsstmLastFM {
         }
 
         //now playing
-        $(track.tracklist.current_media).one('play', nowPlayingTrack);
+        $(track.tracklist.mediaElement).one('play', nowPlayingTrack);
 
         //track end
-        $(track.tracklist.current_media).one('ended', ScrobbleTrack);
+        $(track.tracklist.mediaElement).one('ended', ScrobbleTrack);
     }
     
 }

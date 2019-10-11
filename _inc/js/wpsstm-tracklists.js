@@ -49,7 +49,7 @@ class WpsstmTracklist extends HTMLElement{
         this.isExpired =        undefined;
         this.current_track =    undefined;
 
-        this.current_media =    undefined;
+        this.mediaElement =    undefined;
         this.tracksHistory =    [];
         
         this.$player =          undefined;
@@ -215,7 +215,7 @@ class WpsstmTracklist extends HTMLElement{
             refresh_bt.click(function(e) {
                 e.preventDefault();
                 tracklist.debug("clicked 'refresh' bt");
-                var autoplay = (tracklist.current_track.status === 'playing');
+                var autoplay = ( tracklist.current_track && (tracklist.current_track.status === 'playing') );
                 tracklist.reload_tracklist(autoplay);
             });
         }
@@ -242,7 +242,7 @@ class WpsstmTracklist extends HTMLElement{
 
         $(window).bind('beforeunload', function(){
 
-            if (tracklist.current_media && !tracklist.current_media.paused){
+            if (tracklist.mediaElement && !tracklist.mediaElement.paused){
                 return wpsstmL10n.leave_page_text;
             }
 
@@ -380,17 +380,15 @@ class WpsstmTracklist extends HTMLElement{
             }
         });
         
-        //init tracklist
-        $( document ).ready(function() {
-            tracklist.debug(" DOMready !");
-            if (wpsstmL10n.ajax_radios && tracklist.isExpired){
-                tracklist.reload_tracklist();
-            }else{
-                $(tracklist).trigger('loaded');
-            }
-        });
+        //TOUFIX URGENT
+        //autoreload should only happen one time.  What if we don't have any cache_min ? For now, it will reload infinitly...
+        if (wpsstmL10n.ajax_radios && tracklist.isExpired){
+            tracklist.reload_tracklist();
+        }else{
+            $(tracklist).trigger('loaded');
+        }
     }
-
+    
     reload_tracklist(autoplay){
         var tracklist = this;
         var success = $.Deferred();
@@ -413,10 +411,7 @@ class WpsstmTracklist extends HTMLElement{
         
         $(tracklist).addClass('tracklist-reloading');
         
-        //stop player
-        if (tracklist.current_track === 'playing'){
-            tracklist.current_track.status = '';
-        }
+        tracklist.stop_current_link();
 
         $(document).bind( "keyup.reloadtracklist", abord_reload ); //use namespace - https://acdcjunior.github.io/jquery-creating-specific-event-and-removing-it-only.html
 
@@ -442,11 +437,16 @@ class WpsstmTracklist extends HTMLElement{
                     $(newTracklist).find('wpsstm-track:first-child').addClass('track-autoplay');
                 }
 
-                //swap content
-
-                //TOUFIX URGENT we should maybe keep the player so we keep going with the Autoplay policy ?
-
+                /*
+                Swap content
+                */
                 tracklist.replaceWith( newTracklist );
+                
+                //Keep player intact so we don't mess with the Autoplay Policy
+                var oldPlayer = tracklist.$player;
+                var newPlayer = newTracklist.$player;
+                newPlayer.replaceWith( oldPlayer );
+                
                 tracklist = newTracklist;
 
                 success.resolve(newTracklist);
@@ -725,10 +725,6 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = this;
         var $tracks = tracklist.get_queue();
         var previousTrack = tracklist.get_previous_track();
-        
-        if( tracklist.current_track === 'playing' ){
-            tracklist.current_track.status = '';//stop current track
-        }
 
         if (previousTrack){
             var success = previousTrack.play_track();
@@ -749,10 +745,6 @@ class WpsstmTracklist extends HTMLElement{
         var nextTrack =         tracklist.get_next_track();
         var currentTrackIdx =   $tracks.index( tracklist.current_track );
         var nextTrackIdx =      $tracks.index( nextTrack );
-        
-        if( tracklist.current_track === 'playing' ){
-            tracklist.current_track.status = '';//stop current track
-        }
 
         if (nextTrack){
             nextTrack.play_track();
@@ -847,17 +839,6 @@ class WpsstmTracklist extends HTMLElement{
         });
         
         /*
-        Autoplay
-        */
-        var autoplayTrack = $tracks.filter('.track-autoplay').get(0);
-        if (autoplayTrack){
-            $(document).one('wpsstmPlayerReady',function(){
-                tracklist.debug("autoplay track");
-                autoplayTrack.play_track();
-            });
-        }
-        
-        /*
         Init player
         */
         
@@ -874,9 +855,23 @@ class WpsstmTracklist extends HTMLElement{
             features: ['playpause','loop','progress','current','duration','volume'],
             loop: false,
             success: function(mediaElement, originalNode, MEplayer) {
-                tracklist.current_media = mediaElement;
+                tracklist.mediaElement = mediaElement;
                 tracklist.debug("MediaElementJS ready");
+                
+                /*
+                Autoplay
+                */
+                var autoplayTrack = $tracks.filter('.track-autoplay').get(0);
+                if (autoplayTrack){
+                    $(document).one('wpsstmPlayerReady',function(){
+                        tracklist.debug("autoplay track");
+                        autoplayTrack.play_track();
+                    });
+                }
+                
                 $(document).trigger("wpsstmPlayerReady",[tracklist]);
+                
+                
             },error(mediaElement) {
                 // Your action when mediaElement had an error loading
                 //TO FIX is this required ?
@@ -884,6 +879,13 @@ class WpsstmTracklist extends HTMLElement{
             }
         });
   
+    }
+    
+    stop_current_link(){
+        var tracklist = this;
+        if (!tracklist.current_track) return;
+        if (!tracklist.current_track.current_link) return;
+        tracklist.current_track.current_link.status = '';//stop current link
     }
  
 }

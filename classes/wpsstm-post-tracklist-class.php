@@ -1213,7 +1213,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $seconds = $this->seconds_before_refresh();
 
             if ($seconds !== false){
-                //if no real cache is set; let's say tracklist is already expired at load!
                 $metas['wpsstmRefreshTimer'] = $seconds;
             }
         }

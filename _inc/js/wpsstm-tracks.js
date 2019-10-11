@@ -50,10 +50,8 @@ class WpsstmTrack extends HTMLElement{
                 }
 
                 if ( !newVal ){
-                    $(track).removeClass('track-active track-playing track-loading');
-
+                    
                     if (!isPlayerTrack){
-
                         var playingLink = $(track).find('wpsstm-track-link[linkstatus="playing"]').get(0);
                         if (playingLink){
                             $(track.tracklist).removeClass('tracklist-playing');
@@ -61,6 +59,7 @@ class WpsstmTrack extends HTMLElement{
                         }
                     }
                     
+                    $(track).removeClass('track-active track-playing track-loading');                    
                 }
 
                 if (newVal == 'request'){
@@ -81,8 +80,15 @@ class WpsstmTrack extends HTMLElement{
                     $(track).removeClass('track-loading').addClass('track-playing track-has-played');
                     
                     if (!isPlayerTrack){
-                        track.tracklist.tracksHistory.push(track);
                         $(track.tracklist).removeClass('tracklist-loading').addClass('tracklist-playing tracklist-has-played');
+                        
+                        //is track switch
+                        var lastPlayedTrack = track.tracklist.tracksHistory[track.tracklist.tracksHistory.length-1];
+                        if (lastPlayedTrack !== track){
+                            $(document).trigger("wpsstmTrackStart",[track]);
+                            track.tracklist.tracksHistory.push(track);
+                        }
+                        
                     }
                 }
                 
@@ -257,20 +263,18 @@ class WpsstmTrack extends HTMLElement{
         //play/pause
         $(track).on('click','.wpsstm-track-action-play', function(e) {
             e.preventDefault();
-            
+
             if (track === track.tracklist.current_track){
-                var isPlaying = ( track.status == 'playing' );
-                if ( isPlaying ){
-                    track.tracklist.current_media.pause();
-                }else{
-                    track.tracklist.current_media.play();
+                
+                //toggle play/pause
+                if ( track.status === 'playing' ){
+                    track.tracklist.mediaElement.pause();
+                }else if ( track.status === 'paused' ){
+                    track.tracklist.mediaElement.play();
                 }
+                
             }else{
-                
-                if( track.tracklist.current_track ){
-                    track.tracklist.current_track.status = '';//stop current track
-                }
-                
+
                 if (track.current_link){
                     track.current_link.play_link();
                 }else{
@@ -591,8 +595,6 @@ class WpsstmTrack extends HTMLElement{
             success.resolve();
             return success.promise();
         }
-
-        track.status = 'request';
         
         /*
         Wait for track to be ready
@@ -625,7 +627,7 @@ class WpsstmTrack extends HTMLElement{
         })
         
         success.done(function(v) {
-            if (wpsstmL10n.autolink){ //TOUFIX TOUCHECK URGENT should be fired when track plays ?
+            if (wpsstmL10n.autolink){
                 track.next_tracks_autolink();
             }
         })

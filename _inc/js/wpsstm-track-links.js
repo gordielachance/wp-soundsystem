@@ -10,8 +10,6 @@ class WpsstmLink extends HTMLElement{
         this.src =              undefined;
         this.type =             undefined;
 
-        //Setup listeners
-        $(this).on('sourceInit', this._sourceInitEvent);
     }
     connectedCallback(){
         //console.log("LINK CONNECTED!");
@@ -50,26 +48,26 @@ class WpsstmLink extends HTMLElement{
 
                 if ( !newVal ){
                     $(link).removeClass('link-active link-loading link-playing');
-                    
+
                     if (!isPlayerLink){
+                        
+                        if ( link.status === 'playing' ){
+                            link.track.tracklist.mediaElement.pause();
+                        }
+
                         link.track.status = '';
-                    }
-                    
-                    if ( (link.track.current_link == link) && (link.status === 'playing') ){
-                        link.track.tracklist.current_media.pause();
+                        $(link.track.tracklist.mediaElement).off();
+
                     }
                     
                 }
                 
                 if (newVal == 'request'){
                     $(link).addClass('link-active link-loading');
-                    
-                    if (!isPlayerLink){
-                        $(link.track.tracklist.current_media).off(); //remove old events
-                        link.track.current_link = link;
-                        $(link).trigger('sourceInit');
 
-                        link.track.status = 'request';
+                    if (!isPlayerLink){
+                        link.track.current_link = link;
+                        link.track.status = 'request';                        
                     }
                 }
                 
@@ -240,61 +238,53 @@ class WpsstmLink extends HTMLElement{
         var link = this;
         var $instances = this.get_instances();
         var success = $.Deferred();
-        
+        var track = link.track;
+        var tracklist = track.tracklist;
+
         if( !link.playable ){
             success.reject('cannot play this link');
             return success.promise();
         }
 
-        ///
+        tracklist.stop_current_link();
         link.status = 'request';
 
         /*
         register new events
         */
+
         
-        var track = link.track;
-        var $track_instances = track.get_instances();
-
-        $(track.tracklist.current_media).on('loadeddata', function() {
-            track.tracklist.debug('source loaded',link.src);
-            track.tracklist.current_media.play();
-        });
-
-        $(track.tracklist.current_media).on('error', function(error) {
-            link.status = '';
+        $(tracklist.mediaElement).on('loadeddata',function(e){
+            var mediaElement = this;
+            mediaElement.play();
+        })
+        .on('error', function(error) {
             success.reject(error);
-        });
-
-        $(track.tracklist.current_media).on('play', function() {
+        })
+        .on('play', function() {
             link.status = 'playing';
             success.resolve();
-        });
-
-        $(track.tracklist.current_media).on('pause', function() {
+        })
+        .on('pause', function() {
             link.status = 'paused';
-        });
-
-        $(track.tracklist.current_media).on('ended', function() {
-
-            track.tracklist.debug('media - ended');
+        })
+        .on('ended', function() {
             link.status = '';
-            
             //Play next song if any
             track.tracklist.next_track_jump();
-
         });
-
+        
         success.done(function(v) {
-            
+
+            link.status = 'playing';
+
             $instances.toArray().forEach(function(item) {
                 item.playable = true;
             });
-            
-            
-            //TOUFIX ajax --> +1 track play; user now playing...
         })
-        success.fail(function() {
+        .fail(function() {
+            
+            link.status = '';
             
             $instances.toArray().forEach(function(item) {
                 item.playable = false;
@@ -303,11 +293,8 @@ class WpsstmLink extends HTMLElement{
         })
 
         ////
-        track.tracklist.current_media.setSrc(link.src);
-        track.tracklist.current_media.load();
-        
-        ////
-
+        link.track.tracklist.mediaElement.setSrc(link.src);
+        link.track.tracklist.mediaElement.load();
         return success.promise();
 
     }
@@ -315,17 +302,6 @@ class WpsstmLink extends HTMLElement{
     get_instances(){
         return $('wpsstm-track-link[data-wpsstm-link-id="'+this.post_id+'"]');
     }
-    
-    _sourceInitEvent(e){
-        var link = e.target;
-        var track = link.track;
-
-        //start track event, fired only once
-        $(link.track.tracklist.current_media).one('play', function(){
-            $(document).trigger("wpsstmTrackStart",[track]);
-        });
-    }
-
 }
 
 window.customElements.define('wpsstm-track-link', WpsstmLink);
