@@ -73,8 +73,6 @@ class WPSSTM_Core_Tracks{
         /*
         AJAX
         */
-        add_action('wp_ajax_wpsstm_get_track_details', array($this,'ajax_get_track_details'));
-        add_action('wp_ajax_nopriv_wpsstm_get_track_details', array($this,'ajax_get_track_details'));
         
         add_action('wp_ajax_wpsstm_get_track_links_autolinked', array($this,'ajax_get_track_links_autolinked'));
         add_action('wp_ajax_nopriv_wpsstm_get_track_links_autolinked', array($this,'ajax_get_track_links_autolinked'));
@@ -1117,35 +1115,6 @@ class WPSSTM_Core_Tracks{
 
         header('Content-type: application/json');
         wp_send_json( $result ); 
-    }
-
-    function ajax_get_track_details(){
-        
-        global $wpsstm_track;
-        $ajax_data = wp_unslash($_POST);
-        
-        $wpsstm_track = new WPSSTM_Track();
-        $track_arr = wpsstm_get_array_value('track',$ajax_data);
-        $wpsstm_track->from_array($track_arr);
-        $wpsstm_track->populate_track_details();
-        
-        $result = array(
-            'input'         => $ajax_data,
-            'timestamp'     => current_time('timestamp'),
-            'error_code'    => null,
-            'message'       => null,
-            'track'         => $wpsstm_track,
-            'success'       => false,
-        );
-
-        $result['html'] = $wpsstm_track->get_track_html();
-        $result['success'] = true;
-        
-        $result['track'] = $wpsstm_track->to_array(); //maybe we have a new post ID here, if the track has been created
-
-        header('Content-type: application/json');
-        wp_send_json( $result );
-
     }
     
     function ajax_get_track_links_autolinked(){

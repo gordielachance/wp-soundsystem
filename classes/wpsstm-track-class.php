@@ -34,9 +34,7 @@ class WPSSTM_Track{
         'track-links',
         'track-autolink',
     );
-    
-    public $populated_details = false; //wheter or not we have populated details for the track
-    
+
     public $notices = array();
     
     function __construct( $post = null, $tracklist = null ){
@@ -930,7 +928,6 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
             'can-autolink' =>                   !$this->is_autolink_paused(),
-            'has-details' =>                    $this->populated_details,
             'wpsstm-playable' =>                wpsstm()->get_options('player_enabled'),
         );
 
@@ -1245,30 +1242,9 @@ class WPSSTM_Track{
             $this->tracklist =          new WPSSTM_Post_Tracklist($post->tracklist_id);
             $this->from_tracklist =     filter_var($post->from_tracklist, FILTER_VALIDATE_INT);
         }
-        
+
         return $this->post_id;
 
-    }
-    
-    /*
-    Populate extended track informations, usually post metas
-    */
-    
-    public function populate_track_details(){
-        if (!$this->post_id) return;
-
-        if( $this->is_supported('track-thumbnails') ){
-            $this->image_url        = wpsstm_get_post_image_url($this->post_id);
-        }
-        if( $this->is_supported('track-durations') ){
-            $this->duration         = wpsstm_get_post_duration($this->post_id);
-        }
-
-        if ( $this->is_supported('track-links') ){
-            $this->populate_links();
-        }
-        
-        $this->populated_details = true;
     }
 
     private function populate_subtrack_id($subtrack_id){

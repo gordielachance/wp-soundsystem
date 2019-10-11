@@ -1,10 +1,6 @@
 <?php
 global $wpsstm_track;
 
-if ( !wpsstm()->get_options('ajax_tracks') ){
-    $wpsstm_track->populate_track_details();
-}
-
 ?>
 <wpsstm-track <?php echo $wpsstm_track->get_track_attr();?>>
     <div class="wpsstm-track-row">
@@ -14,9 +10,9 @@ if ( !wpsstm()->get_options('ajax_tracks') ){
             </span>
             <span class="wpsstm-track-image" itemprop="image">
                 <?php 
-                if ($wpsstm_track->image_url){
+                if ($image_url = wpsstm_get_post_image_url($wpsstm_track->post_id) ){
                     ?>
-                    <img src="<?php echo $wpsstm_track->image_url;?>" />
+                    <img src="<?php echo $image_url;?>" />
                     <?php
                 }
                 ?>
@@ -44,6 +40,7 @@ if ( !wpsstm()->get_options('ajax_tracks') ){
     </div>
     <?php
     //track links
+    $wpsstm_track->populate_links();
     wpsstm_locate_template( 'content-track-links.php', true, false );
 
     ?>

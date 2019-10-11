@@ -115,7 +115,6 @@ class WP_SoundSystem {
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
             'ajax_radios'                       => true,//use ajax to sync radios ?
-            'ajax_tracks'                       => false,//use ajax to load each track details (metas, static links...) ?
             'ajax_autolink'                     => true,
         );
         
@@ -697,7 +696,6 @@ class WP_SoundSystem {
             'debug'                 => (WP_DEBUG),
             'ajaxurl'               => admin_url( 'admin-ajax.php' ),
             'ajax_radios'           => wpsstm()->get_options('ajax_radios'),
-            'ajax_tracks'           => wpsstm()->get_options('ajax_tracks'),
             'ajax_autolink'         => ( wpsstm()->get_options('ajax_autolink') && ( WPSSTM_Core_Track_Links::can_autolink() === true) ),
             'leave_page_text'       =>      __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),
             'plugin_path'           =>      trailingslashit( get_bloginfo('url') ) . WPINC . '/js/mediaelement/', //do not forget final slash here

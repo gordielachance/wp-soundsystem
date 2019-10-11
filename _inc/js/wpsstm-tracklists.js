@@ -827,17 +827,7 @@ class WpsstmTracklist extends HTMLElement{
         tracklist.debug("Tracklist loaded");
 
         var $tracks = tracklist.get_queue();
-        
-        /*
-        AJAX load details ?
-        */
-        $tracks.each(function( index ) {
-            var track = this;
-            if ( track.ajax_details ){
-                track.load_details();
-            }
-        });
-        
+
         /*
         Init player
         */

@@ -953,11 +953,11 @@ ul.tracklist-list > li:hover .wpsstm-tracklist-actions {
   content: "\f04c";
 }
 /* line 115, ../scss/_wpsstm-tracks.scss */
-.wpsstm-track[has-details]:not([wpsstm-playable]):not([can-autolink]) .wpsstm-track-action-play:before {
+.wpsstm-track:not([wpsstm-playable]):not([can-autolink]) .wpsstm-track-action-play:before {
   content: "\f071";
 }
 /* line 118, ../scss/_wpsstm-tracks.scss */
-.wpsstm-track:not([has-details]) .wpsstm-track-action-play {
+.wpsstm-track.wpsstm-track-action-play {
   visibility: hidden;
 }
 /* line 123, ../scss/_wpsstm-tracks.scss */

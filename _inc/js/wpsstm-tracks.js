@@ -204,7 +204,6 @@ class WpsstmTrack extends HTMLElement{
         track.post_id =             Number($(track).attr('data-wpsstm-track-id'));
         track.subtrack_id =         Number($(track).attr('data-wpsstm-subtrack-id'));
         track.can_autolink =        ( wpsstmL10n.ajax_autolink && track.hasAttribute('can-autolink') );
-        track.ajax_details =        ( wpsstmL10n.ajax_tracks && !track.hasAttribute('has-details') );
 
         var $toggleLinks = $(track).find('.wpsstm-track-action-toggle-links');
 
@@ -285,55 +284,6 @@ class WpsstmTrack extends HTMLElement{
 
         });
 
-    }
-
-    load_details() {
-
-        var track = this;
-        var $instances = track.get_instances();
-        var success = $.Deferred();
-
-        $instances.addClass('track-details-loading');
-
-        var ajax_data = {
-            action:     'wpsstm_get_track_details',
-            track:      track.to_ajax(),   
-        };
-
-        var request = $.ajax({
-            type:       "post",
-            url:        wpsstmL10n.ajaxurl,
-            data:       ajax_data,
-            dataType:   'json',
-        })
-        .done(function(data) {
-            if ( data.success ){
-                
-                var newTrack = $(data.html)[0];
-
-                //swap nodes
-                $instances.each(function( index ) {
-                    var instance = $(this).get(0);
-                    instance.parentNode.insertBefore(newTrack,instance);
-                    instance.parentNode.removeChild(instance);
-                });
-
-                success.resolve(newTrack);
-                
-
-            }else{
-                success.reject();
-            }
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-            track.debug(ajax_data,"failed loading track details");
-            success.reject();
-        })
-        .always(function() {
-            $instances.removeClass('track-details-loading');
-        });
-
-        return success.promise();
     }
     
     track_autolink() {

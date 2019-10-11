@@ -131,7 +131,6 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 = XXX =
 * get_static_subtracks() about 4 times faster !
 * cache get_tracklist_html()
-* new tracklist option 'ajax_tracks'
 * new 'tracklist' view in the tracks backend
 * new class Wpsstm_Subtrack_List_Table WIP
 * DO NOT queue a track if it is already part of the tracklist
