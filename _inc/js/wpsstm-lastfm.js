@@ -22,22 +22,24 @@ class WpsstmLastFM {
             type: "post",
             url: wpsstmL10n.ajaxurl,
             data:ajax_data,
-            dataType: 'json',
-            
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                    success.reject();
-                }else{
-                    success.resolve();
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.status);
-                console.log(thrownError);
-            },
-
+            dataType: 'json'
         })
+        .done(function(data){
+            if (data.success === false) {
+                console.log(data);
+                success.reject();
+            }else{
+                success.resolve();
+            }
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
+            success.reject(thrownError);
+        })
+        
+        success.fail(function (reason) {
+            console.log(reason);
+        })
+
         
         return success.promise();
     }
@@ -62,20 +64,23 @@ class WpsstmLastFM {
             url: wpsstmL10n.ajaxurl,
             data:ajax_data,
             dataType: 'json',
-            success: function(data){
-                if (data.success === false) {
-                    console.log(data);
-                    success.reject();
-                }else{
-                    success.resolve();
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.status);
-                console.log(thrownError);
-            },
+        })
+        .done(function(data){
+            if (data.success === false) {
+                console.log(data);
+                success.reject();
+            }else{
+                success.resolve();
+            }
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
+            success.reject(thrownError);
         })
         
+        success.fail(function (reason) {
+            console.log(reason);
+        })
+
         return success.promise();
     }
 
@@ -103,16 +108,19 @@ class WpsstmLastFM {
             dataType: 'json',
         })
         .done(function(data){
-                if (data.success === false) {
-                    console.log(data);
-                    success.reject();
-                }else{
-                    success.resolve();
-                }
+            if (data.success === false) {
+                console.log(data);
+                success.reject();
+            }else{
+                success.resolve();
+            }
         })
         .fail(function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.status);
-                console.log(thrownError);
+            success.reject(thrownError);
+        })
+        
+        success.fail(function (reason) {
+            console.log(reason);
         })
         
         return success.promise();
@@ -137,21 +145,24 @@ class WpsstmLastFM {
             url: wpsstmL10n.ajaxurl,
             data:ajax_data,
             dataType: 'json',
-            success: function(data){
+        })
+        .done(function(data){
+            console.log(data);
+            if (data.success === false) {
                 console.log(data);
-                if (data.success === false) {
-                    console.log(data);
-                    success.reject();
-                }else{
-                    success.resolve();
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.status);
-                console.log(thrownError);
-            },
+                success.reject();
+            }else{
+                success.resolve();
+            }
+        })
+        .fail(function (xhr, ajaxOptions, thrownError) {
+            success.reject(thrownError);
         })
         
+        success.fail(function (reason) {
+            console.log(reason);
+        })
+
         return success.promise();
     }
         
