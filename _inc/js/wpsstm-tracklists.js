@@ -62,6 +62,8 @@ class WpsstmTracklist extends HTMLElement{
         //Setup listeners
         $(this).on('queueLoop',WpsstmTracklist._queueLoopEvent);
         $(this).on('loaded', WpsstmTracklist._loadedEvent);
+        $(this).on('queueLoop', WpsstmTracklist._queueLoopEvent);
+        
     }
     connectedCallback(){
         //console.log("TRACKLIST CONNECTED!");
@@ -853,13 +855,13 @@ class WpsstmTracklist extends HTMLElement{
                 */
                 var autoplayTrack = $tracks.filter('.track-autoplay').get(0);
                 if (autoplayTrack){
-                    $(document).one('wpsstmPlayerReady',function(){
+                    $(tracklist).one('ready',function(){
                         tracklist.debug("autoplay track");
                         autoplayTrack.play_track();
                     });
                 }
                 
-                $(document).trigger("wpsstmPlayerReady",[tracklist]);
+                $(tracklist).trigger("ready",[tracklist]);
                 
                 
             },error(mediaElement) {

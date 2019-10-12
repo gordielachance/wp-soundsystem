@@ -3,8 +3,8 @@ var $ = jQuery.noConflict();
 class WpsstmLastFM {
     constructor(){
         this.lastfm_scrobble_along =    parseInt(wpsstmLastFM.lastfm_scrobble_along);
-        $(document).on('wpsstmPlayerReady',this._initPlayerEvent);
-        $(document).on('wpsstmTrackStart',this._nowPlayingTrackEvent);
+        $('wpsstm-tracklist').live('ready',this._initPlayerEvent);
+        $('wpsstm-track').live('start',this._nowPlayingTrackEvent);
     }
 
     enable_scrobbler(do_enable){
@@ -178,7 +178,8 @@ class WpsstmLastFM {
         wpsstm_debug(data,msg);
     }
     
-    _initPlayerEvent(e, tracklist){
+    _initPlayerEvent(e){
+        var tracklist =             this;
         var scrobble_icon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
 
         //click toggle scrobbling
@@ -203,7 +204,8 @@ class WpsstmLastFM {
         });
     }
     
-    _nowPlayingTrackEvent(e, track){
+    _nowPlayingTrackEvent(e){
+        var track = this;
         var scrobble_icon =         $(track.tracklist).find('.wpsstm-player-action-scrobbler');
         var scrobbler_enabled =     scrobble_icon.hasClass('active');
 

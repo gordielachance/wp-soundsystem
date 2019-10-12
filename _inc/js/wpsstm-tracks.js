@@ -85,7 +85,7 @@ class WpsstmTrack extends HTMLElement{
                         //is track switch
                         var lastPlayedTrack = track.tracklist.tracksHistory[track.tracklist.tracksHistory.length-1];
                         if (lastPlayedTrack !== track){
-                            $(document).trigger("wpsstmTrackStart",[track]);
+                            $(track).trigger("start");
                             track.tracklist.tracksHistory.push(track);
                         }
                         
