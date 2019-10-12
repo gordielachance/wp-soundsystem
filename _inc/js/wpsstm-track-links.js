@@ -26,17 +26,19 @@ class WpsstmLink extends HTMLElement{
         */
     }
     attributeChangedCallback(attrName, oldVal, newVal){
-        
+
         var isValueChanged = (newVal !== oldVal);
         if (!isValueChanged) return;
         
         var link = this;
-        if (!link.track) return; //TOUFIX TOUCHECK when player track is cloned, this function is called and fails because track is not defined yet.  Works for now, but this should be investigated.
 
         //link.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
 
         switch (attrName) {
             case 'linkstatus':
+                
+                //mirror status to track
+                link.track.status = newVal;
                 
                 //mirror status to player link if needed
                 var playerTrack = link.track.tracklist.get_playerTrack();
@@ -45,21 +47,10 @@ class WpsstmLink extends HTMLElement{
                 if ( playerLink && !isPlayerLink ){
                     playerLink.status = newVal;
                 }
-                
 
                 if ( !newVal ){
                     $(link).removeClass('link-active link-loading link-playing');
 
-                    if (!isPlayerLink){
-                        
-                        //stop current track
-                        link.track.tracklist.mediaElement.pause();
-                        link.track.tracklist.mediaElement.currentTime = 0;
-                        
-                        link.track.status = '';
-                        $(link.track.tracklist.mediaElement).off();
-
-                    }
                     
                 }
                 
@@ -68,26 +59,15 @@ class WpsstmLink extends HTMLElement{
 
                     if (!isPlayerLink){
                         link.track.current_link = link;
-                        link.track.status = 'request';                        
                     }
                 }
                 
                 if ( newVal == 'playing' ){
                     $(link).removeClass('link-loading').addClass('link-playing link-has-played');
-                    
-                    if (!isPlayerLink){
-                        link.track.status = 'playing';
-                    }
-
                 }
                 
                 if ( newVal == 'paused' ){
                     $(link).removeClass('link-playing');
-                    
-                    if (!isPlayerLink){
-                        link.track.status = 'paused';
-                    }
-                    
                 }
                 
             break;
@@ -163,7 +143,6 @@ class WpsstmLink extends HTMLElement{
         $(link).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link[wpsstm-playable] .wpsstm-link-title', function(e) {
             e.preventDefault();
             var link = $(this).closest('wpsstm-track-link').get(0);
-            var track = link.track;
             link.play_link();
 
         });
@@ -254,27 +233,55 @@ class WpsstmLink extends HTMLElement{
         register new events
         */
 
-        
         $(tracklist.mediaElement).on('loadeddata',function(e){
+            
             var mediaElement = this;
+            var tracklist = mediaElement.closest('wpsstm-tracklist');
+            var track = tracklist.current_track;
+            var link = tracklist.current_track.current_link;
+            
             mediaElement.play();
         })
         .on('error', function(error) {
+            
+            var mediaElement = this;
+            var tracklist = mediaElement.closest('wpsstm-tracklist');
+            var track = tracklist.current_track;
+            var link = tracklist.current_track.current_link;
+            
             success.reject(error);
         })
         .on('play', function() {
+            
+            var mediaElement = this;
+            var tracklist = mediaElement.closest('wpsstm-tracklist');
+            var track = tracklist.current_track;
+            var link = tracklist.current_track.current_link;
+            
             link.status = 'playing';
             success.resolve();
         })
         .on('pause', function() {
+            
+            var mediaElement = this;
+            var tracklist = mediaElement.closest('wpsstm-tracklist');
+            var track = tracklist.current_track;
+            var link = tracklist.current_track.current_link;
+            
             link.status = 'paused';
         })
         .on('ended', function() {
+            
+            var mediaElement = this;
+            var tracklist = mediaElement.closest('wpsstm-tracklist');
+            var track = tracklist.current_track;
+            var link = tracklist.current_track.current_link;
+            
             link.status = '';
             //Play next song if any
-            track.tracklist.next_track_jump();
+            tracklist.next_track_jump();
         });
-        
+
         success.done(function(v) {
 
             link.status = 'playing';
@@ -294,6 +301,8 @@ class WpsstmLink extends HTMLElement{
         })
 
         ////
+        link.track.current_link = this;
+        link.track.tracklist.current_track = link.track;
         link.track.tracklist.mediaElement.setSrc(link.src);
         link.track.tracklist.mediaElement.load();
         return success.promise();

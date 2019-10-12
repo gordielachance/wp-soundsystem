@@ -60,10 +60,9 @@ class WpsstmTracklist extends HTMLElement{
         this.isRevertPlay =     false;
 
         //Setup listeners
-        $(this).on('queueLoop',WpsstmTracklist._queueLoopEvent);
-        $(this).on('loaded', WpsstmTracklist._loadedEvent);
+        $(this).on('queueLoaded', WpsstmTracklist._queueLoadedEvent);
+        $(this).on('ready',WpsstmTracklist._TracklistReadyEvent);
         $(this).on('queueLoop', WpsstmTracklist._queueLoopEvent);
-        
     }
     connectedCallback(){
         //console.log("TRACKLIST CONNECTED!");
@@ -216,7 +215,6 @@ class WpsstmTracklist extends HTMLElement{
             var refresh_bt = $(tracklist).find(".wpsstm-reload-bt");
             refresh_bt.click(function(e) {
                 e.preventDefault();
-                tracklist.debug("clicked 'refresh' bt");
                 var autoplay = ( tracklist.current_track && (tracklist.current_track.status === 'playing') );
                 tracklist.reload_tracklist(autoplay);
             });
@@ -382,18 +380,21 @@ class WpsstmTracklist extends HTMLElement{
             }
         });
         
-        //TOUFIX URGENT
-        //autoreload should only happen one time.  What if we don't have any cache_min ? For now, it will reload infinitly...
+        ///
+
         if (wpsstmL10n.ajax_radios && tracklist.isExpired){
             tracklist.reload_tracklist();
         }else{
-            $(tracklist).trigger('loaded');
+            $(tracklist).trigger('queueLoaded');
         }
+
     }
     
     reload_tracklist(autoplay){
         var tracklist = this;
         var success = $.Deferred();
+        
+        tracklist.debug("reload tracklist... - autoplay ? " + (autoplay === true) );
         
         var abord_reload = function(e) {
             if ( (e.key === "Escape") ) { // escape key maps to keycode `27`
@@ -401,10 +402,9 @@ class WpsstmTracklist extends HTMLElement{
             }
         }
 
-        tracklist.debug("reload tracklist...");
-        if (autoplay){
-            tracklist.debug("...and autoplay !");
-        }
+        tracklist.stop_current_link();
+        
+        ///
         
         var ajax_data = {
             action:     'wpsstm_reload_tracklist',
@@ -412,8 +412,6 @@ class WpsstmTracklist extends HTMLElement{
         };
         
         $(tracklist).addClass('tracklist-reloading');
-        
-        tracklist.stop_current_link();
 
         $(document).bind( "keyup.reloadtracklist", abord_reload ); //use namespace - https://acdcjunior.github.io/jquery-creating-specific-event-and-removing-it-only.html
 
@@ -442,6 +440,7 @@ class WpsstmTracklist extends HTMLElement{
                 /*
                 Swap content
                 */
+
                 tracklist.replaceWith( newTracklist );
                 
                 //Keep player intact so we don't mess with the Autoplay Policy
@@ -462,7 +461,6 @@ class WpsstmTracklist extends HTMLElement{
         .always(function () {
             $(tracklist).removeClass('tracklist-reloading');
             $(document).unbind( "keyup.reloadtracklist", abord_reload );
-            $(tracklist).trigger('loaded');
         })
         
         return success.promise();
@@ -823,12 +821,10 @@ class WpsstmTracklist extends HTMLElement{
         //}
     }
     
-    static _loadedEvent(e){
+    static _queueLoadedEvent(e){
         var tracklist = e.target;
 
-        tracklist.debug("Tracklist loaded");
-
-        var $tracks = tracklist.get_queue();
+        tracklist.debug("Queue loaded");
 
         /*
         Init player
@@ -849,21 +845,8 @@ class WpsstmTracklist extends HTMLElement{
             success: function(mediaElement, originalNode, MEplayer) {
                 tracklist.mediaElement = mediaElement;
                 tracklist.debug("MediaElementJS ready");
-                
-                /*
-                Autoplay
-                */
-                var autoplayTrack = $tracks.filter('.track-autoplay').get(0);
-                if (autoplayTrack){
-                    $(tracklist).one('ready',function(){
-                        tracklist.debug("autoplay track");
-                        autoplayTrack.play_track();
-                    });
-                }
-                
-                $(tracklist).trigger("ready",[tracklist]);
-                
-                
+                $(tracklist).trigger("ready");
+
             },error(mediaElement) {
                 // Your action when mediaElement had an error loading
                 //TO FIX is this required ?
@@ -873,10 +856,27 @@ class WpsstmTracklist extends HTMLElement{
   
     }
     
+    static _TracklistReadyEvent(e){
+        
+        var tracklist = this;
+
+        /*
+        Autoplay ?
+        */
+        var tracklist = this;
+        var $tracks = tracklist.get_queue();
+        var autoplayTrack = $tracks.filter('.track-autoplay').get(0);
+        if (!autoplayTrack) return;
+        tracklist.debug("autoplay track");
+        autoplayTrack.play_track();
+
+    }
+    
     stop_current_link(){
         var tracklist = this;
         if (!tracklist.current_track) return;
         if (!tracklist.current_track.current_link) return;
+
         tracklist.current_track.current_link.status = '';//stop current link
     }
  

@@ -14,6 +14,10 @@ class WpsstmTrack extends HTMLElement{
         this.tracklist =            undefined;
         this.ajax_details =         undefined;
         this.current_link =         undefined;
+        
+        //Setup listeners
+        $(this).on('start', WpsstmTrack._startTrackEvent);
+        
     }
     connectedCallback(){
         //console.log("TRACK CONNECTED!");
@@ -30,12 +34,11 @@ class WpsstmTrack extends HTMLElement{
         */
     }
     attributeChangedCallback(attrName, oldVal, newVal){
-        
+
         var isValueChanged = (newVal !== oldVal);
         if (!isValueChanged) return;
         
         var track = this;
-        if (!track.tracklist) return; //TOUFIX TOUCHECK when player track is cloned, this function is called and fails because track.tracklist is not defined yet.  Works for now, but this should be investigated.
 
         //track.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
 
@@ -57,6 +60,12 @@ class WpsstmTrack extends HTMLElement{
                             $(track.tracklist).removeClass('tracklist-playing');
                             playingLink.status = '';
                         }
+                        
+                        //stop current track
+                        track.tracklist.mediaElement.pause();
+                        track.tracklist.mediaElement.currentTime = 0;
+                        $(track.tracklist.mediaElement).off();
+                        
                     }
                     
                     $(track).removeClass('track-active track-playing track-loading');                    
@@ -86,7 +95,6 @@ class WpsstmTrack extends HTMLElement{
                         var lastPlayedTrack = track.tracklist.tracksHistory[track.tracklist.tracksHistory.length-1];
                         if (lastPlayedTrack !== track){
                             $(track).trigger("start");
-                            track.tracklist.tracksHistory.push(track);
                         }
                         
                     }
@@ -677,8 +685,11 @@ class WpsstmTrack extends HTMLElement{
     get_instances(){
         return $('wpsstm-track[data-wpsstm-track-id="'+this.post_id+'"]');
     }
-    
-    static _playEvent(e,track){
+
+    static _startTrackEvent(e){
+        var track = this;
+
+        track.tracklist.tracksHistory.push(track);
 
         var ajax_data = {
             action:     'wpsstm_track_start',
@@ -699,5 +710,3 @@ class WpsstmTrack extends HTMLElement{
 }
 
 window.customElements.define('wpsstm-track', WpsstmTrack);
-
-$(document).on('wpsstmTrackPlay',WpsstmTrack._playEvent);
