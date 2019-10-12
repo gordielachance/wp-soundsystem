@@ -16,6 +16,7 @@ class WpsstmLink extends HTMLElement{
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
         */
+
         this.render();
     }
 
@@ -51,10 +52,10 @@ class WpsstmLink extends HTMLElement{
 
                     if (!isPlayerLink){
                         
-                        if ( link.status === 'playing' ){
-                            link.track.tracklist.mediaElement.pause();
-                        }
-
+                        //stop current track
+                        link.track.tracklist.mediaElement.pause();
+                        link.track.tracklist.mediaElement.currentTime = 0;
+                        
                         link.track.status = '';
                         $(link.track.tracklist.mediaElement).off();
 
