@@ -1,5 +1,6 @@
 <?php
 //define('WPSSTM_API_URL','http://localhost:8888/la-bonne-toune/');
+//define('WPSSTM_API_URL','http://wpsstm-api/');
 define('WPSSTM_API_URL','https://api.spiff-radio.org/');
 define('WPSSTM_API_REST',WPSSTM_API_URL . 'wp-json/');
 define('WPSSTM_API_CACHE',WPSSTM_API_URL . 'wordpress/wp-content/uploads/wpsstmapi/');
@@ -166,16 +167,6 @@ class WPSSTM_Core_API {
         $headers = wp_remote_retrieve_headers($request);
         $response_code = wp_remote_retrieve_response_code($request);
         $response = wp_remote_retrieve_body( $request );
-
-        if( $response_code > 400){
-            $response_msg = wp_remote_retrieve_response_message($request);
-            $error_msg = sprintf('[%s] %s',$response_code,$response_msg);
-            $error_msg = sprintf( __('Unable to query API: %s','wpsstm'),$error_msg );
-            
-            WP_SoundSystem::debug_log($error_msg);
-            return new WP_Error( 'query_api',$error_msg, $rest_url );
-            
-        }
 
         if ( is_wp_error($response) ){
             WP_SoundSystem::debug_log($response->get_error_message());

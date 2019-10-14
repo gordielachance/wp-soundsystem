@@ -769,16 +769,37 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
                 $error_code = $xspf->get_error_code();
                 $error_message = $xspf->get_error_message();
-
-                if($error_code == 'rest_forbidden'){
-
+                
+                switch($error_code){
+                    case 'rest_forbidden':
+                        
                     if ( current_user_can('manage_options') ){
                         $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstmapi') );
                         $this->add_notice('wpsstm-api-error',sprintf(__('An API key is needed. Get one %s.','wpsstm'),$api_link)  );
                     }
-
-                }else{
-                    $this->add_notice('wpsstm-api-error',$error_message  );
+                        
+                    break;
+                        
+                    case 'import_error':
+                        
+                        //set import ID
+                        $this->import_id = $xspf->get_error_data('import_error');
+                        update_post_meta( $this->post_id, self::$import_id_meta_name, $this->import_id );
+                        
+                        $error_codes =  $xspf->get_error_codes();
+                        $error_code =   $error_codes[1];
+                        $error_msg =    $xspf->get_error_message($error_code);
+                        $error_data =   $xspf->get_error_data($error_code);
+                        
+                        $this->add_notice($error_code,$error_msg);
+                        
+                        return new WP_Error($error_code,$error_msg,$error_data);
+                        
+                    break;
+                        
+                    default:
+                        $this->add_notice('wpsstm-api-error',$error_message  );
+                    break;
                 }
 
                 return $xspf;
@@ -793,7 +814,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $xspf = simplexml_load_string($xspf, "SimpleXMLElement", LIBXML_NOCDATA);
         $json = json_encode($xspf);
         $xspf = json_decode($json,TRUE);
+        
+        //set import ID
         $this->import_id = wpsstm_get_array_value('identifier',$xspf);
+        update_post_meta( $this->post_id, self::$import_id_meta_name, $this->import_id );
 
         /*
         Create playlist from the XSPF array
@@ -902,12 +926,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         
         $playlist = $this->import_xspf();
         if ( is_wp_error($playlist) ) return $playlist;
-        
-        //update import ID if any (even if we received an error, we should have the import ID populated)
-        if ($this->import_id){
-            $this->tracklist_log($this->get_debug_url(),"import succeeded");
-            update_post_meta( $this->post_id, self::$import_id_meta_name, $this->import_id );
-        }
 
         $updated = $this->update_radio_data($playlist);
 
