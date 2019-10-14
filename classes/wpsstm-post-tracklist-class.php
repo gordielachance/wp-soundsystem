@@ -683,7 +683,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
             if ( $this->is_expired && !$wait_for_ajax ){
                 $synced = $this->sync_radio();
-                if ( is_wp_error($synced) ) return $synced;
             }
         }
         
@@ -766,9 +765,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $xspf = WPSSTM_Core_API::api_request('import',$params);
 
             if ( is_wp_error($xspf) ){
-
-                $error_code = $xspf->get_error_code();
-                $error_message = $xspf->get_error_message();
+                
+                $error = $xspf;
+                $error_code = $error->get_error_code();
+                $error_message = $error->get_error_message();
                 
                 switch($error_code){
                     case 'rest_forbidden':
@@ -783,17 +783,18 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                     case 'import_error':
                         
                         //set import ID
-                        $this->import_id = $xspf->get_error_data('import_error');
+                        $this->import_id = $error->get_error_data('import_error');
                         update_post_meta( $this->post_id, self::$import_id_meta_name, $this->import_id );
                         
-                        $error_codes =  $xspf->get_error_codes();
+                        //return the other error
+                        $error_codes =  $error->get_error_codes();
                         $error_code =   $error_codes[1];
-                        $error_msg =    $xspf->get_error_message($error_code);
-                        $error_data =   $xspf->get_error_data($error_code);
+                        $error_msg =    $error->get_error_message($error_code);
+                        $error_data =   $error->get_error_data($error_code);
                         
                         $this->add_notice($error_code,$error_msg);
                         
-                        return new WP_Error($error_code,$error_msg,$error_data);
+                        $error = new WP_Error($error_code,$error_msg,$error_data);
                         
                     break;
                         
@@ -802,7 +803,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                     break;
                 }
 
-                return $xspf;
+                return $error;
                 
             }
 
