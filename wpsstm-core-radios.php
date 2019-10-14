@@ -1,7 +1,7 @@
 <?php
 class WPSSTM_Core_Radios{
     static $remote_author_meta_name = 'wpsstm_remote_author_name';
-    static $time_updated_meta_name = 'wpsstm_remote_query_time';
+    static $time_imported_meta_name = 'wpsstm_remote_query_time';
     static $cache_min_meta_name = 'wpsstm_cache_min';
     public $presets;
 

@@ -1,4 +1,4 @@
-<section class="tracklist-header top">
+<section class="wpsstm-tracklist-header top">
     <?php
     global $wpsstm_tracklist;
     $wpsstm_tracklist->html_metas();

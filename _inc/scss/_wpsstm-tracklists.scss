@@ -61,7 +61,7 @@ wpsstm-tracklist{
         }
     }
 
-    .tracklist-header{
+    .wpsstm-tracklist-header{
         margin-bottom:1em;
         font-size:.9em;
         text-align:center;
@@ -163,17 +163,19 @@ wpsstm-tracklist{
 
     }
     
-    &:not([wpsstm-playable]) .wpsstm-tracklist-play-bt{
-        display:none;
+    &:not(.has-player){    
+        .wpsstm-tracklist-play-bt,
+        wpsstm-track .wpsstm-track-action-play{
+            display:none;
+        }
     }
 
     &.tracklist-reloading{
         @extend .wpsstm-freeze;
-        @include striped-bg();
-        min-height:1em;
-        > *{
-            @include opacity(.25);
+        > .wpsstm-tracklist-queue{
+            @include striped-bg();
         }
+        
     } 
 
     &:not(.tracklist-expired){

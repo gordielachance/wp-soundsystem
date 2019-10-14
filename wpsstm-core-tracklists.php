@@ -190,7 +190,7 @@ class WPSSTM_Core_Tracklists{
         }
         
         //playable
-        $new_input['playable'] = wpsstm_get_array_value('playable',$input_data);
+        $new_input['playable'] = (bool)wpsstm_get_array_value('playable',$input_data);
         
         //order
         $order = wpsstm_get_array_value('order',$input_data);
@@ -223,7 +223,7 @@ class WPSSTM_Core_Tracklists{
             checked($option,true, false)
         );
 
-        printf('<p>%s <label>%s</label></p>',$input,__('Playable','wpsstm'));
+        printf('<p>%s <label>%s</label></p>',$input,__('Player','wpsstm'));
         
         //sort
         $option = $wpsstm_tracklist->get_options('order');
@@ -250,7 +250,7 @@ class WPSSTM_Core_Tracklists{
             $option = $wpsstm_tracklist->get_options('cache_min');
 
             $input = sprintf(
-                '<input type="number" name="%s[cache_min]" size="4" min="1" value="%s" />',
+                '<input type="number" name="%s[cache_min]" size="4" min="0" value="%s" />',
                 'wpsstm_tracklist_options',
                 $option
             );

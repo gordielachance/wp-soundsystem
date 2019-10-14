@@ -40,7 +40,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     var $preset;
     
-    public $classes = array('wpsstm-post-tracklist','tracklist-bottom-player');
+    public $classes = array('wpsstm-post-tracklist');
 
     function __construct($post = null ){
         
@@ -118,7 +118,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $seconds = $this->seconds_before_refresh();
             $this->is_expired = ( ($seconds !== false) && ($seconds <= 0) );
             
-            $last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Radios::$time_updated_meta_name,true);
+            $last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Radios::$time_imported_meta_name,true);
             $last_import_time = filter_var($last_import_time, FILTER_VALIDATE_INT);
 
             if ($last_import_time){
@@ -136,6 +136,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //classes
         if( $this->is_tracklist_favorited_by() ) {
             $this->classes[] = 'favorited-tracklist';
+        }
+        
+        if ( wpsstm()->get_options('player_enabled') && $this->get_options('playable') ){
+            $this->classes[] = 'has-player';
+            $this->classes[] = 'tracklist-bottom-player';
         }
 
         return $this->post_id;
@@ -654,7 +659,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'itemtype' =>                           "http://schema.org/MusicPlaylist",
             'data-wpsstm-tracklist-id' =>           $this->post_id,
             'data-wpsstm-domain' =>                 wpsstm_get_url_domain( $this->feed_url ),
-            'wpsstm-playable' =>                    ( wpsstm()->get_options('player_enabled') && $this->get_options('playable') && $this->track_count ),
         );
 
         $values_attr = array_merge($values_defaults,(array)$values_attr);
@@ -943,9 +947,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         */
 
         $meta_input = array(
-            self::$remote_title_meta_name =>                            $tracklist->title,
+            self::$remote_title_meta_name =>                    $tracklist->title,
             WPSSTM_Core_Radios::$remote_author_meta_name =>     $tracklist->author,
-            WPSSTM_Core_Radios::$time_updated_meta_name =>      $tracklist->date_timestamp,
+            WPSSTM_Core_Radios::$time_imported_meta_name =>     current_time( 'timestamp', true ),
         );
 
         $tracklist_post = array(
@@ -1013,8 +1017,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function seconds_before_refresh(){
 
         if ($this->tracklist_type != 'live') return false;
-        
-        $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Radios::$time_updated_meta_name,true);
+
+        $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Radios::$time_imported_meta_name,true);
         if(!$updated_time) return 0;//never imported
 
         if ( !$cache_min = $this->get_options('cache_min') ) return 0; //no delay
@@ -1028,8 +1032,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     function remove_import_timestamp(){
-        if ( !$last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Radios::$time_updated_meta_name,true) ) return;
-        if ( !$success = delete_post_meta($this->post_id,WPSSTM_Core_Radios::$time_updated_meta_name) ) return;
+        if ( !$last_import_time = get_post_meta($this->post_id,WPSSTM_Core_Radios::$time_imported_meta_name,true) ) return;
+        if ( !$success = delete_post_meta($this->post_id,WPSSTM_Core_Radios::$time_imported_meta_name) ) return;
         $this->is_expired = true;
     }
     

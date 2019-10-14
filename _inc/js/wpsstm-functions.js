@@ -93,17 +93,10 @@ function wpsstm_shuffle(array) {
 }
 
 /*
-Update a node with the content and attributes of another one
-So we don't have to delete and create a new node, we keep the listeners, etc.
+Update a node with the attributes of another one
 */
 
-function wpsstmSwapNode(newNode,oldNode){
-
-    //check both nodes have the same tag
-    if (oldNode.tagName !== newNode.tagName){
-        console.log("wpsstmSwapNode - tags do not match, abord.");
-        return false;
-    }
+function wpsstmSwapNodeAttributes(oldNode,newNode){
 
     //remove all old attributes
     while(oldNode.attributes.length > 0){
@@ -116,9 +109,6 @@ function wpsstmSwapNode(newNode,oldNode){
     while(attr = attributes.pop()) {
         oldNode.setAttribute(attr.nodeName, attr.nodeValue);
     }
-    
-    //switch HTML
-    oldNode.innerHTML = newNode.innerHTML;
 
     return true;
 

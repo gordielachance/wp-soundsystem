@@ -17,7 +17,9 @@ $notice = $wpsstm_tracklist->importer_notice();
     /*
     Player
     */
-    wpsstm_locate_template( 'player.php', true, false );
+    if ( $wpsstm_tracklist->get_options('playable') ){
+        wpsstm_locate_template( 'player.php', true, false );
+    }
 
     /*
     Queue

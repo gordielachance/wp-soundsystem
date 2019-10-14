@@ -135,15 +135,6 @@ class WpsstmLink extends HTMLElement{
 
         ajax_request.done(function(data){
             if (data.success === true){
-
-                //skip current link as it was playing
-                //TOUFIX URGENT
-                if ( $(link).hasClass('link-playing') ){
-                    link.debug('link was playing, skip it !');
-                    link.debug(link);
-                }
-
-                ///
                 $instances.remove();
 
             }else{

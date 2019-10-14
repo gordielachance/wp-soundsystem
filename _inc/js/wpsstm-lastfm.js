@@ -3,7 +3,7 @@ var $ = jQuery.noConflict();
 class WpsstmLastFM {
     constructor(){
         this.lastfm_scrobble_along =    parseInt(wpsstmLastFM.lastfm_scrobble_along);
-        $('wpsstm-tracklist').live('ready',this._initPlayerEvent);
+        $('wpsstm-tracklist').live('playerInit',this._initPlayerEvent);
         $('wpsstm-track').live('start',this._nowPlayingTrackEvent);
     }
 
