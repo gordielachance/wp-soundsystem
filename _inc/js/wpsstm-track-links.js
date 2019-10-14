@@ -4,7 +4,6 @@ class WpsstmLink extends HTMLElement{
     constructor() {
         super(); //required to be first
         
-        this.track =            undefined;
         this.index =            undefined;
         this.post_id =          undefined;
         this.src =              undefined;
@@ -35,43 +34,6 @@ class WpsstmLink extends HTMLElement{
         //link.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
 
         switch (attrName) {
-            case 'linkstatus':
-                
-                //mirror status to track
-                link.track.status = newVal;
-                
-                //mirror status to player link if needed
-                var playerTrack = link.track.tracklist.get_playerTrack();
-                var playerLink = $(playerTrack).find('wpsstm-track-link[data-wpsstm-link-id="'+link.post_id+'"]').get(0);
-                var isPlayerLink = (link === playerLink);
-                if ( playerLink && !isPlayerLink ){
-                    playerLink.status = newVal;
-                }
-
-                if ( !newVal ){
-                    $(link).removeClass('link-active link-loading link-playing');
-
-                    
-                }
-                
-                if (newVal == 'request'){
-                    $(link).addClass('link-active link-loading');
-
-                    if (!isPlayerLink){
-                        link.track.current_link = link;
-                    }
-                }
-                
-                if ( newVal == 'playing' ){
-                    $(link).removeClass('link-loading').addClass('link-playing link-has-played');
-                }
-                
-                if ( newVal == 'paused' ){
-                    $(link).removeClass('link-playing');
-                }
-                
-            break;
-
         }
         
         
@@ -83,17 +45,9 @@ class WpsstmLink extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['linkstatus'];
+        return [];
     }
-    
-    get status() {
-        return this.getAttribute('linkstatus');
-    }
-    
-    set status(value) {
-        this.setAttribute('linkstatus',value);
-    }
-    
+
     get playable() {
         return this.hasAttribute('wpsstm-playable');
     }
@@ -127,7 +81,6 @@ class WpsstmLink extends HTMLElement{
 
     render(){
         var link =              this;
-        link.track =            link.closest('wpsstm-track');
         link.index =            Number($(link).attr('data-wpsstm-link-idx'));
         link.post_id =          Number($(link).attr('data-wpsstm-link-id'));
         link.src =              $(link).attr('data-wpsstm-stream-src');
@@ -139,13 +92,7 @@ class WpsstmLink extends HTMLElement{
             link.trash_link();
         });
         
-        //play link
-        $(link).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link[wpsstm-playable] .wpsstm-link-title', function(e) {
-            e.preventDefault();
-            var link = $(this).closest('wpsstm-track-link').get(0);
-            link.play_link();
 
-        });
 
     }
 
@@ -214,101 +161,6 @@ class WpsstmLink extends HTMLElement{
         })
     }
 
-    play_link(){
-        var link = this;
-        var $instances = this.get_instances();
-        var success = $.Deferred();
-        var track = link.track;
-        var tracklist = track.tracklist;
-
-        if( !link.playable ){
-            success.reject('cannot play this link');
-            return success.promise();
-        }
-
-        tracklist.stop_current_link();
-        link.status = 'request';
-
-        /*
-        register new events
-        */
-
-        $(tracklist.mediaElement).on('loadeddata',function(e){
-            
-            var mediaElement = this;
-            var tracklist = mediaElement.closest('wpsstm-tracklist');
-            var track = tracklist.current_track;
-            var link = tracklist.current_track.current_link;
-            
-            mediaElement.play();
-        })
-        .on('error', function(error) {
-            
-            var mediaElement = this;
-            var tracklist = mediaElement.closest('wpsstm-tracklist');
-            var track = tracklist.current_track;
-            var link = tracklist.current_track.current_link;
-            
-            success.reject(error);
-        })
-        .on('play', function() {
-            
-            var mediaElement = this;
-            var tracklist = mediaElement.closest('wpsstm-tracklist');
-            var track = tracklist.current_track;
-            var link = tracklist.current_track.current_link;
-            
-            link.status = 'playing';
-            success.resolve();
-        })
-        .on('pause', function() {
-            
-            var mediaElement = this;
-            var tracklist = mediaElement.closest('wpsstm-tracklist');
-            var track = tracklist.current_track;
-            var link = tracklist.current_track.current_link;
-            
-            link.status = 'paused';
-        })
-        .on('ended', function() {
-            
-            var mediaElement = this;
-            var tracklist = mediaElement.closest('wpsstm-tracklist');
-            var track = tracklist.current_track;
-            var link = tracklist.current_track.current_link;
-            
-            link.status = '';
-            //Play next song if any
-            tracklist.next_track_jump();
-        });
-
-        success.done(function(v) {
-
-            link.status = 'playing';
-
-            $instances.toArray().forEach(function(item) {
-                item.playable = true;
-            });
-        })
-        .fail(function() {
-            
-            link.status = '';
-            
-            $instances.toArray().forEach(function(item) {
-                item.playable = false;
-            });
-            
-        })
-
-        ////
-        link.track.current_link = this;
-        link.track.tracklist.current_track = link.track;
-        link.track.tracklist.mediaElement.setSrc(link.src);
-        link.track.tracklist.mediaElement.load();
-        return success.promise();
-
-    }
-    
     get_instances(){
         return $('wpsstm-track-link[data-wpsstm-link-id="'+this.post_id+'"]');
     }

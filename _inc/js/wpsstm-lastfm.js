@@ -205,8 +205,9 @@ class WpsstmLastFM {
     }
     
     _nowPlayingTrackEvent(e){
-        var track = this;
-        var scrobble_icon =         $(track.tracklist).find('.wpsstm-player-action-scrobbler');
+        var track =                 this;
+        var tracklist =             track.closest('wpsstm-tracklist');
+        var scrobble_icon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
         var scrobbler_enabled =     scrobble_icon.hasClass('active');
 
         var nowPlayingTrack = function(){
@@ -226,7 +227,7 @@ class WpsstmLastFM {
         }
 
         var ScrobbleTrack = function() {
-            var duration = track.tracklist.mediaElement.duration;
+            var duration = tracklist.mediaElement.duration;
             if ( duration < 30) return;
 
             if (scrobbler_enabled){
@@ -250,10 +251,10 @@ class WpsstmLastFM {
         }
 
         //now playing
-        $(track.tracklist.mediaElement).one('play', nowPlayingTrack);
+        $(tracklist.mediaElement).one('play', nowPlayingTrack);
 
         //track end
-        $(track.tracklist.mediaElement).one('ended', ScrobbleTrack);
+        $(tracklist.mediaElement).one('ended', ScrobbleTrack);
     }
     
 }

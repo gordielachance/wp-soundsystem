@@ -62,6 +62,8 @@ class WpsstmTracklist extends HTMLElement{
         //Setup listeners
         $(this).on('queueLoaded', WpsstmTracklist._queueLoadedEvent);
         $(this).on('ready',WpsstmTracklist._TracklistReadyEvent);
+        $(this).on('loadLink', WpsstmTracklist._loadLinkEvent);
+        $(this).on('loadTrack', WpsstmTracklist._loadTrackEvent);
         $(this).on('queueLoop', WpsstmTracklist._queueLoopEvent);
     }
     connectedCallback(){
@@ -215,7 +217,7 @@ class WpsstmTracklist extends HTMLElement{
             var refresh_bt = $(tracklist).find(".wpsstm-reload-bt");
             refresh_bt.click(function(e) {
                 e.preventDefault();
-                var autoplay = ( tracklist.current_track && (tracklist.current_track.status === 'playing') );
+                var autoplay = ( tracklist.current_track && !tracklist.mediaElement.paused );
                 tracklist.reload_tracklist(autoplay);
             });
         }
@@ -402,7 +404,7 @@ class WpsstmTracklist extends HTMLElement{
             }
         }
 
-        tracklist.stop_current_link();
+        tracklist.stop_current_media();
         
         ///
         
@@ -727,9 +729,10 @@ class WpsstmTracklist extends HTMLElement{
         var previousTrack = tracklist.get_previous_track();
 
         if (previousTrack){
-            var success = previousTrack.play_track();
+
+            $(tracklist).trigger('loadTrack',[previousTrack]);
             
-            success.done(function(){
+            $(tracklist.mediaElement).on('play', function(error) {
                 tracklist.isRevertPlay = false;
             })
             
@@ -747,7 +750,8 @@ class WpsstmTracklist extends HTMLElement{
         var nextTrackIdx =      $tracks.index( nextTrack );
 
         if (nextTrack){
-            nextTrack.play_track();
+            
+            $(tracklist).trigger('loadTrack',[nextTrack]);
             
         }else{
             tracklist.debug("no next track");
@@ -813,6 +817,162 @@ class WpsstmTracklist extends HTMLElement{
         return this.$player.find('.player-track wpsstm-track').get(0);
     }
     
+    static _loadLinkEvent(e,link){
+        var $instances = link.get_instances();
+        var track = link.closest('wpsstm-track');
+        var tracklist = e.target;
+
+        if( !link.playable ){
+            console.log('cannot play this link');
+            $(link).trigger('skip');
+            return;
+        }
+
+        tracklist.stop_current_media();
+        
+        console.log("LOAD LINK:" + link.src);
+        tracklist.current_track = track;
+        track.current_link = link;
+
+        $(link).addClass('link-active link-loading');
+        $(track).addClass('track-active track-loading');
+        $(tracklist).addClass('tracklist-loading tracklist-active tracklist-has-played');
+
+        tracklist.update_player_track();
+        tracklist.update_player_controls();
+
+        /*
+        register new events
+        */
+        
+        $(tracklist.mediaElement).one('error', function(error) {
+            $(link).trigger('skip');
+        })
+
+        tracklist.mediaElement.setSrc(link.src);
+        tracklist.mediaElement.load();
+
+    }
+    
+    static _loadTrackEvent(e,track){
+        var tracklist = e.target;
+        
+        if (track.current_link){
+            $(tracklist).trigger('loadLink',[track.current_link]);
+            return;
+        }
+        
+        console.log("LOAD TRACK");
+
+        /*
+        Wait for track to be ready
+        */
+        var trackready = $.Deferred();
+        
+        //should we autolink ?
+        var $links = $(track).find('wpsstm-track-link');
+        var $sources = $links.filter('[wpsstm-playable]');
+        
+        if ( track.can_autolink && !$sources.length ){
+            trackready = track.track_autolink()
+        }else{
+            trackready.resolve();
+        }
+        
+        /*
+        Track is now ready, try to play links
+        */
+        
+        trackready.done(function(v) {
+            
+            /*
+            Play first available link
+            */
+            
+            var playableLinks = $(track).find('wpsstm-track-link').filter(function (index) {
+                return this.playable;
+            });
+
+            if (!playableLinks.length){
+                $(track).trigger('skip');
+            }else{
+
+                /*
+                This function will loop until a promise is resolved
+                */
+
+                (function iterateLinks(index) {
+
+                    if (index >= playableLinks.length){
+                        console.log("finished link iteration");
+                        $(track).trigger('skip');
+                        return;
+                    }
+
+                    var link = playableLinks[index];
+
+                    $(tracklist.mediaElement).one('error', function() {
+                        iterateLinks(index + 1);
+                    })
+
+                    $(tracklist).trigger('loadLink',[link]);
+
+                })(0);
+            }
+            
+            /*
+            Success ?
+            */
+            
+            $(tracklist.mediaElement).one('play', function() {
+                if (wpsstmL10n.autolink){
+                    tracklist.next_tracks_autolink(track);
+                }
+            })
+            
+        })  
+    }
+    
+    /*
+    preload links for the X next tracks
+    */
+    next_tracks_autolink(track){
+        var tracklist = this;
+        var tracks = tracklist.get_queue();
+        var max_items = 3; //number of following tracks to preload //TOUFIX should be in php options
+        var track_index = tracks.index( track );
+        if (track_index < 0) return; //index not found
+
+        //keep only tracks after this one
+        var rtrack_in = track_index + 1;
+        var next_tracks = tracks.slice( rtrack_in );
+        
+        //consider only the next X tracks
+        var tracks_slice = next_tracks.slice( 0, max_items );
+
+        //keep only tracks that needs to be autolinked
+        tracks_slice = tracks_slice.filter(function (index) {
+            var playable_links = $(this).find('wpsstm-track-link[wpsstm-playable]');
+            return ( this.can_autolink && !playable_links.length );
+        });
+        
+        /*
+        TOUFIX TOUCHECK this preloads the tracks SEQUENCIALLY
+        var results = [];
+        return tracks_slice.toArray().reduce((promise, track) => {
+            return promise.then((result) => {
+                return track.track_autolink().then(result => results.push(result));
+            })
+            .catch(console.error);
+        }, Promise.resolve());
+        */
+        
+        $(tracks_slice).each(function(index, track_to_preload) {	
+            track_to_preload.track_autolink();	
+        });
+
+    }
+
     static _queueLoopEvent(e){
         var tracklist = e.target;
         tracklist.debug("Tracklist loop");
@@ -858,7 +1018,107 @@ class WpsstmTracklist extends HTMLElement{
     
     static _TracklistReadyEvent(e){
         
+        console.log("TRACKLIST READY !");
+        
         var tracklist = this;
+        
+        //load link
+        $('wpsstm-track-link').live('click', '.wpsstm-track-link-action-play,wpsstm-track-link[wpsstm-playable] .wpsstm-link-title', function(e) {
+            e.preventDefault();
+            var link = $(this).closest('wpsstm-track-link').get(0);
+            $(tracklist).trigger('loadLink',[link]);
+        });
+        
+        //load track
+        $('wpsstm-track').on('click','.wpsstm-track-action-play', function(e) {
+            e.preventDefault();
+            var track = $(this).closest('wpsstm-track').get(0);
+
+            if (track === tracklist.current_track){
+                
+                //toggle play/pause
+                if ( tracklist.mediaElement.paused ){
+                    tracklist.mediaElement.play();
+                }else{
+                    tracklist.mediaElement.pause();
+                }
+                
+            }else{
+                $(tracklist).trigger('loadTrack',[track]);
+            }
+
+        });
+        
+        $(tracklist.mediaElement).on('loadeddata',function(e){
+            console.log("LOADEDDATA");
+            var mediaElement = this;
+            var tracklist = mediaElement.closest('wpsstm-tracklist');
+            var track = tracklist.current_track;
+            var link = tracklist.current_track.current_link;
+            mediaElement.play();
+        })
+        .on('error', function(error) {
+            
+            var mediaElement = this;
+            var tracklist = mediaElement.closest('wpsstm-tracklist');
+            var track = tracklist.current_track;
+            var link = tracklist.current_track.current_link;
+            
+            link.get_instances().toArray().forEach(function(item) {
+                item.playable = false;
+            });
+            
+        })
+        .on('play', function() {
+            
+            var mediaElement = this;
+            var tracklist = mediaElement.closest('wpsstm-tracklist');
+            var track = tracklist.current_track;
+            var link = tracklist.current_track.current_link;
+            var $link_instances = link.get_instances();
+
+            $link_instances.toArray().forEach(function(item) {
+                item.playable = true;
+            });
+            
+            $(tracklist).removeClass('tracklist-loading').addClass('tracklist-playing tracklist-has-played');
+            track.get_instances().removeClass('track-loading').addClass('track-playing track-has-played');
+            link.get_instances().removeClass('link-loading').addClass('link-playing link-has-played');
+            
+            //is track switch
+            var lastPlayedTrack = tracklist.tracksHistory[tracklist.tracksHistory.length-1];
+            if (lastPlayedTrack !== track){
+                $(track).trigger("start");
+            }
+            
+            //history
+            tracklist.tracksHistory.push(track);
+
+            
+        })
+        .on('pause', function() {
+            
+            var mediaElement = this;
+            var tracklist = mediaElement.closest('wpsstm-tracklist');
+            var track = tracklist.current_track;
+            var link = tracklist.current_track.current_link;
+
+            $(tracklist).removeClass('tracklist-playing');
+            track.get_instances().removeClass('track-playing');
+            link.get_instances().removeClass('link-playing');
+            
+        })
+        .on('ended', function() {
+            
+            var mediaElement = this;
+            var tracklist = mediaElement.closest('wpsstm-tracklist');
+            var track = tracklist.current_track;
+            var link = tracklist.current_track.current_link;
+            
+            tracklist.stop_current_media();
+            //Play next song if any
+            tracklist.next_track_jump();
+        });
 
         /*
         Autoplay ?
@@ -868,16 +1128,32 @@ class WpsstmTracklist extends HTMLElement{
         var autoplayTrack = $tracks.filter('.track-autoplay').get(0);
         if (!autoplayTrack) return;
         tracklist.debug("autoplay track");
-        autoplayTrack.play_track();
+        
+        $(tracklist).trigger('loadTrack',[autoplayTrack]);
 
     }
     
-    stop_current_link(){
+    stop_current_media(){
         var tracklist = this;
-        if (!tracklist.current_track) return;
-        if (!tracklist.current_track.current_link) return;
+        var mediaElement = tracklist.mediaElement;
+        if (!mediaElement) return;
+        
+        //stop current media
+        mediaElement.pause();
+        mediaElement.currentTime = 0;
+        
+        $(tracklist).removeClass('tracklist-playing');
+        
+        var track = tracklist.current_track;
+        
+        if (track){
+            track.get_instances().removeClass('track-active track-loading track-playing');
+            var link = tracklist.current_track.current_link;
+            if (link){
+                link.get_instances().removeClass('link-active link-loading link-playing');
+            }
+        }
 
-        tracklist.current_track.current_link.status = '';//stop current link
     }
  
 }
