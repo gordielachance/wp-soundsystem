@@ -11,7 +11,6 @@ class WpsstmTrack extends HTMLElement{
         this.track_album =          undefined;
         this.subtrack_id =          undefined;
         this.post_id =              undefined;
-        this.ajax_details =         undefined;
         
         //Setup listeners
         $(this).on('start', WpsstmTrack._startTrackEvent);

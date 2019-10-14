@@ -622,8 +622,6 @@ class WPSSTM_Track{
     */
     
     function autolink($force = false){
-        
-        $this->track_log('DO TRACK AUTOLINK');
 
         $new_links = array();
         $links_auto = array();
