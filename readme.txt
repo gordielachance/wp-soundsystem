@@ -128,14 +128,19 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= XXX =
+= 3.2.0 =
 * get_static_subtracks() about 4 times faster !
-* cache get_tracklist_html()
+* audio player is now a a child node of its tracklist (better for customisation)
+* JS: a lot of improvements !
 * new 'tracklist' view in the tracks backend
-* new class Wpsstm_Subtrack_List_Table WIP
 * DO NOT queue a track if it is already part of the tracklist
-* bew fb batch_delete_duplicate_subtracks()
+* Radios: better JSON feedback
+* tracklist/track/links actions for unlogged users : use wp_login_url()
+* new fn batch_delete_duplicate_subtracks()
 * new fn batch_reindex_subtracks_by()
+* fixed fn reset_subtrack_order()
+* use WP_Object_Cache for get_tracklist_html()
+* new class Wpsstm_Subtrack_List_Table [WIP]
 * database upgrade: v213
 
 = 3.1.5 =
