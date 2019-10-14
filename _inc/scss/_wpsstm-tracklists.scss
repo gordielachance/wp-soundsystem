@@ -172,10 +172,8 @@ wpsstm-tracklist{
 
     &.tracklist-reloading{
         @extend .wpsstm-freeze;
-        > .wpsstm-tracklist-queue{
-            @include striped-bg();
-        }
-        
+        @include striped-bg();
+        min-height:1em;
     } 
 
     &:not(.tracklist-expired){
