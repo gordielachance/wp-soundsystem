@@ -12,7 +12,6 @@ class WpsstmTrack extends HTMLElement{
         this.subtrack_id =          undefined;
         this.post_id =              undefined;
         this.ajax_details =         undefined;
-        this.current_link =         undefined;
         
         //Setup listeners
         $(this).on('start', WpsstmTrack._startTrackEvent);
