@@ -895,6 +895,16 @@ class WpsstmTracklist extends HTMLElement{
         */
         
         trackready.always(function(v) {
+            
+            /*
+            Check this is still the track requested
+            */
+            if ( tracklist.current_track !== track ){
+                track.debug('Track switched, do not play');
+                success.resolve();
+                return success.promise();
+            }
+            
 
             /*
             Play first available link
