@@ -471,6 +471,9 @@ class WpsstmTracklist extends HTMLElement{
                 var $oldTracklistQueue =    $(tracklist).find('>section.wpsstm-tracklist-queue');
                 var $newTracklistQueue =    $(newTracklist).find('>section.wpsstm-tracklist-queue');
                 $oldTracklistQueue.replaceWith( $newTracklistQueue );
+                
+                //reset expiration
+                tracklist.init_tracklist_expiration();
 
                 success.resolve();
             }
