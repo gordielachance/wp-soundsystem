@@ -1,6 +1,5 @@
 <?php
 
-
 class WPSSTM_Track{
     public $post_id = null;
     
@@ -12,7 +11,7 @@ class WPSSTM_Track{
     public $spotify_id = null;
     
     public $image_url; //remote image URL
-    public $location;
+    public $classes = array('wpsstm-track');
     
     var $link;
     public $links = array();
@@ -29,24 +28,28 @@ class WPSSTM_Track{
     public $subtrack_author = null;
     public $from_tracklist = null;
     
-    public $did_autolink = null;
-    
+    public $supported = array(
+        'track-thumbnails',
+        'track-durations',
+        'track-links',
+        'track-autolink',
+    );
+
     public $notices = array();
     
-    function __construct( $post_id = null, $tracklist = null ){
+    function __construct( $post = null, $tracklist = null ){
         
-        $post_id = filter_var($post_id, FILTER_VALIDATE_INT); //cast to int
-        
+        $this->tracklist = new WPSSTM_Post_Tracklist();
+
+        /*
+        Track
+        */
+
+        $this->populate_track_post($post);
+
         /*
         Tracklist
         */
-        $this->tracklist = new WPSSTM_Post_Tracklist();
-
-        //has track ID
-        if ( is_int($post_id) ) {
-            $this->populate_track_post($post_id);
-        }
-        
         if ($tracklist){
             if ( is_a($tracklist,'WPSSTM_Post_Tracklist') ){
                 $this->tracklist = $tracklist;
@@ -57,48 +60,6 @@ class WPSSTM_Track{
 
     }
 
-    function populate_track_post($track_id){
-        
-        if ( get_post_type($track_id) != wpsstm()->post_type_track ){
-            return new WP_Error( 'wpsstm_invalid_track_entry', __("This is not a valid track entry.",'wpsstm') );
-        }
-
-        $this->post_id          = $track_id;
-        $this->title            = wpsstm_get_post_track($this->post_id);
-        $this->artist           = wpsstm_get_post_artist($this->post_id);
-        $this->album            = wpsstm_get_post_album($this->post_id);
-        $this->image_url        = wpsstm_get_post_image_url($this->post_id);
-        $this->duration         = wpsstm_get_post_duration($this->post_id);
-        $this->did_autolink     = $this->autolink_check();
-        
-    }
-    
-    function populate_subtrack($subtrack_id){
-        global $wpdb;
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-
-        $query = $wpdb->prepare("SELECT * FROM `$subtracks_table` WHERE subtrack_id = %s",$subtrack_id);
-        $subtrack = $wpdb->get_row($query);
-        if (!$subtrack) return new WP_Error( 'wpsstm_invalid_subtrack_entry', __("This is not a valid subtrack entry.",'wpsstm') );
-
-        //track
-        $track_id = $subtrack->track_id;
-        $success = $this->populate_track_post($track_id);
-        if ( is_wp_error($success) ) return $success;
-
-        //tracklist
-        if ($tracklist_id = $subtrack->tracklist_id){
-            $this->tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-        }
-
-        //subtrack-specific
-        $this->subtrack_id =        $subtrack->subtrack_id;
-        $this->subtrack_time =      $subtrack->subtrack_time;
-        $this->subtrack_author =    $subtrack->subtrack_author;
-        $this->position =           $subtrack->subtrack_order;
-        $this->from_tracklist =     $subtrack->tracklist_id;
-    }
-    
     function from_array( $args ){
         
         if ( !is_array($args) ) return;
@@ -135,10 +96,14 @@ class WPSSTM_Track{
 
         //subtrack or track id ?
         if ($this->subtrack_id){
-            return $this->populate_subtrack($this->subtrack_id);
+            return $this->populate_subtrack_id($this->subtrack_id);
         }elseif ( $this->post_id ){
             return $this->populate_track_post($this->post_id);
         }
+    }
+    
+    function is_supported($key){
+        return in_array($key,$this->supported);
     }
     
     /*
@@ -214,21 +179,12 @@ class WPSSTM_Track{
     function get_in_tracklists_ids(){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-        
-        $subtracks_ids = $this->get_subtrack_matches();
 
-        if ( is_wp_error($subtracks_ids) ) return $subtracks_ids;
-        if ( !$subtracks_ids ) return;
+        $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `track_id`=%d",$this->post_id );
 
-        $subtracks_ids_str = implode(',',$subtracks_ids);
-        
-        // !!! using wpb->prepare fucks up here, it wraps our IDs string with quotes and then the query fails.
-        //$querystr = $wpdb->prepare( "SELECT `tracklist_id` FROM `$subtracks_table` WHERE `subtrack_id` IN (%s)",$subtracks_ids_str );
-        $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `subtrack_id` IN (%s)",$subtracks_ids_str );
-        
         $tracklist_ids = $wpdb->get_col($querystr);
         
-        return array_unique($tracklist_ids);
+        return $tracklist_ids;
 
     }
 
@@ -242,7 +198,7 @@ class WPSSTM_Track{
 
             $tracklist_post_type = get_post_type($tracklist_id);
 
-            $playlist_url = get_permalink($tracklist_id);
+            $playlist_url = ( is_admin() ) ? get_edit_post_link($tracklist_id) : get_permalink($tracklist_id);
             $title = get_the_title($tracklist_id);
             $title_short = wpsstm_shorten_text($title);
 
@@ -295,10 +251,10 @@ class WPSSTM_Track{
     
     function get_track_html(){
         global $wpsstm_track;
+
         $old_track = $wpsstm_track; //store temp
         $wpsstm_track = $this;
-        $wpsstm_track->local_track_lookup(); //check for this track in the database (if it has no ID) //TOUFIX TOUCHECK useful ?
-        
+
         ob_start();
         wpsstm_locate_template( 'content-track.php', true, false );
         $content = ob_get_clean();
@@ -331,7 +287,7 @@ class WPSSTM_Track{
         $old_pos = $this->position;
         $new_pos = filter_var($new_pos, FILTER_VALIDATE_INT); //cast to int
         $tracklist_id = $this->tracklist->post_id;
-        $tracks_count = $this->tracklist->get_subtracks_count();
+        $last_pos = $this->tracklist->get_last_subtrack_pos();
         
         
         if ( !$this->subtrack_id ){
@@ -342,7 +298,7 @@ class WPSSTM_Track{
             return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required tracklist ID missing.",'wpsstm') );
         }
         
-        if ( !is_int($new_pos) || ($new_pos < 1) || ($new_pos > $tracks_count) ){
+        if ( !is_int($new_pos) || ($new_pos < 1) || ($new_pos > $last_pos) ){
             return new WP_Error( 'wpsstm_invalid_position', __("Invalid subtrack position.",'wpsstm') );
         }
         
@@ -449,7 +405,7 @@ class WPSSTM_Track{
         wp_set_post_terms( $post_id,$this->title, WPSSTM_Core_Tracks::$track_taxonomy );
         wp_set_post_terms( $post_id,$this->album, WPSSTM_Core_Tracks::$album_taxonomy );
 
-        //repopulate datas
+        //repopulate track
         $this->populate_track_post($post_id);
 
         //save track links from parser if any
@@ -544,28 +500,6 @@ class WPSSTM_Track{
         
         return $result;
     }
-
-    /*
-    retrieve the subtracks IDs that matches a track, eventually filtered by tracklist ID
-    //TOUFIX albums should be enabled ? TOCHECK carefully.
-    */
-    function get_subtrack_matches($tracklist_id = null){
-        global $wpdb;
-        
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-
-        //check we have enough informations on this track
-        if ( $this->validate_track() !== true) return false;
-
-        $querystr = $wpdb->prepare( "SELECT subtrack_id FROM `$subtracks_table` WHERE track_id = %d", $this->post_id );
-        
-        if($tracklist_id){
-            $querystr.= $wpdb->prepare( " AND tracklist_id = %d",$tracklist_id);
-        }
-
-        return $wpdb->get_col( $querystr);
-
-    }
     
     function get_favoriters(){
         global $wpdb;
@@ -643,13 +577,21 @@ class WPSSTM_Track{
         $this->link_count = 0;
 
         if ($this->post_id){
+            
             $args = array(
                 'fields' =>             'ids',
             );
             $query = $this->query_links($args);
 
             $link_ids = $query->posts;
+
+            if ( !$link_ids && $this->is_supported('track-autolink') && !wpsstm()->get_options('ajax_autolink') ){
+                $autolink_ids = $this->autolink();
+                $link_ids = ( !is_wp_error($autolink_ids) ) ? $autolink_ids : null;
+            }
+            
             $this->add_links($link_ids);
+            
         }else{
             $this->add_links($this->links); //so we're sure the links count is set
         }
@@ -658,32 +600,28 @@ class WPSSTM_Track{
         
     }
     
-    private function autolink_check(){
+    /*
+    Check if a track has been autolinked recently
+    */
+    
+    public function is_autolink_paused(){
 
-        /*
-        Check if a track has been autolinkd recently
-        */
-        
-        if ($this->did_autolink === null){
-            $last_autolinkd  = get_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, true );
-            if (!$last_autolinkd) return false;
+        if ( !$autolinked = get_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, true ) ) return;
 
-            $now = current_time( 'timestamp' );
-            $seconds = $now - $last_autolinkd;
+        $now = current_time( 'timestamp' );
+        $seconds = $now - $autolinked;
 
-            $max_seconds = wpsstm()->get_options('autolink_timeout');
-            $this->did_autolink = ($seconds < $max_seconds);
-        }
+        $max_seconds = wpsstm()->get_options('autolink_timeout');
 
-        return $this->did_autolink;
- 
+        return ($seconds < $max_seconds);
+
     }
 
     /*
     Retrieve autolinks for a track
     */
     
-    function autolink(){
+    function autolink($force = false){
 
         $new_links = array();
         $links_auto = array();
@@ -691,7 +629,7 @@ class WPSSTM_Track{
         $can_autolink = WPSSTM_Core_Track_Links::can_autolink();
         if ( $can_autolink !== true ) return $can_autolink;
         
-        if ( $this->did_autolink ) {
+        if ( !$force && ( $this->is_autolink_paused() ) ){
             return new WP_Error( 'wpsstm_autolink_disabled', __("Track has already been autolinkd recently.",'wpsstm') );
         }
         
@@ -705,7 +643,6 @@ class WPSSTM_Track{
         */
         $now = current_time('timestamp');
         update_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, $now );
-        $this->did_autolink = true;
         
         /*
         Hook filter here to add autolinks (array)
@@ -738,10 +675,7 @@ class WPSSTM_Track{
 
         $this->add_links($new_links);
         $new_ids = $this->batch_create_links();
-        
-        //repopulate links
-        $this->populate_links();
-        
+
         $this->track_log(array('track_id'=>$this->post_id,'links_found'=>$this->link_count,'links_saved'=>count($new_ids)),'autolink results');
         
         return $new_ids;
@@ -877,43 +811,24 @@ class WPSSTM_Track{
         }
 
         //favorite
-        if ( wpsstm()->get_options('playlists_manager') ){
+        if ( wpsstm()->get_options('playlists_manager') && ( !get_current_user_id() || $can_manage_playlists ) ){
             
-            if ( get_current_user_id() ){
-                
-                if ( $can_manage_playlists ){
-                    $actions['favorite'] = array(
-                        'text' =>      __('Favorite','wpsstm'),
-                        'href' =>       $this->get_track_action_url('favorite'),
-                        'desc' =>       __('Add track to favorites','wpsstm'),
-                        'classes' =>    array('action-favorite'),
-                    );
+            $url_favorite = $this->get_track_action_url('favorite');
+            $url_unfavorite = $this->get_track_action_url('unfavorite');
+            
+            $actions['favorite'] = array(
+                'text' =>      __('Favorite','wpsstm'),
+                'href' =>       get_current_user_id() ? $url_favorite : wp_login_url($url_favorite),
+                'desc' =>       __('Add track to favorites','wpsstm'),
+                'classes' =>    array('action-favorite'),
+            );
 
-                    $actions['unfavorite'] = array(
-                        'text' =>      __('Favorite','wpsstm'),
-                        'href' =>       $this->get_track_action_url('unfavorite'),
-                        'desc' =>       __('Remove track from favorites','wpsstm'),
-                        'classes' =>    array('action-unfavorite'),
-                    );
-                }else{
-                    $actions['favorite'] = array(
-                        'text' =>      __('Favorite','wpsstm'),
-                        'href' =>       '#',
-                        'desc' =>       __("Missing required capability.",'wpsstm'),
-                        'classes' =>    array('action-favorite','wpsstm-disabled-action','wpsstm-tooltip'),
-                    );
-                }
-                
-            }else{
-                
-                $actions['favorite'] = array(
-                    'text' =>      __('Favorite','wpsstm'),
-                    'href' =>       '#',
-                    'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                    'classes' =>    array('action-favorite','wpsstm-disabled-action','wpsstm-tooltip'),
-                );
-                
-            }
+            $actions['unfavorite'] = array(
+                'text' =>      __('Favorite','wpsstm'),
+                'href' =>       get_current_user_id() ? $url_unfavorite : wp_login_url($url_unfavorite),
+                'desc' =>       __('Remove track from favorites','wpsstm'),
+                'classes' =>    array('action-unfavorite'),
+            );
 
         }
 
@@ -952,32 +867,17 @@ class WPSSTM_Track{
         //playlists manager
         if ( wpsstm()->get_options('playlists_manager') ){
             
-            if ( get_current_user_id() ){
+            $url = $this->get_track_action_url('manage');
             
-                if ( $can_manage_playlists ){ 
-                    $actions['toggle-tracklists'] = array(
-                        'text' =>      __('Playlists manager','wpsstm'),
-                        'href' =>       $this->get_track_action_url('manage'),
-                        'classes' =>    array('wpsstm-action-popup'),
-                    );
-                }else{
-                    $actions['toggle-tracklists'] = array(
-                        'text' =>      __('Favorite','wpsstm'),
-                        'href' =>       '#',
-                        'desc' =>       __("Missing required capability.",'wpsstm'),
-                        'classes' =>    array('wpsstm-disabled-action','wpsstm-tooltip'),
-                    );
-                }
-            }else{
-                $actions['toggle-tracklists'] = array(
-                    'text' =>      __('Playlists manager','wpsstm'),
-                    'href' =>       '#',
-                    'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                    'classes' =>    array('wpsstm-disabled-action','wpsstm-tooltip'),
-                );
+            $actions['toggle-tracklists'] = array(
+                'text' =>      __('Playlists manager','wpsstm'),
+                'href' =>       get_current_user_id() ? $url : wp_login_url($url),
+                'classes' =>    array('wpsstm-action-popup'),
+            );
+            
+            if ( get_current_user_id() && !$can_manage_playlists ){
+                $actions['toggle-tracklists'][] = 'wpsstm-disabled-action';
             }
-
-        }else{
 
         }
 
@@ -1016,8 +916,6 @@ class WPSSTM_Track{
     }
     
     function get_track_attr($args=array()){
-        global $wpsstm_tracklist;
-        $can_autolink = ( WPSSTM_Core_Track_Links::can_autolink() === true);
 
         $attr = array(
             'itemscope' =>                      true,
@@ -1027,7 +925,7 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
-            'can-autolink' =>                   ( $can_autolink && !$this->did_autolink),
+            'can-autolink' =>                   !$this->is_autolink_paused(),
             'wpsstm-playable' =>                wpsstm()->get_options('player_enabled'),
         );
 
@@ -1036,16 +934,18 @@ class WPSSTM_Track{
     
     function get_track_class(){
 
-        $classes = array(
-            'wpsstm-track',
+        $add_classes = array(
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
-            is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,
+            is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,//TOUFIX URGENT NEEDED ?
             ( ( $autoplay_id = wpsstm_get_array_value('subtrack_autoplay',$_GET) ) && ($autoplay_id == $this->subtrack_id) ) ? 'track-autoplay' : null,
-
         );
 
+        $classes = array_merge($this->classes,$add_classes);
+        $classes = array_filter(array_unique($classes));
+        
         $classes = apply_filters('wpsstm_track_classes',$classes,$this);
-        return array_filter(array_unique($classes));
+
+        return $classes;
     }
     
     /*
@@ -1057,7 +957,6 @@ class WPSSTM_Track{
         $add_links = array();
         if(!$input_links) return;
 
-        
         foreach ((array)$input_links as $link){
 
             if ( is_a($link, 'WPSSTM_Track_Link') ){
@@ -1069,7 +968,6 @@ class WPSSTM_Track{
                     $link_obj->from_array($link_args);
                 }else{ //link ID
                     $link_id = $link;
-                    //TO FIX check for int ?
                     $link_obj = new WPSSTM_Track_Link($link_id);
                 }
             }
@@ -1077,6 +975,7 @@ class WPSSTM_Track{
             $valid = $link_obj->validate_link();
 
             if ( is_wp_error($valid) ){
+
                 $code = $valid->get_error_code();
                 $error_msg = $valid->get_error_message($code);
                 $link_obj->link_log(array('error'=>$error_msg,'link'=>$link_obj),"Unable to add link");
@@ -1305,6 +1204,64 @@ class WPSSTM_Track{
         
         $tracklist = new WPSSTM_Post_Tracklist($nowplaying_id);
         return $tracklist->insert_subtrack($now_track);
+    }
+    
+    /*
+    Populate the basic track informations
+    Post : int|WP_Post|null
+    */
+
+    private function populate_track_post($post = null){
+
+        $post = get_post($post);
+        if ( get_post_type($post) != wpsstm()->post_type_track ) return;
+
+        $this->post_id =    $post->ID;
+
+        /*
+        Get basic infos : artist, title & album.
+        Since WP caches terms alongside with the query results, we can get those without hitting the DB
+        https://wordpress.stackexchange.com/a/227450/70449
+        */
+
+        $this->artist =     wpsstm_get_post_artist($this->post_id);
+        $this->title =      wpsstm_get_post_track($this->post_id);
+        $this->album =      wpsstm_get_post_album($this->post_id);
+
+        /*
+        Subtrack
+        */
+
+        if ( isset($post->subtrack_id) ){
+            $this->subtrack_id =        filter_var($post->subtrack_id, FILTER_VALIDATE_INT);
+            $this->subtrack_time =      $post->subtrack_time;
+            $this->subtrack_author =    filter_var($post->subtrack_author, FILTER_VALIDATE_INT);
+            $this->position =           filter_var($post->subtrack_order, FILTER_VALIDATE_INT);
+            $this->tracklist =          new WPSSTM_Post_Tracklist($post->tracklist_id);
+            $this->from_tracklist =     filter_var($post->from_tracklist, FILTER_VALIDATE_INT);
+        }
+
+        return $this->post_id;
+
+    }
+
+    private function populate_subtrack_id($subtrack_id){
+        
+        //get post
+        $track_args = array(
+            'post_type' =>              wpsstm()->post_type_track,
+            'subtrack_query' =>         true,
+            'subtrack_id' =>            $subtrack_id
+        );
+
+        $query = new WP_Query( $track_args );
+        $posts = $query->posts;
+        
+        $post = isset($posts[0]) ? $posts[0] : null;
+        if (!$post) return;
+
+        //populate post
+        return $this->populate_track_post($post);
     }
     
 }

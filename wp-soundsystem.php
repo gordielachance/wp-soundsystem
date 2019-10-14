@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 3.1.6
+Version: 3.2.0
 License: GPL2
 */
 
@@ -36,11 +36,11 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '3.1.6';
+    public $version = '3.2.0';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '212';
+    public $db_version = '213';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -114,7 +114,7 @@ class WP_SoundSystem {
             'details_engines'                   => array('musicbrainz','spotify'),
             'excluded_track_link_hosts'         => array(),
             'playlists_manager'                 => true,
-            'ajax_tracks'                       => true,
+            'ajax_radios'                       => true,//use ajax to sync radios ?
             'ajax_autolink'                     => true,
         );
         
@@ -149,7 +149,6 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-post-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-track-link-class.php';
-        require $this->plugin_dir . 'classes/wpsstm-player-class.php';
         
         //include APIs/services stuff (lastfm,youtube,spotify,etc.)
         $this->load_services();
@@ -187,8 +186,8 @@ class WP_SoundSystem {
         
         add_action( 'init', array($this, 'upgrade'), 9);
 
-        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
-        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 9 );
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 11 );
+        add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 11 );
 
         add_action('edit_form_after_title', array($this,'metabox_reorder'));
         
@@ -252,6 +251,7 @@ class WP_SoundSystem {
     function upgrade(){
 
         global $wpdb;
+
         $current_version = get_option("_wpsstm-db_version");
         $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
 
@@ -418,7 +418,12 @@ class WP_SoundSystem {
                 $this->create_sitewide_favorites_post();
 
             }
+            
+            if ($current_version < 213){
 
+                $this->batch_delete_duplicate_subtracks();
+                $this->batch_reindex_subtracks_by('time');
+            }
         }
         
         //update DB version
@@ -546,6 +551,49 @@ class WP_SoundSystem {
 
     }
     
+    /*
+    Get the subtracks that have the same track ID & tracklist ID
+    */
+    private function batch_delete_duplicate_subtracks(){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+        $querystr = "SELECT subtrack_id,track_id,tracklist_id, COUNT(*) as countOf FROM `$subtracks_table` GROUP BY track_id,tracklist_id HAVING countOf > 1 ORDER BY MAX(subtrack_id)";
+        if ( !$dupe_ids = $wpdb->get_col($querystr) ) return;
+        $dupe_ids = implode(',',$dupe_ids);
+        
+        $querystr = sprintf("DELETE FROM `$subtracks_table` WHERE subtrack_id IN(%s)",$dupe_ids );
+        return $wpdb->get_results ( $querystr );
+        
+    }
+    
+    private function batch_reindex_subtracks_by($by){
+        global $wpdb;
+        $types_str = "'" . implode ( "', '", $this->tracklist_post_types ) . "'";
+        $querystr = sprintf( "SELECT ID FROM `$wpdb->posts` WHERE post_type IN(%s)",$types_str);
+        if ( !$ids = $wpdb->get_col($querystr) ) return;
+
+        $updated = 0;
+        $errors = 0;
+        
+        foreach($ids as $id){
+            $tracklist = new WPSSTM_Post_Tracklist($id);
+            $success = $tracklist->reindex_subtracks_by($by);
+            if ( !$success ) continue;
+            
+            if ( is_wp_error($success) ){
+                $errors++;
+            }else{
+                $updated++;
+            }
+        }
+
+        WP_SoundSystem::debug_log(array('total'=>count($ids),'by'=>$by,'updated'=>$updated,'errors'=>$errors),"reindexed tracklists");
+        
+        return $updated;
+        
+        
+    }
+    
     private static function batch_delete_orphan_tracks(){
         
         if ( !current_user_can('manage_options') ){
@@ -647,8 +695,10 @@ class WP_SoundSystem {
         $datas = array(
             'debug'                 => (WP_DEBUG),
             'ajaxurl'               => admin_url( 'admin-ajax.php' ),
-            'ajax_tracks'           => wpsstm()->get_options('ajax_tracks'),
-            'autolink'              => ( wpsstm()->get_options('autolink') && wpsstm()->get_options('ajax_autolink') ), 
+            'ajax_radios'           => wpsstm()->get_options('ajax_radios'),
+            'ajax_autolink'         => ( wpsstm()->get_options('ajax_autolink') && ( WPSSTM_Core_Track_Links::can_autolink() === true) ),
+            'leave_page_text'       =>      __('A track is currently playing.  Are u sure you want to leave ?','wpsstm'),
+            'plugin_path'           =>      trailingslashit( get_bloginfo('url') ) . WPINC . '/js/mediaelement/', //do not forget final slash here
         );
 
         wp_localize_script( 'wpsstm-functions', 'wpsstmL10n', $datas );

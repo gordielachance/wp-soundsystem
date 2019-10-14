@@ -219,14 +219,15 @@ abstract class WPSSTM_Data_Engine{
                     ?>
                 </p>
             </div>
-            <div id="wpsstm-music-data">
-                <?php 
-                echo wpsstm_get_json_viewer($music_data);
+            <?php 
+            if ($music_data){
                 ?>
-            </div>
+                <textarea class="wpsstm-json-input"><?php echo json_encode($music_data);?></textarea>
+                <?php
+            }
+            ?>
         </div>
         <?php
-
         /*
         form
         */

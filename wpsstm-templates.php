@@ -66,30 +66,33 @@ function wpsstm_get_post_artist($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    $terms_list = get_the_term_list( $post_id, WPSSTM_Core_Tracks::$artist_taxonomy , null, ',' );
-
-    if ( is_wp_error($terms_list) ) return false;
-    return strip_tags($terms_list);
+    $terms = get_the_terms($post_id,WPSSTM_Core_Tracks::$artist_taxonomy);
+    if ( is_wp_error($terms) ) return false;
+    if ( !isset($terms[0]) ) return false;
+    
+    return $terms[0]->name;
 }
 
 function wpsstm_get_post_track($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    $terms_list = get_the_term_list( $post_id, WPSSTM_Core_Tracks::$track_taxonomy , null, ',' );
-    if ( is_wp_error($terms_list) ) return false;
+    $terms = get_the_terms($post_id,WPSSTM_Core_Tracks::$track_taxonomy);
+    if ( is_wp_error($terms) ) return false;
+    if ( !isset($terms[0]) ) return false;
     
-    return strip_tags($terms_list);
+    return $terms[0]->name;
 }
 
 function wpsstm_get_post_album($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
     
-    $terms_list = get_the_term_list( $post_id, WPSSTM_Core_Tracks::$album_taxonomy , null, ',' );
-    if ( is_wp_error($terms_list) ) return false;
+    $terms = get_the_terms($post_id,WPSSTM_Core_Tracks::$album_taxonomy);
+    if ( is_wp_error($terms) ) return false;
+    if ( !isset($terms[0]) ) return false;
     
-    return strip_tags($terms_list);
+    return $terms[0]->name;
 }
 
 /*

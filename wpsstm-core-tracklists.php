@@ -27,7 +27,7 @@ class WPSSTM_Core_Tracklists{
         
         add_filter( 'template_include', array($this,'single_tracklist_template') );
 
-        add_action( 'wp_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ), 9 );
+        add_action( 'wp_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ) );
 
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'tracks_count_column_register') );
@@ -78,6 +78,7 @@ class WPSSTM_Core_Tracklists{
         add_action( 'add_meta_boxes', array($this, 'metabox_tracklist_register') );
         add_action( 'save_post', array($this,'metabox_save_tracklist_options') );
         
+        
         //sitewide favorites
         add_filter( 'wpsstm_get_subtracks', array($this, 'get_sitewide_favorites'),10,2 );
 
@@ -104,15 +105,16 @@ class WPSSTM_Core_Tracklists{
     function register_tracklists_scripts_styles(){
 
         //JS
-        wp_register_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','wpsstm-functions','wpsstm-tracks','wpsstm-links','jquery-ui-sortable','jquery-ui-dialog'),wpsstm()->version, true );
+        wp_enqueue_script( 'wpsstm-tracklists', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklists.js', array('jquery','wp-mediaelement','wpsstm-functions','wpsstm-tracks','wpsstm-links','jquery-ui-sortable','jquery-ui-dialog'),wpsstm()->version, true );
 
-
-        //JS
         wp_register_script( 'wpsstm-tracklist-manager', wpsstm()->plugin_url . '_inc/js/wpsstm-tracklist-manager.js', array('jquery'),wpsstm()->version, true );
         
         if ( did_action('wpsstm-tracklist-manager-popup') ) {
             wp_enqueue_script( 'wpsstm-tracklist-manager' );
         }
+        
+        //CSS
+        wp_enqueue_style('wp-mediaelement');
 
     }
     
@@ -188,7 +190,7 @@ class WPSSTM_Core_Tracklists{
         }
         
         //playable
-        $new_input['playable'] = wpsstm_get_array_value('playable',$input_data);
+        $new_input['playable'] = (bool)wpsstm_get_array_value('playable',$input_data);
         
         //order
         $order = wpsstm_get_array_value('order',$input_data);
@@ -206,6 +208,7 @@ class WPSSTM_Core_Tracklists{
         return $success;
 
     }
+
     
     function metabox_tracklist_options_content( $post ){
         
@@ -220,7 +223,7 @@ class WPSSTM_Core_Tracklists{
             checked($option,true, false)
         );
 
-        printf('<p>%s <label>%s</label></p>',$input,__('Playable','wpsstm'));
+        printf('<p>%s <label>%s</label></p>',$input,__('Player','wpsstm'));
         
         //sort
         $option = $wpsstm_tracklist->get_options('order');
@@ -723,13 +726,12 @@ class WPSSTM_Core_Tracklists{
         );
 
         $query = new WP_Query( $track_args );
-        $subtracks = $query->posts;
+        $posts = $query->posts;
 
         $tracks = array();
 
-        foreach($subtracks as $track){
-            $subtrack = new WPSSTM_Track(); //default
-            $subtrack->populate_subtrack($track->subtrack_id);
+        foreach($posts as $post){
+            $subtrack = new WPSSTM_Track($post); //default
             $tracks[] = $subtrack;
         }
 

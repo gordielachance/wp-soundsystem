@@ -96,11 +96,11 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
     </div>
 </div>
 <div id="wpsstm-importer-step-debug" class="wpsstm-importer-section  wpsstm-importer-section-advanced">
-   <?php
+    <?php
     $notice = __("This is the last debug log.  Click on the tab title to update it once you have refreshed the tracklist.",'wpsstm');
     printf('<div class="notice notice-warning inline is-dismissible"><p>%s</p></div>',$notice);
-   ?>
-   <div id="wpsstm-debug-json"><!--ajax filled--></div>
+    ?>
+    <textarea class="wpsstm-json-input"></textarea><!-- will be filled through AJAX-->
 </div>
 
 <?php

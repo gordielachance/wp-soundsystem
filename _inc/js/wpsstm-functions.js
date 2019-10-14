@@ -1,5 +1,34 @@
 var $ = jQuery.noConflict();
 
+$.fn.wpsstmJsonViewer = function() {
+
+    this.filter( "textarea" ).each(function() {
+        
+        var $input = $(this);
+        var $container = $input.closest('.wpsstm-json');
+        var $output = $container.find('.wpsstm-json-output');
+        
+        //setup dom
+        if ( $container.length == 0 ){
+            $input.addClass('wpsstm-json-input');
+            $input.wrap( "<div class='wpsstm-json'></div>" );
+            var $container = $(this).parent();
+            var $output = $("<div class='wpsstm-json-output'></div>");
+            $container.append($output);
+        }
+
+        //
+        var data = $input.val();
+        if (data){
+            var json = JSON.parse(data);
+            $output.jsonViewer(json,{collapsed: true,rootCollapsable:false});
+        }
+    });
+
+    return this;
+
+};
+
 function wpsstm_js_notice(msg,preprendTo){
     
     if (typeof preprendTo === 'undefined'){
@@ -22,13 +51,25 @@ function wpsstm_js_notice(msg,preprendTo){
 
 }
 
-function wpsstm_debug(msg,prefix){
+function wpsstm_debug(data,msg){
     if (!wpsstmL10n.debug) return;
+    
+    //data
+    if (typeof data !== 'object'){
+        msg = msg + ' - ' + data;
+        data = undefined;
+    }
+
+    //msg
     if (typeof msg === 'object'){
         console.log(msg);
     }else{
-        if (!prefix) prefix = 'wpsstm';
-        console.log(prefix + ': ' + msg);
+        console.log('[wpsstm]' + msg);
+    }
+    
+    //data
+    if (typeof data !== 'undefined'){
+        console.log(data);
     }
 }
 
@@ -52,16 +93,10 @@ function wpsstm_shuffle(array) {
 }
 
 /*
-Because we can't (?) switch the outerHTML of nodes, custom-hackish method to update attributes and content.
+Update a node with the attributes of another one
 */
 
-function wpsstmSwapNode(oldNode,newNode){
-
-    //check both nodes have the same tag
-    if (oldNode.tagName !== newNode.tagName){
-        console.log("wpsstmSwapNode - tags do not match, abord.");
-        return false;
-    }
+function wpsstmSwapNodeAttributes(oldNode,newNode){
 
     //remove all old attributes
     while(oldNode.attributes.length > 0){
@@ -74,9 +109,6 @@ function wpsstmSwapNode(oldNode,newNode){
     while(attr = attributes.pop()) {
         oldNode.setAttribute(attr.nodeName, attr.nodeValue);
     }
-    
-    //switch HTML
-    oldNode.innerHTML = newNode.innerHTML;
 
     return true;
 

@@ -63,10 +63,8 @@ class WPSSTM_Tracklist{
 
         $valid_tracks = $rejected_tracks = array();
         $error_codes = array();
-        
-        $pending_tracks = array_unique($tracks);
-        
-        foreach($pending_tracks as $track){
+
+        foreach($tracks as $track){
             $valid = $track->validate_track();
             if ( is_wp_error($valid) ){
 
@@ -134,7 +132,6 @@ class WPSSTM_Tracklist{
 			do_action_ref_array( 'wpsstm_tracks_loop_start', array( &$this ) );
 
         $wpsstm_track = $this->next_subtrack();
-        //$this->setup_subtrack_data( $wpsstm_track );
 	}
 
 	/**
@@ -176,10 +173,25 @@ class WPSSTM_Tracklist{
 		}
 	}
     
+    function get_player_actions(){
+        $actions = array();
+        return apply_filters('wpsstm_get_player_actions',$actions);
+    }
+    
+    function get_audio_attr($values_attr=null){
+        
+        //https://www.w3schools.com/tags/tag_audio.asp
+        $values_defaults = array();
+
+        $values_attr = array_merge($values_defaults,(array)$values_attr);
+        
+        return wpsstm_get_html_attr($values_attr);
+    }
+    
     function tracklist_log($data,$title = null){
         WP_SoundSystem::debug_log($data,$title);
     }
-    
+
 }
 
 

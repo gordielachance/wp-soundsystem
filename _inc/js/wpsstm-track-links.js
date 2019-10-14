@@ -4,21 +4,18 @@ class WpsstmLink extends HTMLElement{
     constructor() {
         super(); //required to be first
         
-        this.track =            undefined;
         this.index =            undefined;
         this.post_id =          undefined;
         this.src =              undefined;
         this.type =             undefined;
 
-        // Setup a click listener on <wpsstm-tracklist> itself.
-        this.addEventListener('click', e => {
-        });
     }
     connectedCallback(){
         //console.log("LINK CONNECTED!");
         /*
         Called every time the element is inserted into the DOM. Useful for running setup code, such as fetching resources or rendering. Generally, you should try to delay work until this time.
         */
+
         this.render();
     }
 
@@ -28,36 +25,15 @@ class WpsstmLink extends HTMLElement{
         */
     }
     attributeChangedCallback(attrName, oldVal, newVal){
-        
+
         var isValueChanged = (newVal !== oldVal);
         if (!isValueChanged) return;
         
-        var source = this;
-        var sourceInstances = source.get_instances();
+        var link = this;
 
-        //source.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
+        //link.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
 
         switch (attrName) {
-            case 'linkstatus':
-
-                if ( !newVal ){
-                    sourceInstances.removeClass('link-active link-loading link-playing');                    
-                }
-                
-                if (newVal == 'request'){
-                    source.debug("request source: " + source.src);
-                    sourceInstances.addClass('link-active link-loading');
-                }
-                
-                if ( newVal == 'playing' ){
-                    sourceInstances.removeClass('link-loading').addClass('link-playing link-has-played');
-                }
-                
-                if ( newVal == 'paused' ){
-                    sourceInstances.removeClass('link-playing');
-                }
-                
-                
         }
         
         
@@ -69,17 +45,9 @@ class WpsstmLink extends HTMLElement{
     }
     
     static get observedAttributes() {
-        return ['linkstatus','wpsstm-playable'];
+        return [];
     }
-    
-    get status() {
-        return this.getAttribute('linkstatus');
-    }
-    
-    set status(value) {
-        this.setAttribute('linkstatus',value);
-    }
-    
+
     get playable() {
         return this.hasAttribute('wpsstm-playable');
     }
@@ -96,86 +64,66 @@ class WpsstmLink extends HTMLElement{
     ///
     ///
     
-    debug(msg){
-        var debug = {message:msg,link:this};
-        wpsstm_debug(debug);
-    }
-    
-    get_instances(){
-        var self = this;
-        return $(document).find('wpsstm-track-link[data-wpsstm-link-id="'+self.post_id+'"]');
-    }
-    
-    render(){
-        var self = this;
+    debug(data,msg){
         
-        self.track =            self.closest('wpsstm-track');
+        //add prefix
+        if (this.post_id){
+            var prefix = '[link:'+this.post_id+']';
+            if (typeof msg === 'undefined'){
+                msg = prefix;
+            }else{
+                msg = prefix + ' ' + msg;
+            }
+        }
+        
+        wpsstm_debug(data,msg);
+    }
 
-        self.index =            Number($(self).attr('data-wpsstm-link-idx'));
-        self.post_id =          Number($(self).attr('data-wpsstm-link-id'));
-        self.src =              $(self).attr('data-wpsstm-stream-src');
-        self.type =             $(self).attr('data-wpsstm-stream-type');
+    render(){
+        var link =              this;
+        link.index =            Number($(link).attr('data-wpsstm-link-idx'));
+        link.post_id =          Number($(link).attr('data-wpsstm-link-id'));
+        link.src =              $(link).attr('data-wpsstm-stream-src');
+        link.type =             $(link).attr('data-wpsstm-stream-type');
 
         //delete link
-        $(self).on('click', '.wpsstm-track-link-action-trash', function(e) {
+        $(link).on('click', '.wpsstm-track-link-action-trash', function(e) {
             e.preventDefault();
-            self.trash_link();
+            link.trash_link();
         });
         
-        //play link
-        $(self).on('click', '.wpsstm-track-link-action-play,wpsstm-track-link[wpsstm-playable] .wpsstm-link-title', function(e) {
-            e.preventDefault();
-            var link = this.closest('wpsstm-track-link');
-            var linkIdx = Array.from(link.parentNode.children).indexOf(link);
 
-            var track = self.track;
-            if (track.queueNode){ //page track, get the queue track
-                track = track.queueNode;
-            }
-
-            var trackIdx = Array.from(track.parentNode.children).indexOf(track);
-
-            if(track.player){
-                //toggle tracklist links
-                if ( !$(track).hasClass('track-playing') ){
-                    var list = $(track).find('.wpsstm-track-links-list');
-                    $( list ).removeClass('active');
-                }
-
-                track.player.play_queue(trackIdx,linkIdx);
-            }
-
-        });
 
     }
 
     //reduce object for communication between JS & PHP
     to_ajax(){
-        var self = this;
+        var link = this;
         var allowed = ['index','post_id'];
-        var filtered = Object.keys(self)
+        var filtered = Object.keys(link)
         .filter(key => allowed.includes(key))
         .reduce((obj, key) => {
-        obj[key] = self[key];
+        obj[key] = link[key];
         return obj;
         }, {});
         
         //track
-        filtered.track = self.track.to_ajax();
+        filtered.track = link.track.to_ajax();
 
         return filtered;
     }
     
     trash_link(){
         var link = this;
-        var action_link = $(link).find('.wpsstm-track-link-action-trash');
+        var $instances = link.get_instances();
+        var action_links = $instances.find('.wpsstm-track-link-action-trash');
 
         var ajax_data = {
             action:         'wpsstm_trash_link',
             post_id:        link.post_id
         };
 
-        action_link.addClass('action-loading');
+        action_links.addClass('action-loading');
 
         var ajax_request = $.ajax({
 
@@ -187,109 +135,26 @@ class WpsstmLink extends HTMLElement{
 
         ajax_request.done(function(data){
             if (data.success === true){
-
-                link.playable = false;
-
-                //skip current link as it was playibg
-                if ( $(link).hasClass('link-playing') ){
-                    link.debug('link was playing, skip it !');
-                    link.debug(link);
-                }
-
-                ///
-                $(link).remove();
+                $instances.remove();
 
             }else{
-                action_link.addClass('action-error');
+                action_links.addClass('action-error');
                 console.log(data);
             }
         });
 
         ajax_request.fail(function(jqXHR, textStatus, errorThrown) {
-            action_link.addClass('action-error');
+            action_links.addClass('action-error');
         })
 
         ajax_request.always(function(data, textStatus, jqXHR) {
-            action_link.removeClass('action-loading');
+            action_links.removeClass('action-loading');
         })
     }
 
-    play_link(){
-        var link = this;
-        var track = this.track;
-        var track_instances = link.track.get_instances();
-        var link_instances = link.get_instances();
-        var tracks_container = track_instances.parents('.tracks-container');
-        var success = $.Deferred();
-        
-        if( !link.playable ){
-            success.reject('cannot play this link');
-            return success.promise();
-        }
-
-        ///
-        $(link.track.player.current_media).off(); //remove old events
-        link.status = 'request';
-        link.track.player.current_link = link;
-        $(document).trigger( "wpsstmSourceInit",[link] ); //custom event
-
-        /*
-        register new events
-        */
-
-        $(track.player.current_media).on('loadeddata', function() {
-            track.player.debug('source loaded');
-            track.player.current_media.play();
-        });
-
-        $(track.player.current_media).on('error', function(error) {
-            link.playable = false;
-            link.status = '';
-            track.status = '';
-            success.reject(error);
-        });
-
-        $(track.player.current_media).on('play', function() {
-            link.status = 'playing';
-            track.status = 'playing';
-            success.resolve();
-        });
-
-        $(track.player.current_media).on('pause', function() {
-            link.status = 'paused';
-            track.status = 'paused';
-        });
-
-        $(track.player.current_media).on('ended', function() {
-
-            track.player.debug('media - ended');
-            link.status = '';
-            
-            //Play next song if any
-            track.player.next_track_jump();
-            
-            
-        });
-
-        success.done(function(v) {
-            track.player.tracksHistory.push(track);
-            link_instances.playable = true;
-            //TOUFIX ajax --> +1 track play; user now playing...
-        })
-        success.fail(function() {
-            link_instances.playable = false;
-        })
-
-        ////
-        track.player.current_media.setSrc(link.src);
-        track.player.current_media.load();
-        
-        ////
-
-        return success.promise();
-
+    get_instances(){
+        return $('wpsstm-track-link[data-wpsstm-link-id="'+this.post_id+'"]');
     }
-
 }
 
 window.customElements.define('wpsstm-track-link', WpsstmLink);

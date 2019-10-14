@@ -1,7 +1,7 @@
 @import "compass/css3";
 @import "compass/typography/text/ellipsis";
 
-wpsstm-track{
+.wpsstm-track{
     display:block;
     position:relative;
     padding:0;
@@ -102,7 +102,6 @@ wpsstm-track{
     }
     
     .wpsstm-track-action-play{
-        display:none; //display using JS
         margin:0;
     }
     
@@ -113,8 +112,11 @@ wpsstm-track{
     &.track-playing .wpsstm-track-action-play:before{
         content:"\f04c"; //.fa-pause;
     }
-    &:not([can-autolink]):not([wpsstm-playable]) .wpsstm-track-action-play:before{
+    &:not([wpsstm-playable]):not([can-autolink]) .wpsstm-track-action-play:before{
         content:"\f071"; //.fa-exclamation-triangle;
+    }
+    &.wpsstm-track-action-play{
+        visibility: hidden;
     }
 
     .wpsstm-track-links{
@@ -130,7 +132,7 @@ wpsstm-track{
     }
 
     &.wpsstm-invalid-track{
-        background:rgba(255, 0, 0, 0.10);
+        background:rgba(255, 0, 0, 0.10)!important;
     }
     
     &:nth-child(odd){
@@ -143,9 +145,12 @@ wpsstm-track{
             @include flex-shrink(0);
         }
     }
-
+    
     &[data-sources-count="0"]{
         @include opacity(.25);
+    }
+
+    &[data-links-count="0"]{
         .wpsstm-track-links{
             display:none!important;
         }
@@ -174,6 +179,7 @@ wpsstm-track{
         }
     }
     
+    &.track-details-loading,
     &.track-links-loading{
         @extend .wpsstm-freeze;
         @include striped-bg();
@@ -230,7 +236,7 @@ wpsstm-track{
         content: "\f08a";//.fa-heart-o;
     }
     &.wpsstm-track-action-toggle-links{
-        .wpsstm-sources-count{
+        .wpsstm-link-count{
             display:inline;
         }
         &:before{
@@ -239,14 +245,13 @@ wpsstm-track{
         &.active:before{
             content: "\f077";//.fa-chevron-up;
         }
-        .wpsstm-sources-count{
+        .wpsstm-link-count{
             font-weight: bold;
             font-size:.8em;
         }
     }
 
 }
-
 
 ul.wpsstm-track-loved-by-list,ul.wpsstm-track-parents{
     @extend .comma-list;
