@@ -16,7 +16,6 @@ class WpsstmTracklist extends HTMLElement{
         this.$loopTracksBt =    undefined;
         this.$previousTrackBt = undefined;
         this.$nextTrackBt =     undefined;
-        this.didReload =        false; //used to avoid infinite loop when loading tracklists that don't have any cache_min
 
         //Setup listeners
         $(this).on('playerInit',WpsstmTracklist._PlayerInitEvent);
@@ -36,7 +35,7 @@ class WpsstmTracklist extends HTMLElement{
         var tracklistReady = $.Deferred();
         
         tracklist.init_tracklist_expiration();
-        var needsRefresh = (wpsstmL10n.ajax_radios && tracklist.isExpired && !tracklist.didReload );
+        var needsRefresh = (wpsstmL10n.ajax_radios && tracklist.isExpired );
 
         if (needsRefresh){
             tracklistReady = tracklist.reloadTracklist();
@@ -453,7 +452,6 @@ class WpsstmTracklist extends HTMLElement{
             }else{
 
                 var newTracklist = $(data.html).get(0);
-                newTracklist.didReload = true;
 
                 /*
                 Swap content, but keep player intact so we don't mess with the Autoplay Policy.
@@ -471,6 +469,9 @@ class WpsstmTracklist extends HTMLElement{
                 var $oldTracklistQueue =    $(tracklist).find('>section.wpsstm-tracklist-queue');
                 var $newTracklistQueue =    $(newTracklist).find('>section.wpsstm-tracklist-queue');
                 $oldTracklistQueue.replaceWith( $newTracklistQueue );
+                
+                //reset expiration
+                tracklist.init_tracklist_expiration();
 
                 success.resolve();
             }
@@ -895,6 +896,16 @@ class WpsstmTracklist extends HTMLElement{
         */
         
         trackready.always(function(v) {
+            
+            /*
+            Check this is still the track requested
+            */
+            if ( tracklist.current_track !== track ){
+                track.debug('Track switched, do not play');
+                success.resolve();
+                return success.promise();
+            }
+            
 
             /*
             Play first available link
