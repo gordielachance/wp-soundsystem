@@ -164,6 +164,7 @@ class WpsstmTracklist extends HTMLElement{
         
         //container play icon
         $(tracklist).find('.wpsstm-tracklist-play-bt').click(function(e) {
+            e.preventDefault();
             if (!tracklist.tracks) return;
 
             var track = (tracklist.current_track) ? tracklist.current_track : tracklist.tracks[0];
@@ -180,6 +181,8 @@ class WpsstmTracklist extends HTMLElement{
         var tracklist = this;
         
         if ( !tracklist.playerTrack ) return;
+        
+        $(tracklist.tracks).on('started', WpsstmTracklist._startedTrackEvent);
 
         /*
         Confirmation popup is a media is playing and that we leave the page
@@ -829,22 +832,27 @@ class WpsstmTracklist extends HTMLElement{
             success.reject('cannot play this link');
             
         }else{
-
+            
             tracklist.stopCurrentMedia();
+
             tracklist.playerTrack = track;
             tracklist.current_link = link;
+            
+            $(track).trigger('request');
 
             link.get_instances().addClass('link-active link-loading');
             track.get_instances().addClass('track-active track-loading');
             $(tracklist).addClass('tracklist-loading tracklist-active tracklist-has-played');
 
-            
-
             /*
             register new events
             */
             $(tracklist.mediaElement).one('play', function() {
+                $(track).trigger('started');
                 success.resolve();
+            })
+            .one('ended', function(error) {
+                $(track).trigger('ended');
             })
             .one('error', function(error) {
                 success.reject(error);
@@ -1012,6 +1020,7 @@ class WpsstmTracklist extends HTMLElement{
         //load link
         $(tracklist).on('click', 'wpsstm-track-link .wpsstm-track-link-action-play,wpsstm-track-link[wpsstm-playable] .wpsstm-link-title', function(e) {
             e.preventDefault();
+            
             var link = this.closest('wpsstm-track-link');
             
             if ( tracklist.current_link && (link.post_id === tracklist.current_link.post_id) ){
@@ -1032,6 +1041,7 @@ class WpsstmTracklist extends HTMLElement{
         //load track
         $(tracklist).on('click','wpsstm-track .wpsstm-track-action-play', function(e) {
             e.preventDefault();
+            
             var track = this.closest('wpsstm-track');
 
             if ( tracklist.current_track && (track.queueIdx === tracklist.current_track.queueIdx) ){
@@ -1082,17 +1092,7 @@ class WpsstmTracklist extends HTMLElement{
             $(tracklist).removeClass('tracklist-loading').addClass('tracklist-playing tracklist-has-played');
             track.get_instances().removeClass('track-loading').addClass('track-playing track-has-played');
             link.get_instances().removeClass('link-loading').addClass('link-playing link-has-played');
-            
-            //is track switch
-            var lastPlayedTrack = tracklist.tracksHistory[tracklist.tracksHistory.length-1];
-            if (lastPlayedTrack !== track){
-                $(track).trigger("start");
-            }
-            
-            //history
-            tracklist.tracksHistory.push(track);
 
-            
         })
         .on('pause', function() {
             
@@ -1133,6 +1133,37 @@ class WpsstmTracklist extends HTMLElement{
 
     }
     
+    static _startedTrackEvent(e){
+
+        var track = e.target;
+        var tracklist = track.closest('wpsstm-tracklist');
+
+        //add to history
+        var lastPlayedTrack = tracklist.tracksHistory[tracklist.tracksHistory.length-1];
+        if (lastPlayedTrack !== track){
+            tracklist.tracksHistory.push(track); //history
+        }
+        
+        //local scrobble
+        
+        var track = this;
+
+        var ajax_data = {
+            action:     'wpsstm_track_start',
+            track:      track.to_ajax(),   
+        };
+
+        var request = $.ajax({
+            type:       "post",
+            url:        wpsstmL10n.ajaxurl,
+            data:       ajax_data,
+            dataType:   'json',
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+            track.debug(ajax_data,"track start request failed");
+        })
+    }
+    
     stopCurrentMedia(){
         var tracklist = this;
         var mediaElement = tracklist.mediaElement;
@@ -1146,6 +1177,8 @@ class WpsstmTracklist extends HTMLElement{
         
         var track =     tracklist.current_track;
         var link =      tracklist.current_link;
+        
+        $(track).trigger('stopped');
 
         if (track){
             track.get_instances().removeClass('track-active track-loading track-playing');

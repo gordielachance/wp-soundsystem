@@ -203,12 +203,11 @@ class WPSSTM_LastFM{
         
         //JS
         wp_enqueue_script( 'wpsstm-lastfm', wpsstm()->plugin_url . '_inc/js/wpsstm-lastfm.js', array('jquery'),wpsstm()->version, true);
-        
-        $scrobble_along = ( $this->can_scrobble_along() === true );
-        
+
         //localize vars
         $localize_vars=array(
-            'lastfm_scrobble_along'     => $scrobble_along,
+            'lastfm_scrobble_along'=>   (int)( $this->can_scrobble_along() === true ),
+            'lastfm_scrobble_user' =>   (int)( get_current_user_id() && ( $this->lastfm_user->is_user_connected() === true ) ),
         );
 
         wp_localize_script('wpsstm-lastfm','wpsstmLastFM', $localize_vars);
@@ -542,25 +541,11 @@ class WPSSTM_LastFM{
     
     function get_lastfm_actions($actions = null){
 
-        if ( get_current_user_id() ){
-            
-            $connected = ( $this->lastfm_user->is_user_connected() === true );
-            
-            $actions['scrobbler'] = array(
-                'text' =>       __('Last.fm scrobble', 'wpsstm'),
-                'href' =>       '#',
-                'classes' =>    array(
-                    ( $connected ) ? 'active' : null
-                ),
-            );
-        }else{
-            $actions['scrobbler'] = array(
-                'text' =>       __('Last.fm scrobble', 'wpsstm'),
-                'href' =>       '#',
-                'desc' =>       __('This action requires you to be logged.','wpsstm'),
-                'classes' =>    array('wpsstm-tooltip'),
-            );
-        }
+        $actions['scrobbler'] = array(
+            'text' =>       __('Last.fm scrobble', 'wpsstm'),
+            'href' =>       wp_login_url( get_permalink() ),
+            'classes' =>    array('wpsstm-tooltip'),
+        );
 
         return $actions;
     }

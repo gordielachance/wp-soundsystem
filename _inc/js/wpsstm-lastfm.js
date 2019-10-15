@@ -2,9 +2,9 @@ var $ = jQuery.noConflict();
 
 class WpsstmLastFM {
     constructor(){
-        this.lastfm_scrobble_along =    parseInt(wpsstmLastFM.lastfm_scrobble_along);
-        $('wpsstm-tracklist').live('playerInit',this._initPlayerEvent);
-        $('wpsstm-track').live('start',this._nowPlayingTrackEvent);
+        this.lastfm_scrobble_along =    ( parseInt(wpsstmLastFM.lastfm_scrobble_along) === 1 );
+        this.lastfm_scrobble_user =     ( parseInt(wpsstmLastFM.lastfm_scrobble_user) === 1 );
+        $('wpsstm-tracklist').on('playerInit',this._initPlayerEvent);
     }
 
     enable_scrobbler(do_enable){
@@ -36,7 +36,10 @@ class WpsstmLastFM {
             success.reject(thrownError);
         })
         
-        success.fail(function (reason) {
+        success.done(function () {
+            this.lastfm_scrobble_user = do_enable;
+        })
+        .fail(function(reason) {
             console.log(reason);
         })
 
@@ -52,6 +55,8 @@ class WpsstmLastFM {
         
         var self = this;
         var success = $.Deferred();
+        
+        track_obj.debug("[Last.fm] update user NOW PLAYING track");
 
         var ajax_data = {
             action:             'wpsstm_user_update_now_playing_lastfm_track',
@@ -76,8 +81,8 @@ class WpsstmLastFM {
         .fail(function (xhr, ajaxOptions, thrownError) {
             success.reject(thrownError);
         })
-        
-        success.fail(function (reason) {
+
+        success.fail(function(reason) {
             console.log(reason);
         })
 
@@ -92,14 +97,14 @@ class WpsstmLastFM {
 
         var self = this;
         var success = $.Deferred();
+        
+        track_obj.debug("[Last.fm] scrobble USER track");
 
         var ajax_data = {
             action:             'wpsstm_lastfm_scrobble_user_track',
             track:              track_obj.to_ajax(),
             playback_start:     Math.round( $.now() /1000), //time in sec
         };
-        
-        $(self.scrobble_icon).addClass('lastfm-loading');
 
         var ajax = $.ajax({
             type: "post",
@@ -118,9 +123,9 @@ class WpsstmLastFM {
         .fail(function (xhr, ajaxOptions, thrownError) {
             success.reject(thrownError);
         })
-        
-        success.fail(function (reason) {
-            console.log(reason);
+
+        success.fail(function(reaseon) {
+             console.log(reason);
         })
         
         return success.promise();
@@ -130,14 +135,14 @@ class WpsstmLastFM {
         
         var self = this;
         var success = $.Deferred();
+        
+        track_obj.debug("[Last.fm] scrobble BOT track");
 
         var ajax_data = {
             action:             'wpsstm_lastfm_scrobble_bot_track',
             track:              track_obj.to_ajax(),
             playback_start:     Math.round( $.now() /1000), //time in sec
         };
-
-        self.debug(ajax_data);
 
         var ajax = $.ajax({
 
@@ -147,7 +152,6 @@ class WpsstmLastFM {
             dataType: 'json',
         })
         .done(function(data){
-            console.log(data);
             if (data.success === false) {
                 console.log(data);
                 success.reject();
@@ -180,81 +184,96 @@ class WpsstmLastFM {
     
     _initPlayerEvent(e){
         var tracklist =             this;
-        var scrobble_icon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
+        var $scrobbleIcon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
 
         //click toggle scrobbling
-        scrobble_icon.click(function(e) {
+        $scrobbleIcon.click(function(e) {
             e.preventDefault();
 
-            scrobble_icon.addClass('lastfm-loading');
+            $scrobbleIcon.addClass('lastfm-loading');
 
-            var do_enable = !scrobble_icon.hasClass('active');
+            var do_enable = !wpsstm_lastfm.lastfm_scrobble_user;
             var ajax_toggle = wpsstm_lastfm.enable_scrobbler(do_enable);
 
             ajax_toggle.done(function() {
-                scrobble_icon.toggleClass('active',do_enable);
+                $scrobbleIcon.toggleClass('active',do_enable);
+            })
+            .done(function() {
+                $scrobbleIcon.removeClass('scrobbler-error');
             })
             .fail(function() {
-                scrobble_icon.addClass('scrobbler-error');
+                $scrobbleIcon.addClass('scrobbler-error');
             })
             .always(function() {
-                scrobble_icon.removeClass('lastfm-loading');
+                $scrobbleIcon.removeClass('lastfm-loading');
             });
 
         });
+
+        $scrobbleIcon.toggleClass('active',wpsstm_lastfm.lastfm_scrobble_user);
+        $(tracklist.tracks).on('started',WpsstmLastFM._nowPlayingTrackEvent);
+        $(tracklist.tracks).on('ended',WpsstmLastFM._scrobbleTrackEvent);
+        
     }
     
-    _nowPlayingTrackEvent(e){
+    static _nowPlayingTrackEvent(e){
+        
         var track =                 this;
         var tracklist =             track.closest('wpsstm-tracklist');
-        var scrobble_icon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
-        var scrobbler_enabled =     scrobble_icon.hasClass('active');
+        var $scrobbleIcon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
+        var scrobbler_enabled =     $scrobbleIcon.hasClass('active');
 
-        var nowPlayingTrack = function(){
-            if (!scrobbler_enabled) return;
+        if (scrobbler_enabled){
 
-            scrobble_icon.addClass('lastfm-loading');
-
-            var ajax = wpsstm_lastfm.updateNowPlaying(track);
-
-            ajax.fail(function() {
-                scrobble_icon.addClass('scrobbler-error');
+            $scrobbleIcon.addClass('lastfm-loading');
+            wpsstm_lastfm.updateNowPlaying(track)
+            .done(function() {
+                $scrobbleIcon.removeClass('scrobbler-error');
+            })
+            .fail(function(reason) {
+                console.log(reason);
+                $scrobbleIcon.addClass('scrobbler-error');
             })
             .always(function() {
-                scrobble_icon.removeClass('lastfm-loading');
+                $scrobbleIcon.removeClass('lastfm-loading');
             });
-
+            
         }
 
-        var ScrobbleTrack = function() {
-            var duration = tracklist.mediaElement.duration;
-            if ( duration < 30) return;
+    }
+    
+    static _scrobbleTrackEvent(e){
+        var track =                 this;
+        var tracklist =             track.closest('wpsstm-tracklist');
+        var $scrobbleIcon =         $(tracklist).find('.wpsstm-player-action-scrobbler');
+        var scrobbler_enabled =     $scrobbleIcon.hasClass('active');
 
-            if (scrobbler_enabled){
-
-                var ajax =  wpsstm_lastfm.user_scrobble(track);
-
-                ajax.fail(function() {
-                    scrobble_icon.addClass('scrobbler-error');
-                })
-                .always(function() {
-                    scrobble_icon.removeClass('lastfm-loading');
-                });
-
-            }
-
-            //bot scrobble
-            if (wpsstm_lastfm.lastfm_scrobble_along){
-                wpsstm_lastfm.bot_scrobble(track);
-            }
-
+        var duration = tracklist.mediaElement.duration;
+        if ( duration < 30) return;
+        
+        //bot scrobble
+        if (wpsstm_lastfm.lastfm_scrobble_along){
+            wpsstm_lastfm.bot_scrobble(track);
         }
 
-        //now playing
-        $(tracklist.mediaElement).one('play', nowPlayingTrack);
+        //user scrobble
+        if (scrobbler_enabled){
+            $scrobbleIcon.addClass('lastfm-loading');
 
-        //track end
-        $(tracklist.mediaElement).one('ended', ScrobbleTrack);
+            wpsstm_lastfm.user_scrobble(track)
+            .done(function() {
+                $scrobbleIcon.removeClass('scrobbler-error');
+            })
+            .fail(function(reason) {
+                console.log(reason);
+                $scrobbleIcon.addClass('scrobbler-error');
+            })
+            .always(function() {
+                $scrobbleIcon.removeClass('lastfm-loading');
+            });
+        }
+
+
     }
     
 }
