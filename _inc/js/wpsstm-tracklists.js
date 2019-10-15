@@ -189,7 +189,7 @@ class WpsstmTracklist extends HTMLElement{
 
         $(window).bind('beforeunload', function(){
 
-            if (tracklist.mediaElement && !tracklist.mediaElement.paused){
+            if ( tracklist.current_track && tracklist.mediaElement && !tracklist.mediaElement.paused ){
                 return wpsstmL10n.leave_page_text;
             }
 
