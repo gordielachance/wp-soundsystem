@@ -23,6 +23,11 @@ function wpsstm_get_array_value($keys = null, $array){
     return false;
 }
 
+function wpsstm_is_associative_array(array $arr){
+    if (array() === $arr) return false;
+    return array_keys($arr) !== range(0, count($arr) - 1);
+}
+
 /**
  * Outputs the html readonly attribute.  Inspired by core function disabled().
  *

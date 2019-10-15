@@ -1,4 +1,7 @@
 <?php
+
+use LaLit\XML2Array;
+
 class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     var $post_id = null; //tracklist ID (can be an album, playlist or radio)
@@ -713,7 +716,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
     
     private function import_xspf(){
-        
+
         $this->tracklist_log("import XSPF...");
 
         //check feed URL
@@ -811,10 +814,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         /*
         convert XSPF to array
         */
-        $xspf = simplexml_load_string($xspf, "SimpleXMLElement", LIBXML_NOCDATA);
-        $json = json_encode($xspf);
-        $xspf = json_decode($json,TRUE);
         
+        require_once(wpsstm()->plugin_dir . '_inc/php/XML2Array.php');
+        $xspf = XML2Array::createArray($xspf);
+        $xspf = self::clean_xml_array_input($xspf);
+        $xspf = wpsstm_get_array_value('playlist',$xspf);
+        
+
         //set import ID
         $this->import_id = wpsstm_get_array_value('identifier',$xspf);
         update_post_meta( $this->post_id, self::$import_id_meta_name, $this->import_id );
@@ -825,6 +831,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $playlist = new WPSSTM_Tracklist();
         $playlist_tracks = array();
+        
 
         $playlist->title = wpsstm_get_array_value('title',$xspf);
         $playlist->author = wpsstm_get_array_value('creator',$xspf);
@@ -834,35 +841,36 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $playlist->date_timestamp = strtotime ($date);
         }
 
-        $xspf_tracks = wpsstm_get_array_value(array('trackList','track'),$xspf);
+        $tracks_arr = wpsstm_get_array_value(array('trackList','track'),$xspf);
+        $tracks_arr = !wpsstm_is_associative_array($tracks_arr) ? $tracks_arr : [$tracks_arr]; //a tracklist with multiple tracks would be sequential.
 
-        foreach ((array)$xspf_tracks as $xspf_track) {
+        foreach ((array)$tracks_arr as $track_arr) {
 
             $track = new WPSSTM_Track();
 
             //identifier
 
             //title
-            $track->title = wpsstm_get_array_value('title',$xspf_track);
+            $track->title = wpsstm_get_array_value('title',$track_arr);
 
             //creator
-            $track->artist = wpsstm_get_array_value('creator',$xspf_track);
+            $track->artist = wpsstm_get_array_value('creator',$track_arr);
 
             //album
-            $track->album = wpsstm_get_array_value('album',$xspf_track);
+            $track->album = wpsstm_get_array_value('album',$track_arr);
 
             //image
-            $track->image_url = wpsstm_get_array_value('image',$xspf_track);
+            $track->image_url = wpsstm_get_array_value('image',$track_arr);
 
             //trackNum
-            $track->position = wpsstm_get_array_value('trackNum',$xspf_track);
+            $track->position = wpsstm_get_array_value('trackNum',$track_arr);
 
             //duration
-            $track->duration = wpsstm_get_array_value('duration',$xspf_track);
+            $track->duration = wpsstm_get_array_value('duration',$track_arr);
 
             //links
             //when there are several links, it is an array; while it is a string for a single link.  So force array.
-            if ( $link_urls = wpsstm_get_array_value('location',$xspf_track) ){
+            if ( $link_urls = wpsstm_get_array_value('location',$track_arr) ){
 
                 $link_urls = (array)$link_urls;
                 $addlinks = array();
@@ -879,7 +887,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             }
             
             //identifiers
-            if ( $identifiers = wpsstm_get_array_value('identifier',$xspf_track) ){
+            if ( $identifiers = wpsstm_get_array_value('identifier',$track_arr) ){
                 $identifiers = (array)$identifiers;
 
                 foreach($identifiers as $url){
@@ -909,14 +917,32 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
             //extension
 
-            ////
-
             $playlist_tracks[] = $track;
         }
 
         $playlist->add_tracks($playlist_tracks);
 
         return $playlist;
+    }
+
+    /*
+    XML needs properly formatted keys.
+    */
+    
+    private static function clean_xml_array_input($arr){
+        
+        function flatten_cdata($array) {
+            array_walk($array, function (&$item, $key) {
+                if ( !is_array($item) ) return;
+                if (isset($item['@cdata'])) {
+                    $item = $item['@cdata'];
+                    return;
+                }
+                $item = flatten_cdata($item);
+            });
+            return $array;
+        }
+        return flatten_cdata($arr);
         
     }
     
