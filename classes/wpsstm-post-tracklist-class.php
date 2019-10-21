@@ -4,6 +4,7 @@ use LaLit\XML2Array;
 
 class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
+    var $id = null; //unique tracklist ID
     var $post_id = null; //tracklist ID (can be an album, playlist or radio)
     var $import_id = null;
     var $index = -1;
@@ -46,6 +47,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     public $classes = array('wpsstm-post-tracklist');
 
     function __construct($post = null ){
+        
+        $this->id = uniqid();
         
         if ($post){
             if ( is_a($post,'WP_Post') ){
@@ -248,8 +251,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function get_tracklist_html(){
         global $wpsstm_tracklist;
-        
-        $html = wp_cache_get( 'tracklist_html', 'wpsstm' );
+
+        $cache_key = sprintf('tracklist_%s_html',$this->id);
+
+        $html = wp_cache_get( $cache_key, 'wpsstm' );
         
         if ( false === $html ) {
             
@@ -263,7 +268,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $wpsstm_tracklist = $old_tracklist; //restore global
             
             
-            wp_cache_set( 'tracklist_html', $html, 'wpsstm' );
+            wp_cache_set( $cache_key, $html, 'wpsstm' );
         } 
 
         return $html;
