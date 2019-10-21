@@ -1077,17 +1077,24 @@ class WPSSTM_Core_Tracks{
             'album'     => null,
         );
         
+        //track
+        
         $atts = shortcode_atts($default,$atts);
         $track = new WPSSTM_Track();
         $track->from_array($atts);
 
-        if ( $track->validate_track() === true ){
-            $output = $track->get_track_html();
-            $output = sprintf('<div class="wpsstm-standalone-track">%s</div>',$output);
-        }
+        $tracklist = $this->get_single_track_tracklist($track);
+        return $tracklist->get_tracklist_html();
 
-        return $output;
-
+    }
+    
+    function get_single_track_tracklist($track){
+        $tracklist = new WPSSTM_Post_Tracklist();
+        $tracklist->options['header'] = false;
+        $tracklist->classes[] = 'standalone-track';
+        
+        $tracklist->add_tracks($track);
+        return $tracklist;
     }
     
     function ajax_update_track_links_order(){
