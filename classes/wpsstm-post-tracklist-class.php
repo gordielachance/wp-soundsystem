@@ -11,9 +11,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $tracklist_type = 'static';
     
     var $default_options = array(
-        'cache_min' => 15,
-        'playable'  => true,
-        'order'     => 'ASC',
+        'cache_min' =>      15,
+        'playable'  =>      true,
+        'order'     =>      'ASC',
     );
     
     var $default_importer_options = array();
@@ -142,11 +142,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //classes
         if( $this->is_tracklist_favorited_by() ) {
             $this->classes[] = 'favorited-tracklist';
-        }
-        
-        if ( wpsstm()->get_options('player_enabled') && $this->get_options('playable') ){
-            $this->classes[] = 'has-player';
-            $this->classes[] = 'tracklist-bottom-player';
         }
 
         return $this->post_id;
@@ -655,6 +650,25 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function user_can_reorder_tracks(){
         return ( $this->user_can_edit_tracklist() && ($this->tracklist_type == 'static') );
     }
+    
+    private function get_tracklist_classes(){
+
+        $playable = ( wpsstm()->get_options('player_enabled') && $this->get_options('playable') );
+        
+        $add_classes = array(
+            $playable ? 'has-player' : null,
+            $playable ? 'tracklist-bottom-player' : null,
+            
+        );
+        
+        $classes = array_merge($this->classes,$add_classes);
+        $classes = array_filter(array_unique($classes));
+        
+        $classes = apply_filters('wpsstm_tracklist_classes',$classes,$this);
+
+        return $classes;
+        
+    }
 
     function get_tracklist_attr($values_attr=null){
         
@@ -667,6 +681,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             'itemtype' =>                           "http://schema.org/MusicPlaylist",
             'data-wpsstm-tracklist-id' =>           $this->post_id,
             'data-wpsstm-domain' =>                 wpsstm_get_url_domain( $this->feed_url ),
+            'class' =>                              implode(' ',$this->get_tracklist_classes()),
         );
 
         $values_attr = array_merge($values_defaults,(array)$values_attr);

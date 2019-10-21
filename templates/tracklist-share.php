@@ -33,7 +33,7 @@ $edit_cap = $post_type_obj->cap->edit_posts;
     <?php wp_head(); ?>
 </head>
 <body <?php body_class($body_classes); ?>>  
-<wpsstm-tracklist class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>" <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
+<wpsstm-tracklist <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php wpsstm_locate_template( 'content-tracklist-header.php', true, false );?>
 </wpsstm-tracklist>
     <div class="wpsstm-copy-link">
