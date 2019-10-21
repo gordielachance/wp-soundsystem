@@ -10,9 +10,6 @@ class WPSSTM_Core_Albums{
         
         add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
 
-        add_filter('manage_posts_columns', array($this,'column_album_register'), 10, 2 );
-        add_action( 'manage_posts_custom_column', array($this,'column_album_content'), 10, 2 );
-        
         add_filter( 'the_title', array($this, 'the_album_post_title'), 9, 2 );
         
     }
@@ -43,41 +40,6 @@ class WPSSTM_Core_Albums{
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
         
-    }
-    
-    function column_album_register($defaults) {
-        global $post;
-        global $wp_query;
-        $post_types = array(
-            wpsstm()->post_type_track
-        );
-        
-        $before = array();
-        $after = array();
-        
-        if ( isset($_GET['post_type']) && in_array($_GET['post_type'],$post_types) ){
-            if ( !$wp_query->get('subtrack_exclude') ){
-                $after['album'] = __('Album','wpsstm');
-            }
-        }
-        
-        return array_merge($before,$defaults,$after);
-    }
-    
-    function column_album_content($column,$post_id){
-        global $post;
-        switch ( $column ) {
-            case 'album':
-                $album = wpsstm_get_post_album($post_id);
-                
-                if ($album){
-                    echo $album;
-                }else{
-                    echo '—';
-                }
-                
-            break;
-        }
     }
 
     function register_post_type_album() {
