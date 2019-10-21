@@ -252,7 +252,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function get_tracklist_html(){
         global $wpsstm_tracklist;
 
-        $html = wp_cache_get( 'tracklist_html', 'wpsstm' );
+        $cache_key = sprintf('tracklist_%s_html',$this->id);
+
+        $html = wp_cache_get( $cache_key, 'wpsstm' );
         
         if ( false === $html ) {
             
@@ -266,7 +268,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $wpsstm_tracklist = $old_tracklist; //restore global
             
             
-            wp_cache_set( 'tracklist_html', $html, 'wpsstm' );
+            wp_cache_set( $cache_key, $html, 'wpsstm' );
         } 
 
         return $html;
