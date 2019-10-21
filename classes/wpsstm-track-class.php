@@ -910,7 +910,7 @@ class WPSSTM_Track{
             'itemscope' =>                      true,
             'itemtype' =>                       "http://schema.org/MusicRecording",
             'itemprop' =>                       'track',
-            'class' =>                          implode( ' ',$this->get_track_class() ),
+            'class' =>                          implode( ' ',$this->get_track_classes() ),
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
@@ -921,7 +921,7 @@ class WPSSTM_Track{
         return wpsstm_get_html_attr($attr);
     }
     
-    function get_track_class(){
+    private function get_track_classes(){
 
         $add_classes = array(
             ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
