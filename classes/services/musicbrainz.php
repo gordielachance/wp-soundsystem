@@ -449,12 +449,13 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Data_Engine{
         
         //url encode
         $artist = urlencode($artist);
-        $album = urlencode($album);
         $track = urlencode($track);
+        if ($album === '_') $album = null;
+        $album = urlencode($album);
         
         if($artist && $track){//track
             $endpoint = sprintf('services/musicbrainz/search/%s/%s/%s',$artist,$album,$track);
-        }elseif($artist && ($album !== '_') ){//album
+        }elseif($artist && $album ){//album
             $endpoint = sprintf('services/musicbrainz/search/%s/%s',$artist,$album);
         }elseif($artist){//artist
             $endpoint = sprintf('services/musicbrainz/search/%s',$artist);
@@ -517,9 +518,12 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Data_Engine{
         $datas = $this->get_post_music_data($post_id);
 
         switch ($post_type){
+                
             case wpsstm()->post_type_artist:
-                //$item['artist'] = wpsstm_get_array_value(array('name'), $datas);
+                $item = new WPSSTM_Artist();
+                $item->artist = wpsstm_get_array_value(array('name'), $datas);
             break;
+                
             case wpsstm()->post_type_track:
                 
                 $item = new WPSSTM_Track();
@@ -530,11 +534,14 @@ class WPSSTM_Musicbrainz_Data extends WPSSTM_Data_Engine{
                 //$item->image_url = 
                 
             break;
+                
             case wpsstm()->post_type_album:
-                //$item['artist'] =   wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
-                //$item['album'] =    wpsstm_get_array_value(array('title'), $datas);
+                $item = new WPSSTM_Album();
+                $item->artist =   wpsstm_get_array_value(array('artist-credit',0,'name'), $datas);
+                $item->title =    wpsstm_get_array_value(array('title'), $datas);
             break;
         }
+
         return $item;
     }
   

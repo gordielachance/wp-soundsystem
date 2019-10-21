@@ -145,7 +145,9 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'classes/wpsstm-data-engine.php';
         require $this->plugin_dir . 'wpsstm-core-importer.php';
         
+        require $this->plugin_dir . 'classes/wpsstm-artist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
+        require $this->plugin_dir . 'classes/wpsstm-album-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-post-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-track-link-class.php';
