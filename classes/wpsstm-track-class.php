@@ -27,13 +27,6 @@ class WPSSTM_Track{
     public $subtrack_time = null;
     public $subtrack_author = null;
     public $from_tracklist = null;
-    
-    public $supported = array(
-        'track-thumbnails',
-        'track-durations',
-        'track-links',
-        'track-autolink',
-    );
 
     public $notices = array();
     
@@ -101,11 +94,7 @@ class WPSSTM_Track{
             return $this->populate_track_post($this->post_id);
         }
     }
-    
-    function is_supported($key){
-        return in_array($key,$this->supported);
-    }
-    
+
     /*
     Query tracks (IDs) that have the same artist + title (+album if set)
     */
@@ -585,7 +574,7 @@ class WPSSTM_Track{
 
             $link_ids = $query->posts;
 
-            if ( !$link_ids && $this->is_supported('track-autolink') && !wpsstm()->get_options('ajax_autolink') ){
+            if ( !$link_ids && !wpsstm()->get_options('ajax_autolink') ){
                 $autolink_ids = $this->autolink();
                 $link_ids = ( !is_wp_error($autolink_ids) ) ? $autolink_ids : null;
             }
