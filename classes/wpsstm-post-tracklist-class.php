@@ -50,6 +50,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function __construct($post = null ){
         
         $this->id = uniqid();
+        $this->options = $this->default_options;
         
         if ($post){
             if ( is_a($post,'WP_Post') ){
