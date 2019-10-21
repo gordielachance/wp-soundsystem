@@ -128,6 +128,13 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 3.2.2 =
+* fix click on player's track position
+* fix styles on track displayed in data engines metaboxes
+* fix get_tracklist_html (cache) when displaying several playlists
+* removed hooks 'wpsstm_init', 'wpsstm_init_post_types', 'wpsstm_init_rewrite'
+* WPSSTM_Post_Tracklist : new $id property (unique_id)
+
 = 3.2.0 =
 * get_static_subtracks() about 4 times faster !
 * audio player is now a a child node of its tracklist (better for customisation)
@@ -153,8 +160,6 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 * Improved importers code
 * New filter 'wpsstm_get_subtracks'
 * database upgrade: v212
-
-= 3.1.1 =
 * faster REST import
 
 = 3.1.0 =
