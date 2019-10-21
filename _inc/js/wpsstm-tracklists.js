@@ -201,7 +201,7 @@ class WpsstmTracklist extends HTMLElement{
         Player track : scroll to page track
         */
         //Scroll to page track
-        $(tracklist).find('.player-track .wpsstm-track-position').click(function(e) {
+        $(tracklist).on('click','.player-track .wpsstm-track-position',function(e) {
             e.preventDefault();
 
             //https://stackoverflow.com/a/6677069/782013
