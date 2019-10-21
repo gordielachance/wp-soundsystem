@@ -141,8 +141,8 @@ abstract class WPSSTM_Data_Engine{
         <div class="wpsstm-data-metabox">
             
             <?php
-                $this->map_post_datas_notice();
                 $this->mapped_item_header();
+                $this->map_post_datas_notice();
             ?>
             
             <div class="wpsstm-data-section-id">
@@ -288,7 +288,7 @@ abstract class WPSSTM_Data_Engine{
         }
         if (!$header) return;
         
-        printf('<p class="">%s</p>',$header);
+        printf('<div class="wpsstm-tracks-list">%s</div>',$header);
     }
     
     public function map_post_datas_notice(){

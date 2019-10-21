@@ -80,11 +80,15 @@
     
     .wpsstm-data-metabox{
         //header
+        //TOUFIX this should not be done through CSS but through PHP
         .wpsstm-track-row{
-            .wpsstm-track-pre{
+            .wpsstm-track-position{
                 display:none;
             }
             .wpsstm-track-actions{
+                display:none;
+            }
+            .wpsstm-track-action-play{
                 display:none;
             }
         }
