@@ -1356,15 +1356,20 @@ mediaElementJS
 .postbox#wpsstm_mb_entries.table-mbz-summary table.wp-list-table tfoot {
   display: none;
 }
-/* line 85, ../scss/_wpsstm-backend.scss */
-.postbox .wpsstm-data-metabox .wpsstm-track-row .wpsstm-track-position {
-  display: none;
+/* line 84, ../scss/_wpsstm-backend.scss */
+.postbox .wpsstm-data-metabox .wpsstm-tracks-list {
+  font-size: 1.2em;
+  margin: 1em 0;
 }
 /* line 88, ../scss/_wpsstm-backend.scss */
-.postbox .wpsstm-data-metabox .wpsstm-track-row .wpsstm-track-actions {
+.postbox .wpsstm-data-metabox .wpsstm-tracks-list .wpsstm-track-row .wpsstm-track-position {
   display: none;
 }
 /* line 91, ../scss/_wpsstm-backend.scss */
-.postbox .wpsstm-data-metabox .wpsstm-track-row .wpsstm-track-action-play {
+.postbox .wpsstm-data-metabox .wpsstm-tracks-list .wpsstm-track-row .wpsstm-track-actions {
+  display: none;
+}
+/* line 94, ../scss/_wpsstm-backend.scss */
+.postbox .wpsstm-data-metabox .wpsstm-tracks-list .wpsstm-track-row .wpsstm-track-action-play {
   display: none;
 }
