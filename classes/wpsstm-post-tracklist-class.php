@@ -12,6 +12,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     var $default_options = array(
         'cache_min' =>      15,
+        'header'    =>      true,
         'playable'  =>      true,
         'order'     =>      'ASC',
     );

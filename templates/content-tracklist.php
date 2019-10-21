@@ -12,7 +12,10 @@ $notice = $wpsstm_tracklist->importer_notice();
 ?>
 <wpsstm-tracklist <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php
-    wpsstm_locate_template( 'content-tracklist-header.php', true, false );
+    
+    if ( $wpsstm_tracklist->get_options('header') ){
+        wpsstm_locate_template( 'content-tracklist-header.php', true, false );
+    }
     
     /*
     Player
