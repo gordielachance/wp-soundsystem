@@ -28,10 +28,9 @@ if ( $tracklist_query->have_posts() ) {
         while ( $tracklist_query->have_posts() ) {
 
             $tracklist_query->the_post();
-            $wpsstm_tracklist->classes[] = 'tracklist-row';
 
             ?>
-            <li class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>">
+            <li>
                 <span class="tracklist-row-action">
                     <?php
 
@@ -61,13 +60,6 @@ if ( $tracklist_query->have_posts() ) {
                     </strong>
                     <?php
                 ?>
-                </span>
-                <span class="wpsstm-tracklist-actions">
-                    <?php
-                    if ( $actions = $wpsstm_tracklist->get_tracklist_actions() ){
-                        echo get_actions_list($actions,'tracklist');
-                    }
-                    ?>
                 </span>
             </li>
             <?php

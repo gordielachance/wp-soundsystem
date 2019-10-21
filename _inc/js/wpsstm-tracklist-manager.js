@@ -9,7 +9,7 @@ var toggleTracklistResults = function(){
     var submitEl = newForm.find('button[type="submit"]');
 
     var toggleForm = $('form#wpsstm-toggle-tracklists');
-    var visibleTracklistRows = toggleForm.find('li.tracklist-row:visible');
+    var visibleTracklistRows = toggleForm.find('.tracklist-list>li:visible');
 
     var show = ( visibleTracklistRows.length );
 
@@ -33,7 +33,7 @@ formNewTracklist.find('input[type="text"]').on('keyup', function(e){
     var toggleForm = $('form#wpsstm-toggle-tracklists');
 
 
-    var tracklist_items = toggleForm.find('.tracklist-list .tracklist-row');
+    var tracklist_items = toggleForm.find('.tracklist-list>li');
 
 
     var has_results = false;

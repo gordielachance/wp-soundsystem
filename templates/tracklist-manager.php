@@ -85,6 +85,8 @@ $edit_cap = $post_type_obj->cap->edit_posts;
 
                 $args = apply_filters('wpsstm_tracklist_manager_query',$args);
                 $tracklist_query = new WP_Query( $args );
+            
+                //TOUFIX TOUCHECK duplicate of tracklists-list.php ?
 
                 if ( $tracklist_query->have_posts() ) {
 
@@ -94,10 +96,9 @@ $edit_cap = $post_type_obj->cap->edit_posts;
                         while ( $tracklist_query->have_posts() ) {
 
                             $tracklist_query->the_post();
-                            $wpsstm_tracklist->classes[] = 'tracklist-row';
 
                             ?>
-                            <li class="<?php echo implode(' ',$wpsstm_tracklist->classes);?>">
+                            <li>
                                 <span class="tracklist-row-action">
                                     <?php
 
@@ -127,13 +128,6 @@ $edit_cap = $post_type_obj->cap->edit_posts;
                                     </strong>
                                     <?php
                                 ?>
-                                </span>
-                                <span class="wpsstm-tracklist-actions">
-                                    <?php
-                                    if ( $actions = $wpsstm_tracklist->get_tracklist_actions() ){
-                                        echo get_actions_list($actions,'tracklist');
-                                    }
-                                    ?>
                                 </span>
                             </li>
                             <?php
