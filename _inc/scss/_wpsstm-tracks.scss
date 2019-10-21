@@ -93,9 +93,11 @@
     }
     
     .wpsstm-track-actions{
-        display:none;
+        @include display-flex();
+        @include flex-shrink(0);
         margin-left: auto;
         .wpsstm-action{
+            display:none;
             @extend .wpsstm-action-icon;
         }
     }
@@ -139,9 +141,8 @@
     }
 
     &:hover,&.track-active{
-        .wpsstm-track-actions{
-            @include display-flex();
-            @include flex-shrink(0);
+        .wpsstm-action{
+            display:inherit;
         }
     }
     

@@ -248,7 +248,7 @@ wpsstm-tracklist{
     
     //play BT
 
-    &:not(.tracklist-has-played){
+    &[wpsstm-playable]:not(.tracklist-has-played){
         .wpsstm-tracklist-play-bt{
             animation: opacityPulse 1s linear infinite;
         }
@@ -278,13 +278,15 @@ wpsstm-tracklist{
         }
     }
     
+    &:not([wpsstm-playable]) .wpsstm-tracklist-play-bt .wpsstm-icon:before{
+        content:"\f071"; //.fa-exclamation-triangle;
+    }
+    
     &.standalone-track{
         .wpsstm-track-position{
             display:none;
         }
     }
-
-
 }
 
 .wpsstm-tracklist-actions{
