@@ -6,13 +6,15 @@
     margin:0;
     padding:0;
     list-style: none;
-    line-height: 2.2em;
     font-family: sans-serif;
     text-align:center;
+    
 }
 .wpsstm-action{
+    display:inline-block;
     @extend .wpsstm-icon;
     @extend .wpsstm-no-underline;
+
     &.action-loading{
         @extend .wpsstm-loading-icon;
         @extend .wpsstm-freeze;

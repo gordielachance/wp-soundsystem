@@ -27,13 +27,10 @@ wpsstm-tracklist{
             list-style: none;
             text-align:center;
             margin:.5em 0;
-            font-size:.9em;
 
             .wpsstm-tracklist-action{
-                padding: .25em .5em;
+                padding: .5em;
                 font-size:.8em;
-                border: 1px solid #F7F7F7;
-                line-height: 1.8em;
                 
                 &:hover{
                     border-color:#F7F7F7;
@@ -281,6 +278,11 @@ wpsstm-tracklist{
         }
     }
     
+    &.standalone-track{
+        .wpsstm-track-position{
+            display:none;
+        }
+    }
 
 
 }
@@ -324,12 +326,8 @@ wpsstm-tracklist{
 ul.tracklist-list{
     > li{
         border-bottom: 1px solid rgba(51, 51, 51, 0.1);
-        @include display-flex();
-        height: 1em;
         padding: 1em 0;
         > *{
-            @include display-flex();
-            @include flex-grow(1);
             align-items: center;
             padding: 0 .25em;
             box-sizing: border-box;
