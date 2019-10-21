@@ -637,4 +637,4 @@ function wpsstm_wizard_init(){
     new WPSSTM_Core_Importer();
 }
 
-add_action('wpsstm_init','wpsstm_wizard_init');
+add_action('plugins_loaded','wpsstm_wizard_init');

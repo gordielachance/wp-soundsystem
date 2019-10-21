@@ -19,7 +19,7 @@ class WPSSTM_Core_Tracklists{
         add_action( 'the_post', array($this,'populate_global_tracklist_loop'),10,2);
 
         //rewrite rules
-        add_action( 'wpsstm_init_rewrite', array($this, 'tracklists_rewrite_rules') );
+        add_action( 'init', array($this, 'tracklists_rewrite_rules') );
         add_filter( 'query_vars', array($this,'add_tracklist_query_vars') );
         add_filter( 'upload_mimes', array($this,'enable_xspf_uploads') );
 
@@ -748,4 +748,4 @@ function wpsstm_tracklists_init(){
 
 
 
-add_action('wpsstm_init','wpsstm_tracklists_init');
+add_action('plugins_loaded','wpsstm_tracklists_init');

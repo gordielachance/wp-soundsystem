@@ -3,14 +3,13 @@ class WPSSTM_Core_Albums{
     
     function __construct() {
 
-        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_album' ));
-        add_action( 'wpsstm_init_post_types', array($this,'register_album_taxonomy' ));
+        add_action( 'init', array($this,'register_post_type_album' ));
+        add_action( 'init', array($this,'register_album_taxonomy' ));
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_albums_submenu' ) );
         
         add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
-        
-        //TO FIX TO CHECK used ? same as in tracklist ?
+
         add_filter('manage_posts_columns', array($this,'column_album_register'), 10, 2 );
         add_action( 'manage_posts_custom_column', array($this,'column_album_content'), 10, 2 );
         
@@ -243,4 +242,4 @@ class WPSSTM_Core_Albums{
 function wpsstm_albums_init(){
     new WPSSTM_Core_Albums();
 }
-add_action('wpsstm_init','wpsstm_albums_init');
+add_action('plugins_loaded','wpsstm_albums_init');

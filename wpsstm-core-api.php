@@ -210,4 +210,4 @@ class WPSSTM_Core_API {
 function wpsstm_api_init(){
     new WPSSTM_Core_API();
 }
-add_action('wpsstm_init','wpsstm_api_init');
+add_action('plugins_loaded','wpsstm_api_init');

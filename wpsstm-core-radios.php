@@ -13,7 +13,7 @@ class WPSSTM_Core_Radios{
         Better register the post type and fire a tracklist notice to say that it cannot be refreshed because API key is invalid.
         */
 
-        add_action( 'wpsstm_init_post_types', array($this,'register_post_type_radio' ));
+        add_action( 'init', array($this,'register_post_type_radio' ));
 
         add_filter( 'pre_get_posts', array($this,'pre_get_tracklist_by_pulse') );
         add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
@@ -213,4 +213,4 @@ function wpsstm_radios_init(){
     new WPSSTM_Core_Radios();
 }
 
-add_action('wpsstm_init','wpsstm_radios_init');
+add_action('plugins_loaded','wpsstm_radios_init');

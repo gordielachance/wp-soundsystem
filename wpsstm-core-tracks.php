@@ -12,8 +12,8 @@ class WPSSTM_Core_Tracks{
     function __construct() {
         global $wpsstm_track;
         
-        add_action( 'wpsstm_init_post_types', array($this,'register_track_post_type' ));
-        add_action( 'wpsstm_init_post_types', array($this,'register_track_taxonomy' ));
+        add_action( 'init', array($this,'register_track_post_type' ));
+        add_action( 'init', array($this,'register_track_taxonomy' ));
         
         /*
         populate single global track.
@@ -29,7 +29,7 @@ class WPSSTM_Core_Tracks{
         add_filter( 'the_title', array($this, 'the_track_post_title'), 9, 2 );
 
         //rewrite rules
-        add_action('wpsstm_init_rewrite', array($this, 'tracks_rewrite_rules') );
+        add_action('init', array($this, 'tracks_rewrite_rules') );
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
@@ -37,7 +37,7 @@ class WPSSTM_Core_Tracks{
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_tracks_submenu' ) );
 
         add_action( 'add_meta_boxes', array($this, 'metabox_track_register'));
-        add_action( 'save_post', array($this,'metabox_save_music_details'), 5); //TOUFIX should NOT be within the track class ?
+        add_action( 'save_post', array($this,'metabox_save_music_details'), 5);
         
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'tracks_columns_register') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content') );
@@ -991,10 +991,9 @@ class WPSSTM_Core_Tracks{
                 self::save_track_artist($post_id, $artist);
 
             break;
-                
-                
+
             case wpsstm()->post_type_album:
-                
+
                 //artist
                 self::save_track_artist($post_id, $artist);
                 //album
@@ -1478,4 +1477,4 @@ function wpsstm_tracks_init(){
     new WPSSTM_Core_Tracks();
 }
 
-add_action('wpsstm_init','wpsstm_tracks_init');
+add_action('plugins_loaded','wpsstm_tracks_init');

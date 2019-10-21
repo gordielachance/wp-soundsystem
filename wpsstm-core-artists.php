@@ -4,8 +4,8 @@ class WPSSTM_Core_Artists{
 
     function __construct(){
 
-        add_action( 'wpsstm_init_post_types', array($this,'register_artist_post_type' ));
-        add_action( 'wpsstm_init_post_types', array($this,'register_artist_taxonomy' ));
+        add_action( 'init', array($this,'register_artist_post_type' ));
+        add_action( 'init', array($this,'register_artist_taxonomy' ));
         
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_artists_submenu' ) );
         
@@ -126,26 +126,26 @@ class WPSSTM_Core_Artists{
     function register_artist_taxonomy(){
 
         $labels = array(
-            'name'                       => _x( 'Track Artists', 'Taxonomy General Name', 'wpsstm' ),
-            'singular_name'              => _x( 'Track Artist', 'Taxonomy Singular Name', 'wpsstm' ),
+            'name'                       => _x( 'Artists', 'Taxonomy General Name', 'wpsstm' ),
+            'singular_name'              => _x( 'Artist', 'Taxonomy Singular Name', 'wpsstm' ),
             'menu_name'                  => __( 'Taxonomy', 'wpsstm' ),
-            'all_items'                  => __( 'All Items', 'wpsstm' ),
-            'parent_item'                => __( 'Parent Item', 'wpsstm' ),
-            'parent_item_colon'          => __( 'Parent Item:', 'wpsstm' ),
-            'new_item_name'              => __( 'New Item Name', 'wpsstm' ),
-            'add_new_item'               => __( 'Add New Item', 'wpsstm' ),
-            'edit_item'                  => __( 'Edit Item', 'wpsstm' ),
-            'update_item'                => __( 'Update Item', 'wpsstm' ),
-            'view_item'                  => __( 'View Item', 'wpsstm' ),
-            'separate_items_with_commas' => __( 'Separate items with commas', 'wpsstm' ),
-            'add_or_remove_items'        => __( 'Add or remove items', 'wpsstm' ),
+            'all_items'                  => __( 'All Artists', 'wpsstm' ),
+            'parent_item'                => __( 'Parent Artist', 'wpsstm' ),
+            'parent_item_colon'          => __( 'Parent Artist:', 'wpsstm' ),
+            'new_item_name'              => __( 'New Artist Name', 'wpsstm' ),
+            'add_new_item'               => __( 'Add New Artist', 'wpsstm' ),
+            'edit_item'                  => __( 'Edit Artist', 'wpsstm' ),
+            'update_item'                => __( 'Update Artist', 'wpsstm' ),
+            'view_item'                  => __( 'View Artist', 'wpsstm' ),
+            'separate_items_with_commas' => __( 'Separate artists with commas', 'wpsstm' ),
+            'add_or_remove_items'        => __( 'Add or remove artists', 'wpsstm' ),
             'choose_from_most_used'      => __( 'Choose from the most used', 'wpsstm' ),
-            'popular_items'              => __( 'Popular Items', 'wpsstm' ),
-            'search_items'               => __( 'Search Items', 'wpsstm' ),
+            'popular_items'              => __( 'Popular Artists', 'wpsstm' ),
+            'search_items'               => __( 'Search Artists', 'wpsstm' ),
             'not_found'                  => __( 'Not Found', 'wpsstm' ),
-            'no_terms'                   => __( 'No items', 'wpsstm' ),
-            'items_list'                 => __( 'Items list', 'wpsstm' ),
-            'items_list_navigation'      => __( 'Items list navigation', 'wpsstm' ),
+            'no_terms'                   => __( 'No artists', 'wpsstm' ),
+            'items_list'                 => __( 'Artists list', 'wpsstm' ),
+            'items_list_navigation'      => __( 'Artists list navigation', 'wpsstm' ),
         );
         $capabilities = array(
             'manage_terms'               => 'manage_tracks',
@@ -192,4 +192,4 @@ class WPSSTM_Core_Artists{
 function wpsstm_artists_init(){
     new WPSSTM_Core_Artists();
 }
-add_action('wpsstm_init','wpsstm_artists_init');
+add_action('plugins_loaded','wpsstm_artists_init');

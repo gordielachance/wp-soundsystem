@@ -15,7 +15,7 @@ class WPSSTM_Core_Track_Links{
         add_action( 'the_post', array($this,'populate_global_track_link_loop'),10,2);
         
         add_filter( 'query_vars', array($this,'add_query_vars_track_link') );
-        add_action( 'wpsstm_init_post_types', array($this,'register_track_link_post_type' ));
+        add_action( 'init', array($this,'register_track_link_post_type' ));
 
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_links_submenu' ) );
         add_action( 'add_meta_boxes', array($this, 'metabox_link_register'));
@@ -851,4 +851,4 @@ function wpsstm_links_init(){
     new WPSSTM_Core_Track_Links();
 }
 
-add_action('wpsstm_init','wpsstm_links_init');
+add_action('plugins_loaded','wpsstm_links_init');

@@ -179,8 +179,6 @@ class WP_SoundSystem {
         register_deactivation_hook( $this->file, array( $this, 'deactivate_wpsstm'));
 
         //init
-        add_action( 'init', array($this,'init_post_types'), 5);
-        add_action( 'init', array($this,'init_rewrite'), 5);
         add_action( 'init', array($this,'populate_data_engines'));
         add_action( 'admin_init', array($this,'load_textdomain'));
         
@@ -194,10 +192,6 @@ class WP_SoundSystem {
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
         
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
-        
-        
-
-        do_action('wpsstm_init');
 
     }
 
@@ -224,22 +218,6 @@ class WP_SoundSystem {
         WPSSTM_Settings::clear_premium_transients();
         
         $this->add_custom_capabilites();
-    }
-    
-    function init_post_types(){
-        //self::debug_log('init post types');
-        do_action('wpsstm_init_post_types');
-    }
-    
-    /*
-    Hook for rewrite rules.
-    */
-    function init_rewrite(){
-        //self::debug_log('set rewrite rules');
-
-        do_action('wpsstm_init_rewrite');
-        
-        flush_rewrite_rules();
     }
 
     function deactivate_wpsstm() {
