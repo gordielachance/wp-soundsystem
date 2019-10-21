@@ -132,6 +132,7 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 * fix click on player's track position
 * fix styles on track displayed in data engines metaboxes
 * fix get_tracklist_html (cache) when displaying several playlists
+* fix standalone track shortcode
 * removed hooks 'wpsstm_init', 'wpsstm_init_post_types', 'wpsstm_init_rewrite'
 * WPSSTM_Post_Tracklist : new $id property (unique_id)
 
