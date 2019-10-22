@@ -129,7 +129,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 == Changelog ==
 
 = 3.2.3 =
-* split array of tracklist options '_wpsstm_tracklist_options' into separate options
+* added 'wpsstm_populated_tracklist' action hook
+* improved 'Now Playing' and 'Sitewide favorites'
+* better code for tracklist options / time stuff
 * database upgrade: v214
 
 = 3.2.2 =
