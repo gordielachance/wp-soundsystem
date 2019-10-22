@@ -128,6 +128,10 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 3.2.3 =
+* split array of tracklist options '_wpsstm_tracklist_options' into separate options
+* database upgrade: v214
+
 = 3.2.2 =
 * fix click on player's track position
 * fix styles on track displayed in data engines metaboxes

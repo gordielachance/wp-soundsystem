@@ -278,8 +278,8 @@ wpsstm-tracklist{
         }
     }
     
-    &:not([wpsstm-playable]) .wpsstm-tracklist-play-bt .wpsstm-icon:before{
-        content:"\f071"; //.fa-exclamation-triangle;
+    &:not([wpsstm-playable]) .wpsstm-tracklist-play-bt{
+        display:none;
     }
     
     &.standalone-track{

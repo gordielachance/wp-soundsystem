@@ -10,18 +10,19 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $index = -1;
     var $tracklist_type = 'static';
     
+    //TOUFIX TOUCHECK 
+    //maybe we should use obj properties instead of an array of options ?
+    
     var $default_options = array(
         'cache_timeout' =>  15 * MINUTE_IN_SECONDS, //seconds
         'header'    =>      true,
         'playable'  =>      true,
         'orderby'     =>    'ASC',
     );
+    var $options = array();
     
     var $default_importer_options = array();
-    
-    var $options = array();
     var $importer_options = array();
-    
     
     public $is_expired = false;
     
