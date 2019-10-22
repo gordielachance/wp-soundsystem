@@ -17,7 +17,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         'cache_timeout' =>  15 * MINUTE_IN_SECONDS, //seconds
         'header'    =>      true,
         'playable'  =>      true,
-        'orderby'     =>    'ASC',
+        'order'     =>      'ASC',
     );
     var $options = array();
     
@@ -113,9 +113,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $db_options['playable'] = get_post_meta($this->post_id,WPSSTM_Core_Tracklists::$playable_meta_name,true);
         }
 
-        //orderby
-        if ( metadata_exists('post', $this->post_id, WPSSTM_Core_Tracklists::$orderby_meta_name) ){
-            $db_options['orderby'] = get_post_meta($this->post_id,WPSSTM_Core_Tracklists::$orderby_meta_name,true);
+        //order
+        if ( metadata_exists('post', $this->post_id, WPSSTM_Core_Tracklists::$order_meta_name) ){
+            $db_options['order'] = get_post_meta($this->post_id,WPSSTM_Core_Tracklists::$order_meta_name,true);
         }
 
         $this->options = array_replace_recursive($this->default_options,(array)$db_options);//last one has priority

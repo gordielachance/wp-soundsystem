@@ -428,14 +428,14 @@ class WP_SoundSystem {
                     $value = maybe_unserialize($result->meta_value);
                     
                     $playable = isset($value['playable']) ? $value['playable'] : null;
-                    $sortby = isset($value['order']) ? $value['order'] : null;
+                    $order = isset($value['order']) ? $value['order'] : null;
 
                     if($playable){
                         update_post_meta( $post_id, WPSSTM_Core_Tracklists::$playable_meta_name, $playable );
                     }
                     
-                    if($sortby){
-                        update_post_meta( $post_id, WPSSTM_Core_Tracklists::$orderby_meta_name, $sortby );
+                    if($order){
+                        update_post_meta( $post_id, WPSSTM_Core_Tracklists::$order_meta_name, $order );
                     }
                     
                     delete_post_meta($post_id,'_wpsstm_tracklist_options');
@@ -510,7 +510,7 @@ class WP_SoundSystem {
             'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
             'post_type' =>      wpsstm()->post_type_radio,
             'meta_input' =>     array(
-                WPSSTM_Core_Tracklists::$orderby_meta_name =>   'DESC',
+                WPSSTM_Core_Tracklists::$order_meta_name =>   'DESC',
                 
             ),
         );
@@ -529,7 +529,7 @@ class WP_SoundSystem {
             'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
             'post_type' =>      wpsstm()->post_type_radio,
             'meta_input' =>     array(
-                WPSSTM_Core_Tracklists::$orderby_meta_name =>   'DESC',
+                WPSSTM_Core_Tracklists::$order_meta_name =>   'DESC',
                 
             ),
         );

@@ -6,7 +6,7 @@ Handle posts that have a tracklist, like albums and playlists.
 
 class WPSSTM_Core_Tracklists{
     
-    static $orderby_meta_name = 'wpsstm_order_by';
+    static $order_meta_name = 'wpsstm_order';
     static $playable_meta_name = 'wpsstm_playable';
 
     function __construct() {
@@ -197,12 +197,12 @@ class WPSSTM_Core_Tracklists{
         update_post_meta( $post_id, WPSSTM_Core_Tracklists::$playable_meta_name,$playable);
         
         //order
-        $orderby = wpsstm_get_array_value('orderby',$input_data);
-        if ($orderby){
-            $orderby = strtoupper($orderby);
-            update_post_meta( $post_id, WPSSTM_Core_Tracklists::$orderby_meta_name,$orderby );
+        $order = wpsstm_get_array_value('order',$input_data);
+        if ($order){
+            $order = strtoupper($order);
+            update_post_meta( $post_id, WPSSTM_Core_Tracklists::$order_meta_name,$order );
         }else{
-            delete_post_meta( $post_id, WPSSTM_Core_Tracklists::$orderby_meta_name );
+            delete_post_meta( $post_id, WPSSTM_Core_Tracklists::$order_meta_name );
         }
 
         //reload settings
@@ -227,16 +227,16 @@ class WPSSTM_Core_Tracklists{
         printf('<p>%s <label>%s</label></p>',$input,__('Player','wpsstm'));
         
         //sort
-        $option = $wpsstm_tracklist->get_options('orderby');
+        $option = $wpsstm_tracklist->get_options('order');
 
         $input_asc = sprintf(
-            '<input type="radio" name="%s[orderby]" value="ASC" %s /><label>%s</label>',
+            '<input type="radio" name="%s[order]" value="ASC" %s /><label>%s</label>',
             'wpsstm_tracklist_options',
             checked($option,'ASC', false),
             'ASC'
         );
         $input_desc = sprintf(
-            '<input type="radio" name="%s[orderby]" value="DESC" %s /><label>%s</label>',
+            '<input type="radio" name="%s[order]" value="DESC" %s /><label>%s</label>',
             'wpsstm_tracklist_options',
             checked($option,'DESC', false),
             'DESC'
