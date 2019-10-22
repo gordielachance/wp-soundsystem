@@ -510,7 +510,6 @@ class WP_SoundSystem {
             'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
             'post_type' =>      wpsstm()->post_type_radio,
             'meta_input' =>     array(
-                WPSSTM_Core_Radios::$cache_timeout_meta_name => 0, //will not be used, just for display
                 WPSSTM_Core_Tracklists::$orderby_meta_name =>   'DESC',
                 
             ),
@@ -530,7 +529,6 @@ class WP_SoundSystem {
             'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
             'post_type' =>      wpsstm()->post_type_radio,
             'meta_input' =>     array(
-                WPSSTM_Core_Radios::$cache_timeout_meta_name => 0, //will not be used, just for display
                 WPSSTM_Core_Tracklists::$orderby_meta_name =>   'DESC',
                 
             ),

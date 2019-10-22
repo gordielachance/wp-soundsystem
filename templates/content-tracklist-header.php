@@ -36,7 +36,7 @@
             <ul>
                 <?php
                 //updated
-                if ($updated = $wpsstm_tracklist->date_timestamp){
+                if ($updated = $wpsstm_tracklist->last_import_time){
                     ?>
                     <li class="wpsstm-tracklist-date">
                         <time class="wpsstm-tracklist-updated"><?php echo wpsstm_get_datetime( $updated );?></time>
