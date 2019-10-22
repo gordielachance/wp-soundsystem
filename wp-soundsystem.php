@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '214';
+    public $db_version = '215';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -102,6 +102,7 @@ class WP_SoundSystem {
             'player_enabled'                    => true,
             'importer_page_id'                  => null,
             'nowplaying_id'                     => null,
+            'sitewide_favorites_id'             => null,
             'play_history_timeout'              => 1 * DAY_IN_SECONDS, //how long a track is stored in the plays history
             'playing_timeout'                   => 5 * MINUTE_IN_SECONDS,//how long a track is considered playing 'now'
             'recent_wizard_entries'             => get_option( 'posts_per_page' ),
@@ -443,6 +444,23 @@ class WP_SoundSystem {
 
             }
             
+            if ($current_version < 215){
+
+                $nowplaying_id = wpsstm()->get_options('nowplaying_id');
+                $sitewide_favorites_id = wpsstm()->get_options('sitewide_favorites_id');
+
+                if ( $nowplaying_id ){
+                    $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE ID = '%s'",$this->post_type_radio,$nowplaying_id);
+                    $result = $wpdb->get_results ( $querystr );
+                }
+                
+                if ( $sitewide_favorites_id ){
+                    $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE ID = '%s'",$this->post_type_radio,$sitewide_favorites_id);
+                    $result = $wpdb->get_results ( $querystr );
+                }
+
+            }
+            
         }
 
         //update DB version
@@ -490,7 +508,12 @@ class WP_SoundSystem {
             'post_title' =>     __('Now playing','wpsstm'),
             'post_status' =>    'publish',
             'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
-            'post_type' =>      wpsstm()->post_type_playlist
+            'post_type' =>      wpsstm()->post_type_radio,
+            'meta_input' =>     array(
+                WPSSTM_Core_Radios::$cache_timeout_meta_name => 0, //will not be used, just for display
+                WPSSTM_Core_Tracklists::$orderby_meta_name =>   'DESC',
+                
+            ),
         );
         $page_id = wp_insert_post( $post_details );
         if ( is_wp_error($page_id) ) return $page_id;
@@ -505,7 +528,12 @@ class WP_SoundSystem {
             'post_title' =>     __('Sitewide favorite tracks','wpsstm'),
             'post_status' =>    'publish',
             'post_author' =>    get_current_user_id(),//TOUFIX SHOULD BE SPIFFBOT ? is he available ?
-            'post_type' =>      wpsstm()->post_type_playlist
+            'post_type' =>      wpsstm()->post_type_radio,
+            'meta_input' =>     array(
+                WPSSTM_Core_Radios::$cache_timeout_meta_name => 0, //will not be used, just for display
+                WPSSTM_Core_Tracklists::$orderby_meta_name =>   'DESC',
+                
+            ),
         );
         $page_id = wp_insert_post( $post_details );
         if ( is_wp_error($page_id) ) return $page_id;
