@@ -23,6 +23,11 @@ class WPSSTM_Core_Radios{
         add_action('admin_notices', array(__class__,'radios_notice') );
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_radios_submenu' ) );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_radio), array(wpsstm(),'register_imported_view'), 5 );
+        
+        //special radios
+        add_action( 'wpsstm_populated_tracklist', array(__class__,'now_playing_radio') );
+        add_action( 'wpsstm_populated_tracklist', array(__class__,'sitewide_favorites_radio') );
+        
 
     }
 
@@ -201,6 +206,29 @@ class WPSSTM_Core_Radios{
 
         $notice = __("Radios are how we call 'live playlists'. Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are refreshing seamlessly after a user-defined delay.  Setup the 'Tracklist Importer' metabox while editing a radio.",'wpsstm');
         printf('<div class="notice notice-warning is-dismissible"><p>%s</p></div>',$notice);
+    }
+    
+    static function now_playing_radio($tracklist){
+        $nowplaying_id = wpsstm()->get_options('nowplaying_id');
+
+        if ($tracklist->post_id != $nowplaying_id) return;
+        
+        //do not try to sync radio with URL, we do this automatically by filtering get_subtracks().
+        $tracklist->last_import_time = current_time( 'timestamp', true );
+        $tracklist->date_timestamp = $tracklist->last_import_time;
+        $tracklist->is_expired = false;
+
+    }
+    
+    static function sitewide_favorites_radio($tracklist){
+        $sitewide_favorites_id = wpsstm()->get_options('sitewide_favorites_id');
+
+        if ($tracklist->post_id != $sitewide_favorites_id) return;
+        
+        //do not try to sync radio with URL, we do this automatically by filtering get_subtracks().
+        $tracklist->last_import_time = current_time( 'timestamp', true );
+        $tracklist->date_timestamp = $tracklist->last_import_time;
+        $tracklist->is_expired = false;
     }
 
 }

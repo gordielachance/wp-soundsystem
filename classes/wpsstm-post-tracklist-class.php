@@ -157,6 +157,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         if( $this->is_tracklist_favorited_by() ) {
             $this->classes[] = 'favorited-tracklist';
         }
+        
+        do_action('wpsstm_populated_tracklist',$this);
 
         return $this->post_id;
 
