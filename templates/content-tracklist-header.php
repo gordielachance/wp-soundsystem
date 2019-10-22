@@ -42,7 +42,7 @@
                         <time class="wpsstm-tracklist-updated"><?php echo wpsstm_get_datetime( $updated );?></time>
                         <?php
                         //refreshed
-                        if ( ($wpsstm_tracklist->tracklist_type == 'live') && $wpsstm_tracklist->get_options('cache_min') ){
+                        if ( ($wpsstm_tracklist->tracklist_type == 'live') && $wpsstm_tracklist->get_options('cache_timeout') ){
                             $next_refresh = $wpsstm_tracklist->get_human_next_refresh_time();
                             $pulse = $wpsstm_tracklist->get_human_pulse();
                             ?>

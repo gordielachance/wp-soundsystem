@@ -2,8 +2,7 @@
 class WPSSTM_Core_Radios{
     static $remote_author_meta_name = 'wpsstm_remote_author_name';
     static $time_imported_meta_name = 'wpsstm_remote_query_time';
-    static $cache_min_meta_name = 'wpsstm_cache_min';
-    public $presets;
+    static $cache_timeout_meta_name = 'wpsstm_cache_timeout'; //seconds
 
     function __construct() {
 
@@ -183,7 +182,7 @@ class WPSSTM_Core_Radios{
         if ( $max && ctype_digit($max) ) {
             
             $meta_query[] = array(
-                'key' => self::$cache_min_meta_name,
+                'key' => self::$cache_timeout_meta_name,
                 'value' => $max,
                 'type' => 'NUMERIC',
                 'compare' => '<='
@@ -192,9 +191,6 @@ class WPSSTM_Core_Radios{
             $query->set( 'meta_query', $meta_query);
 
         }
-        
-
-        
 
         return $query;
     }

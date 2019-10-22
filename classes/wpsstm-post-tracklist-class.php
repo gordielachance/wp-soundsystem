@@ -11,10 +11,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     var $tracklist_type = 'static';
     
     var $default_options = array(
-        'cache_min' =>      15,
+        'cache_timeout' =>  15 * MINUTE_IN_SECONDS, //seconds
         'header'    =>      true,
         'playable'  =>      true,
-        'order'     =>      'ASC',
+        'orderby'     =>    'ASC',
     );
     
     var $default_importer_options = array();
@@ -33,7 +33,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     var $paged_var = 'tracklist_page';
 
-    static $tracklist_options_meta_name = '_wpsstm_tracklist_options';
     static $importer_options_meta_name = '_wpsstm_scraper_options';
     static $feed_url_meta_name = '_wpsstm_scraper_url';
     static $website_url_meta_name = '_wpsstm_website_url';
@@ -41,9 +40,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     private static $remote_title_meta_name = 'wpsstm_remote_title';
     public $feed_url = null;
     public $website_url = null;
-    public $cache_min = null;
     
-    var $preset;
+    var $preset; //TOUFIX TOUCHECK USED ?
     
     public $classes = array('wpsstm-post-tracklist');
 
@@ -95,13 +93,22 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //type        
         $this->tracklist_type = ($post_type == wpsstm()->post_type_radio) ? 'live' : 'static';
 
-        //options
-        $db_options = (array)get_post_meta($this->post_id,self::$tracklist_options_meta_name,true);
-
-        $cache_min = get_post_meta($this->post_id,WPSSTM_Core_Radios::$cache_min_meta_name,true);
-        if( is_numeric($cache_min) ){
-            $db_options['cache_min'] = $cache_min;
+        /*
+        options
+        */
+        
+        //cache timeout
+        $cache_timeout = get_post_meta($this->post_id,WPSSTM_Core_Radios::$cache_timeout_meta_name,true);
+        if( is_numeric($cache_timeout) ){
+            $db_options['cache_timeout'] = $cache_timeout;
         }
+        
+        //playable
+        $db_options['playable'] = get_post_meta($this->post_id,WPSSTM_Core_Tracklists::$playable_meta_name,true);
+        
+        //orderby
+        $db_options['orderby'] = get_post_meta($this->post_id,WPSSTM_Core_Tracklists::$orderby_meta_name,true);
+        
 
         $this->options = array_replace_recursive($this->default_options,(array)$db_options);//last one has priority
 
@@ -693,10 +700,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function populate_subtracks(){
         global $wpdb;
-        
-        //avoid populating the subtracks several times (eg. Jetpack populates the content several times) TOUFIX TOUCHECK ?
-
-        if ($this->track_count !== null) return;
 
         $tracks = array();
 
@@ -1088,9 +1091,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $updated_time = (int)get_post_meta($this->post_id,WPSSTM_Core_Radios::$time_imported_meta_name,true);
         if(!$updated_time) return 0;//never imported
 
-        if ( !$cache_min = $this->get_options('cache_min') ) return 0; //no delay
+        if ( !$cache_timeout = $this->get_options('cache_timeout') ) return 0; //no delay
 
-        $expiration_time = $updated_time + ($cache_min * MINUTE_IN_SECONDS);
+        $expiration_time = $updated_time + $cache_timeout;
         $now = current_time( 'timestamp', true );
 
         $seconds = $expiration_time - $now;
@@ -1106,11 +1109,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     
     function get_human_pulse(){
         if ($this->tracklist_type != 'live') return false;
-        if ( !$cache_min = $this->get_options('cache_min') ) return false;
-        $cache_seconds = $cache_min * MINUTE_IN_SECONDS;
-        
+        if ( !$cache_timeout = $this->get_options('cache_timeout') ) return false;
+
         $now = current_time( 'timestamp', true );
-        $then = $now + $cache_seconds;
+        $then = $now + $cache_timeout;
         
         return human_time_diff( $now, $then );
     }
@@ -1118,11 +1120,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     function get_human_next_refresh_time(){
         
         if ($this->tracklist_type != 'live') return false;
-        if ( !$cache_min = $this->get_options('cache_min') ) return false;
+        if ( !$cache_timeout = $this->get_options('cache_timeout') ) return false;
         
-        $cache_seconds = $cache_min * MINUTE_IN_SECONDS;
         $time_refreshed = $this->date_timestamp;
-        $next_refresh = $time_refreshed + $cache_seconds;
+        $next_refresh = $time_refreshed + $cache_timeout;
         $now = current_time( 'timestamp', true );
         
         $is_future = ( ($next_refresh - $now) > 0 );

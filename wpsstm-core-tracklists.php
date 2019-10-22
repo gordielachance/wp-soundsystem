@@ -5,6 +5,9 @@ Handle posts that have a tracklist, like albums and playlists.
 **/
 
 class WPSSTM_Core_Tracklists{
+    
+    static $orderby_meta_name = 'wpsstm_order_by';
+    static $playable_meta_name = 'wpsstm_playable';
 
     function __construct() {
         global $wpsstm_tracklist;
@@ -180,32 +183,30 @@ class WPSSTM_Core_Tracklists{
 
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
         
-        //cache time
+        //cache timeout
         $cache_min = wpsstm_get_array_value('cache_min',$input_data);
 
         if ( is_numeric($cache_min) ){
-            update_post_meta( $post_id, WPSSTM_Core_Radios::$cache_min_meta_name,$cache_min);
+            update_post_meta( $post_id, WPSSTM_Core_Radios::$cache_timeout_meta_name,$cache_min * MINUTE_IN_SECONDS);
         }else{
-            delete_post_meta( $post_id, WPSSTM_Core_Radios::$cache_min_meta_name);
+            delete_post_meta( $post_id, WPSSTM_Core_Radios::$cache_timeout_meta_name);
         }
         
         //playable
-        $new_input['playable'] = (bool)wpsstm_get_array_value('playable',$input_data);
+        $playable = (bool)wpsstm_get_array_value('playable',$input_data);
+        update_post_meta( $post_id, WPSSTM_Core_Tracklists::$playable_meta_name,$playable);
         
         //order
-        $order = wpsstm_get_array_value('order',$input_data);
-        $new_input['order'] = strtoupper($order);
-
-        if (!$new_input){
-            $success = delete_post_meta($post_id, WPSSTM_Post_Tracklist::$tracklist_options_meta_name);
+        $orderby = wpsstm_get_array_value('orderby',$input_data);
+        if ($orderby){
+            $orderby = strtoupper($orderby);
+            update_post_meta( $post_id, WPSSTM_Core_Tracklists::$orderby_meta_name,$orderby );
         }else{
-            $success = update_post_meta($post_id, WPSSTM_Post_Tracklist::$tracklist_options_meta_name, $new_input);
+            delete_post_meta( $post_id, WPSSTM_Core_Tracklists::$orderby_meta_name );
         }
 
         //reload settings
         $tracklist->populate_tracklist_post();
-
-        return $success;
 
     }
 
@@ -226,16 +227,16 @@ class WPSSTM_Core_Tracklists{
         printf('<p>%s <label>%s</label></p>',$input,__('Player','wpsstm'));
         
         //sort
-        $option = $wpsstm_tracklist->get_options('order');
+        $option = $wpsstm_tracklist->get_options('orderby');
 
         $input_asc = sprintf(
-            '<input type="radio" name="%s[order]" value="ASC" %s /><label>%s</label>',
+            '<input type="radio" name="%s[orderby]" value="ASC" %s /><label>%s</label>',
             'wpsstm_tracklist_options',
             checked($option,'ASC', false),
             'ASC'
         );
         $input_desc = sprintf(
-            '<input type="radio" name="%s[order]" value="DESC" %s /><label>%s</label>',
+            '<input type="radio" name="%s[orderby]" value="DESC" %s /><label>%s</label>',
             'wpsstm_tracklist_options',
             checked($option,'DESC', false),
             'DESC'
@@ -246,16 +247,19 @@ class WPSSTM_Core_Tracklists{
         if ($wpsstm_tracklist->tracklist_type === 'live' ) {
 
             //cache min
-
-            $option = $wpsstm_tracklist->get_options('cache_min');
+            if ( $cache_timeout = $wpsstm_tracklist->get_options('cache_timeout') ){
+                $cache_min = $cache_timeout / MINUTE_IN_SECONDS;
+            }else{
+                $cache_min = 0;
+            }
 
             $input = sprintf(
                 '<input type="number" name="%s[cache_min]" size="4" min="0" value="%s" />',
                 'wpsstm_tracklist_options',
-                $option
+                $cache_min
             );
             
-            printf('<p><strong>%s</strong> <small>(%s)</small></br>%s</p>',__('Cache time','wpsstm'),__('minutes','wpsstm'),$input);
+            printf('<p><strong>%s</strong> <small>(%s)</small></br>%s</p>',__('Cache timeout','wpsstm'),__('minutes','wpsstm'),$input);
         }
         
         //edit tracks bt

@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '213';
+    public $db_version = '214';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -280,7 +280,7 @@ class WP_SoundSystem {
                     $min = isset($metadata['remote_delay_min']) ? $metadata['remote_delay_min'] : false;
                     if( $min === false ) continue;
 
-                    update_post_meta($row->post_id, WPSSTM_Core_Radios::$cache_min_meta_name, $min);
+                    update_post_meta($row->post_id,'wpsstm_cache_min', $min);
                     
                     unset($metadata['remote_delay_min']);
                     update_post_meta($row->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name, $metadata);
@@ -332,8 +332,7 @@ class WP_SoundSystem {
                 //TRACKS TITLE - migrate meta to taxonomy
                 $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_track' );
                 $results = $wpdb->get_results ( $querystr );
-            
-                
+
                 foreach((array)$results as $meta){
                     
                     //TOUFIX TOUCHECK should this be here ?
@@ -404,8 +403,48 @@ class WP_SoundSystem {
                 $this->batch_delete_duplicate_subtracks();
                 $this->batch_reindex_subtracks_by('time');
             }
+            
+            if ($current_version < 214){
+                
+                //convert cache_min to seconds
+                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", 'wpsstm_cache_min' );
+                $results = $wpdb->get_results ( $querystr );
+                
+                foreach((array)$results as $result){
+                    $post_id = $result->post_id;
+                    $min = $result->meta_value;
+                    update_post_meta( $post_id, WPSSTM_Core_Radios::$cache_timeout_meta_name, $min * 60 );
+                    delete_post_meta( $post_id,'wpsstm_cache_min');
+                }
+
+                //split old tracklist options into separate options
+
+                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_tracklist_options' );
+                $results = $wpdb->get_results ( $querystr );
+                
+                foreach((array)$results as $result){
+                    $post_id = $result->post_id;
+                    $value = maybe_unserialize($result->meta_value);
+                    
+                    $playable = isset($value['playable']) ? $value['playable'] : null;
+                    $sortby = isset($value['order']) ? $value['order'] : null;
+
+                    if($playable){
+                        update_post_meta( $post_id, WPSSTM_Core_Tracklists::$playable_meta_name, $playable );
+                    }
+                    
+                    if($sortby){
+                        update_post_meta( $post_id, WPSSTM_Core_Tracklists::$orderby_meta_name, $sortby );
+                    }
+                    
+                    delete_post_meta($post_id,'_wpsstm_tracklist_options');
+                    
+                }
+
+            }
+            
         }
-        
+
         //update DB version
         update_option("_wpsstm-db_version", $this->db_version );
     }
