@@ -7,27 +7,46 @@ Tested up to: 5.2.4
 Stable tag: trunk
 License: GPLv2 or later
 
-WP SoundSystem is a complete solution to manage music in WordPress.  Manage tracklists and tracks, load them in our audio player, connect to popular music services, and more !
+WP SoundSystem is a complete solution to manage music in WordPress.  Import, create and manage tracklists, play tracks, connect to popular music services, and more !
 
 == Description ==
 
 *WP SoundSystem* is a complete solution to manage music in WordPress.
 
-Create, import or manage tracklists and tracks, load them in our audio player, connect to popular music services, and more !
-
-Several new post types will be available : Playlists, Radios, Artists, Albums, Tracks and Tracks Links.
+Import, create and manage tracklists, play tracks, connect to popular music services, and more !
 
 [See it working on Spiff Radio](https://www.spiff-radio.org/)
 
-= Tracklists =
+Unlike most plugins, WP SoundSystem is *not* embedding third-party widgets in Wordpress.
+It goes *further* by using its own **customizable player** : no brands, no logos, but **your own data & design** !
 
-Creating and editing playlists is a piece of cake (not to mention the *Tracklist Importer*): 
-Add or remove tracks on the fly, reorder them, favorite a track or a tracklist, export…
+Playing tracks does not rely on a single service, since multiple links can be associated to a track (Youtube, Soundcloud, Spotify, audio files, anything!).
+
+= tracklists =
+
+We have two types of tracklists : Playlists, and Radios.
+
+= But what the hell are Radios ? =
+
+Unlike Playlists, you cannot add, remove or reorder the tracks of a Radio : it is synced with an external URL, and updates seamlessly after a user-defined delay.  This is something very specific to this plugin.
+
+[Check some Radios on Spiff Radio](http://spiff-radio.org/?post_type=wpsstm_radio&tag=editors-pick&author=1)
+
+For example, a Radio might be
+
+* Synced to a station website "now playing" page, cached for only 15 minutes since it is updated constantly on the remote side.
+* Synced to a Spotify playlist, cached for 1 day (or more) since there is only a few chances that its author might have updated it.
+
+A Radio synced with a Spotify playlist of yours would bring an always up-to-date playlist to your visitors, without having to update your website.
+
+You can also create a Radio to fetch a tracklist you like, then convert it to a (static) Playlist so you have a backup of it.
+
+Any tracklists can be exported to the standard [XSPF](http://xspf.org/) file format.
 
 = Tracks =
 
-When editing a track, you can query details from music services like [MusicBrainz](https://musicbrainz.org/) (The Open Music Encyclopedia) or Spotify. 
-Tracks can be favorited by your users frontend, or added to any new playlist on-the-fly. 
+Tracks can be favorited and shared by your users frontend, or added to a new playlist on-the-fly.
+Backend, you can query details from music services like [MusicBrainz](https://musicbrainz.org/) (The Open Music Encyclopedia) or Spotify. 
 
 = Tracks Links =
 
@@ -37,13 +56,6 @@ You can attach a bunch of links to any track; including links that can stream au
 
 If you don't attach links to your track manually, you can enable our *autolink* module.  
 It will search for remote links and attach them to your tracks automatically.
-
-= Radios =
-
-Radios are how we call *live playlists*. 
-Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are refreshing seamlessly after a user-defined delay.
-
-[Check some Radios on Spiff Radio](http://spiff-radio.org/?post_type=wpsstm_radio&tag=editors-pick&author=1)
 
 = Tracklist Importer =
 
@@ -58,6 +70,7 @@ Custom setups are also available, if you are somewhat familiar with [CSS selecto
 
 Our player uses of the [MediaElement.js](https://www.mediaelementjs.com) library, which is native in WordPress. It supports audio (& video) files, but also links from various services like Youtube or Soundcloud.
 It has been extended with various features built on top of it, like a tracks queue or a Last.fm scrobbler.
+You can customize the design of this player the way you like, and extend its functions.
 
 = Social =
 
@@ -81,7 +94,7 @@ Get more out of this plugin by [registering an API key](https://api.spiff-radio.
 * the Autolink module
 
 Those are optionals, but are nice features to a solid plugin.
-Consider getting one as a nice way to support the work done – hundred of hours – , and to ensure its durability.
+Consider getting one as a nice way to support the work done –hundred of hours– , and to ensure its durability.
 
 = Donate =
 Whatever, if you like this plugin, please also consider [making a donation](https://api.spiff-radio.org/?p=31).
@@ -127,6 +140,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 9. Music menu on a BuddyPress profile
 
 == Changelog ==
+
+= 3.2.4 =
+* better way to add tracks to a Playlist
 
 = 3.2.3 =
 * added 'wpsstm_populated_tracklist' action hook
