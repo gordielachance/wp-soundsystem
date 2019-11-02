@@ -319,7 +319,7 @@ class WPSSTM_Track{
         $result = $wpdb->update( 
             $subtracks_table, //table
             array('subtrack_order'=>$new_pos),//data
-            array('ID'=>$this->subtrack_id)//where
+            array('subtrack_id'=>$this->subtrack_id)//where
         );
 
         if ( !$result ){
@@ -1234,7 +1234,7 @@ class WPSSTM_Track{
 
     }
 
-    private function populate_subtrack_id($subtrack_id){
+    function populate_subtrack_id($subtrack_id){
         
         //get post
         $track_args = array(
