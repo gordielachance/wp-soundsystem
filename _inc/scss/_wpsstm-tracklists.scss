@@ -11,6 +11,13 @@ wpsstm-tracklist{
         list-style: none;
         width:100%;
         font-size:.8em;
+        
+        > * {
+            &:nth-child(odd){
+                background: rgba(0, 0, 0, 0.03);
+            }
+        }
+        
     }
     .wpsstm-tracklist-notices{
         position:relative;
@@ -193,56 +200,40 @@ wpsstm-tracklist{
             display:none;
         }
     }
+
+    #wpsstm-new-tracks{
+        text-align:center;
+        .wpsstm-new-track{
+            display:none;
+        }
+    }
     
-    #wpsstm-queue-tracks{
-        margin: 1em 0;
-        text-align: center;
+    .wpsstm-new-track{
+        @include display-flex();
+        padding:.5em;
 
-        .wpsstm-new-track{
-            padding: 1em;
-            margin: 0;
-            border-bottom: 1px solid white;
-            @extend .wpsstm-align-both;
-            > * {
-                margin: 0 .5em;
-            }
-            &:first-child{
-                >button{ //we should not be able to remove the first row
-                    @extend .wpsstm-freeze;
-                    @include opacity(0);
-                }
-            }
-            &.action-loading{
-                @extend .wpsstm-freeze;
-                @include striped-bg();
-                > *{
-                    @include opacity(.25);
-                }
-            }
-
-            &.action-error{
-                border:1px solid red;
-            }
+        .wpsstm-new-track-data{
+            @include display-flex();
+            @include flex-grow(1);
+            @include flex-shrink(1);
         }
-        
-        #wpsstm-queue-more-tracks{
-            display: inline-block;
-            line-height: 26px;
-        }
-        
-        .wpsstm-new-track{
-            background: #fcf8e3;
+        .wpsstm-new-track-actions{
+            @include display-flex();
+            @include flex-grow(0);
+            @include flex-shrink(0);
         }
 
-        &:not(.expanded){
-            #wpsstm-queue-more-tracks{
-                display:none;
-            }
-            .wpsstm-new-track{
-                display:none;
+        &.action-loading{
+            @extend .wpsstm-freeze;
+            @include striped-bg();
+            > *{
+                @include opacity(.25);
             }
         }
 
+        &.action-error{
+            border:1px solid red;
+        }
     }
     
     

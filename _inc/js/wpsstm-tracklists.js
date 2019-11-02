@@ -321,69 +321,69 @@ class WpsstmTracklist extends HTMLElement{
         New subtracks
         */
 
-        var queue_tracks_form = $(tracklist).find('#wpsstm-queue-tracks');
-        var queue_tracks_submit = queue_tracks_form.find('#wpsstm-queue-tracks-submit');
-        var queue_more_tracks = queue_tracks_form.find('#wpsstm-queue-more-tracks');
+        var tracksList = $(tracklist).find('.wpsstm-tracks-list');
+        var newTracksActionsBlock = $(tracklist).find('#wpsstm-new-tracks');
+        var newTracksSubmitBt = newTracksActionsBlock.find('#wpsstm-new-tracks-submit');//TOUFIX URGENT
+        var addNewTrackRowBt = newTracksActionsBlock.find('#wpsstm-add-new-track-row');
 
         //add new track row
-        queue_more_tracks.on( "click", function(e) {
+        addNewTrackRowBt.on( "click", function(e) {
             e.preventDefault();
-            var last_row = queue_tracks_form.find('.wpsstm-new-track').last();
-
-            var new_row = last_row.clone();
-            new_row.find('input').val('');
-            new_row.removeClass('wpsstm-new-track-ready');
-            new_row.insertAfter( last_row );
+            var baseRow = newTracksActionsBlock.find('.wpsstm-new-track').first();
+            var newRow = baseRow.clone();
+            tracksList.append( newRow );
         });
         
         //remove new track row
-        queue_tracks_form.on( "click",'.wpsstm-remove-new-track-row', function(e) {
+        tracksList.on( "click",'.wpsstm-remove-new-track-row', function(e) {
             var row = $(this).parents('.wpsstm-new-track');
             row.remove();
         });
 
-        //submit tracks
-        queue_tracks_submit.click(function(e) {
+        //submit new track
+        tracksList.on( "click",'.wpsstm-save-new-track-row', function(e) {
             
             e.preventDefault();
             
-            var isExpanded = queue_tracks_form.hasClass('expanded');
-            
-            if (!isExpanded){
-                queue_tracks_form.addClass('expanded');
-            }else{
+            var row = $(this).parents('.wpsstm-new-track');
+            var track = new WpsstmTrack();
+            track.track_artist = row.find('input[name="wpsstm_track_data[artist]"]').val();
+            track.track_title = row.find('input[name="wpsstm_track_data[title]"]').val();
+            track.track_album = row.find('input[name="wpsstm_track_data[album]"]').val();
+
+            var ajax_data = {
+                action:         'wpsstm_tracklist_new_subtrack',
+                track:          track.to_ajax(),
+                tracklist_id:   tracklist.post_id
+            };
+
+            row.removeClass('action-error').addClass('action-loading wpsstm-freeze');
+
+            var ajax = $.ajax({
+
+                type:       "post",
+                url:        wpsstmL10n.ajaxurl,
+                data:       ajax_data,
+                dataType:   'json',
+            })
+            .done(function(data){
+
+                if (data.success === false) {
+                    console.log(data);
+                }
                 
-                var rows = queue_tracks_form.find('.wpsstm-new-track');
-                var doReload = false;
-                var ajaxCalls = [];
-                
-                queue_tracks_form.addClass('wpsstm-freeze');
-
-                rows.each(function( index ) {
-                    var row = $(this);
-                    var track = new WpsstmTrack();
-                    track.track_artist = row.find('input[name="wpsstm_track_data[artist]"]').val();
-                    track.track_title = row.find('input[name="wpsstm_track_data[title]"]').val();
-                    track.track_album = row.find('input[name="wpsstm_track_data[album]"]').val();
-                    
-                    var ajax = tracklist.new_subtrack(track,row).done(function() { //at least one track added, we'll need to reload the tracklist
-                        doReload = true;
-                        row.remove();
-                    });
-
-                    ajaxCalls.push(ajax);
-                    
-                });
-
-                //TOUFIX BROKEN
-                //should be fired when all promises have returned a response, no matter if it succeeded or not.
-                $.when.apply($, ajaxCalls).always(function(){
-                    queue_tracks_form.removeClass('wpsstm-freeze');
-                    if (doReload){
-                        tracklist.reloadTracklist();
-                    }
-                })
-            }
+                if (data.html){
+                    row.replaceWith($(data.html));
+                }
+            })
+            .fail(function (xhr, ajaxOptions, thrownError) {
+                console.log(xhr.status);
+                console.log(thrownError);
+                row.addClass('action-error');
+            })
+            .always(function() {
+                row.removeClass('action-loading wpsstm-freeze');
+            })
 
         });
 
@@ -654,48 +654,7 @@ class WpsstmTracklist extends HTMLElement{
         }, {});
         return filtered;
     }
-    
-    new_subtrack(track,row){
-        
-        var tracklist = this;
-        var success = $.Deferred();
 
-        var ajax_data = {
-            action:         'wpsstm_tracklist_new_subtrack',
-            track:          track.to_ajax(),
-            tracklist_id:   tracklist.post_id
-        };
-        
-        row.removeClass('action-error').addClass('action-loading wpsstm-freeze');
-
-        var ajax = $.ajax({
-
-            type:       "post",
-            url:        wpsstmL10n.ajaxurl,
-            data:       ajax_data,
-            dataType:   'json',
-        })
-        .done(function(data){
-            if (data.success === false) {
-                console.log(data);
-                success.reject();
-            }else{
-                success.resolve();
-            }
-        })
-        .fail(function (xhr, ajaxOptions, thrownError) {
-            console.log(xhr.status);
-            console.log(thrownError);
-            row.addClass('action-error');
-            success.reject();
-        })
-        .always(function() {
-            row.removeClass('action-loading wpsstm-freeze');
-        })
-        
-        return success.promise();
-    }
-    
     get_previous_track(){
         var tracklist = this;
         var tracks_playable = [];

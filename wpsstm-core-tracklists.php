@@ -350,6 +350,7 @@ class WPSSTM_Core_Tracklists{
             $result['message'] = $success->get_error_message();
         }else{
             $result['success'] = $success;
+            $result['html'] = $track->get_track_html();
         }
 
         header('Content-type: application/json');
