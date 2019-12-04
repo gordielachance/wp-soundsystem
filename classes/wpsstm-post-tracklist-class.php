@@ -875,7 +875,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         $tracks_arr = wpsstm_get_array_value(array('trackList','track'),$xspf);
-        $tracks_arr = !wpsstm_is_associative_array($tracks_arr) ? $tracks_arr : [$tracks_arr]; //a tracklist with multiple tracks would be sequential.
+        $tracks_arr = !wpsstm_is_associative_array($tracks_arr) ? $tracks_arr : array($tracks_arr); //a tracklist with multiple tracks would be sequential.
 
         foreach ((array)$tracks_arr as $track_arr) {
 
