@@ -58,25 +58,25 @@ class WP_SoundSystem {
     public $post_type_track_link =  'wpsstm_track_link';
     public $post_type_playlist =    'wpsstm_playlist';
     public $post_type_radio =       'wpsstm_radio';
-    
+
     public $tracklist_post_types = array('wpsstm_playlist','wpsstm_radio','wpsstm_release');
 
     public $subtracks_table_name = 'wpsstm_subtracks';
     public $user;
 
     public $meta_name_options = 'wpsstm_options';
-    
+
     var $menu_page;
     var $options = array();
     var $details_engine;
-    
+
     /**
     * @var The one true Instance
     */
     private static $instance;
 
     public static function instance() {
-        
+
             if ( ! isset( self::$instance ) ) {
                     self::$instance = new WP_SoundSystem;
                     self::$instance->setup_globals();
@@ -89,9 +89,9 @@ class WP_SoundSystem {
     * A dummy constructor to prevent plugin from being loaded more than once.
     */
     private function __construct() { /* Do nothing here */ }
-    
+
     function setup_globals() {
-        
+
         /** Paths *************************************************************/
         $this->file       = __FILE__;
         $this->basename   = plugin_basename( $this->file );
@@ -118,20 +118,20 @@ class WP_SoundSystem {
             'ajax_radios'                       => true,//use ajax to sync radios ?
             'ajax_autolink'                     => true,
         );
-        
+
         $db_option = get_option( $this->meta_name_options);
         $this->options = wp_parse_args($db_option,$options_default);
-        
+
     }
-    
+
     function includes(){
-        
+
         require_once(wpsstm()->plugin_dir . '_inc/php/autoload.php'); // PHP dependencies
-        
+
         require $this->plugin_dir . 'wpsstm-templates.php';
         require $this->plugin_dir . 'wpsstm-functions.php';
         require $this->plugin_dir . 'wpsstm-settings.php';
-        
+
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'wpsstm-core-radios.php';
@@ -139,43 +139,43 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-core-artists.php';
         require $this->plugin_dir . 'wpsstm-core-tracks.php';
         require $this->plugin_dir . 'wpsstm-core-track-links.php';
-        
+
         require $this->plugin_dir . 'wpsstm-core-user.php';
         require $this->plugin_dir . 'wpsstm-core-buddypress.php';
         require $this->plugin_dir . 'wpsstm-core-api.php';
         require $this->plugin_dir . 'classes/wpsstm-data-engine.php';
         require $this->plugin_dir . 'wpsstm-core-importer.php';
-        
+
         require $this->plugin_dir . 'classes/wpsstm-artist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-track-class.php';
         require $this->plugin_dir . 'classes/wpsstm-album-class.php';
         require $this->plugin_dir . 'classes/wpsstm-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-post-tracklist-class.php';
         require $this->plugin_dir . 'classes/wpsstm-track-link-class.php';
-        
+
         //include APIs/services stuff (lastfm,youtube,spotify,etc.)
         $this->load_services();
     }
-    
+
     /*
     Register scraper presets.
     */
     private function load_services(){
-        
+
         $presets = array();
 
         $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/services' );
 
         //get all files in /presets directory
-        $preset_files = glob( $presets_path . '*.php' ); 
+        $preset_files = glob( $presets_path . '*.php' );
 
         foreach ($preset_files as $file) {
             require_once($file);
         }
-        
+
         do_action('wpsstm_load_services');
     }
-    
+
     function setup_actions(){
         // activation, deactivation...
         register_activation_hook( $this->file, array( $this, 'activate_wpsstm'));
@@ -184,16 +184,16 @@ class WP_SoundSystem {
         //init
         add_action( 'init', array($this,'populate_data_engines'));
         add_action( 'admin_init', array($this,'load_textdomain'));
-        
+
         add_action( 'init', array($this, 'upgrade'), 9);
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts_styles' ), 11 );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_scripts_styles' ), 11 );
 
         add_action('edit_form_after_title', array($this,'metabox_reorder'));
-        
+
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
-        
+
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
 
     }
@@ -213,13 +213,13 @@ class WP_SoundSystem {
     function load_textdomain() {
         load_plugin_textdomain( 'wpsstm', false, $this->plugin_dir . '/languages' );
     }
-	
+
     function activate_wpsstm() {
         self::debug_log('activation');
-        
+
         //clear some transients
         WPSSTM_Settings::clear_premium_transients();
-        
+
         $this->add_custom_capabilites();
     }
 
@@ -268,44 +268,44 @@ class WP_SoundSystem {
                 $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_spotify_time', '_wpsstm_spotify_data_time' );
                 $result = $wpdb->get_results ( $querystr );
             }
-            
+
             if ($current_version < 202){
-                
+
                 $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", WPSSTM_Post_Tracklist::$importer_options_meta_name );
-                
+
                 $rows = $wpdb->get_results($querystr);
 
                 foreach($rows as $row){
                     $metadata = maybe_unserialize($row->meta_value);
-                    
+
                     $min = isset($metadata['remote_delay_min']) ? $metadata['remote_delay_min'] : false;
                     if( $min === false ) continue;
 
                     update_post_meta($row->post_id,'wpsstm_cache_min', $min);
-                    
+
                     unset($metadata['remote_delay_min']);
                     update_post_meta($row->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name, $metadata);
-                    
-                    
+
+
                 }
             }
-            
+
             if ($current_version < 204){
-                
+
                 //rename post type
                 $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE post_type = '%s'",$this->post_type_track_link,'wpsstm_source' );
                 $result = $wpdb->get_results ( $querystr );
-                
+
                 //rename _wpsstm_source_url metas
                 $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",WPSSTM_Core_Track_Links::$link_url_metakey, '_wpsstm_source_url' );
                 $result = $wpdb->get_results ( $querystr );
-                
+
                 //rename _wpsstm_autosource_time metas
                 $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",WPSSTM_Core_Track_Links::$autolink_time_metakey, '_wpsstm_autosource_time' );
                 $result = $wpdb->get_results ( $querystr );
-                
+
             }
-            
+
             if ($current_version < 205){
                 $this->migrate_old_subtracks();
             }
@@ -316,7 +316,7 @@ class WP_SoundSystem {
                 $results = $wpdb->get_results ( $querystr );
 
                 foreach((array)$results as $meta){
-                    
+
                     //TOUFIX TOUCHECK should this be here ?
                     $post_type = get_post_type($meta->post_id);
                     if ( $post_type !== wpsstm()->post_type_track ) continue;
@@ -325,17 +325,17 @@ class WP_SoundSystem {
 
                     if ( !is_wp_error($success) ){
                         $success = delete_post_meta($meta->post_id,'_wpsstm_artist');
-                        
+
                     }
-                    
+
                 }
-                
+
                 //TRACKS TITLE - migrate meta to taxonomy
                 $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_track' );
                 $results = $wpdb->get_results ( $querystr );
 
                 foreach((array)$results as $meta){
-                    
+
                     //TOUFIX TOUCHECK should this be here ?
                     $post_type = get_post_type($meta->post_id);
                     if ( $post_type !== wpsstm()->post_type_track ) continue;
@@ -344,17 +344,17 @@ class WP_SoundSystem {
 
                     if ( !is_wp_error($success) ){
                         delete_post_meta($meta->post_id,'_wpsstm_track');
-                        
+
                     }
-                    
+
                 }
-                
+
                 //TRACKS ALBUM - migrate meta to taxonomy
                 $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_release' );
                 $results = $wpdb->get_results ( $querystr );
-                
+
                 foreach((array)$results as $meta){
-                    
+
                     //TOUFIX TOUCHECK should this be here ?
                     $post_type = get_post_type($meta->post_id);
                     if ( $post_type !== wpsstm()->post_type_track ) continue;
@@ -363,15 +363,15 @@ class WP_SoundSystem {
 
                     if ( !is_wp_error($success) ){
                         delete_post_meta($meta->post_id,'_wpsstm_release');
-                        
+
                     }
-                    
+
                 }
-                
+
             }
-            
+
             if ($current_version < 211){
-                
+
                 //migrate community user
                 if ( $community_id = $this->get_options('community_user_id') ){
                     $success = $this->update_option( 'bot_user_id', $community_id );
@@ -381,36 +381,36 @@ class WP_SoundSystem {
                     $success = $this->update_option( 'importer_page_id', $page_id );
                 }
 
-                self::batch_delete_orphan_tracks();
-                
+                WPSSTM_Core_Tracks::batch_delete_orphan_tracks();
+
                 //remove unused music terms since we hadn't cleanup functions before this version
                 self::batch_delete_unused_music_terms();
             }
-            
+
             if ($current_version < 212){
                 $results = $wpdb->query( "UPDATE `$wpdb->posts` SET `post_type` = 'wpsstm_radio' WHERE `wp_posts`.`post_type` = 'wpsstm_live_playlist'");
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `time` `subtrack_time` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'");
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `track_order` `subtrack_order` int(11) NOT NULL DEFAULT '0'");
                 $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD subtrack_author bigint(20) UNSIGNED NULL" );
-                
+
                 $this->create_nowplaying_post();
                 $this->create_sitewide_favorites_post();
 
             }
-            
+
             if ($current_version < 213){
 
                 $this->batch_delete_duplicate_subtracks();
                 $this->batch_reindex_subtracks_by('time');
             }
-            
+
             if ($current_version < 214){
-                
+
                 //convert cache_min to seconds
                 $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", 'wpsstm_cache_min' );
                 $results = $wpdb->get_results ( $querystr );
-                
+
                 foreach((array)$results as $result){
                     $post_id = $result->post_id;
                     $min = $result->meta_value;
@@ -422,28 +422,28 @@ class WP_SoundSystem {
 
                 $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_tracklist_options' );
                 $results = $wpdb->get_results ( $querystr );
-                
+
                 foreach((array)$results as $result){
                     $post_id = $result->post_id;
                     $value = maybe_unserialize($result->meta_value);
-                    
+
                     $playable = isset($value['playable']) ? $value['playable'] : null;
                     $order = isset($value['order']) ? $value['order'] : null;
 
                     if($playable){
                         update_post_meta( $post_id, WPSSTM_Core_Tracklists::$playable_meta_name, $playable );
                     }
-                    
+
                     if($order){
                         update_post_meta( $post_id, WPSSTM_Core_Tracklists::$order_meta_name, $order );
                     }
-                    
+
                     delete_post_meta($post_id,'_wpsstm_tracklist_options');
-                    
+
                 }
 
             }
-            
+
             if ($current_version < 215){
 
                 $nowplaying_id = wpsstm()->get_options('nowplaying_id');
@@ -453,39 +453,39 @@ class WP_SoundSystem {
                     $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE ID = '%s'",$this->post_type_radio,$nowplaying_id);
                     $result = $wpdb->get_results ( $querystr );
                 }
-                
+
                 if ( $sitewide_favorites_id ){
                     $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE ID = '%s'",$this->post_type_radio,$sitewide_favorites_id);
                     $result = $wpdb->get_results ( $querystr );
                 }
 
             }
-            
+
         }
 
         //update DB version
         update_option("_wpsstm-db_version", $this->db_version );
     }
-    
+
     private function create_bot_user(){
 
-        $bot_id = wp_create_user( 
+        $bot_id = wp_create_user(
             'wpsstm bot',
             wp_generate_password()
         );
         if ( is_wp_error($bot_id) ) return $bot_id;
-        
+
         $this->update_option( 'bot_user_id', $bot_id );
         self::debug_log($bot_id,'created bot user');
 
         $user = new WP_User( $bot_id );
-        
+
         //TOFIX URGENT should be caps instead of role ?
         $success = $user->set_role( 'author' );
 
         return $success;
     }
-    
+
     //TOUFIX should be a radio, but breaks because then it has no URL
     private function create_import_page(){
         $post_details = array(
@@ -496,12 +496,12 @@ class WP_SoundSystem {
         );
         $page_id = wp_insert_post( $post_details );
         if ( is_wp_error($page_id) ) return $page_id;
-        
+
         self::debug_log($page_id,'created importer page');
-        
+
         return $this->update_option( 'importer_page_id', $page_id );
     }
-    
+
     //TOUFIX should be a radio, but breaks because then it has no URL
     private function create_nowplaying_post(){
         $post_details = array(
@@ -511,17 +511,17 @@ class WP_SoundSystem {
             'post_type' =>      wpsstm()->post_type_radio,
             'meta_input' =>     array(
                 WPSSTM_Core_Tracklists::$order_meta_name =>   'DESC',
-                
+
             ),
         );
         $page_id = wp_insert_post( $post_details );
         if ( is_wp_error($page_id) ) return $page_id;
-        
+
         self::debug_log($page_id,'created now playing post');
-        
+
         return $this->update_option( 'nowplaying_id', $page_id );
     }
-    
+
     private function create_sitewide_favorites_post(){
         $post_details = array(
             'post_title' =>     __('Sitewide favorite tracks','wpsstm'),
@@ -530,17 +530,17 @@ class WP_SoundSystem {
             'post_type' =>      wpsstm()->post_type_radio,
             'meta_input' =>     array(
                 WPSSTM_Core_Tracklists::$order_meta_name =>   'DESC',
-                
+
             ),
         );
         $page_id = wp_insert_post( $post_details );
         if ( is_wp_error($page_id) ) return $page_id;
-        
+
         self::debug_log($page_id,'created global favorites post');
-        
+
         return $this->update_option( 'sitewide_favorites_id', $page_id );
     }
-    
+
     function setup_subtracks_table(){
         global $wpdb;
 
@@ -561,12 +561,12 @@ class WP_SoundSystem {
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
         return dbDelta( $sql );
     }
-    
+
     /*
     we don't use $wpdb->prepare here because it adds quotes like IN('1,2,3,4'), and we don't want that.
     https://wordpress.stackexchange.com/questions/78659/wpdb-prepare-function-remove-single-quote-for-s-in-sql-statment
     */
-    
+
     private static function batch_delete_unused_music_terms(){
         global $wpdb;
 
@@ -589,13 +589,13 @@ class WP_SoundSystem {
             $terms = $wpdb->get_results($querystr);
             $unused_terms = array_merge($unused_terms,$terms);
         }
-        
+
         foreach($unused_terms as $term){
             wp_delete_term( $term->term_id, $term->taxonomy );
         }
 
     }
-    
+
     /*
     Get the subtracks that have the same track ID & tracklist ID
     */
@@ -605,12 +605,12 @@ class WP_SoundSystem {
         $querystr = "SELECT subtrack_id,track_id,tracklist_id, COUNT(*) as countOf FROM `$subtracks_table` GROUP BY track_id,tracklist_id HAVING countOf > 1 ORDER BY MAX(subtrack_id)";
         if ( !$dupe_ids = $wpdb->get_col($querystr) ) return;
         $dupe_ids = implode(',',$dupe_ids);
-        
+
         $querystr = sprintf("DELETE FROM `$subtracks_table` WHERE subtrack_id IN(%s)",$dupe_ids );
         return $wpdb->get_results ( $querystr );
-        
+
     }
-    
+
     private function batch_reindex_subtracks_by($by){
         global $wpdb;
         $types_str = "'" . implode ( "', '", $this->tracklist_post_types ) . "'";
@@ -619,12 +619,12 @@ class WP_SoundSystem {
 
         $updated = 0;
         $errors = 0;
-        
+
         foreach($ids as $id){
             $tracklist = new WPSSTM_Post_Tracklist($id);
             $success = $tracklist->reindex_subtracks_by($by);
             if ( !$success ) continue;
-            
+
             if ( is_wp_error($success) ){
                 $errors++;
             }else{
@@ -633,31 +633,9 @@ class WP_SoundSystem {
         }
 
         WP_SoundSystem::debug_log(array('total'=>count($ids),'by'=>$by,'updated'=>$updated,'errors'=>$errors),"reindexed tracklists");
-        
+
         return $updated;
-        
-        
-    }
-    
-    private static function batch_delete_orphan_tracks(){
-        
-        if ( !current_user_can('manage_options') ){
-            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
-        }
 
-        $trashed = array();
-        
-        if ( $flushable_ids = WPSSTM_Core_Tracks::get_orphan_track_ids() ){
-
-            foreach( (array)$flushable_ids as $track_id ){
-                $success = wp_delete_post($track_id,true);
-                if ( $success ) $trashed[] = $track_id;
-            }
-        }
-
-        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan tracks");
-
-        return $trashed;
 
     }
 
@@ -668,32 +646,32 @@ class WP_SoundSystem {
     */
     function migrate_old_subtracks(){
         global $wpdb;
-        
+
         $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
         $querystr = $wpdb->prepare( "SELECT * FROM `$subtracks_table` WHERE track_id = %s",'0' );
         $rows = $wpdb->get_results($querystr);
 
         foreach((array)$rows as $row){
-            
+
             $track = new WPSSTM_Track();
             $track->subtrack_id = $row->ID;
             $track->artist = $row->artist;
             $track->title = $row->title;
             $track->album = $row->album;
-            
+
             $valid = $track->validate_track();
-            
+
             if ( is_wp_error( $valid ) ){
-                
+
                 $rowquerystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE subtrack_id = '%s'",$row->ID );
                 $result = $wpdb->get_results ( $rowquerystr );
-                
+
             }else{
-                
+
                 $track_id = $track->insert_bot_track();
-                
+
                 if ( !is_wp_error($track_id) ){
-                    
+
                     $rowquerystr = $wpdb->prepare( "UPDATE `$subtracks_table` SET track_id = '%s' WHERE subtrack_id = '%s'",$track_id, $row->ID );
                     $result = $wpdb->get_results ( $rowquerystr );
 
@@ -702,7 +680,7 @@ class WP_SoundSystem {
             }
 
         }
-        
+
         //now that the tracks are fixed, alter table
         $wpdb->query("ALTER TABLE `$subtracks_table` DROP artist");
         $wpdb->query("ALTER TABLE `$subtracks_table` DROP title");
@@ -713,7 +691,7 @@ class WP_SoundSystem {
     function get_options($keys = null){
         return wpsstm_get_array_value($keys,$this->options);
     }
-    
+
     function update_option($key, $value){
         $db_option = get_option( $this->meta_name_options);
         $db_option[$key] = $value;
@@ -723,11 +701,11 @@ class WP_SoundSystem {
     function register_scripts_styles(){
 
         //TO FIX conditional / move code ?
-        
+
         //JSON VIEWER
         wp_register_script('jquery.json-viewer', $this->plugin_url . '_inc/js/jquery.json-viewer/jquery.json-viewer.js',array('jquery')); //TOFIX version
         wp_register_style('jquery.json-viewer', $this->plugin_url . '_inc/js/jquery.json-viewer/jquery.json-viewer.css',null); //TOFIX version
-        
+
         //CSS
         wp_register_style( 'font-awesome', '//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css',false,'4.7.0');
         wp_register_style( 'wpsstm', wpsstm()->plugin_url . '_inc/css/wpsstm.css',array('font-awesome','jquery.json-viewer'),wpsstm()->version );
@@ -747,21 +725,21 @@ class WP_SoundSystem {
         );
 
         wp_localize_script( 'wpsstm-functions', 'wpsstmL10n', $datas );
-        
+
         //JS
         wp_enqueue_script( 'wpsstm' );
-        
+
         //CSS
         wp_enqueue_style( 'wpsstm' );
- 
+
     }
 
     /*
     Checks that we are on one of backend pages of the plugin
     */
-    
+
     function is_admin_page(){
-        
+
         if ( !wpsstm_is_backend() ) return;
 
         $screen = get_current_screen();
@@ -779,16 +757,16 @@ class WP_SoundSystem {
 
         return ( $is_allowed_post_type || self::is_settings_page() );
     }
-    
+
     static function is_settings_page(){
         if ( !wpsstm_is_backend() ) return;
         if ( !$screen = get_current_screen() ) return;
-        
+
         return ($screen->id == 'toplevel_page_wpsstm');
     }
-    
+
     function promo_notice(){
-        
+
         if ( !$this->is_admin_page() ) return;
 
         $rate_link_wp = 'https://wordpress.org/support/view/plugin-reviews/wp-soundsystem?rate#postform';
@@ -817,33 +795,33 @@ class WP_SoundSystem {
 
         error_log($prefix . $data);
     }
-    
+
     function register_imported_view($views){
-        
+
         if ( !$bot_id = $this->get_options('bot_user_id') ) return $views;
-        
+
         $screen = get_current_screen();
         $post_type = $screen->post_type;
 
         $link = add_query_arg( array('post_type'=>$post_type,'author'=>$bot_id),admin_url('edit.php') );
-        
+
         $attr = array(
             'href' =>   $link,
         );
-        
+
         $author_id = isset($_REQUEST['author']) ? $_REQUEST['author'] : null;
-        
+
         if ($author_id==$bot_id){
             $attr['class'] = 'current';
         }
-        
+
         $count = count_user_posts( $bot_id , $post_type  );
 
         $views['imported'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Imported','wpsstm'),$count);
-        
+
         return $views;
     }
-    
+
     /*
     List of capabilities and which roles should get them
     */
@@ -851,88 +829,88 @@ class WP_SoundSystem {
     function get_roles_capabilities($role_slug){
 
         //array('subscriber','contributor','author','editor','administrator'),
-        
+
         $all = array(
-            
+
             //radios
             'manage_radios'     => array('editor','administrator'),
             'edit_radios'       => array('contributor','author','editor','administrator'),
             'create_radios'     => array('contributor','author','editor','administrator'),
-            
+
             //playlists
             'manage_playlists'     => array('editor','administrator'),
             'edit_playlists'       => array('contributor','author','editor','administrator'),
             'create_playlists'     => array('contributor','author','editor','administrator'),
-            
+
             //tracks
             'manage_tracks'     => array('editor','administrator'),
             'edit_tracks'       => array('contributor','author','editor','administrator'),
             'create_tracks'     => array('contributor','author','editor','administrator'),
-            
+
             //tracks & tracks links
             'manage_tracks'     => array('editor','administrator'),
             'edit_tracks'       => array('contributor','author','editor','administrator'),
             'create_tracks'     => array('contributor','author','editor','administrator'),
-            
+
             //artists
             'manage_artists'     => array('editor','administrator'),
             'edit_artists'       => array('contributor','author','editor','administrator'),
             'create_artists'     => array('contributor','author','editor','administrator'),
-            
+
             //albums
             'manage_albums'     => array('editor','administrator'),
             'edit_albums'       => array('contributor','author','editor','administrator'),
             'create_albums'     => array('contributor','author','editor','administrator'),
-            
+
         );
-        
+
         $role_caps = array();
-        
+
         foreach ((array)$all as $cap=>$allowed_roles){
             if ( !in_array($role_slug,$allowed_roles) ) continue;
             $role_caps[] = $cap;
         }
-        
+
         return $role_caps;
-        
+
     }
-    
+
     /*
     https://wordpress.stackexchange.com/questions/35165/how-do-i-create-a-custom-role-capability
     */
-    
+
     function add_custom_capabilites(){
 
         $roles = get_editable_roles();
         foreach ($GLOBALS['wp_roles']->role_objects as $role_slug => $role) {
             if ( !isset($roles[$role_slug]) ) continue;
             $custom_caps = $this->get_roles_capabilities($role_slug);
-            
+
             foreach($custom_caps as $caps){
                 $role->add_cap($caps);
             }
-            
+
         }
 
     }
-    
+
     function remove_custom_capabilities(){
-        
+
         $roles = get_editable_roles();
         foreach ($GLOBALS['wp_roles']->role_objects as $role_slug => $role) {
             if ( !isset($roles[$role_slug]) ) continue;
             $custom_caps = $this->get_roles_capabilities($role_slug);
-            
+
             foreach($custom_caps as $caps){
                 $role->remove_cap($caps);
             }
-            
+
         }
-        
+
     }
-    
+
     static function get_notices_output($notices){
-        
+
         $output = array();
 
         foreach ((array)$notices as $notice){
@@ -943,9 +921,9 @@ class WP_SoundSystem {
                 'wpsstm-notice',
                 'is-dismissible'
             );
-            
+
             //$notice_classes[] = ($notice['error'] == true) ? 'error' : 'updated';
-            
+
             $notice_attr_arr = array(
                 'id'    => sprintf('wpsstm-notice-%s',$notice['code']),
                 'class' => implode(' ',$notice_classes),
@@ -953,33 +931,33 @@ class WP_SoundSystem {
 
             $output[] = sprintf('<li %s><strong>%s</strong></li>',wpsstm_get_html_attr($notice_attr_arr),$notice['message']);
         }
-        
+
         return implode("\n",$output);
     }
 
     public function is_bot_ready(){
-        
+
         //bot
         $bot_id = $this->get_options('bot_user_id');
-        
+
         if ( !$bot_id ){
             return new WP_Error( 'wpsstm_missing_bot', __("Missing bot user.",'wpsstm'));
         }
-        
+
         if ( !$userdatas = get_userdata($bot_id) ) {
             return new WP_Error( 'wpsstm_invalid_bot', __("Invalid bot user.",'wpsstm'));
         }
-        
+
         //check can create radios
         if ( !user_can($bot_id,'create_radios') ){
             return new WP_Error( 'wpsstm_missing_capability', __("The bot user requires the 'create_radios' capability.",'wpsstm'));
         }
-        
+
         //check can create tracks
         if ( !user_can($bot_id,'create_tracks') ){
             return new WP_Error( 'wpsstm_missing_capability', __("The bot user requires the 'create_tracks' capability.",'wpsstm') );
         }
-        
+
         //check can create track links
         //commented since it is the same capability than for tracks.
         /*
@@ -987,27 +965,27 @@ class WP_SoundSystem {
             return new WP_Error( 'wpsstm_missing_capability', __("The bot user requires the 'create_tracks' capability.",'wpsstm'));
         }
         */
-        
+
         return true;
     }
-    
+
     /*
     Get the list of services that could get music details
     */
     public function get_available_detail_engines(){
         return apply_filters('wpsstm_get_music_detail_engines',array());
     }
-    
+
     public static function local_rest_request($endpoint = null, $namespace = null, $method = 'GET'){
-        
-        if (!$namespace) $namespace = WPSSTM_REST_NAMESPACE; 
+
+        if (!$namespace) $namespace = WPSSTM_REST_NAMESPACE;
 
         if (!$endpoint){
             return new WP_Error('wpsstm_no_rest_endpoint',__("Missing REST endpoint",'wpsstm'));
         }
 
         $rest_url = sprintf('/%s/%s',$namespace,$endpoint);
-        
+
         self::debug_log(array('url'=>$rest_url,'method'=>$method),'local REST query...');
 
         //Create request
@@ -1015,25 +993,25 @@ class WP_SoundSystem {
 
         //Get response
         $response = rest_do_request( $request );
-        
+
         if ( $response->is_error() ) {
-            
+
             $error = $response->as_error();
             $error_message = $error->get_error_message();
-            
+
             self::debug_log($error_message,'local REST query error');
 
             return $error;
-            
+
         }
-        
+
         //Get datas
         $datas = $response->get_data();
 
         return $datas;
 
     }
-    
+
     public static function format_rest_response($response){
 
         if ( is_wp_error($response) ){
@@ -1044,13 +1022,13 @@ class WP_SoundSystem {
             if (!$status){
                 $response->add_data(array('status'=>404, $code));
             }
-            
+
         }
-        
+
         $response = rest_ensure_response( $response );
         return $response;
     }
-    
+
     function populate_data_engines(){
         $enabled_engine_slugs = $this->get_options('details_engines');
         $available_engines = $this->get_available_detail_engines();
