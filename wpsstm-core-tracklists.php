@@ -72,7 +72,7 @@ class WPSSTM_Core_Tracklists{
         /*
         DB relationships
         */
-        add_action( 'before_delete_post', array($this,'unset_from_tracklist_id') );
+        add_action( 'before_delete_post', array($this,'unset_fromtracklist_references') );
         add_action( 'before_delete_post', array($this,'delete_tracklist_subtracks') );
         
         /*
@@ -658,10 +658,10 @@ class WPSSTM_Core_Tracklists{
     }
 
     /*
-    Unset tracklist occurences out of the subtracks table when it is deleted
+    Remove references to this tracklist ID in the from_tracklist column of the subtracks table, when it is deleted.
     */
     
-    function unset_from_tracklist_id($post_id){
+    function unset_fromtracklist_references($post_id){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 

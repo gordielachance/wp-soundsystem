@@ -1395,13 +1395,11 @@ class WPSSTM_Core_Tracks{
 
     /*
     Get tracks that do not belong to any playlists
-    //TOUFIX very slow query, freezes de settings page when there is a lot of tracks.
+    //TOUFIX very slow query, freezes the settings page when there is a lot of tracks.
     //store in transient ? Do in it two steps (query links - delete links) ?
     */
     static function get_orphan_track_ids(){
         global $wpdb;
-        $bot_id = wpsstm()->get_options('bot_user_id');
-        if ( !$bot_id ) return;
 
         //get bot tracks
         $orphan_tracks_args = array(
@@ -1484,15 +1482,16 @@ class WPSSTM_Core_Tracks{
         if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
+        
+        WP_SoundSystem::debug_log("Batch delete orphan tracks...");
 
+        if ( !$flushable_ids = WPSSTM_Core_Tracks::get_orphan_track_ids() ) return;
+        
         $trashed = array();
 
-        if ( $flushable_ids = WPSSTM_Core_Tracks::get_orphan_track_ids() ){
-
-            foreach( (array)$flushable_ids as $track_id ){
-                $success = wp_delete_post($track_id,true);
-                if ( $success ) $trashed[] = $track_id;
-            }
+        foreach( (array)$flushable_ids as $post_id ){
+            $success = wp_delete_post($post_id,true);
+            if ( $success ) $trashed[] = $post_id;
         }
 
         WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan tracks");

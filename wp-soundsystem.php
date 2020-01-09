@@ -567,7 +567,7 @@ class WP_SoundSystem {
     https://wordpress.stackexchange.com/questions/78659/wpdb-prepare-function-remove-single-quote-for-s-in-sql-statment
     */
 
-    private static function batch_delete_unused_music_terms(){
+    public static function batch_delete_unused_music_terms(){
         global $wpdb;
 
         $unused_terms = array();
