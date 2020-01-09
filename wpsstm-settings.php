@@ -60,7 +60,23 @@ class WPSSTM_Settings {
 
         //orphan tracks
         if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_orphan_tracks'),$_POST) ){
-          WPSSTM_Core_Tracks::batch_delete_orphan_tracks();
+            WPSSTM_Core_Tracks::batch_delete_orphan_tracks();
+        }
+        
+        //orphan links
+        if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_orphan_links'),$_POST) ){
+            WPSSTM_Core_Track_Links::batch_delete_orphan_links();
+        }
+        
+        
+        //excluded host links
+        if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_excluded_hosts_links'),$_POST) ){
+            WPSSTM_Core_Track_Links::batch_delete_excluded_hosts_links();
+        }
+        
+        //unused terms
+        if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_unused_music_terms'),$_POST) ){
+            WP_SoundSystem::batch_delete_unused_music_terms();
         }
 
         /*
@@ -390,6 +406,30 @@ class WPSSTM_Settings {
             'batch_delete_orphan_tracks',
             __('Delete orphan tracks','wpsstm'),
             array( $this, 'batch_delete_orphan_tracks_callback' ),
+            'wpsstm-settings-page', // Page
+            'settings_maintenance'//section
+        );
+        
+        add_settings_field(
+            'batch_delete_orphan_links',
+            __('Delete orphan links','wpsstm'),
+            array( $this, 'batch_delete_orphan_links_callback' ),
+            'wpsstm-settings-page', // Page
+            'settings_maintenance'//section
+        );
+        
+        add_settings_field(
+            'batch_delete_excluded_hosts_links',
+            __('Delete excluded hosts links','wpsstm'),
+            array( $this, 'batch_delete_excluded_hosts_links_callback' ),
+            'wpsstm-settings-page', // Page
+            'settings_maintenance'//section
+        );
+        
+        add_settings_field(
+            'batch_delete_unused_music_terms',
+            __('Delete unused music terms','wpsstm'),
+            array( $this, 'batch_delete_unused_music_terms_callback' ),
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
@@ -739,6 +779,29 @@ class WPSSTM_Settings {
           '<input type="checkbox" name="%s[batch_delete_orphan_tracks]" value="on"/><label>%s</label>',
           wpsstm()->meta_name_options,
           __("Batch delete orphan tracks.","wpsstm")
+      );
+    }
+    
+    function batch_delete_orphan_links_callback(){
+      printf(
+          '<input type="checkbox" name="%s[batch_delete_orphan_links]" value="on"/><label>%s</label>',
+          wpsstm()->meta_name_options,
+          __("Batch delete orphan links.","wpsstm")
+      );
+    }
+    
+    function batch_delete_excluded_hosts_links_callback(){
+      printf(
+          '<input type="checkbox" name="%s[batch_delete_excluded_hosts_links]" value="on"/><label>%s</label>',
+          wpsstm()->meta_name_options,
+          __("Batch delete excluded hosts tracks links.","wpsstm")
+      );
+    }
+    function batch_delete_unused_music_terms_callback(){
+      printf(
+          '<input type="checkbox" name="%s[batch_delete_unused_music_terms]" value="on"/><label>%s</label>',
+          wpsstm()->meta_name_options,
+          __("Batch delete unused music terms.","wpsstm")
       );
     }
 

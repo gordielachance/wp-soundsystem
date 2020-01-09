@@ -845,6 +845,52 @@ class WPSSTM_Core_Track_Links{
         return $views;
     }
     
+    public static function batch_delete_orphan_links(){
+
+        if ( !current_user_can('manage_options') ){
+            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
+        }
+        
+        WP_SoundSystem::debug_log("Batch delete orphan links...");
+
+        if ( !$flushable_ids = WPSSTM_Core_Track_Links::get_orphan_link_ids() ) return;
+
+        $trashed = array();
+        
+        foreach( (array)$flushable_ids as $post_id ){
+            $success = wp_delete_post($post_id,true);
+            if ( $success ) $trashed[] = $post_id;
+        }
+
+        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted orphan links");
+
+        return $trashed;
+
+    }
+    
+    public static function batch_delete_excluded_hosts_links(){
+
+        if ( !current_user_can('manage_options') ){
+            return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
+        }
+        
+        WP_SoundSystem::debug_log("Batch delete excluded hosts links...");
+
+        if ( !$flushable_ids = WPSSTM_Core_Track_Links::get_excluded_host_link_ids() ) return;
+
+        $trashed = array();
+        
+        foreach( (array)$flushable_ids as $post_id ){
+            $success = wp_delete_post($post_id,true);
+            if ( $success ) $trashed[] = $post_id;
+        }
+
+        WP_SoundSystem::debug_log( json_encode(array('flushable'=>count($flushable_ids),'trashed'=>count($trashed))),"Deleted excluded hosts links");
+
+        return $trashed;
+
+    }
+
 }
 
 function wpsstm_links_init(){
