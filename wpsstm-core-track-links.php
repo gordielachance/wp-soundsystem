@@ -694,6 +694,7 @@ class WPSSTM_Core_Track_Links{
             'post_type' =>              wpsstm()->post_type_track_link,
             'posts_per_page' =>         -1,
             'post_status' =>            'any',
+            'fields' =>                 'ids',
             'only_excluded_hosts' =>    true,
         );
         
@@ -879,7 +880,7 @@ class WPSSTM_Core_Track_Links{
         if ( !$flushable_ids = WPSSTM_Core_Track_Links::get_excluded_host_link_ids() ) return;
 
         $trashed = array();
-        
+
         foreach( (array)$flushable_ids as $post_id ){
             $success = wp_delete_post($post_id,true);
             if ( $success ) $trashed[] = $post_id;
