@@ -93,9 +93,9 @@ class WPSSTM_Core_Tracks{
         /*
         DB relationships
         */
-        add_action( 'before_delete_post', array($this,'delete_track_links') );
+
         add_action( 'before_delete_post', array($this,'delete_subtracks') );
-        add_action( 'before_delete_post', array($this,'delete_empty_music_terms') );
+        add_action( 'before_delete_post', array($this,'unparent_track_links') );
 
     }
 
@@ -1318,31 +1318,26 @@ class WPSSTM_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result );
     }
+    
+    /*
+    Set post parent = 0 on track links when deleting the parent track, so they will be detected as orphan tracks.
+    Before we were deleting the links directly, but this is slows down the plugin a lot when we batch delete tracks.
+    TOUFIX maybe we should process it in a different way when it's a batch and when it's a single post ?
+    */
 
-    function delete_track_links($post_id){
+    function unparent_track_links($post_id){
+        global $wpdb;
 
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
-
-        //get all links
-        $track = new WPSSTM_Track($post_id);
-
-        $link_args = array(
-            'posts_per_page' => -1,
-            'fields'  =>        'ids',
-            'post_status'=>     'any',
+        
+        $updateCount = $wpdb->update( 
+            $wpdb->posts, //table
+            array('post_parent'=>''), //data
+            array('post_parent'=>$post_id) //where
         );
 
-        $links_query = $track->query_links($link_args);
-        $deleted = 0;
-
-        foreach($links_query->posts as $link_id){
-            if ( $success = wp_delete_post($link_id,true) ){
-                $deleted ++;
-            }
-        }
-
-        if ($deleted){
-            //$track->track_log( json_encode(array('post_id'=>$post_id,'links'=>$links_query->post_count,'trashed'=>$deleted)),"WPSSTM_Post_Tracklist::delete_track_links()");
+        if ($updateCount){
+            //WP_SoundSystem::debug_log( json_encode(array('post_id'=>$post_id,'unparented'=>$updateCount)),"unparent links for track");
         }
 
     }
@@ -1356,42 +1351,14 @@ class WPSSTM_Core_Tracks{
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
-        $rowquerystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE track_id = '%s'",$post_id );
 
-        return $wpdb->get_results ( $rowquerystr );
+        return $wpdb->delete( 
+            $subtracks_table, //table
+            array('track_id'=>$post_id) //where
+        );
     }
 
-    /*
-    When deleting a post, remove the terms attached to it if they are attached only to this post.
-    */
 
-    function delete_empty_music_terms($post_id){
-        global $wpdb;
-
-        $allowed_types = array(
-            wpsstm()->post_type_artist,
-            wpsstm()->post_type_album,
-            wpsstm()->post_type_track,
-        );
-
-        $taxonomies = array(
-            WPSSTM_Core_Tracks::$artist_taxonomy,
-            WPSSTM_Core_Tracks::$track_taxonomy,
-            WPSSTM_Core_Tracks::$album_taxonomy
-        );
-
-        if ( !in_array(get_post_type($post_id),$allowed_types ) ) return;
-
-        $args = array();
-        $terms = wp_get_post_terms( $post_id, $taxonomies, $args );
-
-        foreach((array)$terms as $term){
-            if ( $term->count <= 0 ){
-                //WP_SoundSystem::debug_log($term,'delete unique term');
-                wp_delete_term( $term->term_id, $term->taxonomy );
-            }
-        }
-    }
 
     /*
     Get tracks that do not belong to any playlists
@@ -1486,7 +1453,7 @@ class WPSSTM_Core_Tracks{
         WP_SoundSystem::debug_log("Batch delete orphan tracks...");
 
         if ( !$flushable_ids = WPSSTM_Core_Tracks::get_orphan_track_ids() ) return;
-        
+
         $trashed = array();
 
         foreach( (array)$flushable_ids as $post_id ){

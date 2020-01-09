@@ -167,7 +167,7 @@ class WP_SoundSystem {
         $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/services' );
 
         //get all files in /presets directory
-        $preset_files = glob( $presets_path . '*.php' );
+        $preset_files = glob( $presets_path . '*.php' );    
 
         foreach ($preset_files as $file) {
             require_once($file);
@@ -195,6 +195,8 @@ class WP_SoundSystem {
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
 
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
+        
+        add_action( 'before_delete_post', array($this,'delete_empty_music_terms') );
 
     }
 
@@ -1037,6 +1039,38 @@ class WP_SoundSystem {
             if ( !in_array($engine->slug,$enabled_engine_slugs) ) continue;
             $engine->setup_actions();
             $this->engines[] = $engine;
+        }
+    }
+    
+    /*
+    When deleting a post, remove the terms attached to it if they are attached only to this post.
+    */
+
+    function delete_empty_music_terms($post_id){
+        global $wpdb;
+
+        $allowed_types = array(
+            wpsstm()->post_type_artist,
+            wpsstm()->post_type_album,
+            wpsstm()->post_type_track,
+        );
+
+        $taxonomies = array(
+            WPSSTM_Core_Tracks::$artist_taxonomy,
+            WPSSTM_Core_Tracks::$track_taxonomy,
+            WPSSTM_Core_Tracks::$album_taxonomy
+        );
+
+        if ( !in_array(get_post_type($post_id),$allowed_types ) ) return;
+
+        $args = array();
+        $terms = wp_get_post_terms( $post_id, $taxonomies, $args );
+
+        foreach((array)$terms as $term){
+            if ( $term->count <= 0 ){
+                //WP_SoundSystem::debug_log($term,'delete unique term');
+                wp_delete_term( $term->term_id, $term->taxonomy );
+            }
         }
     }
 
