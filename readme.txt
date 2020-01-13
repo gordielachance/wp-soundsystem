@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: https://api.spiff-radio.org?p=31
 Tags: music,audio player,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks
 Requires at least: 4.9
-Tested up to: 5.2.4
+Tested up to: 5.3.2
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -140,6 +140,11 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 9. Music menu on a BuddyPress profile
 
 == Changelog ==
+
+= 3.2.5 =
+* improved plugin settings : maintenance
+* track links :improved excluded hosts queries
+* do not delete links alongside with tracks, just remove the post_parent value (faster)
 
 = 3.2.4 =
 * better way to add tracks to a Playlist
