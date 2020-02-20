@@ -46,7 +46,7 @@ Any tracklists can be exported to the standard [XSPF](http://xspf.org/) file for
 = Tracks =
 
 Tracks can be favorited and shared by your users frontend, or added to a new playlist on-the-fly.
-Backend, you can query details from music services like [MusicBrainz](https://musicbrainz.org/) (The Open Music Encyclopedia) or Spotify. 
+Backend, you can query details from music services like [MusicBrainz](https://musicbrainz.org/) (The Open Music Encyclopedia) or Spotify.
 
 = Tracks Links =
 
@@ -54,7 +54,7 @@ You can attach a bunch of links to any track; including links that can stream au
 
 = Autolink (requires an API key) =
 
-If you don't attach links to your track manually, you can enable our *autolink* module.  
+If you don't attach links to your track manually, you can enable our *autolink* module.
 It will search for remote links and attach them to your tracks automatically.
 
 = Tracklist Importer =
@@ -78,7 +78,7 @@ You can customize the design of this player the way you like, and extend its fun
 In addition of being able to scrobble on [Last.fm](https://www.last.fm/), every track favorited by a user connected to his account will also be loved on that service.
 
 **BuddyPress**
-Users profiles will get a new music section that lists the user favorite tracks, tracklists, and the ones he created. 
+Users profiles will get a new music section that lists the user favorite tracks, tracklists, and the ones he created.
 It will also fire new *BuddyPress activity* items.
 
 = Contribute =
@@ -94,7 +94,8 @@ Get more out of this plugin by [registering an API key](https://api.spiff-radio.
 * the Autolink module
 
 Those are optionals, but are nice features to a solid plugin.
-Consider getting one as a nice way to support the work done –hundred of hours– , and to ensure its durability.
+Consider getting one as a nice way to support the work done –hundred of hours– , and to ensure its durability!
+Price is 5$/month or 50$/year.
 
 = Donate =
 Whatever, if you like this plugin, please also consider [making a donation](https://api.spiff-radio.org/?p=31).
@@ -140,6 +141,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 9. Music menu on a BuddyPress profile
 
 == Changelog ==
+
+= 3.2.6 =
+* fixed rewrite rules
 
 = 3.2.5 =
 * improved plugin settings : maintenance

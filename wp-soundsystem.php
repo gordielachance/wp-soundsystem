@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://api.spiff-radio.org
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 3.2.5
+Version: 3.2.6
 License: GPL2
 */
 
@@ -36,7 +36,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '3.2.5';
+    public $version = '3.2.6';
     /**
     * @public string plugin DB version
     */
@@ -167,7 +167,7 @@ class WP_SoundSystem {
         $presets_path = trailingslashit( wpsstm()->plugin_dir . 'classes/services' );
 
         //get all files in /presets directory
-        $preset_files = glob( $presets_path . '*.php' );    
+        $preset_files = glob( $presets_path . '*.php' );
 
         foreach ($preset_files as $file) {
             require_once($file);
@@ -195,7 +195,7 @@ class WP_SoundSystem {
         add_action( 'all_admin_notices', array($this, 'promo_notice'), 5 );
 
         add_filter( 'query_vars', array($this,'add_wpsstm_query_vars'));
-        
+
         add_action( 'before_delete_post', array($this,'delete_empty_music_terms') );
 
     }
@@ -1041,7 +1041,7 @@ class WP_SoundSystem {
             $this->engines[] = $engine;
         }
     }
-    
+
     /*
     When deleting a post, remove the terms attached to it if they are attached only to this post.
     */
