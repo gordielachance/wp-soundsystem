@@ -29,7 +29,7 @@ class WPSSTM_Core_Tracks{
         add_filter( 'the_title', array($this, 'the_track_post_title'), 9, 2 );
 
         //rewrite rules
-        add_action('init', array($this, 'tracks_rewrite_rules') );
+        add_action('wo_loaded', array($this, 'tracks_rewrite_rules') );
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
@@ -302,36 +302,35 @@ class WPSSTM_Core_Tracks{
         //single NEW subtrack action
         //TOUFIX TOUCHECK used ?
         add_rewrite_rule(
-            sprintf('^%s/%s/%s/([^/]+)/([^/]+)/([^/]+)/action/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG,WPSSTM_NEW_ITEM_SLUG), // = /music/subtracks/ID/action/ACTION
+            sprintf('%s/%s/%s/([^/]+)/([^/]+)/([^/]+)/action/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG,WPSSTM_NEW_ITEM_SLUG), // = /music/subtracks/ID/action/ACTION
             sprintf('index.php?post_type=%s&wpsstm_track_data[artist]=$matches[1]&wpsstm_track_data[album]=$matches[2]&wpsstm_track_data[title]=$matches[3]&wpsstm_action=$matches[4]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&wpsstm_track_data[artist]=ARTIST&wpsstm_track_data[album]=ALBUM&wpsstm_track_data[title]=TITLE&wpsstm_action=dequeue
             'top'
         );
 
         //single ID subtrack action
         add_rewrite_rule(
-            sprintf('^%s/%s/(\d+)/action/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID/action/ACTION
+            sprintf('%s/%s/(\d+)/action/([^/]+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID/action/ACTION
             sprintf('index.php?post_type=%s&subtrack_id=$matches[1]&wpsstm_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=dequeue
             'top'
         );
 
         //single ID subtrack
         add_rewrite_rule(
-            sprintf('^%s/%s/(\d+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID
+            sprintf('%s/%s/(\d+)/?',WPSSTM_BASE_SLUG,WPSSTM_SUBTRACKS_SLUG), // = /music/subtracks/ID
             sprintf('index.php?post_type=%s&subtrack_id=$matches[1]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251
             'top'
         );
 
-
         //single track action
         add_rewrite_rule(
-            sprintf('^%s/(\d+)/action/([^/]+)/?',$track_post_type_obj->rewrite['slug']), // = /music/tracks/ID/action/ACTION
+            sprintf('%s/(\d+)/action/([^/]+)/?',$track_post_type_obj->rewrite['slug']), // = /music/tracks/ID/action/ACTION
             sprintf('index.php?post_type=%s&p=$matches[1]&wpsstm_action=$matches[2]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_track&subtrack-id=251&wpsstm_action=dequeue
             'top'
         );
 
         //single track
         add_rewrite_rule(
-            sprintf('^%s/(\d+)/?',$track_post_type_obj->rewrite['slug']), // = /music/tracks/ID
+            sprintf('%s/(\d+)/?',$track_post_type_obj->rewrite['slug']), // = /music/tracks/ID
             sprintf('index.php?post_type=%s&p=$matches[1]',wpsstm()->post_type_track), // = /index.php?post_type=wpsstm_trackp=251
             'top'
         );
@@ -1318,7 +1317,7 @@ class WPSSTM_Core_Tracks{
         header('Content-type: application/json');
         wp_send_json( $result );
     }
-    
+
     /*
     Set post parent = 0 on track links when deleting the parent track, so they will be detected as orphan tracks.
     Before we were deleting the links directly, but this is slows down the plugin a lot when we batch delete tracks.
@@ -1329,8 +1328,8 @@ class WPSSTM_Core_Tracks{
         global $wpdb;
 
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
-        
-        $updateCount = $wpdb->update( 
+
+        $updateCount = $wpdb->update(
             $wpdb->posts, //table
             array('post_parent'=>''), //data
             array('post_parent'=>$post_id) //where
@@ -1352,7 +1351,7 @@ class WPSSTM_Core_Tracks{
 
         if ( get_post_type($post_id) != wpsstm()->post_type_track ) return;
 
-        return $wpdb->delete( 
+        return $wpdb->delete(
             $subtracks_table, //table
             array('track_id'=>$post_id) //where
         );
@@ -1449,7 +1448,7 @@ class WPSSTM_Core_Tracks{
         if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
-        
+
         WP_SoundSystem::debug_log("Batch delete orphan tracks...");
 
         if ( !$flushable_ids = WPSSTM_Core_Tracks::get_orphan_track_ids() ) return;
