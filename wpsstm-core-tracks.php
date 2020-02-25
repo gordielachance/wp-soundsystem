@@ -29,7 +29,7 @@ class WPSSTM_Core_Tracks{
         add_filter( 'the_title', array($this, 'the_track_post_title'), 9, 2 );
 
         //rewrite rules
-        add_action('wo_loaded', array($this, 'tracks_rewrite_rules') );
+        add_action('wp_loaded', array($this, 'tracks_rewrite_rules') );
 
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracks_scripts_styles' ) );
