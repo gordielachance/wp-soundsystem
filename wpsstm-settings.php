@@ -62,18 +62,18 @@ class WPSSTM_Settings {
         if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_orphan_tracks'),$_POST) ){
             WPSSTM_Core_Tracks::batch_delete_orphan_tracks();
         }
-        
+
         //orphan links
         if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_orphan_links'),$_POST) ){
             WPSSTM_Core_Track_Links::batch_delete_orphan_links();
         }
-        
-        
+
+
         //excluded host links
         if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_excluded_hosts_links'),$_POST) ){
             WPSSTM_Core_Track_Links::batch_delete_excluded_hosts_links();
         }
-        
+
         //unused terms
         if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_unused_music_terms'),$_POST) ){
             WP_SoundSystem::batch_delete_unused_music_terms();
@@ -159,9 +159,9 @@ class WPSSTM_Settings {
         WPSSTM API
         */
 
-        $old_token = wpsstm()->get_options('wpsstmapi_token');
+        $old_token = wpsstm()->get_options('wpsstmapi_key');
 
-        $new_input['wpsstmapi_token'] = trim( wpsstm_get_array_value('wpsstmapi_token',$input) );
+        $new_input['wpsstmapi_key'] = trim( wpsstm_get_array_value('wpsstmapi_key',$input) );
 
         $new_input['details_engines'] = (array)$input['details_engines'];
 
@@ -178,7 +178,7 @@ class WPSSTM_Settings {
     public static function clear_premium_transients(){
         WP_SoundSystem::debug_log('deleted premium transients...');
         delete_transient( WPSSTM_Core_Importer::$importers_transient_name );
-        delete_transient( WPSSTM_Core_API::$valid_token_transient_name );
+        delete_transient( WPSSTM_Core_API::$token_transient_name );
         delete_transient( WPSSTM_Core_API::$premium_expiry_transient_name );
     }
 
@@ -201,7 +201,7 @@ class WPSSTM_Settings {
         );
 
         add_settings_field(
-            'wpsstmapi_token',
+            'wpsstmapi_key',
             __('API Key','wpsstm'),
             array( $this, 'wpsstmapi_apitoken_callback' ),
             'wpsstm-settings-page',
@@ -409,7 +409,7 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
-        
+
         add_settings_field(
             'batch_delete_orphan_links',
             __('Delete orphan links','wpsstm'),
@@ -417,7 +417,7 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
-        
+
         add_settings_field(
             'batch_delete_excluded_hosts_links',
             __('Delete excluded hosts links','wpsstm'),
@@ -425,7 +425,7 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
-        
+
         add_settings_field(
             'batch_delete_unused_music_terms',
             __('Delete unused music terms','wpsstm'),
@@ -562,17 +562,17 @@ class WPSSTM_Settings {
         }
 
         //register errors
-        $valid_token = WPSSTM_Core_API::has_valid_api_token();
+        $valid_token = WPSSTM_Core_API::get_token();
 
     }
 
     function wpsstmapi_apitoken_callback(){
         //client secret
-        $client_secret = wpsstm()->get_options('wpsstmapi_token');
-        $valid_token = WPSSTM_Core_API::has_valid_api_token();
+        $client_secret = wpsstm()->get_options('wpsstmapi_key');
+        $valid_token = WPSSTM_Core_API::get_token();
 
         printf(
-            '<p><input type="text" name="%s[wpsstmapi_token]" value="%s" class="wpsstm-fullwidth" /></p>',
+            '<p><input type="text" name="%s[wpsstmapi_key]" value="%s" class="wpsstm-fullwidth" /></p>',
             wpsstm()->meta_name_options,
             $client_secret
         );
@@ -619,10 +619,11 @@ class WPSSTM_Settings {
 
         }else{
 
-            $datas = WPSSTM_Core_API::get_premium_datas();
+            $datas = WPSSTM_Core_API::get_api_userdatas();
 
-            if ( $expiry = wpsstm_get_array_value('expiry',$datas) ){
-                echo get_date_from_gmt( date( 'Y-m-d H:i:s', $expiry ), get_option( 'date_format' ) );
+            if ( $expires_at = wpsstm_get_array_value('expires_at',$datas) ){
+              $date = date( 'Y-m-d H:i:s', strtotime($expires_at) );
+              echo get_date_from_gmt($dat , get_option( 'date_format' ) );
             }else{
                 echo '—';
             }
@@ -781,7 +782,7 @@ class WPSSTM_Settings {
           __("Batch delete orphan tracks.","wpsstm")
       );
     }
-    
+
     function batch_delete_orphan_links_callback(){
       printf(
           '<input type="checkbox" name="%s[batch_delete_orphan_links]" value="on"/><label>%s</label>',
@@ -789,7 +790,7 @@ class WPSSTM_Settings {
           __("Batch delete orphan links.","wpsstm")
       );
     }
-    
+
     function batch_delete_excluded_hosts_links_callback(){
       printf(
           '<input type="checkbox" name="%s[batch_delete_excluded_hosts_links]" value="on"/><label>%s</label>',

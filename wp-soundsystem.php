@@ -110,7 +110,7 @@ class WP_SoundSystem {
             'autolink'                          => true,
             'autolink_timeout'                  => 7 * DAY_IN_SECONDS,
             'limit_autolinks'                   => 5,//max number of links returned by autolink
-            'wpsstmapi_token'                   => null,
+            'wpsstmapi_key'                     => null,
             'wpsstmapi_timeout'                 => 20,//timeout for API requests (seconds)
             'details_engines'                   => array('musicbrainz','spotify'),
             'excluded_track_link_hosts'         => array(),
