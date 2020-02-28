@@ -6,19 +6,32 @@ $importers = WPSSTM_Core_Importer::get_importers();
 
 if (!$importers || is_wp_error($importers) ) return;
 
+$all_patterns = array();
+
+foreach($importers as $importer_idx=>$importer){
+  $patterns = wpsstm_get_array_value(array('infos','patterns'),$importer);
+  foreach((array)$patterns as $pattern){
+    $pattern['importer'] = $importer_idx;
+    $all_patterns[] = $pattern;
+  }
+}
+
 /*
 URLs
 */
 
-$url_importers = array_filter($importers, function($importer) {return $importer['type']==='url'; }); //only URLs
+$url_patterns = array_filter($all_patterns, function($pattern) {return $pattern['type']==='url'; }); //only URLs
 
-//sort alphabetically
-usort($url_importers, function ($a, $b) { return strcasecmp($a["name"], $b["name"]); });
-
-foreach((array)$url_importers as $importer){
-    $url_items[] = sprintf('<span>%s</span> <small>%s: %s</small>',$importer['name'],__('eg.','wpsstm'),$importer['label']);
+$url_items = array();
+foreach((array)$url_patterns as $pattern){
+    $importer_idx = $pattern['importer'];
+    $importer = $importers[$importer_idx];
+    $name = wpsstm_get_array_value(array('infos','name'),$importer);
+    $url_items[] = sprintf('<span>%s</span> <code>%s: %s</code>',$name,__('eg.','wpsstm'),$pattern['helper']);
 }
 
+//sort alphabetically //TOUFIX
+//usort($url_items, function ($a, $b) { return strcasecmp($a["name"], $b["name"]); });
 
 
 //wrap
@@ -34,12 +47,15 @@ $list_urls = sprintf('<ul id="wpsstm-importer-urls">%s</ul>',implode("\n",$list_
 Bangs
 */
 
-$bangs = array_filter($importers, function($importer) {return $importer['type']==='bang'; }); //only bangs
+$bang_patterns = array_filter($all_patterns, function($pattern) {return $pattern['type']==='bang'; }); //only URLs
 
-foreach((array)$bangs as $bang){
-    $bang_items[] = sprintf('<code>%s</code> <span>%s</span>',$bang['label'],$bang['name']);
+$bang_items = array();
+foreach((array)$bang_patterns as $pattern){
+    $importer_idx = $pattern['importer'];
+    $importer = $importers[$importer_idx];
+    $name = wpsstm_get_array_value(array('infos','name'),$importer);
+    $bang_items[] = sprintf('<code>%s</code> <span>%s</span>',$pattern['helper'],$name);
 }
-
 
 //wrap
 $list_bangs = array_map(
@@ -51,10 +67,7 @@ $list_bangs = array_map(
 
 //supported URL shortcut
 $urls_el = sprintf('<a id="wpsstm-list-urls-bt" href="#">%s</a>',__('supported URL','wpsstm'));
-$list_bangs[] = sprintf('<li>%s%s</li>',sprintf(__('...Or type any %s!','wpsstm'),$urls_el),$list_urls);
-
-
-
+$list_bangs[] = sprintf('<li>%s%s</li>',sprintf(__('...Or type any %s!','wpsstm'),$urls_el),$list_bangs);
 
 /*
 services
@@ -80,7 +93,7 @@ if ( $domains && !is_wp_error($domains) ){
 
 ?>
 <section id="wpsstm-importers">
-    <?php 
+    <?php
     if ($list_bangs){
         ?>
         <div id="wpsstm-importer-bangs">

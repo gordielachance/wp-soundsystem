@@ -18,7 +18,7 @@ class WPSSTM_Core_Importer{
         add_action( 'save_post', array($this,'metabox_save_importer_settings') );
 
         add_action( 'admin_enqueue_scripts', array( $this, 'importer_register_scripts_styles' ) );
-        
+
         /*
         AJAX
         */
@@ -30,7 +30,7 @@ class WPSSTM_Core_Importer{
     Usually, we don't want bot playlists; it's only used by the importer.
     So ignore those playlists frontend.
     */
-    
+
     function pre_get_posts_ignore_bot_tracklists( $query ){
 
         //main query check
@@ -38,11 +38,11 @@ class WPSSTM_Core_Importer{
 
         //archive check
         if ( $query->is_singular() ) return $query;
-        
+
         //post type check
         $post_type = $query->get('post_type');
         if ( !in_array($post_type,wpsstm()->tracklist_post_types) ) return $query;
-        
+
         //we HAVE an author query
         if ( $query->get('author') || $query->get('author_name') || $query->get('author__in') ) return $query;
 
@@ -55,21 +55,21 @@ class WPSSTM_Core_Importer{
 
         return $query;
     }
-    
+
     /*
     We're requesting the frontend wizard page, load the wizard template
     */
-    
+
     function frontend_importer_content($content){
         if ( !is_page(wpsstm()->get_options('importer_page_id')) ) return $content;
-        
+
         //check bot user
         $bot_ready = wpsstm()->is_bot_ready();
         if ( is_wp_error($bot_ready) ){
             WP_SoundSystem::debug_log('Bot user not ready','Frontend import template' );
             return $content;
         }
-        
+
         ob_start();
         wpsstm_locate_template( 'frontend-importer.php', true, false );
         $wizard = ob_get_clean();
@@ -77,9 +77,9 @@ class WPSSTM_Core_Importer{
     }
 
     function importer_register_scripts_styles(){
-        
+
         $wp_scripts = wp_scripts();
-        
+
         // JS
         wp_register_script( 'wpsstm-importer', wpsstm()->plugin_url . '_inc/js/wpsstm-importer.js',array('jquery','jquery-ui-tabs'),wpsstm()->version);
 
@@ -95,11 +95,11 @@ class WPSSTM_Core_Importer{
 
     function metabox_importer_register(){
 
-        add_meta_box( 
-            'wpsstm-metabox-importer', 
+        add_meta_box(
+            'wpsstm-metabox-importer',
             __('Tracklist Importer','wpsstm'),
             array($this,'metabox_importer_display'),
-            wpsstm()->tracklist_post_types, 
+            wpsstm()->tracklist_post_types,
             'normal', //context
             'high' //priority
         );
@@ -110,18 +110,18 @@ class WPSSTM_Core_Importer{
         global $wpsstm_tracklist;
 
         //TOUFIX we should be able to import (append) tracks to a static playlist without having to create a radio first.
-        
+
         if ($wpsstm_tracklist->tracklist_type=='live'){
             wpsstm_locate_template( 'tracklist-importer.php', true );
         }else{
             $notice = __("For now, the only way to import a tracklist is to create a new Radio (not a Playlist), fill the 'Tracklist Importer' metabox, then click the 'Stop Sync' button under the Radio header.  This will convert the Radio to a Playlist.",'wpsstm');
             printf('<div class="notice notice-warning inline"><p>%s</p></div>',$notice);
         }
-        
-        
-        
+
+
+
     }
-    
+
     function metabox_save_importer_settings( $post_id ) {
         global $wpsstm_tracklist;
 
@@ -131,7 +131,7 @@ class WPSSTM_Core_Importer{
         $is_revision = wp_is_post_revision( $post_id );
         $is_metabox = isset($_POST['wpsstm_tracklist_importer_meta_box_nonce']);
         if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
-        
+
         //check post type
         $post_type = get_post_type($post_id);
         if( !in_array($post_type,wpsstm()->tracklist_post_types ) ){
@@ -144,11 +144,11 @@ class WPSSTM_Core_Importer{
 
         /////
         /////
-        
+
         if ( !$data = wpsstm_get_array_value('wpsstm_importer',$_POST) ) return;
 
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
-        
+
         //feed URL
         $feed_url = wpsstm_get_array_value('feed_url',$data);
 
@@ -160,13 +160,13 @@ class WPSSTM_Core_Importer{
 
         //website URL
         $website_url = wpsstm_get_array_value('website_url',$data);
-        
+
         if ($website_url){
             update_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name,$website_url);
         }else{
             delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name);
         }
-        
+
         /*
         importer
         */
@@ -200,11 +200,11 @@ class WPSSTM_Core_Importer{
     */
 
     function handle_frontend_importer(){
-        
+
         global $wpsstm_tracklist;
 
         if ( !wpsstm()->get_options('importer_page_id') ) return;
-        
+
         $url = wpsstm_get_array_value('wpsstm_frontend_wizard_url',$_POST);
         if (!$url) return;
 
@@ -216,7 +216,7 @@ class WPSSTM_Core_Importer{
         }
         $bot_id = wpsstm()->get_options('bot_user_id');
 
-        
+
         $duplicate_args = array(
             'post_type'         => wpsstm()->post_type_radio,
             'fields'            => 'ids',
@@ -227,12 +227,12 @@ class WPSSTM_Core_Importer{
                 )
             )
         );
-        
+
         /*
         Check for radio duplicates, by user ID
         */
         if ( $user_id = get_current_user_id() ){
-            
+
             $author_duplicate_args = $duplicate_args;
             $author_duplicate_args['post_author'] = $user_id;
 
@@ -298,10 +298,10 @@ class WPSSTM_Core_Importer{
             __('Use Regular Expression','wpsstm')
         );
     }
-    
+
     static function css_selector_block($selector){
         global $wpsstm_tracklist;
-        
+
         //path
         $path = $wpsstm_tracklist->get_importer_options( array('selectors',$selector,'path') );
         $path_forced = null;//TOUFIX$wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'path'));
@@ -326,7 +326,7 @@ class WPSSTM_Core_Importer{
             <?php
 
             //build info
-        
+
             $info = null;
 
             switch($selector){
@@ -361,7 +361,7 @@ class WPSSTM_Core_Importer{
                         );
                     break;
             }
-            
+
             if ($selector!='tracks'){
                 $tracks_prefix = $wpsstm_tracklist->get_importer_options(array('selectors','tracks','path'));
 
@@ -373,11 +373,11 @@ class WPSSTM_Core_Importer{
                 }
 
             }
-        
+
             // if this is a preset default, set as readonly
-        
-            
-            
+
+
+
             printf(
                 '<input type="text" class="wpsstm-importer-selector-jquery wpsstm-fullwidth" name="%s[selectors][%s][path]" value="%s" %s />',
                 'wpsstm_importer',
@@ -400,7 +400,7 @@ class WPSSTM_Core_Importer{
                 <tbody>
                     <tr>
                         <th scope="row"><?php _e('Tag attribute','wpsstm');?></th>
-                        <td>        
+                        <td>
                             <div>
                                 <?php
 
@@ -417,7 +417,7 @@ class WPSSTM_Core_Importer{
                     </tr>
                     <tr>
                         <th scope="row"><?php _e('Regex pattern','wpsstm');?></th>
-                        <td>        
+                        <td>
                             <div>
                                 <?php
 
@@ -440,19 +440,19 @@ class WPSSTM_Core_Importer{
             </table>
         </div>
         <?php
-        
+
     }
 
-    
+
     static function sanitize_importer_settings($input){
 
         $new_input = array();
 
         //TO FIX isset() check for boolean option - have a hidden field to know that settings are enabled ?
 
-        //selectors 
+        //selectors
         if ( isset($input['selectors']) && !empty($input['selectors']) ){
-            
+
             foreach ($input['selectors'] as $selector_slug=>$value){
 
                 //path
@@ -469,7 +469,7 @@ class WPSSTM_Core_Importer{
                 if ( isset($value['regex']) ) {
                     $value['regex'] = trim($value['regex']);
                 }
-                
+
                 if ( $value = array_filter($value) ){
                     $new_input['selectors'][$selector_slug] = array_filter($value);
                 }
@@ -479,17 +479,17 @@ class WPSSTM_Core_Importer{
 
         return $new_input;
     }
-    
+
     /*
     Feedback
     */
-    
+
     static function feedback_preset(){
         global $wpsstm_tracklist;
         echo $wpsstm_tracklist->preset->get_preset_name();
     }
-    
-    
+
+
     static function feedback_data_type_callback(){
         global $wpsstm_tracklist;
 
@@ -498,7 +498,7 @@ class WPSSTM_Core_Importer{
         if ( $wpsstm_tracklist->preset->response_type ){
             $output = $wpsstm_tracklist->preset->response_type;
         }
-        
+
         echo $output;
 
     }
@@ -509,7 +509,7 @@ class WPSSTM_Core_Importer{
         $output = "—";
 
         if ( $body_node = $wpsstm_tracklist->preset->body_node ){
-            
+
             $content = $body_node->html();
 
             //force UTF8
@@ -519,9 +519,9 @@ class WPSSTM_Core_Importer{
             $output = '<pre class="wpsstm-raw"><code class="language-markup">'.$content.'</code></pre>';
 
         }
-        
+
         echo $output;
-        
+
 
     }
 
@@ -534,7 +534,7 @@ class WPSSTM_Core_Importer{
         if ( $track_nodes = $wpsstm_tracklist->preset->track_nodes ){
 
             foreach ($track_nodes as $single_track_node){
-                
+
                 $single_track_html = $single_track_node->innerHTML();
 
                 //force UTF8
@@ -548,57 +548,62 @@ class WPSSTM_Core_Importer{
                 $output = sprintf('<div id="wpsstm-tracks-raw">%s</div>',implode(PHP_EOL,$tracks_output));
             }
 
-            
+
         }
 
 
         echo $output;
 
     }
-    
+
     static function get_importers(){
-        
-        $importers = get_transient( self::$importers_transient_name );
 
-        if (false === $importers){
-            $importers = WPSSTM_Core_API::api_request('import/services/get');
+      $importers = get_transient( self::$importers_transient_name );
 
-            if ( is_wp_error($importers) ) return false;
+      if (false === $importers){
+        $api_response = WPSSTM_Core_API::api_request('importers/list');
 
-            set_transient( self::$importers_transient_name, $importers, 1 * DAY_IN_SECONDS );
-        }
-        
-        return $importers;
+        $importers = wpsstm_get_array_value(array('response','items'),$api_response);
+
+        if ( is_wp_error($importers) || !$importers ) return false;
+
+        set_transient( self::$importers_transient_name, $importers, 1 * DAY_IN_SECONDS );
+      }
+
+      return $importers;
     }
-    
+
     static function get_importers_by_domain(){
         $importers = self::get_importers();
         if ( is_wp_error($importers) ) return $importers;
-        
+
         /*
         sort importers by domain
         */
-        
-        $domains = array();
-        
-        foreach((array)$importers as $importer){
-            $url = $importer['url'];
-            $domain = wpsstm_get_url_domain($url);
-            $key = sanitize_title($domain);
 
-            //first one of this domain
-            if ( !isset($domains[$key]) ){
-                $domains[$key]['image'] = $importer['image'];
-                $domains[$key]['name'] = $importer['name'];
-            }else{
-                $domains[$key]['name'] .= ', ' . $importer['name'];
-            }
-            
-            //set item
-            $domains[$key]['importers'] = $importer;
+        $domains = array();
+
+        foreach((array)$importers as $importer){
+
+          $name = wpsstm_get_array_value(array('infos','name'),$importer);
+          $url = wpsstm_get_array_value(array('infos','service_url'),$importer);
+          $image = wpsstm_get_array_value(array('infos','image'),$importer);
+          $domain = wpsstm_get_url_domain($url);
+          $key = sanitize_title($domain);
+
+          //first one of this domain
+          if ( !isset($domains[$key]) ){
+              $domains[$key]['image'] = $image;
+              $domains[$key]['name'] = $name;
+          }else{
+              $domains[$key]['name'] .= ', ' . $name;
+          }
+
+          //set item
+          $domains[$key]['importers'] = $importer;
 
         }
-        
+
         return $domains;
     }
 
@@ -606,7 +611,7 @@ class WPSSTM_Core_Importer{
         $ajax_data = wp_unslash($_POST);
         $post_id = wpsstm_get_array_value('tracklist_id',$ajax_data);
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
-        
+
         $result = array(
             'input' =>          $ajax_data,
             'error_code' =>     null,
@@ -617,7 +622,7 @@ class WPSSTM_Core_Importer{
         );
 
         $json = $tracklist->get_json_feedback();
-        
+
         if ( is_wp_error($json) ){
             $result['error_code'] = $json->get_error_code();
             $result['message'] = $json->get_error_message();
@@ -628,7 +633,7 @@ class WPSSTM_Core_Importer{
 
         header('Content-type: application/json');
         wp_send_json( $result );
-        
+
     }
 
 }
