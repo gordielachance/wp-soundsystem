@@ -32,7 +32,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     var $paged_var = 'tracklist_page';
 
-    static $importer_options_meta_name = '_wpsstm_scraper_options';
+    static $importer_options_meta_name = '_wpsstm_importer_options';
     static $feed_url_meta_name = '_wpsstm_scraper_url';
     static $website_url_meta_name = '_wpsstm_website_url';
     static $import_id_meta_name = '_wpsstm_import_id';

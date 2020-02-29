@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '215';
+    public $db_version = '216';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -460,6 +460,39 @@ class WP_SoundSystem {
                     $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE ID = '%s'",$this->post_type_radio,$sitewide_favorites_id);
                     $result = $wpdb->get_results ( $querystr );
                 }
+
+            }
+
+            if ($current_version < 216){
+
+              $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_scraper_options' );
+              $results = $wpdb->get_results ( $querystr );
+
+              foreach((array)$results as $result){
+                  $post_id = $result->post_id;
+                  $value = maybe_unserialize($result->meta_value);
+
+                  $new_options = array(
+                    'selectors'=>array(
+                      'playlist'=> array(
+                        'tracks' => wpsstm_get_array_value(array('selectors','tracks'),$value),
+                      ),
+                      'track'=> array(
+                        'artist'=>  wpsstm_get_array_value(array('selectors','track_artist'),$value),
+                        'title'=>   wpsstm_get_array_value(array('selectors','track_title'),$value),
+                        'album'=>   wpsstm_get_array_value(array('selectors','track_album'),$value),
+                        'image'=>   wpsstm_get_array_value(array('selectors','track_image'),$value),
+                        'links'=>   wpsstm_get_array_value(array('selectors','track_source_urls'),$value),
+                      )
+                    )
+                  );
+
+                  $new_options = wpsstm_clean_array($new_options);
+
+                  if ( update_post_meta( $post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,$new_options) ) {
+                    delete_post_meta( $post_id,'_wpsstm_scraper_options');
+                  }
+              }
 
             }
 
