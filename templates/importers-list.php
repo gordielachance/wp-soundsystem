@@ -67,7 +67,7 @@ $list_bangs = array_map(
 
 //supported URL shortcut
 $urls_el = sprintf('<a id="wpsstm-list-urls-bt" href="#">%s</a>',__('supported URL','wpsstm'));
-$list_bangs[] = sprintf('<li>%s%s</li>',sprintf(__('...Or type any %s!','wpsstm'),$urls_el),$list_bangs);
+$list_bangs[] = sprintf('<li>%s%s</li>',sprintf(__('...Or type any %s!','wpsstm'),$urls_el),$list_urls);
 
 /*
 services
