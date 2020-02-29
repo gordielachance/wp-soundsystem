@@ -179,7 +179,7 @@ class WPSSTM_Settings {
         WP_SoundSystem::debug_log('deleted premium transients...');
         delete_transient( WPSSTM_Core_Importer::$importers_transient_name );
         delete_transient( WPSSTM_Core_API::$token_transient_name );
-        delete_transient( WPSSTM_Core_API::$premium_expiry_transient_name );
+        delete_transient( WPSSTM_Core_API::$premium_userdata_transient_name );
     }
 
     function settings_init(){

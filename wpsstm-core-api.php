@@ -7,60 +7,15 @@ define('WPSSTM_API_REGISTER_URL','https://api.spiff-radio.org/?p=10');
 class WPSSTM_Core_API {
 
   public static $token_transient_name = 'wpsstmapi_token';
-  public static $premium_expiry_transient_name = 'wpsstmapi_premium_expiry';
+  public static $premium_userdata_transient_name = 'wpsstmapi_premium_expiry';
 
   function __construct(){
       add_filter( 'wpsstm_autolink_input',array($this,'api_track_autolink'), 5, 2 );
   }
 
-  public static function get_token(){
-
-    $response = null;
-    $valid = false;
-
-    if ( !$api_key = wpsstm()->get_options('wpsstmapi_key') ){
-        return false;
-    }
-
-    if ( false === ( $token = get_transient(self::$token_transient_name ) ) ) {
-
-      $url = WPSSTM_API_URL . 'auth/token';
-
-      //build headers
-      $args = array(
-        'body' => array(
-          'api_key' => $api_key
-        )
-      );
-
-      $request = wp_remote_post($url,$args);
-      if ( is_wp_error($request) ) return $request;
-
-      $response = wp_remote_retrieve_body( $request );
-      if ( is_wp_error($response) ) return $response;
-      $response = json_decode($response, true);
-
-      //check error in JSON response
-      if ( $error = wpsstm_get_array_value(array('error'),$response) ){
-        $first_value = reset($error);
-        $first_key = key($error);
-        return new WP_Error($first_key,$first_value);
-      }
-
-      if ( !$token = wpsstm_get_array_value(array('token'),$response) ){
-        return new WP_Error('no_token','Missing token');
-      }
-
-      set_transient( self::$token_transient_name, $token, 1 * DAY_IN_SECONDS );
-
-    }
-
-    return $token;
-  }
-
   public static function get_api_userdatas(){
 
-    if ( false === ( $datas = get_transient(self::$premium_expiry_transient_name ) ) ) {
+    if ( false === ( $datas = get_transient(self::$premium_userdata_transient_name ) ) ) {
 
         WP_SoundSystem::debug_log('get api user datas...');
 
@@ -70,7 +25,7 @@ class WPSSTM_Core_API {
             $datas = false;
         }
 
-        set_transient( self::$premium_expiry_transient_name, $datas, 1 * DAY_IN_SECONDS );
+        set_transient( self::$premium_userdata_transient_name, $datas, 1 * DAY_IN_SECONDS );
 
     }
 
@@ -88,23 +43,70 @@ class WPSSTM_Core_API {
   But we cannot use WP_REST_Request here since it is remote API... :/
   */
 
-  private static function convert_json_response_errors(&$response){
-    if ( isset($response['code']) && isset($response['message']) && isset($response['data']) ){
+  private static function maybe_populate_api_error(&$response){
 
-        $error = new WP_Error( $response['code'],$response['message'],$response['data'] );
+    $code = wpsstm_get_array_value('error_code',$response);
 
-        if( isset($response['additional_errors']) ){
-            foreach ($response['additional_errors'] as $add_error){
-                $error->add($add_error['code'], $add_error['message'], $add_error['data']);
-            }
-        }
+    if ( $code ){
 
-        return $error;
+      $message = wpsstm_get_array_value('error_message',$response);
+      $data = wpsstm_get_array_value('error_data',$response);
+
+      $error = new WP_Error( $code,$message,$data );
+
+      return $error;
 
     }
 
     return $response;
   }
+
+
+    public static function get_token(){
+
+      $response = null;
+      $valid = false;
+
+      if ( !$api_key = wpsstm()->get_options('wpsstmapi_key') ){
+          return false;
+      }
+
+      if ( false === ( $token = get_transient(self::$token_transient_name ) ) ) {
+
+        $url = WPSSTM_API_URL . 'auth/token';
+
+        //build headers
+        $args = array(
+          'body' => array(
+            'api_key' => $api_key
+          )
+        );
+
+        $request = wp_remote_post($url,$args);
+        if ( is_wp_error($request) ) return $request;
+
+        $response = wp_remote_retrieve_body( $request );
+        if ( is_wp_error($response) ) return $response;
+        $response = json_decode($response, true);
+
+        //check error in JSON response
+        //TOUCHECK TOUFIX
+        if ( $error = wpsstm_get_array_value(array('error'),$response) ){
+          $first_value = reset($error);
+          $first_key = key($error);
+          return new WP_Error($first_key,$first_value);
+        }
+
+        if ( !$token = wpsstm_get_array_value(array('token'),$response) ){
+          return new WP_Error('no_token','Missing token');
+        }
+
+        set_transient( self::$token_transient_name, $token, 1 * DAY_IN_SECONDS );
+
+      }
+
+      return $token;
+    }
 
   static function api_request($endpoint = null, $params=null,$method = 'GET'){
 
@@ -151,19 +153,25 @@ class WPSSTM_Core_API {
     $response_code = wp_remote_retrieve_response_code($request);
     $response = wp_remote_retrieve_body( $request );
 
+    //invalid token, redo.
+    if ( in_array($response_code,array(401,422,498)) ){
+      WP_SoundSystem::debug_log('invalid token, force clear');
+      WPSSTM_Settings::clear_premium_transients();
+    }
+
     if ( is_wp_error($response) ){
         WP_SoundSystem::debug_log($response->get_error_message());
         return $response;
     }
 
     $response = json_decode($response, true);
-    $response = self::convert_json_response_errors($response);
+    $response = self::maybe_populate_api_error($response);
 
     return $response;
 
   }
 
-  function api_track_autolink($links_auto,$track){
+  function api_track_autolink($links,$track){
 
     if (!$track->post_id){
         return new WP_Error( 'missing_track_id',__( 'Missing Track ID.', 'wpsstm' ));
@@ -181,11 +189,18 @@ class WPSSTM_Core_API {
         return new WP_Error( 'missing_spotify_id',__( 'Missing Spotify ID.', 'wpsstmapi' ));
     }
 
-    $api_url = sprintf('track/autolink/spotify/%s',$music_id);
-    $links_auto = WPSSTM_Core_API::api_request($api_url);
-    if ( is_wp_error($links_auto) ) return $links_auto;
+    $args = array('spotify_id'=>$music_id);
+    $response = WPSSTM_Core_API::api_request('track/links',$args);
+    $response = self::maybe_populate_api_error($response);
 
-    return $links_auto;
+    if ( is_wp_error($response) ){
+      WP_SoundSystem::debug_log('Error while filtering autolinks');
+    }else{
+      $new_links = (array)wpsstm_get_array_value(array('response','items'),$response);
+      $links = array_merge((array)$links,(array)$new_links);
+    }
+
+    return $links;
   }
 
 }
