@@ -299,25 +299,34 @@ class WPSSTM_Core_Importer{
         );
     }
 
-    static function css_selector_block($selector){
+    static function css_selector_block($keys){
         global $wpsstm_tracklist;
 
+        $options = $wpsstm_tracklist->get_importer_options($path_keys );
+
+
         //path
-        $path = $wpsstm_tracklist->get_importer_options( array('selectors',$selector,'path') );
-        $path_forced = null;//TOUFIX$wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'path'));
+        $path_keys = array_merge(array('selectors'),$keys,array('path'));
+        $path_keys_html = implode('',array_map(function ($el) {return sprintf('[%s]',$el);},$path_keys));
+        $path = $wpsstm_tracklist->get_importer_options($path_keys );
+        $path_forced = null;//TOUFIX
         $path_disabled = disabled( (bool)$path_forced, true, false );
         $path = ( $path ? htmlentities($path) : null);
 
 
         //regex
-        $regex = $wpsstm_tracklist->get_importer_options( array('selectors',$selector,'regex') );
-        $regex_forced = null;//TOUFIX$wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'regex'));
+        $regex_keys = array_merge(array('selectors'),$keys,array('regex'));
+        $regex_keys_html = implode('',array_map(function ($el) {return sprintf('[%s]',$el);},$regex_keys));
+        $regex = $wpsstm_tracklist->get_importer_options( $regex_keys );
+        $regex_forced = null;//TOUFIX
         $regex_disabled = disabled( (bool)$regex_forced, true, false );
         $regex = ( $regex ? htmlentities($regex) : null);
 
         //attr
-        $attr = $wpsstm_tracklist->get_importer_options( array('selectors',$selector,'attr') );
-        $attr_forced = null;//TOUFIX$wpsstm_tracklist->preset->get_preset_options(array('selectors',$selector,'attr'));
+        $attr_keys = array_merge(array('selectors'),$keys,array('attr'));
+        $attr_keys_html = implode('',array_map(function ($el) {return sprintf('[%s]',$el);},$attr_keys));
+        $attr = $wpsstm_tracklist->get_importer_options( $attr_keys );
+        $attr_forced = null;//TOUFIX
         $attr_disabled = disabled( (bool)$attr_forced, true, false );
         $attr = ( $attr ? htmlentities($attr) : null);
 
@@ -379,9 +388,8 @@ class WPSSTM_Core_Importer{
 
 
             printf(
-                '<input type="text" class="wpsstm-importer-selector-jquery wpsstm-fullwidth" name="%s[selectors][%s][path]" value="%s" %s />',
-                'wpsstm_importer',
-                $selector,
+                '<input type="text" class="wpsstm-importer-selector-jquery wpsstm-fullwidth" name="%s" value="%s" %s />',
+                'wpsstm_importer'.$path_keys_html,
                 $path,
                 $path_disabled
             );
@@ -405,9 +413,8 @@ class WPSSTM_Core_Importer{
                                 <?php
 
                                 printf(
-                                    '<p class="wpsstm-importer-selector-attr"><input class="wpsstm-fullwidth" name="%s[selectors][%s][attr]" type="text" value="%s" %s/></p>',
-                                    'wpsstm_importer',
-                                    $selector,
+                                    '<p class="wpsstm-importer-selector-attr"><input class="wpsstm-fullwidth" name="%s" type="text" value="%s" %s/></p>',
+                                    'wpsstm_importer'.$attr_keys_html,
                                     $attr,
                                     $attr_disabled
                                 );
@@ -415,7 +422,7 @@ class WPSSTM_Core_Importer{
                             </div>
                         </td>
                     </tr>
-                    <tr>
+                    <tr>wpsstm_importer
                         <th scope="row"><?php _e('Regex pattern','wpsstm');?></th>
                         <td>
                             <div>
@@ -424,11 +431,10 @@ class WPSSTM_Core_Importer{
                                 printf(
                                     '<p class="wpsstm-importer-selector-regex">
                                     <span>~</span>
-                                    <input class="regex" name="%s[selectors][%s][regex]" type="text" value="%s" %s />
+                                    <input class="regex" name="%s" type="text" value="%s" %s />
                                     <span>~mi</span>
                                     </p>',
-                                    'wpsstm_importer',
-                                    $selector,
+                                    'wpsstm_importer'.$regex_keys_html,
                                     $regex,
                                     $regex_disabled
                                 );
