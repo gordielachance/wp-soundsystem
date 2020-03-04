@@ -22,7 +22,6 @@ class WPSSTM_Core_Importer{
         /*
         AJAX
         */
-        add_action('wp_ajax_wpsstm_get_importer_debug', array($this,'ajax_importer_debug'));
 
     }
 
@@ -611,35 +610,6 @@ class WPSSTM_Core_Importer{
         }
 
         return $domains;
-    }
-
-    function ajax_importer_debug(){
-        $ajax_data = wp_unslash($_POST);
-        $post_id = wpsstm_get_array_value('tracklist_id',$ajax_data);
-        $tracklist = new WPSSTM_Post_Tracklist($post_id);
-
-        $result = array(
-            'input' =>          $ajax_data,
-            'error_code' =>     null,
-            'message' =>        null,
-            'success' =>        false,
-            'json' =>           null,
-            'tracklist' =>      $tracklist->to_array(),
-        );
-
-        $json = $tracklist->get_json_feedback();
-
-        if ( is_wp_error($json) ){
-            $result['error_code'] = $json->get_error_code();
-            $result['message'] = $json->get_error_message();
-        }else{
-            $result['success'] = true;
-            $result['json'] = $json;
-        }
-
-        header('Content-type: application/json');
-        wp_send_json( $result );
-
     }
 
 }

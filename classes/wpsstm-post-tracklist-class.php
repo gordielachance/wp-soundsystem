@@ -6,7 +6,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     var $id = null; //unique tracklist ID
     var $post_id = null; //tracklist ID (can be an album, playlist or radio)
-    var $import_id = null;
     var $index = -1;
     var $tracklist_type = 'static';
 
@@ -35,7 +34,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     static $importer_options_meta_name = '_wpsstm_importer_options';
     static $feed_url_meta_name = '_wpsstm_scraper_url';
     static $website_url_meta_name = '_wpsstm_website_url';
-    static $import_id_meta_name = '_wpsstm_import_id';
     private static $remote_title_meta_name = 'wpsstm_remote_title';
 
     public $feed_url = null;
@@ -122,7 +120,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $this->feed_url =           get_post_meta($this->post_id, self::$feed_url_meta_name, true );
         $this->website_url =        get_post_meta($this->post_id, self::$website_url_meta_name, true );
-        $this->import_id =          get_post_meta($this->post_id,self::$import_id_meta_name, true);
 
         //time stuff
 
@@ -817,10 +814,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
                     case 'import_error':
 
-                        //set import ID
-                        $this->import_id = $error->get_error_data('import_error');
-                        update_post_meta( $this->post_id, self::$import_id_meta_name, $this->import_id );
-
                         //return the other error
                         $error_codes =  $error->get_error_codes();
                         $error_code =   $error_codes[1];
@@ -852,11 +845,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $xspf = XML2Array::createArray($xspf);
         $xspf = self::clean_xml_array_input($xspf);
         $xspf = wpsstm_get_array_value('playlist',$xspf);
-
-
-        //set import ID
-        $this->import_id = wpsstm_get_array_value('identifier',$xspf);
-        update_post_meta( $this->post_id, self::$import_id_meta_name, $this->import_id );
 
         /*
         Create playlist from the XSPF array
@@ -1401,11 +1389,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->add_notice('get-autorship', $message );
     }
 
-    function get_debug_url(){
-        if (!$this->import_id) return;
-        return $xspf_url = WPSSTM_API_CACHE . sprintf('%s-feedback.json',$this->import_id);
-    }
-
     function get_backend_tracks_url(){
         $links_url = admin_url('edit.php');
         $links_url = add_query_arg(
@@ -1477,26 +1460,4 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return $total_updated;
 
     }
-
-    function get_json_feedback(){
-        if (!$this->import_id){
-            return new WP_Error('wpsstm_missing_import_id',__('Missing import ID','wpsstm'));
-        }
-
-        $json_url = WPSSTM_API_CACHE . sprintf('%s-feedback.json',$this->import_id);
-        $response = wp_remote_get( $json_url );
-        $json = wp_remote_retrieve_body( $response );
-
-        //check for json errors
-        $data = json_decode($json);
-        $json_error = json_last_error();
-        if ($json_error !== JSON_ERROR_NONE) {
-            return new WP_Error('wpsstm_json_feedback_error',sprintf(__('Error while decoding JSON feedback: %s','wpsstm'),$json_error));
-        }
-
-        return $json;
-
-    }
-
-
 }
