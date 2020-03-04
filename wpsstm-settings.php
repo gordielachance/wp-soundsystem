@@ -623,7 +623,7 @@ class WPSSTM_Settings {
 
             if ( $expires_at = wpsstm_get_array_value('expires_at',$datas) ){
               $date = date( 'Y-m-d H:i:s', strtotime($expires_at) );
-              echo get_date_from_gmt($dat , get_option( 'date_format' ) );
+              echo get_date_from_gmt($date , get_option( 'date_format' ) );
             }else{
                 echo '—';
             }
