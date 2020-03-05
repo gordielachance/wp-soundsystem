@@ -620,12 +620,13 @@ class WPSSTM_Settings {
         }else{
 
             $datas = WPSSTM_Core_API::get_api_userdatas();
-
-            if ( $expires_at = wpsstm_get_array_value('expires_at',$datas) ){
-              $date = date( 'Y-m-d H:i:s', strtotime($expires_at) );
-              echo get_date_from_gmt($date , get_option( 'date_format' ) );
-            }else{
-                echo '—';
+            if ( !is_wp_error($datas) ){
+              if ( $expires_at = wpsstm_get_array_value('expires_at',$datas) ){
+                $date = date( 'Y-m-d H:i:s', strtotime($expires_at) );
+                echo get_date_from_gmt($date , get_option( 'date_format' ) );
+              }else{
+                  echo '—';
+              }
             }
 
         }

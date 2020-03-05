@@ -19,10 +19,7 @@ class WPSSTM_Core_API {
         WP_SoundSystem::debug_log('get api user datas...');
 
         $datas = WPSSTM_Core_API::api_request('auth/userdata');
-
-        if ( is_wp_error($datas) ){
-            $datas = false;
-        }
+        if ( is_wp_error($datas) ) return $datas;
 
         set_transient( self::$premium_userdata_transient_name, $datas, 1 * DAY_IN_SECONDS );
 
@@ -36,76 +33,51 @@ class WPSSTM_Core_API {
     return (bool)$token;
   }
 
-  /*
-  When receiving an error from the API, convert error arrays to WP_Error.
-  //TOUFIX TOUCHECK this is quite quirky.  Should be done in another way ?
-  But we cannot use WP_REST_Request here since it is remote API... :/
-  */
+  public static function get_token(){
 
-  private static function maybe_populate_api_error(&$response){
+    $response = null;
+    $valid = false;
 
-    $code = wpsstm_get_array_value('error_code',$response);
+    if ( !$api_key = wpsstm()->get_options('wpsstmapi_key') ){
+        return false;
+    }
 
-    if ( $code ){
+    if ( false === ( $token = get_transient(self::$token_transient_name ) ) ) {
 
-      $message = wpsstm_get_array_value('error_message',$response);
-      $data = wpsstm_get_array_value('error_data',$response);
+      $url = WPSSTM_API_URL . 'auth/token';
 
-      $error = new WP_Error( $code,$message,$data );
+      //build headers
+      $args = array(
+        'body' => array(
+          'api_key' => $api_key
+        )
+      );
 
-      return $error;
+      $request = wp_remote_post($url,$args);
+      if ( is_wp_error($request) ) return $request;
+
+      $response = wp_remote_retrieve_body( $request );
+      if ( is_wp_error($response) ) return $response;
+      $response = json_decode($response, true);
+
+      //check error in JSON response
+      //TOUCHECK TOUFIX
+      if ( $error = wpsstm_get_array_value(array('error'),$response) ){
+        $first_value = reset($error);
+        $first_key = key($error);
+        return new WP_Error($first_key,$first_value);
+      }
+
+      if ( !$token = wpsstm_get_array_value(array('token'),$response) ){
+        return new WP_Error('no_token','Missing token');
+      }
+
+      set_transient( self::$token_transient_name, $token, 1 * DAY_IN_SECONDS );
 
     }
 
-    return $response;
+    return $token;
   }
-
-
-    public static function get_token(){
-
-      $response = null;
-      $valid = false;
-
-      if ( !$api_key = wpsstm()->get_options('wpsstmapi_key') ){
-          return false;
-      }
-
-      if ( false === ( $token = get_transient(self::$token_transient_name ) ) ) {
-
-        $url = WPSSTM_API_URL . 'auth/token';
-
-        //build headers
-        $args = array(
-          'body' => array(
-            'api_key' => $api_key
-          )
-        );
-
-        $request = wp_remote_post($url,$args);
-        if ( is_wp_error($request) ) return $request;
-
-        $response = wp_remote_retrieve_body( $request );
-        if ( is_wp_error($response) ) return $response;
-        $response = json_decode($response, true);
-
-        //check error in JSON response
-        //TOUCHECK TOUFIX
-        if ( $error = wpsstm_get_array_value(array('error'),$response) ){
-          $first_value = reset($error);
-          $first_key = key($error);
-          return new WP_Error($first_key,$first_value);
-        }
-
-        if ( !$token = wpsstm_get_array_value(array('token'),$response) ){
-          return new WP_Error('no_token','Missing token');
-        }
-
-        set_transient( self::$token_transient_name, $token, 1 * DAY_IN_SECONDS );
-
-      }
-
-      return $token;
-    }
 
   static function api_request($endpoint = null, $params=null,$method = 'GET'){
 
@@ -126,6 +98,9 @@ class WPSSTM_Core_API {
 
     //parameters
     if ($params){
+
+        $params = wpsstm_clean_array($params);
+
         if ($method == 'GET'){
             $url_params = http_build_query($params);
             $rest_url .= '?' . $url_params;
@@ -151,6 +126,7 @@ class WPSSTM_Core_API {
     $headers = wp_remote_retrieve_headers($request);
     $response_code = wp_remote_retrieve_response_code($request);
     $response = wp_remote_retrieve_body( $request );
+    $response = json_decode($response, true);
 
     //invalid token, redo.
     if ( in_array($response_code,array(401,422,498)) ){
@@ -158,13 +134,16 @@ class WPSSTM_Core_API {
       WPSSTM_Settings::clear_premium_transients();
     }
 
+    //api error
+    if ( $error_msg = wpsstm_get_array_value('error',$response) ){
+      $error = sprintf(__('Error %s: %s','wpsstm'),$response_code,$error_msg);
+      return new WP_Error('api_error',$error );
+    }
+
     if ( is_wp_error($response) ){
         WP_SoundSystem::debug_log($response->get_error_message());
         return $response;
     }
-
-    $response = json_decode($response, true);
-    $response = self::maybe_populate_api_error($response);
 
     return $response;
 
@@ -189,13 +168,12 @@ class WPSSTM_Core_API {
     }
 
     $args = array('spotify_id'=>$music_id);
-    $response = WPSSTM_Core_API::api_request('track/links',$args);
-    $response = self::maybe_populate_api_error($response);
+    $response = self::api_request('track/links',$args);
 
     if ( is_wp_error($response) ){
       WP_SoundSystem::debug_log('Error while filtering autolinks');
     }else{
-      $new_links = (array)wpsstm_get_array_value(array('response','items'),$response);
+      $new_links = wpsstm_get_array_value('items',$response);
       $links = array_merge((array)$links,(array)$new_links);
     }
 

@@ -566,12 +566,8 @@ class WPSSTM_Core_Importer{
       $importers = get_transient( self::$importers_transient_name );
 
       if (false === $importers){
-        $api_response = WPSSTM_Core_API::api_request('importers/list');
-
-        $importers = wpsstm_get_array_value(array('response','items'),$api_response);
-
+        $importers = WPSSTM_Core_API::api_request('importers/list');
         if ( is_wp_error($importers) || !$importers ) return false;
-
         set_transient( self::$importers_transient_name, $importers, 1 * DAY_IN_SECONDS );
       }
 
