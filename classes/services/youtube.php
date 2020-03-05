@@ -9,7 +9,7 @@ class WPSSTM_Youtube{
     }
 
     public static function get_youtube_link_type($type,WPSSTM_Track_Link $link){
-        if ( self::get_youtube_id($link->permalink_url) ){
+        if ( self::get_youtube_id($link->url) ){
             $type = self::$mimetype;
         }
         return $type;

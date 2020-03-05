@@ -106,7 +106,7 @@ class WPSSTM_Souncloud{
     }
 
     public function get_soundcloud_link_type($type,WPSSTM_Track_Link $link){
-        if ( $this->get_sc_track_id($link->permalink_url) ){
+        if ( $this->get_sc_track_id($link->url) ){
             $type = self::$mimetype;
         }
         return $type;

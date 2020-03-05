@@ -23,7 +23,7 @@ Render container even if there is no links, as it is used by JS.
                     echo get_actions_list($actions,'track-link');
                 }
                 ?>
-                <a class="wpsstm-link-title" href="<?php echo $wpsstm_link->permalink_url;?>" target="_blank"><?php echo $wpsstm_link->get_link_title();?></a>
+                <a class="wpsstm-link-title" href="<?php echo $wpsstm_link->url;?>" target="_blank"><?php echo $wpsstm_link->get_link_title();?></a>
             </wpsstm-track-link>
             <?php
 

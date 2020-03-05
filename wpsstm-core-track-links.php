@@ -343,7 +343,7 @@ class WPSSTM_Core_Track_Links{
         ?>
         <p>
             <h2><?php _e('URL','wpsstm');?></h2>
-            <input type="text" name="wpsstm_link_url" class="wpsstm-fullwidth" value="<?php echo $link->permalink_url;?>" />
+            <input type="text" name="wpsstm_link_url" class="wpsstm-fullwidth" value="<?php echo $link->url;?>" />
         </p>
         <?php
         wp_nonce_field( 'wpsstm_link_meta_box', 'wpsstm_link_meta_box_nonce' );
@@ -531,7 +531,7 @@ class WPSSTM_Core_Track_Links{
 
             foreach((array)$link_urls as $url){
                 $link = new WPSSTM_Track_Link(null);
-                $link->permalink_url = $url;
+                $link->url = $url;
                 $new_links[] = $link;
             }
 
@@ -582,7 +582,7 @@ class WPSSTM_Core_Track_Links{
         switch ( $column ) {
             case 'track_link_url':
                 
-                $link  = sprintf('<a class="wpsstm-link-provider" href="%s" target="_blank" title="%s">%s</a>',$wpsstm_link->permalink_url,$wpsstm_link->title,$wpsstm_link->permalink_url);
+                $link  = sprintf('<a class="wpsstm-link-provider" href="%s" target="_blank" title="%s">%s</a>',$wpsstm_link->url,$wpsstm_link->title,$wpsstm_link->url);
                 
                 echo $link;
                 

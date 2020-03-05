@@ -2,7 +2,7 @@
 
 class WPSSTM_Track{
     public $post_id = null;
-    
+
     public $title;
     public $artist;
     public $album;
@@ -69,7 +69,7 @@ class WPSSTM_Track{
                     $links = array();
                     foreach((array)$value as $link_url){
                         $link = array(
-                            'permalink_url' => $link_url,
+                            'url' => $link_url,
                         );
                         $links[] = $link;
                     }
