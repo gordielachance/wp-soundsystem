@@ -787,20 +787,22 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }else{
             $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
             $params = array(
-                'input' =>      $feed_url,
+                'url' =>        $feed_url,
                 'options'=>     $importer_options
             );
 
             /*
             API
             */
-            $xspf = WPSSTM_Core_API::api_request('import',$params);
+            $response = WPSSTM_Core_API::api_request('tracklist/import',$params);
 
-            if ( is_wp_error($xspf) ){
+            if ( is_wp_error($response) ){
 
-                $error = $xspf;
+                $error = $response;
                 $error_code = $error->get_error_code();
                 $error_message = $error->get_error_message();
+
+                //TOUFIX URGENT HANDLE ERRORS
 
                 switch($error_code){
                     case 'rest_forbidden':
@@ -837,14 +839,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         }
 
-        /*
-        convert XSPF to array
-        */
-
-        require_once(wpsstm()->plugin_dir . '_inc/php/XML2Array.php');
-        $xspf = XML2Array::createArray($xspf);
-        $xspf = self::clean_xml_array_input($xspf);
-        $xspf = wpsstm_get_array_value('playlist',$xspf);
+        $jspf = wpsstm_get_array_value('playlist',$response);
 
         /*
         Create playlist from the XSPF array
@@ -853,17 +848,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $playlist = new WPSSTM_Tracklist();
         $playlist_tracks = array();
 
+        $playlist->title = wpsstm_get_array_value('title',$jspf);
+        $playlist->author = wpsstm_get_array_value('creator',$jspf);
+        $playlist->location = wpsstm_get_array_value('location',$jspf);
 
-        $playlist->title = wpsstm_get_array_value('title',$xspf);
-        $playlist->author = wpsstm_get_array_value('creator',$xspf);
-        $playlist->location = wpsstm_get_array_value('location',$xspf);
-
-        if ($date = wpsstm_get_array_value('date',$xspf) ){
-            $playlist->date_timestamp = strtotime($date);
+        if ($date = wpsstm_get_array_value('date',$jspf) ){
+            $playlist->date_timestamp = strtotime($date);//TOUFIX TOUCHECK
         }
 
-        $tracks_arr = wpsstm_get_array_value(array('trackList','track'),$xspf);
-        $tracks_arr = !wpsstm_is_associative_array($tracks_arr) ? $tracks_arr : array($tracks_arr); //a tracklist with multiple tracks would be sequential.
+        $tracks_arr = wpsstm_get_array_value(array('track'),$jspf);
+
 
         foreach ((array)$tracks_arr as $track_arr) {
 
@@ -890,10 +884,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             $track->duration = wpsstm_get_array_value('duration',$track_arr);
 
             //links
-            //when there are several links, it is an array; while it is a string for a single link.  So force array.
-            if ( $link_urls = wpsstm_get_array_value('location',$track_arr) ){
+            if ( $link_urls = wpsstm_get_array_value('link',$track_arr) ){
 
-                $link_urls = (array)$link_urls;
                 $addlinks = array();
 
                 foreach($link_urls as $url){
@@ -908,6 +900,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             }
 
             //identifiers
+            //TOUFIX TOUCHECK is this implemented in API ?
             if ( $identifiers = wpsstm_get_array_value('identifier',$track_arr) ){
                 $identifiers = (array)$identifiers;
 
