@@ -1,6 +1,6 @@
 === WP SoundSystem ===
 Contributors: grosbouff
-Donate link: https://api.spiff-radio.org?p=31
+Donate link: https://www.spiff-radio.org/?p=287871
 Tags: music,audio player,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks
 Requires at least: 4.9
 Tested up to: 5.3.2
@@ -61,7 +61,7 @@ It will search for remote links and attach them to your tracks automatically.
 
 Import [XSPF playlists](http://xspf.org/) using the *Tracklist Importer*.
 
-If you have an [API key](https://api.spiff-radio.org/?p=10), you could also import playlists from various services: *Last.fm, Spotify, SoundCloud, Deezer, Musicbrainz, Radionomy, Hypem, 8tracks, BBC, indieshuffle, Online Radio Box, radio.fr, RadioKing, Reddit, SomaFM, Soundsgood,...*
+If you have an [API key](https://www.spiff-radio.org/?p=287875), you could also import playlists from various services: *Last.fm, Spotify, SoundCloud, Deezer, Musicbrainz, Radionomy, Hypem, 8tracks, BBC, indieshuffle, Online Radio Box, radio.fr, RadioKing, Reddit, SomaFM, Soundsgood,...*
 Custom setups are also available, if you are somewhat familiar with [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp).
 
 [Frontend Importer on Spiff Radio](https://www.spiff-radio.org/?p=213)
@@ -88,7 +88,7 @@ Wanna give a hand as developer ? Check the [Github](https://github.com/gordielac
 
 = WP SoundSystem API =
 
-Get more out of this plugin by [registering an API key](https://api.spiff-radio.org/?p=10); which will enable
+Get more out of this plugin by [registering an API key](https://www.spiff-radio.org/?p=287875); which will enable
 
 * Direct import from a lot of music services
 * the Autolink module
@@ -98,7 +98,7 @@ Consider getting one as a nice way to support the work done –hundred of hours�
 Price is 5$/month or 50$/year.
 
 = Donate =
-Whatever, if you like this plugin, please also consider [making a donation](https://api.spiff-radio.org/?p=31).
+Whatever, if you like this plugin, please also consider [making a donation](https://www.spiff-radio.org/?p=287871).
 
 This would be very appreciated — Thanks !
 

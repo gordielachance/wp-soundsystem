@@ -2,7 +2,7 @@
 /*
 Plugin Name: WP SoundSystem
 Description: Manage a music library within Wordpress; including playlists, tracks, artists, albums and radios.  The perfect fit for your music blog !
-Plugin URI: https://api.spiff-radio.org
+Plugin URI: https://www.spiff-radio.org/?p=287854
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
 Version: 3.2.7

@@ -6,7 +6,7 @@ define('WPSSTM_API_REST',WPSSTM_API_URL . 'wp-json/');
 define('WPSSTM_API_CACHE',WPSSTM_API_URL . 'wordpress/wp-content/uploads/wpsstmapi/');
 
 define('WPSSTM_API_NAMESPACE','wpsstmapi/v1');
-define('WPSSTM_API_REGISTER_URL','https://api.spiff-radio.org/?p=10');
+define('WPSSTM_API_REGISTER_URL','https://www.spiff-radio.org/?p=287875');
 
 class WPSSTM_Core_API {
     
