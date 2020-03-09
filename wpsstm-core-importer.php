@@ -291,10 +291,10 @@ class WPSSTM_Core_Importer{
         }
     }
 
-    static function regex_link(){
+    static function advanced_selectors_link(){
         return sprintf(
             '<a href="#" title="%1$s" class="wpsstm-importer-selector-toggle-advanced"><i class="fa fa-cog" aria-hidden="true"></i></a>',
-            __('Use Regular Expression','wpsstm')
+            __('Advanced selectors','wpsstm')
         );
     }
 
@@ -421,7 +421,7 @@ class WPSSTM_Core_Importer{
                             </div>
                         </td>
                     </tr>
-                    <tr>wpsstm_importer
+                    <tr>
                         <th scope="row"><?php _e('Regex pattern','wpsstm');?></th>
                         <td>
                             <div>
