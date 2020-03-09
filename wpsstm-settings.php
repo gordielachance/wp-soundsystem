@@ -561,9 +561,6 @@ class WPSSTM_Settings {
             );
         }
 
-        //register errors
-        $valid_token = WPSSTM_Core_API::get_token();
-
     }
 
     function wpsstmapi_apitoken_callback(){

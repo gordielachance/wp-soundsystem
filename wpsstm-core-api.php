@@ -30,7 +30,7 @@ class WPSSTM_Core_API {
 
   public static function is_premium(){
     $token = self::get_token();
-    return (bool)$token;
+    return !is_wp_error($token) ? (bool)$token : $token;
   }
 
   public static function get_token(){
@@ -110,7 +110,7 @@ class WPSSTM_Core_API {
     }
 
     //token
-    if ( $token = self::get_token() ){
+    if ( ( $token = self::get_token() ) && !is_wp_error($token) ){
         $api_args['headers']['Authorization'] = sprintf('Bearer %s',$token);
     }
 
