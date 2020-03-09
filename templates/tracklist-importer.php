@@ -61,10 +61,11 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
         <small>
             <?php
 
+            $xpath_selectors_link = sprintf('<a href="https://en.wikipedia.org/wiki/XPath" target="_blank">%s</a>',__('XPath selectors','wpsstm'));
             $jquery_selectors_link = sprintf('<a href="http://www.w3schools.com/jquery/jquery_ref_selectors.asp" target="_blank">%s</a>',__('jQuery selectors','wpsstm'));
             $regexes_link = sprintf('<a href="http://regex101.com" target="_blank">%s</a>',__('regular expressions','wpsstm'));
 
-            printf(__('Enter a %s to extract the data for each track.','wpsstm'),$jquery_selectors_link);
+            printf(__('Depending of the document, use %s or %s to target the data for each track.','wpsstm'),$xpath_selectors_link,$jquery_selectors_link);
             echo"<br/>";
             printf(__('It is also possible to target the attribute of an element or to filter the data with a %s by using %s advanced settings for each item.','wpsstm'),$regexes_link,'<i class="fa fa-cog" aria-hidden="true"></i>');
 
