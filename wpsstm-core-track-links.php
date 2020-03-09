@@ -3,7 +3,7 @@ class WPSSTM_Core_Track_Links{
     static $link_url_metakey = '_wpsstm_link_url';
     static $autolink_time_metakey = '_wpsstm_autolink_time'; //to store the musicbrainz datas
     static $excluded_hosts_link_ids_transient_name = '_wpsstm_excluded_hosts_link_ids';
-    
+
     function __construct() {
         global $wpsstm_link;
 
@@ -13,14 +13,14 @@ class WPSSTM_Core_Track_Links{
         */
         $wpsstm_link = new WPSSTM_Track_Link();
         add_action( 'the_post', array($this,'populate_global_track_link_loop'),10,2);
-        
+
         add_filter( 'query_vars', array($this,'add_query_vars_track_link') );
         add_action( 'init', array($this,'register_track_link_post_type' ));
 
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_links_submenu' ) );
         add_action( 'add_meta_boxes', array($this, 'metabox_link_register'));
-        
-        add_action( 'save_post', array($this,'metabox_parent_track_save')); 
+
+        add_action( 'save_post', array($this,'metabox_parent_track_save'));
         add_action( 'save_post', array($this,'metabox_link_url'));
         add_action( 'save_post', array($this,'metabox_save_track_links') );
 
@@ -32,7 +32,7 @@ class WPSSTM_Core_Track_Links{
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(__class__,'register_orphan_track_links_view') );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(wpsstm(),'register_imported_view'), 5 );
-        
+
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track_link), array(__class__,'register_excluded_hosts_links_view') );
         add_action( 'current_screen', array( $this, 'build_excluded_hosts_cache_bt' ) );
         add_action('admin_notices', array(__class__,'build_excluded_hosts_cache_notice') );
@@ -44,11 +44,11 @@ class WPSSTM_Core_Track_Links{
         add_filter( 'pre_get_posts', array($this,'filter_track_links_by_parent') );
         add_filter( 'pre_get_posts', array($this,'filter_track_links_no_excluded_hosts') );
         add_filter( 'pre_get_posts', array($this,'filter_track_links_only_excluded_hosts') );
-        
+
         /*
         AJAX
         */
-        
+
         //delete link
         add_action('wp_ajax_wpsstm_trash_link', array($this,'ajax_trash_link'));
     }
@@ -85,7 +85,7 @@ class WPSSTM_Core_Track_Links{
             'filter_items_list'     => __( 'Filter track links list', 'wpsstm' ),
         );
 
-        $args = array( 
+        $args = array(
             'labels' => $labels,
             'hierarchical' => true,
             'supports' => array( 'author','title'),
@@ -104,26 +104,26 @@ class WPSSTM_Core_Track_Links{
                 'with_front' => FALSE
             ),
             /**
-             * A string used to build the edit, delete, and read capabilities for posts of this type. You 
-             * can use a string or an array (for singular and plural forms).  The array is useful if the 
-             * plural form can't be made by simply adding an 's' to the end of the word.  For example, 
+             * A string used to build the edit, delete, and read capabilities for posts of this type. You
+             * can use a string or an array (for singular and plural forms).  The array is useful if the
+             * plural form can't be made by simply adding an 's' to the end of the word.  For example,
              * array( 'box', 'boxes' ).
              */
             'capability_type'     => 'track', // string|array (defaults to 'post')
 
             /**
-             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for 
-             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the 
+             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for
+             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the
              * 'map_meta_cap' hook.
              */
             'map_meta_cap'        => true, // bool (defaults to FALSE)
 
             /**
-             * Provides more precise control over the capabilities than the defaults.  By default, WordPress 
-             * will use the 'capability_type' argument to build these capabilities.  More often than not, 
-             * this results in many extra capabilities that you probably don't need.  The following is how 
-             * I set up capabilities for many post types, which only uses three basic capabilities you need 
-             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type 
+             * Provides more precise control over the capabilities than the defaults.  By default, WordPress
+             * will use the 'capability_type' argument to build these capabilities.  More often than not,
+             * this results in many extra capabilities that you probably don't need.  The following is how
+             * I set up capabilities for many post types, which only uses three basic capabilities you need
+             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type
              * is unique though, so you'll want to adjust it to fit your needs.
              */
             'capabilities' => array(
@@ -155,23 +155,23 @@ class WPSSTM_Core_Track_Links{
 
         register_post_type( wpsstm()->post_type_track_link, $args );
     }
-    
+
     function add_query_vars_track_link($qvars){
         $qvars[] = 'parent_track';
         $qvars[] = 'no_excluded_hosts';
         $qvars[] = 'only_excluded_hosts';
         return $qvars;
     }
-    
+
     /*
     Register the global within posts loop
     */
-    
+
     function populate_global_track_link_loop($post,$query){
         global $wpsstm_link;
-        
+
         if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return;
-        
+
         //set global
         $is_already_populated = ($wpsstm_link && ($wpsstm_link->post_id == $post->ID) );
         if ($is_already_populated) return;
@@ -189,14 +189,14 @@ class WPSSTM_Core_Track_Links{
             $wpsstm_link = new WPSSTM_Track_Link($post_id);
         }
     }
-    
+
     //add custom admin submenu under WPSSTM
     function backend_links_submenu($parent_slug){
 
         //capability check
         $post_type_slug = wpsstm()->post_type_track_link;
         $post_type_obj = get_post_type_object($post_type_slug);
-        
+
          add_submenu_page(
                 $parent_slug,
                 $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
@@ -204,17 +204,17 @@ class WPSSTM_Core_Track_Links{
                 $post_type_obj->cap->edit_posts, //cap required
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
-        
+
     }
 
     /*
     On backend links listings, allow to filter by track ID
     */
-    
+
     function filter_track_links_by_parent($query){
 
         if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return $query;
-        
+
         $track_id = $query->get( 'parent_track' );
 
         $track_id = is_numeric($track_id) ? (int)$track_id : null; //do not use get_query_var here
@@ -222,14 +222,14 @@ class WPSSTM_Core_Track_Links{
         if ( $track_id === null ) return $query;
 
         $query->set('post_parent',$track_id);
-        
+
         return $query;
     }
-    
+
     function filter_track_links_no_excluded_hosts($query){
         global $wpdb;
-        
-        
+
+
         if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return $query;
         if ( !$query->get('no_excluded_hosts') ) return $query;
 
@@ -238,7 +238,7 @@ class WPSSTM_Core_Track_Links{
         $query->set('post__not_in',$excluded_links_ids);
 
         return $query;
-        
+
     }
 
     function filter_track_links_only_excluded_hosts($query){
@@ -246,7 +246,7 @@ class WPSSTM_Core_Track_Links{
 
         if ( $query->get('post_type') != wpsstm()->post_type_track_link ) return $query;
         if ( !$query->get('only_excluded_hosts') ) return $query;
-        
+
         if ( $excluded_links_ids = self::get_excluded_hosts_link_ids() ){
             $query->set( 'post__in',$excluded_links_ids );
         }else{
@@ -254,50 +254,50 @@ class WPSSTM_Core_Track_Links{
         }
 
         return $query;
-        
+
     }
-    
+
     function metabox_link_register(){
         global $post;
 
         $track_post_type_obj = get_post_type_object(wpsstm()->post_type_track);
-        
+
         add_meta_box(
-            'wpsstm-parent-track', 
-            $track_post_type_obj->labels->parent_item_colon, 
+            'wpsstm-parent-track',
+            $track_post_type_obj->labels->parent_item_colon,
             array($this,'parent_track_content'),
-            wpsstm()->post_type_track_link, 
-            'side', 
+            wpsstm()->post_type_track_link,
+            'side',
             'core'
         );
 
-        add_meta_box( 
-            'wpsstm-link-urls', 
+        add_meta_box(
+            'wpsstm-link-urls',
             __('Track Link URL','wpsstm'),
             array($this,'metabox_link_content'),
-            wpsstm()->post_type_track_link, 
-            'after_title', 
-            'high' 
+            wpsstm()->post_type_track_link,
+            'after_title',
+            'high'
         );
-        
-        add_meta_box( 
-            'wpsstm-metabox-track-links', 
+
+        add_meta_box(
+            'wpsstm-metabox-track-links',
             __('Tracks Links','wpsstm'),
             array($this,'metabox_track_links_content'),
-            wpsstm()->post_type_track, 
+            wpsstm()->post_type_track,
             'normal', //context
             'default' //priority
         );
-        
+
     }
-    
+
     function parent_track_content( $post ){
         ?>
         <div style="text-align:center">
             <?php
 
                 $parent_id = ( $post->post_parent && ( get_post_type( $post->post_parent ) === wpsstm()->post_type_track ) ) ? $post->post_parent : 0;
-                
+
                 if ($parent_id){
                     $track = new WPSSTM_Track($parent_id);
                     printf('<p><strong>%s</strong> — %s</p>',$track->artist,$track->title);
@@ -309,11 +309,11 @@ class WPSSTM_Core_Track_Links{
         <?php
         wp_nonce_field( 'wpsstm_track_parent_meta_box', 'wpsstm_track_parent_meta_box_nonce' );
     }
-    
+
     /**
     Save link URL field for this post
     **/
-    
+
     function metabox_parent_track_save( $post_id ) {
 
         //check save status
@@ -322,7 +322,7 @@ class WPSSTM_Core_Track_Links{
         $is_revision = wp_is_post_revision( $post_id );
         $is_valid_nonce = ( isset($_POST['wpsstm_track_parent_meta_box_nonce']) && wp_verify_nonce( $_POST['wpsstm_track_parent_meta_box_nonce'], 'wpsstm_track_parent_meta_box' ) );
         if ( !$is_valid_nonce || $is_autodraft || $is_autosave || $is_revision ) return;
-        
+
         unset($_POST['wpsstm_track_parent_meta_box_nonce']); //so we avoid the infinite loop
 
         $parent_id = ( isset($_POST[ 'wpsstm_link_parent_id' ]) ) ? $_POST[ 'wpsstm_link_parent_id' ] : null;
@@ -337,7 +337,7 @@ class WPSSTM_Core_Track_Links{
     }
 
     function metabox_link_content( $post ){
-        
+
         $link = new WPSSTM_Track_Link($post->ID);
 
         ?>
@@ -349,7 +349,7 @@ class WPSSTM_Core_Track_Links{
         wp_nonce_field( 'wpsstm_link_meta_box', 'wpsstm_link_meta_box_nonce' );
 
     }
-    
+
     function metabox_track_links_content( $post ){
         global $wpsstm_track;
 
@@ -366,27 +366,27 @@ class WPSSTM_Core_Track_Links{
             $is_enabled = wpsstm()->get_options('autolink');
             $can_autolink = ( WPSSTM_Core_Track_Links::can_autolink() === true);
             $autolinked_time = get_post_meta( $wpsstm_track->post_id, self::$autolink_time_metakey, true );
-        
-        
+
+
             if( $is_enabled ){
-                
+
                 //desc
                 $desc = sprintf("If this track doesn't have any links, we'll try to get them automatically when the track is played.",'wpsstm');
-                
+
                 if (!$is_premium){
                     $premium_desc = sprintf("API key required.",'wpsstm');
                     $desc .= sprintf('  <strong>%s</strong>',$premium_desc);
                 }
-                
+
                 echo $desc;
-                
-                
+
+
                 //has been autolinked notice
                 if ( $autolinked_time ){
 
                     $autolinked_date = date_i18n( get_option( 'date_format' ), $autolinked_time );
                     $notice = sprintf(__('This track has been autolinked on the %s.','wpsstm'),$autolinked_date);
-                    
+
                     if ( $wpsstm_track->is_autolink_paused() ){
                         $now = current_time( 'timestamp' );
                         $next_refresh = $autolinked_time + wpsstm()->get_options('autolink_timeout');
@@ -397,7 +397,7 @@ class WPSSTM_Core_Track_Links{
 
                     printf('<p class="wpsstm-notice">%s</p>',$notice);
                 }
-                
+
             }
 
             ?>
@@ -437,9 +437,9 @@ class WPSSTM_Core_Track_Links{
         </div>
         <div>
             <h3><?php _e('Manual','wpsstm');?></h3>
-        
+
             <div class="wpsstm-track-links">
-                <?php 
+                <?php
                 $wpsstm_track->populate_links();
                 wpsstm_locate_template( 'content-track-links.php', true, false );
                 ?>
@@ -458,7 +458,7 @@ class WPSSTM_Core_Track_Links{
                     <?php
                     //add links
                     printf('<a id="wpsstm-add-link-url" href="#" class="button">%s</a>',__('Add row','wpsstm'));
-        
+
                     if ( $wpsstm_track->have_links() ){
 
                         //edit links bt
@@ -466,11 +466,11 @@ class WPSSTM_Core_Track_Links{
                         printf('<a href="%s" class="button">%s</a>',$post_links_url,__('Filter links','wpsstm'));
 
                     }
-        
+
                     ?>
-                    
-                    
-                    
+
+
+
                 </p>
             </div>
         </div>
@@ -482,7 +482,7 @@ class WPSSTM_Core_Track_Links{
     /**
     Save link URL field for this post
     **/
-    
+
     function metabox_link_url( $post_id ) {
 
         //check save status
@@ -493,7 +493,7 @@ class WPSSTM_Core_Track_Links{
         if ( !$is_valid_nonce || $is_autodraft || $is_autosave || $is_revision ) return;
 
         $link_url = ( isset($_POST[ 'wpsstm_link_url' ]) ) ? $_POST[ 'wpsstm_link_url' ] : null;
-        
+
         //TO FIX validate URL
 
         if (!$link_url){
@@ -503,7 +503,7 @@ class WPSSTM_Core_Track_Links{
         }
 
     }
-    
+
     function metabox_save_track_links( $post_id ) {
         //check save status
         $is_autosave = ( ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE ) || wp_is_post_autosave($post_id) );
@@ -511,7 +511,7 @@ class WPSSTM_Core_Track_Links{
         $is_revision = wp_is_post_revision( $post_id );
         $is_metabox = isset($_POST['wpsstm_track_links_meta_box_nonce']);
         if ( !$is_metabox || $is_autosave || $is_autodraft || $is_revision ) return;
-        
+
         //check post type
         $post_type = get_post_type($post_id);
         $allowed_post_types = array(wpsstm()->post_type_track);
@@ -520,7 +520,7 @@ class WPSSTM_Core_Track_Links{
         //nonce
         $is_valid_nonce = ( wp_verify_nonce( $_POST['wpsstm_track_links_meta_box_nonce'], 'wpsstm_track_links_meta_box' ) );
         if ( !$is_valid_nonce ) return;
-        
+
         $track = new WPSSTM_Track($post_id);
 
         //new link URLs
@@ -539,7 +539,7 @@ class WPSSTM_Core_Track_Links{
             $success = $track->batch_create_links();
 
         }
-        
+
         //unset autolink
         if ( isset($_POST['wpsstm_unset_autolink']) ){
             delete_post_meta( $track->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey );
@@ -550,42 +550,42 @@ class WPSSTM_Core_Track_Links{
             $success = $track->autolink(true);
         }
     }
-    
-    
+
+
     function register_links_scripts_styles(){
         //CSS
         //JS
         wp_register_script( 'wpsstm-links', wpsstm()->plugin_url . '_inc/js/wpsstm-track-links.js', array('jquery','jquery-core','jquery-ui-core','jquery-ui-sortable','wpsstm-functions'),wpsstm()->version, true );
     }
 
-    
+
     public static function link_columns_register($defaults) {
         global $post;
 
         $before = array();
         $after = array();
-        
+
         $after['track_link_url'] = __('URL','wpsstm');
         $after['parent_track'] = __('Track','wpsstm');
-        
+
         if ( isset($_GET['parent_track']) ){
             $after['order'] = __('Order','wpsstm');
         }
-        
+
         return array_merge($before,$defaults,$after);
     }
 
     public static function link_columns_content($column,$post_id){
         global $post;
         global $wpsstm_link;
-        
+
         switch ( $column ) {
             case 'track_link_url':
-                
+
                 $link  = sprintf('<a class="wpsstm-link-provider" href="%s" target="_blank" title="%s">%s</a>',$wpsstm_link->url,$wpsstm_link->title,$wpsstm_link->url);
-                
+
                 echo $link;
-                
+
             break;
             case 'order':
                 if ($wpsstm_link->index !== null){
@@ -597,16 +597,16 @@ class WPSSTM_Core_Track_Links{
             case 'parent_track':
 
                 if ( $track = new WPSSTM_Track($post->post_parent) ){
-                    
+
                     if ($track->artist && $track->artist){
-                        
+
                         $links_url = $track->get_backend_links_url();
-                        
+
                         $track_label = sprintf('<strong>%s</strong> — %s',$track->artist,$track->title);
-                        
+
                         $track_edit_url = get_edit_post_link( $track->post_id );
                         $track_edit_link = sprintf('<a href="%s" alt="%s">%s</a>',$track_edit_url,__('Edit track','wpsstm'),$track_label);
-                        
+
                         $track_links_link = sprintf('<a href="%s" alt="%s">%s</a>',$links_url,__('Filter links','wpsstm'),'<i class="fa fa-filter" aria-hidden="true"></i>');
 
                         printf('<p>%s %s</p>',$track_edit_link,$track_links_link);
@@ -618,12 +618,12 @@ class WPSSTM_Core_Track_Links{
             break;
         }
     }
-    
+
     function ajax_trash_link(){
         $ajax_data = wp_unslash($_POST);
-        
+
         $post_id = wpsstm_get_array_value(array('post_id'),$ajax_data);
-        
+
         $result = array(
             'input'     => $ajax_data,
             'message'   => null,
@@ -632,29 +632,29 @@ class WPSSTM_Core_Track_Links{
 
         $link = new WPSSTM_Track_Link($post_id);
         $success = $link->trash_link();
-        
+
         if ( is_wp_error($success) ){
-            
+
             $result['message'] = $success->get_error_message();
-            
+
         }else{
-            
+
             $result['success'] = true;
-            
+
         }
-        
+
         header('Content-type: application/json');
-        wp_send_json( $result ); 
+        wp_send_json( $result );
     }
-    
+
     static function can_autolink(){
         global $wpsstm_spotify;
-        
+
         //check enabled
         if ( !$enabled = wpsstm()->get_options('autolink') ){
             return new WP_Error( 'wpsstm_autolink_disabled', __("Autolink is disabled.",'wpsstm'));
         }
-        
+
         //check bot user
         $bot_ready = wpsstm()->is_bot_ready();
         if ( is_wp_error($bot_ready) ) return $bot_ready;
@@ -665,10 +665,10 @@ class WPSSTM_Core_Track_Links{
         if ( $has_spotify_api !== true ){
             return new WP_Error( 'wpsstm_spotify_api_missing',__('This requires a Spotify Client ID & Client Secret.','wpsstm') );
         }
-        
+
         //wpssstm API
         $is_premium = WPSSTM_Core_API::is_premium();
-        
+
         if ( $is_premium !== true ){
             return new WP_Error( 'wpsstm_premium_missing',__('This requires you to be Premium.','wpsstm') );
         }
@@ -676,12 +676,12 @@ class WPSSTM_Core_Track_Links{
         //TOFIXKKK TO CHECK has links providers ?
 
         return true;
-        
+
     }
-    
+
     public static function get_orphan_link_ids(){
         global $wpdb;
-        
+
         $query_args = array(
             'post_type' =>      wpsstm()->post_type_track_link,
             'posts_per_page' => -1,
@@ -689,15 +689,15 @@ class WPSSTM_Core_Track_Links{
             'fields' =>         'ids',
             'parent_track' =>    0,
         );
-        
+
         $query = new WP_Query( $query_args );
         return $query->posts;
 
     }
-    
+
     public static function get_excluded_host_link_ids(){
         global $wpdb;
-        
+
         $query_args = array(
             'post_type' =>              wpsstm()->post_type_track_link,
             'posts_per_page' =>         -1,
@@ -705,26 +705,26 @@ class WPSSTM_Core_Track_Links{
             'fields' =>                 'ids',
             'only_excluded_hosts' =>    true,
         );
-        
+
         $query = new WP_Query( $query_args );
 
         return $query->posts;
     }
-    
+
     /*
     Get the duplicate links (by post parent and url)
     https://wordpress.stackexchange.com/questions/340474/sql-query-that-returns-a-list-of-duplicate-posts-ids-comparing-their-post-paren
     //!!!not used for now, but might be useful
     */
-    
+
     static function get_duplicate_link_ids(){
         global $wpdb;
-        
+
         $duplicate_ids = array();
-        
+
         $querystr = $wpdb->prepare( "
-        SELECT post_parent,url, GROUP_CONCAT(DISTINCT post_id SEPARATOR ',') as post_ids FROM (SELECT posts.ID AS post_id,posts.post_parent,metas.meta_value AS url 
-            FROM `$wpdb->posts` AS posts 
+        SELECT post_parent,url, GROUP_CONCAT(DISTINCT post_id SEPARATOR ',') as post_ids FROM (SELECT posts.ID AS post_id,posts.post_parent,metas.meta_value AS url
+            FROM `$wpdb->posts` AS posts
             INNER JOIN `$wpdb->postmeta` AS metas ON ( posts.ID = metas.post_id )
             WHERE `post_type`='wpsstm_track_link'
             AND (`post_status` <> 'trash' AND `post_status` <> 'auto-draft')
@@ -738,12 +738,12 @@ class WPSSTM_Core_Track_Links{
             $row_ids = explode(',',$row->post_ids);
             array_shift($row_ids); //remove first one to keep only duplicates
             $duplicate_ids = array_merge($duplicate_ids, $row_ids);
-            
+
         }
-        
+
         return $duplicate_ids;
     }
-    
+
     static function register_orphan_track_links_view($views){
 
         $screen =                   get_current_screen();
@@ -753,7 +753,7 @@ class WPSSTM_Core_Track_Links{
 
         $link = add_query_arg( array('post_type'=>$post_type,'parent_track'=>0),admin_url('edit.php') );
         $count = count(WPSSTM_Core_Track_Links::get_orphan_link_ids());
-        
+
         $attr = array(
             'href' =>   $link,
         );
@@ -763,19 +763,19 @@ class WPSSTM_Core_Track_Links{
         }
 
         $views['orphan'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Orphan','wpsstm'),$count);
-        
+
         return $views;
     }
-    
+
     static function get_excluded_hosts_link_ids(){
         global $wpdb;
-        
+
         $link_ids = get_transient( self::$excluded_hosts_link_ids_transient_name );
 
         if (false === $link_ids){
-            
+
             if ( $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ){
-                
+
                 $exclude_query = array();
 
                 foreach((array)$excluded_hosts as $domain){
@@ -786,18 +786,18 @@ class WPSSTM_Core_Track_Links{
                 $querystr .= ' AND ( ' . implode(' OR ',$exclude_query) . ')';
 
                 $link_ids = $wpdb->get_col( $querystr );
-                
+
             }
-            
+
             set_transient( self::$excluded_hosts_link_ids_transient_name, $link_ids, 1 * WEEK_IN_SECONDS );
-            
+
             WP_SoundSystem::debug_log(array('hosts'=>count($excluded_hosts),'matches'=>count($link_ids)),"Has built excluded hosts link cache");
 
         }
-        
+
         return $link_ids;
     }
-    
+
     static function rebuild_excluded_hosts_cache(){
         delete_transient( self::$excluded_hosts_link_ids_transient_name );
         self::get_excluded_hosts_link_ids();
@@ -809,15 +809,15 @@ class WPSSTM_Core_Track_Links{
 
         self::rebuild_excluded_hosts_cache();
     }
-    
+
     static function build_excluded_hosts_cache_notice(){
-        
+
         $screen =                   get_current_screen();
-        
+
         if ( !$excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ) return;
         if ( ($screen->base != 'edit') || ($screen->post_type != wpsstm()->post_type_track_link) ) return;
         if ( $is_cache_build = wpsstm_get_array_value('build_excluded_hosts_cache',$_GET) ) return;
-        
+
         $link_url = add_query_arg(
             array(
                 'post_type' =>                  wpsstm()->post_type_track_link,
@@ -830,16 +830,16 @@ class WPSSTM_Core_Track_Links{
         $notice = __('In order to accelerate queries, a cache of track links matching excluded hosts is built every week.','wpsstm') . '  ' . $link_el;
         printf('<div class="notice notice-warning"><p>%s</p></div>',$notice);
     }
-    
+
     static function register_excluded_hosts_links_view($views){
-        
+
         if ( !$excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ) return $views;
-        
+
         $excluded_hosts =           get_query_var('only_excluded_hosts');
 
         $link = add_query_arg( array('post_type'=>wpsstm()->post_type_track_link,'only_excluded_hosts'=>true),admin_url('edit.php') );
         $count = count(WPSSTM_Core_Track_Links::get_excluded_host_link_ids());
-        
+
         $attr = array(
             'href' =>   $link,
         );
@@ -849,22 +849,22 @@ class WPSSTM_Core_Track_Links{
         }
 
         $views['exclude_hosts'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Excluded hosts','wpsstm'),$count);
-        
+
         return $views;
     }
-    
+
     public static function batch_delete_orphan_links(){
 
         if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
-        
+
         WP_SoundSystem::debug_log("Batch delete orphan links...");
 
         if ( !$flushable_ids = WPSSTM_Core_Track_Links::get_orphan_link_ids() ) return;
 
         $trashed = array();
-        
+
         foreach( (array)$flushable_ids as $post_id ){
             $success = wp_delete_post($post_id,true);
             if ( $success ) $trashed[] = $post_id;
@@ -875,13 +875,13 @@ class WPSSTM_Core_Track_Links{
         return $trashed;
 
     }
-    
+
     public static function batch_delete_excluded_hosts_links(){
 
         if ( !current_user_can('manage_options') ){
             return new WP_Error('wpsstm_missing_capability',__("You don't have the capability required.",'wpsstm'));
         }
-        
+
         WP_SoundSystem::debug_log("Batch delete excluded hosts links...");
 
         if ( !$flushable_ids = WPSSTM_Core_Track_Links::get_excluded_host_link_ids() ) return;

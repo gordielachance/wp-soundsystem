@@ -8,13 +8,13 @@ class WPSSTM_Core_User{
     /*
     Get the ID of the 'favorite tracks' tracklist for a user, or create it and store option
     */
-    
+
     public static function get_user_favorites_tracklist_id($user_id = null){
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
 
         $love_id = get_user_option( self::$favorites_tracklist_usermeta_key, $user_id );
-        
+
         //usermeta exists but tracklist does not
         if ( $love_id && !get_post_type($love_id) ){
             delete_user_option( $user_id, self::$favorites_tracklist_usermeta_key );
@@ -24,11 +24,11 @@ class WPSSTM_Core_User{
         return $love_id;
         
     }
-    
+
     /*
     Get the IDs of the 'favorite tracks' tracklists for everyone
     */
-    
+
     static function get_sitewide_favorites_tracklist_ids(){
         global $wpdb;
         //get all subtracks metas
@@ -37,11 +37,11 @@ class WPSSTM_Core_User{
         $ids = $wpdb->get_col( $querystr);
         return $ids;
     }
-    
+
     /*
     Get the IDs of the favorite tracklists, enventually filtered by a user
     */
-    
+
     static function get_favorited_tracklist_ids($user_id = null){
         global $wpdb;
         //get all subtracks metas
@@ -53,15 +53,15 @@ class WPSSTM_Core_User{
 
         $ids = $wpdb->get_col( $querystr);
         return $ids;
-        
+
     }
-    
-    
+
+
     /*
     create new tracklist
     */
     public static function create_user_favorites_tracklist($user_id = null){
-        
+
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
 
@@ -93,12 +93,12 @@ class WPSSTM_Core_User{
         $tracklist->love_tracklist(true);
 
         WP_SoundSystem::debug_log(array('user_id'=>$user_id,'post_id'=>$love_id,'meta'=>$meta),'created favorites tracklist');
-        
+
         return $love_id;
     }
-    
+
     public static function can_manage_playlists($user_id = null){
-        
+
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
 

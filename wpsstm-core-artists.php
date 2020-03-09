@@ -6,9 +6,9 @@ class WPSSTM_Core_Artists{
 
         add_action( 'init', array($this,'register_artist_post_type' ));
         add_action( 'init', array($this,'register_artist_taxonomy' ));
-        
+
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_artists_submenu' ) );
-        
+
         add_action( 'add_meta_boxes', array($this, 'metabox_artist_register'));
 
     }
@@ -18,7 +18,7 @@ class WPSSTM_Core_Artists{
         //capability check
         $post_type_slug = wpsstm()->post_type_artist;
         $post_type_obj = get_post_type_object($post_type_slug);
-        
+
          add_submenu_page(
                 $parent_slug,
                 $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
@@ -26,7 +26,7 @@ class WPSSTM_Core_Artists{
                 $post_type_obj->cap->edit_posts, //cap required
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
-        
+
     }
 
     function register_artist_post_type() {
@@ -59,7 +59,7 @@ class WPSSTM_Core_Artists{
             'items_list_navigation' => __( 'Artists list navigation', 'wpsstm' ),
             'filter_items_list'     => __( 'Filter artists list', 'wpsstm' ),
         );
-        $args = array( 
+        $args = array(
             'labels' => $labels,
             'hierarchical' => false,
             'supports' => array( 'author','thumbnail', 'comments' ),
@@ -78,24 +78,24 @@ class WPSSTM_Core_Artists{
                 'with_front' => FALSE
             ),
             /**
-             * A string used to build the edit, delete, and read capabilities for posts of this type. You 
-             * can use a string or an array (for singular and plural forms).  The array is useful if the 
-             * plural form can't be made by simply adding an 's' to the end of the word.  For example, 
+             * A string used to build the edit, delete, and read capabilities for posts of this type. You
+             * can use a string or an array (for singular and plural forms).  The array is useful if the
+             * plural form can't be made by simply adding an 's' to the end of the word.  For example,
              * array( 'box', 'boxes' ).
              */
             'capability_type'     => 'artist', // string|array (defaults to 'post')
             /**
-             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for 
-             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the 
+             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for
+             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the
              * 'map_meta_cap' hook.
              */
             'map_meta_cap'        => true, // bool (defaults to FALSE)
             /**
-             * Provides more precise control over the capabilities than the defaults.  By default, WordPress 
-             * will use the 'capability_type' argument to build these capabilities.  More often than not, 
-             * this results in many extra capabilities that you probably don't need.  The following is how 
-             * I set up capabilities for many post types, which only uses three basic capabilities you need 
-             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type 
+             * Provides more precise control over the capabilities than the defaults.  By default, WordPress
+             * will use the 'capability_type' argument to build these capabilities.  More often than not,
+             * this results in many extra capabilities that you probably don't need.  The following is how
+             * I set up capabilities for many post types, which only uses three basic capabilities you need
+             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type
              * is unique though, so you'll want to adjust it to fit your needs.
              */
             'capabilities' => array(
@@ -122,7 +122,7 @@ class WPSSTM_Core_Artists{
         );
         register_post_type( wpsstm()->post_type_artist, $args );
     }
-    
+
     function register_artist_taxonomy(){
 
         $labels = array(
@@ -163,7 +163,7 @@ class WPSSTM_Core_Artists{
             'show_tagcloud'              => false,
             'capabilities'               => $capabilities,
         );
-        
+
         register_taxonomy(
             WPSSTM_Core_Tracks::$artist_taxonomy,
             array(
@@ -175,16 +175,16 @@ class WPSSTM_Core_Artists{
         );
 
     }
-    
+
     function metabox_artist_register(){
 
-        add_meta_box( 
-            'wpsstm-artist-info', 
+        add_meta_box(
+            'wpsstm-artist-info',
             __('Artist','wpsstm'),
             array('WPSSTM_Core_Tracks','metabox_music_infos_content'),
-            wpsstm()->post_type_artist, 
-            'after_title', 
-            'high' 
+            wpsstm()->post_type_artist,
+            'after_title',
+            'high'
         );
     }
 

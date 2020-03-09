@@ -48,50 +48,50 @@ function wpsstm_get_percent_bar($percent){
 function wpsstm_get_post_image_url($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    
+
     //easier to use a meta like this than to upload the remote image if the track is imported
-    
+
     $image_url = get_post_meta( $post_id, WPSSTM_Core_Tracks::$image_url_metakey, true ); //remote track
-    
+
     //regular WP post
     if( has_post_thumbnail($post_id) ){
         $image = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ) );
         $image_url = $image[0];
     }
-    
+
     return $image_url;
 }
 
 function wpsstm_get_post_artist($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    
+
     $terms = get_the_terms($post_id,WPSSTM_Core_Tracks::$artist_taxonomy);
     if ( is_wp_error($terms) ) return false;
     if ( !isset($terms[0]) ) return false;
-    
+
     return $terms[0]->name;
 }
 
 function wpsstm_get_post_track($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    
+
     $terms = get_the_terms($post_id,WPSSTM_Core_Tracks::$track_taxonomy);
     if ( is_wp_error($terms) ) return false;
     if ( !isset($terms[0]) ) return false;
-    
+
     return $terms[0]->name;
 }
 
 function wpsstm_get_post_album($post_id = null){
     global $post;
     if (!$post_id) $post_id = $post->ID;
-    
+
     $terms = get_the_terms($post_id,WPSSTM_Core_Tracks::$album_taxonomy);
     if ( is_wp_error($terms) ) return false;
     if ( !isset($terms[0]) ) return false;
-    
+
     return $terms[0]->name;
 }
 
@@ -119,23 +119,23 @@ function wpsstm_get_blank_action(){
 
 function get_actions_list($actions,$prefix){
     $track_actions_list = array();
-    
+
     $default_action = wpsstm_get_blank_action();
 
     foreach($actions as $slug => $action){
         //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
 
         $action = wp_parse_args($action,$default_action);
-        
+
         $classes = $action['classes'];
         $classes[] = 'wpsstm-action';
         $classes[] = sprintf('wpsstm-%s-action',$prefix);
         $classes[] = sprintf('wpsstm-%s-action-%s',$prefix,$slug);
         $classes = array_unique($classes);
-        
+
         $action['title'] =  ($action['desc']) ?$action['desc'] : $action['text'];
         $action['class'] =  implode(' ',$classes);
-        
+
         //cleanup - TO FIX we should filter attributes within wpsstm_get_html_attr() ?
         unset($action['classes'],$action['desc']);
 
@@ -159,7 +159,7 @@ function wpsstm_get_datetime($timestamp){
 //Check that a post is a bot post (created with the bot user)
 function wpsstm_is_bot_post($post_id = null){
     global $post;
-    
+
     if ( !$bot_id = wpsstm()->get_options('bot_user_id') ) return false;
 
     if (!$post_id && $post) $post_id = $post->ID;
@@ -191,7 +191,7 @@ function wpsstm_get_backend_form_input($options = null){
     if ( isset($options['class']) ){
         $class_str .= $options['class'];
     }
-    
+
     //input
     $input_attr = array(
         'id' =>             isset($options['id']) ? $options['id'] : null,

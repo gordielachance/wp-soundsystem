@@ -18,16 +18,16 @@ class WPSSTM_Core_Radios{
         add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
         add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
 
-        
+
         //backend
         add_action('admin_notices', array(__class__,'radios_notice') );
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_radios_submenu' ) );
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_radio), array(wpsstm(),'register_imported_view'), 5 );
-        
+
         //special radios
         add_action( 'wpsstm_populated_tracklist', array(__class__,'now_playing_radio') );
         add_action( 'wpsstm_populated_tracklist', array(__class__,'sitewide_favorites_radio') );
-        
+
 
     }
 
@@ -63,7 +63,7 @@ class WPSSTM_Core_Radios{
             'filter_items_list'     => __( 'Filter radios list', 'wpsstm' ),
         );
 
-        $args = array( 
+        $args = array(
             'labels' => $labels,
             'hierarchical' => false,
 
@@ -82,30 +82,30 @@ class WPSSTM_Core_Radios{
                 'slug' => sprintf('%s/%s',WPSSTM_BASE_SLUG,WPSSTM_LIVE_PLAYLISTS_SLUG), // = /music/radios
                 'with_front' => FALSE
             ),
-            
+
             //http://justintadlock.com/archives/2013/09/13/register-post-type-cheat-sheet
-            
+
             /**
-             * A string used to build the edit, delete, and read capabilities for posts of this type. You 
-             * can use a string or an array (for singular and plural forms).  The array is useful if the 
-             * plural form can't be made by simply adding an 's' to the end of the word.  For example, 
+             * A string used to build the edit, delete, and read capabilities for posts of this type. You
+             * can use a string or an array (for singular and plural forms).  The array is useful if the
+             * plural form can't be made by simply adding an 's' to the end of the word.  For example,
              * array( 'box', 'boxes' ).
              */
             'capability_type'     => 'radio', // string|array (defaults to 'post')
 
             /**
-             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for 
-             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the 
+             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for
+             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the
              * 'map_meta_cap' hook.
              */
             'map_meta_cap'        => true, // bool (defaults to FALSE)
 
             /**
-             * Provides more precise control over the capabilities than the defaults.  By default, WordPress 
-             * will use the 'capability_type' argument to build these capabilities.  More often than not, 
-             * this results in many extra capabilities that you probably don't need.  The following is how 
-             * I set up capabilities for many post types, which only uses three basic capabilities you need 
-             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type 
+             * Provides more precise control over the capabilities than the defaults.  By default, WordPress
+             * will use the 'capability_type' argument to build these capabilities.  More often than not,
+             * this results in many extra capabilities that you probably don't need.  The following is how
+             * I set up capabilities for many post types, which only uses three basic capabilities you need
+             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type
              * is unique though, so you'll want to adjust it to fit your needs.
              */
             'capabilities' => array(
@@ -138,14 +138,14 @@ class WPSSTM_Core_Radios{
 
         register_post_type( wpsstm()->post_type_radio, $args );
     }
-    
+
     //add custom admin submenu under WPSSTM
     function backend_radios_submenu($parent_slug){
 
         //capability check
         $post_type_slug = wpsstm()->post_type_radio;
         $post_type_obj = get_post_type_object($post_type_slug);
-        
+
          add_submenu_page(
                 $parent_slug,
                 $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
@@ -153,7 +153,7 @@ class WPSSTM_Core_Radios{
                 $post_type_obj->cap->edit_posts, //cap required
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
-        
+
     }
 
     function live_tracklist_classes($classes,$tracklist){
@@ -162,44 +162,44 @@ class WPSSTM_Core_Radios{
         }
         return $classes;
     }
-    
+
     function filter_live_tracklist_actions($actions,$tracklist){
-        
+
         if ($tracklist->tracklist_type !== 'live' ) return $actions;
         if (!$tracklist->feed_url) return $actions;
-        
+
         $new_actions['refresh'] = array(
             'text' =>       __('Refresh', 'wpsstm'),
             'href' =>       $tracklist->get_tracklist_action_url('refresh'),
             'classes' =>    array('wpsstm-reload-bt'),
         );
-        
+
         return $new_actions + $actions;
     }
-    
+
     function pre_get_tracklist_by_pulse( $query ) {
-        
+
         //TOUFIX what if the post doesn't have a cache min meta ?
-        
+
         if ( !$meta_query = $query->get( 'meta_query') ) $meta_query = array();
         $max = $query->get( 'pulse-max' );
-        
+
         if ( $max && ctype_digit($max) ) {
-            
+
             $meta_query[] = array(
                 'key' => self::$cache_timeout_meta_name,
                 'value' => $max,
                 'type' => 'NUMERIC',
                 'compare' => '<='
             );
-            
+
             $query->set( 'meta_query', $meta_query);
 
         }
 
         return $query;
     }
-    
+
     static function radios_notice(){
         $screen = get_current_screen();
         if ( ($screen->base != 'edit') || ($screen->post_type != wpsstm()->post_type_radio) ) return;
@@ -207,24 +207,24 @@ class WPSSTM_Core_Radios{
         $notice = __("Radios are how we call 'live playlists'. Those playlists are synced with remote webpages or services (a Spotify URL, a XSPF file, etc.), and are refreshing seamlessly after a user-defined delay.  Setup the 'Tracklist Importer' metabox while editing a radio.",'wpsstm');
         printf('<div class="notice notice-warning is-dismissible"><p>%s</p></div>',$notice);
     }
-    
+
     static function now_playing_radio($tracklist){
         $nowplaying_id = wpsstm()->get_options('nowplaying_id');
 
         if ($tracklist->post_id != $nowplaying_id) return;
-        
+
         //do not try to sync radio with URL, we do this automatically by filtering get_subtracks().
         $tracklist->last_import_time = current_time( 'timestamp', true );
         $tracklist->date_timestamp = $tracklist->last_import_time;
         $tracklist->is_expired = false;
 
     }
-    
+
     static function sitewide_favorites_radio($tracklist){
         $sitewide_favorites_id = wpsstm()->get_options('sitewide_favorites_id');
 
         if ($tracklist->post_id != $sitewide_favorites_id) return;
-        
+
         //do not try to sync radio with URL, we do this automatically by filtering get_subtracks().
         $tracklist->last_import_time = current_time( 'timestamp', true );
         $tracklist->date_timestamp = $tracklist->last_import_time;

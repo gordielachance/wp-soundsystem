@@ -3,7 +3,7 @@
 class WPSSTM_Core_Playlists{
 
     function __construct() {
-        
+
         add_action( 'init', array($this,'register_post_type_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_playlists_submenu' ) );
 
@@ -41,7 +41,7 @@ class WPSSTM_Core_Playlists{
             'filter_items_list'     => __( 'Filter playlists list', 'wpsstm' ),
         );
 
-        $args = array( 
+        $args = array(
             'labels' => $labels,
             'hierarchical' => false,
 
@@ -61,26 +61,26 @@ class WPSSTM_Core_Playlists{
                 'with_front' => FALSE
             ),
             /**
-             * A string used to build the edit, delete, and read capabilities for posts of this type. You 
-             * can use a string or an array (for singular and plural forms).  The array is useful if the 
-             * plural form can't be made by simply adding an 's' to the end of the word.  For example, 
+             * A string used to build the edit, delete, and read capabilities for posts of this type. You
+             * can use a string or an array (for singular and plural forms).  The array is useful if the
+             * plural form can't be made by simply adding an 's' to the end of the word.  For example,
              * array( 'box', 'boxes' ).
              */
             'capability_type'     => 'playlist', // string|array (defaults to 'post')
 
             /**
-             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for 
-             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the 
+             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for
+             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the
              * 'map_meta_cap' hook.
              */
             'map_meta_cap'        => true, // bool (defaults to FALSE)
 
             /**
-             * Provides more precise control over the capabilities than the defaults.  By default, WordPress 
-             * will use the 'capability_type' argument to build these capabilities.  More often than not, 
-             * this results in many extra capabilities that you probably don't need.  The following is how 
-             * I set up capabilities for many post types, which only uses three basic capabilities you need 
-             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type 
+             * Provides more precise control over the capabilities than the defaults.  By default, WordPress
+             * will use the 'capability_type' argument to build these capabilities.  More often than not,
+             * this results in many extra capabilities that you probably don't need.  The following is how
+             * I set up capabilities for many post types, which only uses three basic capabilities you need
+             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type
              * is unique though, so you'll want to adjust it to fit your needs.
              */
             'capabilities' => array(
@@ -112,14 +112,14 @@ class WPSSTM_Core_Playlists{
 
         register_post_type( wpsstm()->post_type_playlist, $args );
     }
-    
+
     //add custom admin submenu under WPSSTM
     function backend_playlists_submenu($parent_slug){
 
         //capability check
         $post_type_slug = wpsstm()->post_type_playlist;
         $post_type_obj = get_post_type_object($post_type_slug);
-        
+
          add_submenu_page(
                 $parent_slug,
                 $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
@@ -127,10 +127,10 @@ class WPSSTM_Core_Playlists{
                 $post_type_obj->cap->edit_posts, //cap required
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
-        
+
     }
 
-    
+
 }
 
 function wpsstm_playlists_init(){
