@@ -1,7 +1,9 @@
 <?php
 class WPSSTM_Core_Radios{
     static $remote_author_meta_name = 'wpsstm_remote_author_name';
-    static $time_imported_meta_name = 'wpsstm_remote_query_time';
+    static $import_success_time_meta_name = 'wpsstm_import_success_time';
+    static $import_attempt_time_meta_name = 'wpsstm_import_attempt_time';
+    static $importer_slug_meta_name = 'wpsstm_importer_slug';
     static $cache_timeout_meta_name = 'wpsstm_cache_timeout'; //seconds
 
     function __construct() {

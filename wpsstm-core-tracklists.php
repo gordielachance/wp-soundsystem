@@ -33,13 +33,9 @@ class WPSSTM_Core_Tracklists{
         add_action( 'wp_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ) );
         add_action( 'admin_enqueue_scripts', array( $this, 'register_tracklists_scripts_styles' ) );
 
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'tracks_count_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_radio), array(__class__,'tracks_count_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'tracks_count_column_register') );
-
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'favorited_tracklist_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_radio), array(__class__,'favorited_tracklist_column_register') );
-        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'favorited_tracklist_column_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_playlist), array(__class__,'tracklist_columns_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_radio), array(__class__,'tracklist_columns_register') );
+        add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'tracklist_columns_register') );
 
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_playlist), array(__class__,'tracklists_columns_content') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_radio), array(__class__,'tracklists_columns_content') );
@@ -357,26 +353,19 @@ class WPSSTM_Core_Tracklists{
         wp_send_json( $result );
     }
 
-    public static function tracks_count_column_register($defaults) {
-        global $post;
+    public function tracklist_columns_register($columns){
+      global $post;
 
-        $before = array();
-        $after = array();
+      if ( in_array($post->post_type,wpsstm()->tracklist_post_types) ){
+        $columns['tracks-count'] = __('Tracks Count','wpsstm');
+        $columns['tracklist-favoritedby'] = __('Favorited','wpsstm');
+      }
 
-        $after['tracks-count'] = __('Tracks Count','wpsstm');
+      if ( $post->post_type == wpsstm()->post_type_radio ){
+        $columns['tracklist-importer'] = __('Importer','wpsstm');
+      }
 
-        return array_merge($before,$defaults,$after);
-    }
-
-    public static function favorited_tracklist_column_register($defaults) {
-        global $post;
-
-        $before = array();
-        $after = array();
-
-        $after['tracklist-favoritedby'] = __('Favorited','wpsstm');
-
-        return array_merge($before,$defaults,$after);
+      return $columns;
     }
 
     public static function tracklists_columns_content($column){
@@ -391,12 +380,16 @@ class WPSSTM_Core_Tracklists{
                 }
             break;
             case 'tracklist-favoritedby':
-
                 if ($list = $wpsstm_tracklist->get_favorited_by_list() ){
                     $output = $list;
                 }
-
             break;
+            case 'tracklist-importer':
+              if ( $meta = $wpsstm_tracklist->get_importer() ){
+                $output = $meta;
+              }
+            break;
+
         }
 
          echo $output;

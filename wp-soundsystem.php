@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '216';
+    public $db_version = '217';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -493,6 +493,14 @@ class WP_SoundSystem {
                     delete_post_meta( $post_id,'_wpsstm_scraper_options');
                   }
               }
+
+            }
+
+            if ($current_version < 217){
+
+              //rename _wpsstm_autosource_time metas
+              $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",WPSSTM_Core_Radios::$import_success_time_meta_name, 'wpsstm_remote_query_timee' );
+              $result = $wpdb->get_results ( $querystr );
 
             }
 
