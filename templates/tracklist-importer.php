@@ -22,7 +22,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
     }
     ?>
     <p>
-        <input type="text" name="wpsstm_importer[feed_url]" value="<?php echo $wpsstm_tracklist->feed_url;?>" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a tracklist URL or type a bang (eg. artist:Gorillaz)','wpsstm');?>" />
+        <input type="text" name="wpsstm_importer[feed_url]" value="<?php echo esc_attr($wpsstm_tracklist->feed_url);?>" class="wpsstm-fullwidth" placeholder="<?php _e('Enter a tracklist URL or type a bang (eg. artist:Gorillaz)','wpsstm');?>" />
     </p>
     <?php
 
@@ -37,7 +37,7 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
     <h3 class="wpsstm-importer-section-label"><?php _e('Website URL','wpsstm');?></h3>
     <?php _e("URL of the radio that will be displayed on the playlist.  If empty, the Feed URL will be used.",'wpsstm');?>
     <p>
-        <input type="text" name="wpsstm_importer[website_url]" value="<?php echo $wpsstm_tracklist->website_url;?>" class="wpsstm-fullwidth" />
+        <input type="text" name="wpsstm_importer[website_url]" value="<?php echo esc_url($wpsstm_tracklist->website_url);?>" class="wpsstm-fullwidth" />
     </p>
 </div>
 

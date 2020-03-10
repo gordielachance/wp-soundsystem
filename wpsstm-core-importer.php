@@ -148,8 +148,8 @@ class WPSSTM_Core_Importer{
 
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
 
-        //feed URL
-        $feed_url = wpsstm_get_array_value('feed_url',$data);
+        //feed URL -sanitized as a string because could be a bang too.
+        $feed_url = sanitize_text_field( wpsstm_get_array_value('feed_url',$data) );
 
         if ($feed_url){
             update_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name,$feed_url);
@@ -158,7 +158,7 @@ class WPSSTM_Core_Importer{
         }
 
         //website URL
-        $website_url = wpsstm_get_array_value('website_url',$data);
+        $website_url = esc_url_raw( wpsstm_get_array_value('website_url',$data) );
 
         if ($website_url){
             update_post_meta( $post_id, WPSSTM_Post_Tracklist::$website_url_meta_name,$website_url);
@@ -172,6 +172,8 @@ class WPSSTM_Core_Importer{
 
         $importer_options = get_post_meta($post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
         $importer_data = self::sanitize_importer_settings($data);
+
+        //TOUFIX URGENT sanitize all datas ?
 
         //settings have been updated, clear tracklist cache
         if ($importer_options != $importer_data){
@@ -204,7 +206,7 @@ class WPSSTM_Core_Importer{
 
         if ( !wpsstm()->get_options('importer_page_id') ) return;
 
-        $url = wpsstm_get_array_value('wpsstm_frontend_wizard_url',$_POST);
+        $url = sanitize_text_field( wpsstm_get_array_value('wpsstm_frontend_wizard_url',$_POST) );
         if (!$url) return;
 
         //check bot user
