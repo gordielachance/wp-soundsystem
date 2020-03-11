@@ -303,17 +303,14 @@ class WPSSTM_Core_Importer{
     static function css_selector_block($keys){
         global $wpsstm_tracklist;
 
-        $options = $wpsstm_tracklist->get_importer_options($path_keys );
-
-
         //path
+        $selector_slug = implode('-',$keys);
         $path_keys = array_merge(array('selectors'),$keys,array('path'));
         $path_keys_html = implode('',array_map(function ($el) {return sprintf('[%s]',$el);},$path_keys));
         $path = $wpsstm_tracklist->get_importer_options($path_keys );
         $path_forced = null;//TOUFIX
         $path_disabled = disabled( (bool)$path_forced, true, false );
         $path = ( $path ? htmlentities($path) : null);
-
 
         //regex
         $regex_keys = array_merge(array('selectors'),$keys,array('regex'));
@@ -339,32 +336,32 @@ class WPSSTM_Core_Importer{
 
             $info = null;
 
-            switch($selector){
-                    case 'track_artist':
+            switch($selector_slug){
+                    case 'track-artist':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
                             '<code>h4 .artist strong</code>'
                         );
                     break;
-                    case 'track_title':
+                    case 'track-title':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
                             '<code>span.track</code>'
                         );
                     break;
-                    case 'track_album':
+                    case 'track-album':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
                             '<code>span.album</code>'
                         );
                     break;
-                    case 'track_image':
+                    case 'track-image':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
                             '<code>a.album-art img</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
                         );
                     break;
-                    case 'track_link_urls':
+                    case 'track-links':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
                             '<code>audio link</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
@@ -372,7 +369,7 @@ class WPSSTM_Core_Importer{
                     break;
             }
 
-            if ($selector!='tracks'){
+            if ($selector_slug!='playlist-tracks'){
                 $tracks_prefix = $wpsstm_tracklist->get_importer_options(array('selectors','tracks','path'));
 
                 if ($tracks_prefix){
@@ -385,8 +382,6 @@ class WPSSTM_Core_Importer{
             }
 
             // if this is a preset default, set as readonly
-
-
 
             printf(
                 '<input type="text" class="wpsstm-importer-selector-jquery wpsstm-fullwidth" name="%s" value="%s" %s />',

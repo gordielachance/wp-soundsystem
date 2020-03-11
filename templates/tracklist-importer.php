@@ -43,10 +43,10 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
 
 <!--parser-->
 <div id="wpsstm-importer-step-parser" class="wpsstm-importer-section wpsstm-importer-section-advanced">
-    <h3 class="wpsstm-importer-section-label"><?php _e('Tracks','wpsstm');?></h3>
+    <h3 class="wpsstm-importer-section-label"><?php _e('Playlist','wpsstm');?></h3>
     <!--tracks selector-->
     <div class="wpsstm-importer-row">
-        <h4 class="wpsstm-importer-row-label"><?php _e('Selector','wpsstm');?></h4>
+        <h4 class="wpsstm-importer-row-label"><?php _e('Tracks Selector','wpsstm');?></h4>
         <div class="wpsstm-importer-row-content">
             <?php WPSSTM_Core_Importer::css_selector_block(array('playlist','tracks'));?>
             <small>

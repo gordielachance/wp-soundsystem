@@ -72,6 +72,7 @@ class WPSSTM_Core_API {
         return new WP_Error('no_token','Missing token');
       }
 
+      //API token is 25 hours
       set_transient( self::$token_transient_name, $token, 1 * DAY_IN_SECONDS );
 
     }
