@@ -148,12 +148,19 @@ class WPSSTM_Core_Importer{
         $tracklist = new WPSSTM_Post_Tracklist($post_id);
 
         //feed URL -sanitized as a string because could be a bang too.
-        $feed_url = sanitize_text_field( wpsstm_get_array_value('feed_url',$data) );
+        $old_feed_url = $tracklist->feed_url;
+        $new_feed_url = sanitize_text_field( wpsstm_get_array_value('feed_url',$data) );
 
-        if ($feed_url){
-            update_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name,$feed_url);
-        }else{
-            delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name);
+        if ($new_feed_url != $old_feed_url){
+
+          if ($new_feed_url){
+              update_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name,$new_feed_url);
+          }else{
+              delete_post_meta( $post_id, WPSSTM_Post_Tracklist::$feed_url_meta_name);
+          }
+
+          //force refresh importer slug
+          delete_post_meta( $post_id, WPSSTM_Core_Radios::$importer_slug_meta_name);
         }
 
         //website URL

@@ -1350,7 +1350,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function get_importer(){
       if (!$this->post_id) return false;
-      if ( !$slug = get_post_meta( $this->post_id,WPSSTM_Core_Radios::$importer_slug_meta_name,true) ) return;
+
+      if ( $this->feed_url && ( !$slug = get_post_meta( $this->post_id,WPSSTM_Core_Radios::$importer_slug_meta_name,true) ) ){
+
+        $response = WPSSTM_Core_API::api_request('importer/',array('url'=>$this->feed_url));
+        if ( !is_wp_error($response) && ($slug = wpsstm_get_array_value(array('importer','slug'),$response)) ){
+          update_post_meta( $this->post_id,WPSSTM_Core_Radios::$importer_slug_meta_name,$slug);
+        }
+      }
+
+      if ( !$slug ) return;
 
       $importers = WPSSTM_Core_Importer::get_importers();
 
