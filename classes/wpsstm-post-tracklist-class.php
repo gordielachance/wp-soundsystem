@@ -1350,7 +1350,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     function get_importer(){
       if (!$this->post_id) return false;
-      return get_post_meta( $this->post_id,WPSSTM_Core_Radios::$importer_slug_meta_name,true);
+      if ( !$slug = get_post_meta( $this->post_id,WPSSTM_Core_Radios::$importer_slug_meta_name,true) ) return;
+
+      $importers = WPSSTM_Core_Importer::get_importers();
+
+      foreach($importers as $importer){
+        if ($importer['slug'] !== $slug) continue;
+        return $importer;
+      }
+
     }
 
     function tracklist_log($data,$title = null){

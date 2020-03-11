@@ -352,7 +352,7 @@ class WPSSTM_Core_Tracklists{
         wp_send_json( $result );
     }
 
-    public function tracklist_columns_register($columns){
+    public static function tracklist_columns_register($columns){
       global $post;
 
       if ( in_array($post->post_type,wpsstm()->tracklist_post_types) ){
@@ -384,8 +384,8 @@ class WPSSTM_Core_Tracklists{
                 }
             break;
             case 'tracklist-importer':
-              if ( $meta = $wpsstm_tracklist->get_importer() ){
-                $output = $meta;
+              if ( $importer = $wpsstm_tracklist->get_importer() ){
+                $output = wpsstm_get_array_value(array('infos','name'),$importer);
               }
             break;
 
