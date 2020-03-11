@@ -1,5 +1,4 @@
 <?php
-
 class WPSSTM_Core_Importer{
 
     static $is_wizard_tracklist_metakey = '_wpsstm_is_wizard';
@@ -565,7 +564,7 @@ class WPSSTM_Core_Importer{
       $importers = get_transient( self::$importers_transient_name );
 
       if (false === $importers){
-        $importers = WPSSTM_Core_API::api_request('importers/list');
+        $importers = WPSSTM_Core_API::api_request('importers');
         if ( is_wp_error($importers) || !$importers ) return false;
         set_transient( self::$importers_transient_name, $importers, 1 * DAY_IN_SECONDS );
       }
