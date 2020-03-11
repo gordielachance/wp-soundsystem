@@ -169,22 +169,22 @@ class WPSSTM_Core_Importer{
         importer
         */
 
-        $importer_options = get_post_meta($post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
-        $importer_data = self::sanitize_importer_settings($data);
+        $old_importer_options = get_post_meta($post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
+        $new_importer_options = self::sanitize_importer_settings($data);
 
         //TOUFIX URGENT sanitize all datas ?
 
         //settings have been updated, clear tracklist cache
-        if ($importer_options != $importer_data){
+        if ($old_importer_options != $new_importer_options){
             //TOUFIX OR if cache time has been updated ?
             WP_SoundSystem::debug_log('scraper settings have been updated, clear import timestamp.','Save wizard' );
             $tracklist->set_is_expired();
         }
 
-        if (!$importer_data){
+        if (!$new_importer_options){
             $success = delete_post_meta($post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name);
         }else{
-            $success = update_post_meta($post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name, $importer_data);
+            $success = update_post_meta($post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name, $new_importer_options);
         }
 
         //reload settings
@@ -336,6 +336,12 @@ class WPSSTM_Core_Importer{
             $info = null;
 
             switch($selector_slug){
+                    case 'playlist-tracks':
+                        $info = sprintf(
+                            __('eg. %s','wpsstm'),
+                            '<code>#content #tracklist .track</code>'
+                        );
+                    break;
                     case 'track-artist':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
@@ -360,7 +366,7 @@ class WPSSTM_Core_Importer{
                             '<code>a.album-art img</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
                         );
                     break;
-                    case 'track-links':
+                    case 'track-link':
                         $info = sprintf(
                             __('eg. %s','wpsstm'),
                             '<code>audio link</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
@@ -368,16 +374,14 @@ class WPSSTM_Core_Importer{
                     break;
             }
 
-            if ($selector_slug!='playlist-tracks'){
-                $tracks_prefix = $wpsstm_tracklist->get_importer_options(array('selectors','tracks','path'));
-
-                if ($tracks_prefix){
-                    printf(
-                        '<span class="tracks-selector-prefix">%1$s</span>',
-                        $tracks_prefix
-                    );
-                }
-
+            //TOUFIX TOUCHECK URGENT this relative path stuff
+            $track_prefix = 'track-';
+            $is_track_selector = ( substr($selector_slug, 0, strlen($track_prefix)) === $track_prefix );
+            if ( $is_track_selector &&  ( $relative_path = $wpsstm_tracklist->get_importer_options(array('selectors','playlist','tracks','path')) ) ){
+              printf(
+                  '<span class="tracks-selector-prefix">%1$s</span>',
+                  $relative_path
+              );
             }
 
             // if this is a preset default, set as readonly

@@ -43,55 +43,51 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
 
 <!--parser-->
 <div id="wpsstm-importer-step-parser" class="wpsstm-importer-section wpsstm-importer-section-advanced">
+
+  <div>
+      <?php
+
+      $xpath_selectors_link = sprintf('<a href="https://en.wikipedia.org/wiki/XPath" target="_blank">%s</a>',__('XPath selectors','wpsstm'));
+      $jquery_selectors_link = sprintf('<a href="http://www.w3schools.com/jquery/jquery_ref_selectors.asp" target="_blank">%s</a>',__('jQuery selectors','wpsstm'));
+      $regexes_link = sprintf('<a href="http://regex101.com" target="_blank">%s</a>',__('regular expressions','wpsstm'));
+
+      printf(__('Depending of the document, use %s or %s to target the data for each track.','wpsstm'),$xpath_selectors_link,$jquery_selectors_link);
+      echo"<br/>";
+      printf(__('It is also possible to target the attribute of an element or to filter the data with a %s by using %s advanced settings for each item.','wpsstm'),$regexes_link,'<i class="fa fa-cog" aria-hidden="true"></i>');
+
+      ?>
+  </div>
     <h3 class="wpsstm-importer-section-label"><?php _e('Playlist','wpsstm');?></h3>
     <!--tracks selector-->
-    <div class="wpsstm-importer-row">
-        <h4 class="wpsstm-importer-row-label"><?php _e('Tracks Selector','wpsstm');?></h4>
-        <div class="wpsstm-importer-row-content">
-            <?php WPSSTM_Core_Importer::css_selector_block(array('playlist','tracks'));?>
-            <small>
-                <?php
-                printf(__('Enter a <a href="%s" target="_blank">jQuery selector</a> to target each track item from the tracklist page, for example: %s.','wpsstm'),'http://www.w3schools.com/jquery/jquery_ref_selectors.asp','<code>#content #tracklist .track</code>');
-                ?>
-            </small>
-        </div>
+    <div id="wpsstm-importer-selectors-playlist">
+      <div id="wpsstm-importer-selectors-playlist-tracks" class="wpsstm-importer-row">
+          <h4 class="wpsstm-importer-row-label"><?php _e('Tracks Selector','wpsstm');?></h4>
+          <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('playlist','tracks'));?></div>
+      </div>
     </div>
     <div class="wpsstm-importer-section-label">
-        <h3><?php _e('Track details','wpsstm');?></h3>
-        <small>
-            <?php
-
-            $xpath_selectors_link = sprintf('<a href="https://en.wikipedia.org/wiki/XPath" target="_blank">%s</a>',__('XPath selectors','wpsstm'));
-            $jquery_selectors_link = sprintf('<a href="http://www.w3schools.com/jquery/jquery_ref_selectors.asp" target="_blank">%s</a>',__('jQuery selectors','wpsstm'));
-            $regexes_link = sprintf('<a href="http://regex101.com" target="_blank">%s</a>',__('regular expressions','wpsstm'));
-
-            printf(__('Depending of the document, use %s or %s to target the data for each track.','wpsstm'),$xpath_selectors_link,$jquery_selectors_link);
-            echo"<br/>";
-            printf(__('It is also possible to target the attribute of an element or to filter the data with a %s by using %s advanced settings for each item.','wpsstm'),$regexes_link,'<i class="fa fa-cog" aria-hidden="true"></i>');
-
-            ?>
-        </small>
+        <h3><?php _e('Single Track','wpsstm');?></h3>
     </div>
-    <div id="wpsstm-single-track-setup">
-        <div id="wpsstm-importer-single-track-artist" class="wpsstm-importer-row">
+    <div id="wpsstm-importer-selectors-track">
+        <div id="wpsstm-importer-selectors-track-artist" class="wpsstm-importer-row">
             <h4 class="wpsstm-importer-row-label"><?php _e('Artist Selector','wpsstm'); echo WPSSTM_Core_Importer::advanced_selectors_link()?></h4>
             <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','artist'));?></div>
         </div>
-        <div id="wpsstm-importer-single-track-title" class="wpsstm-importer-row">
+        <div id="wpsstm-importer-selectors-track-title" class="wpsstm-importer-row">
             <h4 class="wpsstm-importer-row-label"><?php _e('Title Selector','wpsstm'); echo WPSSTM_Core_Importer::advanced_selectors_link()?></h4>
             <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','title'));?></div>
         </div>
-        <div id="wpsstm-importer-single-track-album" class="wpsstm-importer-row">
+        <div id="wpsstm-importer-selectors-track-album" class="wpsstm-importer-row">
             <h4 class="wpsstm-importer-row-label"><?php _e('Album Selector','wpsstm'); echo WPSSTM_Core_Importer::advanced_selectors_link()?></h4>
             <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','album'));?></div>
         </div>
-        <div id="wpsstm-importer-single-track-image" class="wpsstm-importer-row">
+        <div id="wpsstm-importer-selectors-track-image" class="wpsstm-importer-row">
             <h4 class="wpsstm-importer-row-label"><?php _e('Image Selector','wpsstm'); echo WPSSTM_Core_Importer::advanced_selectors_link()?></h4>
             <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','image'));?></div>
         </div>
-        <div id="wpsstm-importer-single-track-links" class="wpsstm-importer-row">
+        <div id="wpsstm-importer-selectors-track-links" class="wpsstm-importer-row">
             <h4 class="wpsstm-importer-row-label"><?php _e('Links Selector','wpsstm'); echo WPSSTM_Core_Importer::advanced_selectors_link()?></h4>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','links'));?></div>
+            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','link'));?></div>
         </div>
     </div>
 </div>
