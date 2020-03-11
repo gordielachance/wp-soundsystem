@@ -86,16 +86,21 @@ It will also fire new *BuddyPress activity* items.
 WP SoundSystem is dev friendly, and has been designed to be extendable.
 Wanna give a hand as developer ? Check the [Github](https://github.com/gordielachance/wp-soundsystem) repo.
 
-= WP SoundSystem API =
+= SoundSystem API =
 
-Get more out of this plugin by [registering an API key](https://www.spiff-radio.org/?p=287875); which will enable
+The [SoundSystem API](https://www.spiff-radio.org/wordpress/?p=287875) has been developed in Ruby in parallel of this plugin.
+Get extra features by [registering an API key](https://www.spiff-radio.org/?p=287875) !
 
-* Direct import from a lot of music services
-* the Autolink module
+Some of its feature are:
+
+* Playlist import from a lot of music services
+* the Autolink module, which will get audio sources for your tracks automatically.
 
 Those are optionals, but are nice features to a solid plugin.
 Consider getting one as a nice way to support the work done –hundred of hours– , and to ensure its durability!
 Price is 5$/month or 50$/year.
+
+Since the API is independent of the plugin, it might also be used by other developers.
 
 = Donate =
 Whatever, if you like this plugin, please also consider [making a donation](https://www.spiff-radio.org/?p=287871).
@@ -142,8 +147,8 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= 3.2.8 =
-* switched to SoundSystem (ruby) API
+= 3.2.9 =
+* switch to the [SoundSystem API](https://www.spiff-radio.org/wordpress/?p=287875)
 
 = 3.2.6 =
 * fixed rewrite rules
