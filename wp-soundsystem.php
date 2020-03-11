@@ -40,7 +40,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin DB version
     */
-    public $db_version = '217';
+    public $db_version = '216';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -241,268 +241,124 @@ class WP_SoundSystem {
         if ($current_version==$this->db_version) return false;
         if(!$current_version){ //not installed
 
-            $this->setup_subtracks_table();
-            $this->create_bot_user();
-            $this->create_import_page();
-            $this->create_nowplaying_post();
-            $this->create_sitewide_favorites_post();
+          $this->setup_subtracks_table();
+          $this->create_bot_user();
+          $this->create_import_page();
+          $this->create_nowplaying_post();
+          $this->create_sitewide_favorites_post();
 
         }else{
 
-            if ($current_version < 201){
-                //
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_musicbrainz_id', '_wpsstm_mbid' );
-                $result = $wpdb->get_results ( $querystr );
-                //
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_musicbrainz_data', '_wpsstm_mbdata' );
-                $result = $wpdb->get_results ( $querystr );
-                //
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_musicbrainz_time', '_wpsstm_mbdata_time' );
-                $result = $wpdb->get_results ( $querystr );
+          if ($current_version < 212){
+              $results = $wpdb->query( "UPDATE `$wpdb->posts` SET `post_type` = 'wpsstm_radio' WHERE `wp_posts`.`post_type` = 'wpsstm_live_playlist'");
+              $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
+              $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `time` `subtrack_time` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'");
+              $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `track_order` `subtrack_order` int(11) NOT NULL DEFAULT '0'");
+              $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD subtrack_author bigint(20) UNSIGNED NULL" );
 
-                //
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s'  WHERE meta_key = '%s'",'_wpsstm_details_spotify_id', '_wpsstm_spotify_id' );
-                $result = $wpdb->get_results ( $querystr );
-                //
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_spotify_data', '_wpsstm_spotify_data' );
-                $result = $wpdb->get_results ( $querystr );
-                //
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",'_wpsstm_details_spotify_time', '_wpsstm_spotify_data_time' );
-                $result = $wpdb->get_results ( $querystr );
-            }
+              $this->create_nowplaying_post();
+              $this->create_sitewide_favorites_post();
 
-            if ($current_version < 202){
+          }
 
-                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", WPSSTM_Post_Tracklist::$importer_options_meta_name );
+          if ($current_version < 213){
 
-                $rows = $wpdb->get_results($querystr);
+              $this->batch_delete_duplicate_subtracks();
+              $this->batch_reindex_subtracks_by('time');
+          }
 
-                foreach($rows as $row){
-                    $metadata = maybe_unserialize($row->meta_value);
+          if ($current_version < 214){
 
-                    $min = isset($metadata['remote_delay_min']) ? $metadata['remote_delay_min'] : false;
-                    if( $min === false ) continue;
+              //convert cache_min to seconds
+              $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", 'wpsstm_cache_min' );
+              $results = $wpdb->get_results ( $querystr );
 
-                    update_post_meta($row->post_id,'wpsstm_cache_min', $min);
+              foreach((array)$results as $result){
+                  $post_id = $result->post_id;
+                  $min = $result->meta_value;
+                  update_post_meta( $post_id, WPSSTM_Core_Radios::$cache_timeout_meta_name, $min * 60 );
+                  delete_post_meta( $post_id,'wpsstm_cache_min');
+              }
 
-                    unset($metadata['remote_delay_min']);
-                    update_post_meta($row->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name, $metadata);
+              //split old tracklist options into separate options
 
-
-                }
-            }
-
-            if ($current_version < 204){
-
-                //rename post type
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE post_type = '%s'",$this->post_type_track_link,'wpsstm_source' );
-                $result = $wpdb->get_results ( $querystr );
-
-                //rename _wpsstm_source_url metas
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",WPSSTM_Core_Track_Links::$link_url_metakey, '_wpsstm_source_url' );
-                $result = $wpdb->get_results ( $querystr );
-
-                //rename _wpsstm_autosource_time metas
-                $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",WPSSTM_Core_Track_Links::$autolink_time_metakey, '_wpsstm_autosource_time' );
-                $result = $wpdb->get_results ( $querystr );
-
-            }
-
-            if ($current_version < 205){
-                $this->migrate_old_subtracks();
-            }
-
-            if ($current_version < 210){
-                //TRACKS ARTIST - migrate meta to taxonomy
-                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_artist' );
-                $results = $wpdb->get_results ( $querystr );
-
-                foreach((array)$results as $meta){
-
-                    //TOUFIX TOUCHECK should this be here ?
-                    $post_type = get_post_type($meta->post_id);
-                    if ( $post_type !== wpsstm()->post_type_track ) continue;
-
-                    $success = wp_set_post_terms( $meta->post_id, $meta->meta_value, WPSSTM_Core_Tracks::$artist_taxonomy);
-
-                    if ( !is_wp_error($success) ){
-                        $success = delete_post_meta($meta->post_id,'_wpsstm_artist');
-
-                    }
-
-                }
-
-                //TRACKS TITLE - migrate meta to taxonomy
-                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_track' );
-                $results = $wpdb->get_results ( $querystr );
-
-                foreach((array)$results as $meta){
-
-                    //TOUFIX TOUCHECK should this be here ?
-                    $post_type = get_post_type($meta->post_id);
-                    if ( $post_type !== wpsstm()->post_type_track ) continue;
-
-                    $success = wp_set_post_terms( $meta->post_id, $meta->meta_value, WPSSTM_Core_Tracks::$track_taxonomy);
-
-                    if ( !is_wp_error($success) ){
-                        delete_post_meta($meta->post_id,'_wpsstm_track');
-
-                    }
-
-                }
-
-                //TRACKS ALBUM - migrate meta to taxonomy
-                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_release' );
-                $results = $wpdb->get_results ( $querystr );
-
-                foreach((array)$results as $meta){
-
-                    //TOUFIX TOUCHECK should this be here ?
-                    $post_type = get_post_type($meta->post_id);
-                    if ( $post_type !== wpsstm()->post_type_track ) continue;
-
-                    $success = wp_set_post_terms( $meta->post_id, $meta->meta_value, WPSSTM_Core_Tracks::$album_taxonomy);
-
-                    if ( !is_wp_error($success) ){
-                        delete_post_meta($meta->post_id,'_wpsstm_release');
-
-                    }
-
-                }
-
-            }
-
-            if ($current_version < 211){
-
-                //migrate community user
-                if ( $community_id = $this->get_options('community_user_id') ){
-                    $success = $this->update_option( 'bot_user_id', $community_id );
-                }
-                //migrate frontend importer
-                if ( $page_id = $this->get_options('frontend_scraper_page_id') ){
-                    $success = $this->update_option( 'importer_page_id', $page_id );
-                }
-
-                WPSSTM_Core_Tracks::batch_delete_orphan_tracks();
-
-                //remove unused music terms since we hadn't cleanup functions before this version
-                self::batch_delete_unused_music_terms();
-            }
-
-            if ($current_version < 212){
-                $results = $wpdb->query( "UPDATE `$wpdb->posts` SET `post_type` = 'wpsstm_radio' WHERE `wp_posts`.`post_type` = 'wpsstm_live_playlist'");
-                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
-                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `time` `subtrack_time` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'");
-                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `track_order` `subtrack_order` int(11) NOT NULL DEFAULT '0'");
-                $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD subtrack_author bigint(20) UNSIGNED NULL" );
-
-                $this->create_nowplaying_post();
-                $this->create_sitewide_favorites_post();
-
-            }
-
-            if ($current_version < 213){
-
-                $this->batch_delete_duplicate_subtracks();
-                $this->batch_reindex_subtracks_by('time');
-            }
-
-            if ($current_version < 214){
-
-                //convert cache_min to seconds
-                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", 'wpsstm_cache_min' );
-                $results = $wpdb->get_results ( $querystr );
-
-                foreach((array)$results as $result){
-                    $post_id = $result->post_id;
-                    $min = $result->meta_value;
-                    update_post_meta( $post_id, WPSSTM_Core_Radios::$cache_timeout_meta_name, $min * 60 );
-                    delete_post_meta( $post_id,'wpsstm_cache_min');
-                }
-
-                //split old tracklist options into separate options
-
-                $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_tracklist_options' );
-                $results = $wpdb->get_results ( $querystr );
-
-                foreach((array)$results as $result){
-                    $post_id = $result->post_id;
-                    $value = maybe_unserialize($result->meta_value);
-
-                    $playable = isset($value['playable']) ? $value['playable'] : null;
-                    $order = isset($value['order']) ? $value['order'] : null;
-
-                    if($playable){
-                        update_post_meta( $post_id, WPSSTM_Core_Tracklists::$playable_meta_name, $playable );
-                    }
-
-                    if($order){
-                        update_post_meta( $post_id, WPSSTM_Core_Tracklists::$order_meta_name, $order );
-                    }
-
-                    delete_post_meta($post_id,'_wpsstm_tracklist_options');
-
-                }
-
-            }
-
-            if ($current_version < 215){
-
-                $nowplaying_id = wpsstm()->get_options('nowplaying_id');
-                $sitewide_favorites_id = wpsstm()->get_options('sitewide_favorites_id');
-
-                if ( $nowplaying_id ){
-                    $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE ID = '%s'",$this->post_type_radio,$nowplaying_id);
-                    $result = $wpdb->get_results ( $querystr );
-                }
-
-                if ( $sitewide_favorites_id ){
-                    $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE ID = '%s'",$this->post_type_radio,$sitewide_favorites_id);
-                    $result = $wpdb->get_results ( $querystr );
-                }
-
-            }
-
-            if ($current_version < 216){
-
-              $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_scraper_options' );
+              $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_tracklist_options' );
               $results = $wpdb->get_results ( $querystr );
 
               foreach((array)$results as $result){
                   $post_id = $result->post_id;
                   $value = maybe_unserialize($result->meta_value);
 
-                  $new_options = array(
-                    'selectors'=>array(
-                      'playlist'=> array(
-                        'tracks' => wpsstm_get_array_value(array('selectors','tracks'),$value),
-                      ),
-                      'track'=> array(
-                        'artist'=>  wpsstm_get_array_value(array('selectors','track_artist'),$value),
-                        'title'=>   wpsstm_get_array_value(array('selectors','track_title'),$value),
-                        'album'=>   wpsstm_get_array_value(array('selectors','track_album'),$value),
-                        'image'=>   wpsstm_get_array_value(array('selectors','track_image'),$value),
-                        'links'=>   wpsstm_get_array_value(array('selectors','track_source_urls'),$value),
-                      )
-                    )
-                  );
+                  $playable = isset($value['playable']) ? $value['playable'] : null;
+                  $order = isset($value['order']) ? $value['order'] : null;
 
-                  $new_options = wpsstm_clean_array($new_options);
-
-                  if ( update_post_meta( $post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,$new_options) ) {
-                    delete_post_meta( $post_id,'_wpsstm_scraper_options');
+                  if($playable){
+                      update_post_meta( $post_id, WPSSTM_Core_Tracklists::$playable_meta_name, $playable );
                   }
+
+                  if($order){
+                      update_post_meta( $post_id, WPSSTM_Core_Tracklists::$order_meta_name, $order );
+                  }
+
+                  delete_post_meta($post_id,'_wpsstm_tracklist_options');
+
               }
 
+          }
+
+          if ($current_version < 215){
+
+              $nowplaying_id = wpsstm()->get_options('nowplaying_id');
+              $sitewide_favorites_id = wpsstm()->get_options('sitewide_favorites_id');
+
+              if ( $nowplaying_id ){
+                  $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE ID = '%s'",$this->post_type_radio,$nowplaying_id);
+                  $result = $wpdb->get_results ( $querystr );
+              }
+
+              if ( $sitewide_favorites_id ){
+                  $querystr = $wpdb->prepare( "UPDATE $wpdb->posts SET post_type = '%s' WHERE ID = '%s'",$this->post_type_radio,$sitewide_favorites_id);
+                  $result = $wpdb->get_results ( $querystr );
+              }
+
+          }
+
+          if ($current_version < 216){
+
+            $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_scraper_options' );
+            $results = $wpdb->get_results ( $querystr );
+
+            foreach((array)$results as $result){
+                $post_id = $result->post_id;
+                $value = maybe_unserialize($result->meta_value);
+
+                $new_options = array(
+                  'selectors'=>array(
+                    'playlist'=> array(
+                      'tracks' => wpsstm_get_array_value(array('selectors','tracks'),$value),
+                    ),
+                    'track'=> array(
+                      'artist'=>  wpsstm_get_array_value(array('selectors','track_artist'),$value),
+                      'title'=>   wpsstm_get_array_value(array('selectors','track_title'),$value),
+                      'album'=>   wpsstm_get_array_value(array('selectors','track_album'),$value),
+                      'image'=>   wpsstm_get_array_value(array('selectors','track_image'),$value),
+                      'link'=>    wpsstm_get_array_value(array('selectors','track_source_urls'),$value),
+                    )
+                  )
+                );
+
+                $new_options = wpsstm_clean_array($new_options);
+
+                if ( update_post_meta( $post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,$new_options) ) {
+                  delete_post_meta( $post_id,'_wpsstm_scraper_options');
+                }
             }
 
-            if ($current_version < 217){
+            //rename _wpsstm_autosource_time metas
+            $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",WPSSTM_Core_Radios::$import_success_time_meta_name, 'wpsstm_remote_query_time' );
+            $result = $wpdb->get_results ( $querystr );
 
-              //rename _wpsstm_autosource_time metas
-              $querystr = $wpdb->prepare( "UPDATE $wpdb->postmeta SET meta_key = '%s' WHERE meta_key = '%s'",WPSSTM_Core_Radios::$import_success_time_meta_name, 'wpsstm_remote_query_timee' );
-              $result = $wpdb->get_results ( $querystr );
-
-            }
+          }
 
         }
 
