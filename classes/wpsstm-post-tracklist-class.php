@@ -126,12 +126,19 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->date_timestamp =     (int)get_post_modified_time( 'U', true, $this->post_id, true );
 
         if ( metadata_exists('post', $this->post_id, WPSSTM_Core_Radios::$import_success_time_meta_name) ){
-            $this->last_import_time =   get_post_meta($this->post_id,WPSSTM_Core_Radios::$import_success_time_meta_name,true);
-            $this->date_timestamp =     $this->last_import_time;
+            $this->last_import_time =   get_post_meta($this->post_id,WPSSTM_Core_Radios::$import_success_time_meta_name
+            ,true);
         }
 
         $seconds = $this->seconds_before_refresh();
-        $this->is_expired = ( ($seconds !== false) && ($seconds <= 0) );
+        $seconds_expired = ( ($seconds !== false) && ($seconds <= 0) );
+
+        //update expired meta if needed
+        if ($seconds_expired){
+          $this->set_is_expired();
+        }
+
+        $this->is_expired = get_post_meta($this->post_id,WPSSTM_Core_Radios::$is_expired_meta_name, true );
 
         //importer options
         $db_importer_options = (array)get_post_meta($this->post_id,self::$importer_options_meta_name,true);
@@ -718,7 +725,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
             }
         }
 
-        //get static subtracks
+        //now that it is updated, get static subtracks
         $tracks = $this->get_static_subtracks();
 
 
@@ -1048,12 +1055,15 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       tracklist data
       */
 
+      if ( is_wp_error($tracklist) ) return $tracklist;
+
       $tracklist_post = array(
         'ID' =>         $this->post_id,
         'meta_input' => array(
           self::$remote_title_meta_name =>                      $tracklist->title,
           WPSSTM_Core_Radios::$remote_author_meta_name =>       $tracklist->author,
           WPSSTM_Core_Radios::$import_success_time_meta_name => current_time( 'timestamp', true ),
+          WPSSTM_Core_Radios::$is_expired_meta_name =>          false,
         )
       );
 
@@ -1105,10 +1115,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       return $seconds;
     }
 
-    function remove_import_timestamp(){
-      if ( !$this->last_import_time ) return;
-      if ( !$success = delete_post_meta($this->post_id,WPSSTM_Core_Radios::$import_success_time_meta_name) ) return;
-      $this->is_expired = true;
+    function set_is_expired(){
+      if ( !$this->is_expired && update_post_meta($this->post_id,WPSSTM_Core_Radios::$is_expired_meta_name,true) ){
+          $this->is_expired = true;
+      }
+      return $this->is_expired;
     }
 
     function get_human_pulse(){

@@ -179,7 +179,7 @@ class WPSSTM_Core_Importer{
         if ($importer_options != $importer_data){
             //TOUFIX OR if cache time has been updated ?
             WP_SoundSystem::debug_log('scraper settings have been updated, clear import timestamp.','Save wizard' );
-            $tracklist->remove_import_timestamp();
+            $tracklist->set_is_expired();
         }
 
         if (!$importer_data){
@@ -452,6 +452,8 @@ class WPSSTM_Core_Importer{
 
 
     static function sanitize_importer_settings($input){
+      //TOUFIX TOUCHECK be sure that we sanitize correctly.
+      //https://wordpress.stackexchange.com/questions/360429/how-to-santize-store-and-restore-a-regex-pattern-string
 
         $new_input = array();
 

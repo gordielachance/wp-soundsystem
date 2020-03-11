@@ -1,6 +1,7 @@
 <?php
 class WPSSTM_Core_Radios{
     static $remote_author_meta_name = 'wpsstm_remote_author_name';
+    static $is_expired_meta_name = 'wpsstm_is_expired';
     static $import_success_time_meta_name = 'wpsstm_import_success_time';
     static $import_attempt_time_meta_name = 'wpsstm_import_attempt_time';
     static $importer_slug_meta_name = 'wpsstm_importer_slug';
