@@ -8,10 +8,10 @@
     list-style: none;
     font-family: sans-serif;
     text-align:center;
-    
+
 }
 .wpsstm-action{
-    
+
     @extend .wpsstm-icon;
     @extend .wpsstm-no-underline;
 
@@ -150,7 +150,7 @@ a.toggle-children-link, .toggle-children-link a{
         width: 100%;
         margin-bottom: 0;
         line-height:40px;
-        padding: 0 10px; 
+        padding: 0 10px;
         border:none;
         box-shadow: none;
         &:focus{
@@ -198,13 +198,13 @@ body.wpsstm-popup-overlay >*:not(.wpsstm-dialog){
     background:rgba(255,255,255,.98);
     border:1px solid rgba(0, 0, 0, .2);
     @include box-shadow( rgba(0, 0, 0, 0.1) 0 5px 10px );
-    
+
     position:relative;
 
     .wpsstm-dialog-loader{
         @extend .wpsstm-loading-icon;
     }
-    
+
     button.ui-dialog-titlebar-close{
         background: none;
         color: black;
@@ -215,7 +215,7 @@ body.wpsstm-popup-overlay >*:not(.wpsstm-dialog){
         .wpsstm-dialog-loader{
             font-size:3em;
         }
-        
+
         @include display-flex(flex!important);
         > * {
             margin: auto;
@@ -254,7 +254,7 @@ body.wpsstm-popup-overlay >*:not(.wpsstm-dialog){
         }
 
     }
-    
+
     iframe{
         width:100%;
         height:100%;

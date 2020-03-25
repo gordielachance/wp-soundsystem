@@ -20,7 +20,7 @@ wpsstm-track-link{
     @include flex-grow(0);
     @include transition-property(margin-bottom);
     @include transition-duration(.2s);
-    
+
 
     &.active{
         wpsstm-track-link{
@@ -31,7 +31,7 @@ wpsstm-track-link{
             }
         }
     }
-    
+
     a{
         @extend .wpsstm-no-underline;
     }
@@ -48,19 +48,19 @@ wpsstm-track-link{
                 @extend .wpsstm-icon;
             }
         }
-        
+
         .wpsstm-track-link-action-play{
             @extend .wpsstm-can-click;
         }
-        
+
         .wpsstm-track-link-action-play{
             @extend .wpsstm-icon;
         }
-        
+
         &.link-loading .wpsstm-track-link-action-play{
             @extend .wpsstm-loading-icon;
         }
-        
+
         &:not(.link-playing) .wpsstm-track-link-action-play:before{
             content:"\f04b"; //.fa-play
         }
@@ -73,7 +73,7 @@ wpsstm-track-link{
                 content:"\f071"; //.fa-exclamation-triangle
             }
         }
-        
+
         .wpsstm-track-link-actions{
             margin:0;
             padding-right: .5em;
@@ -89,7 +89,7 @@ wpsstm-track-link{
                 > span{
                     display:none;
                 }
-                
+
                 &.wpsstm-track-link-action-trash:before{
                     content: "\f1f8";//.fa-trash;
                 }
@@ -101,7 +101,7 @@ wpsstm-track-link{
                 }
             }
         }
-        
+
         &.link-active{
             @include display-flex();
         }
