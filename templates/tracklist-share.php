@@ -32,7 +32,7 @@ $edit_cap = $post_type_obj->cap->edit_posts;
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >
     <?php wp_head(); ?>
 </head>
-<body <?php body_class($body_classes); ?>>  
+<body <?php body_class($body_classes); ?>>
 <wpsstm-tracklist <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php wpsstm_locate_template( 'content-tracklist-header.php', true, false );?>
 </wpsstm-tracklist>

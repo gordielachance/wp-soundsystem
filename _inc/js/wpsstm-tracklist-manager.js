@@ -1,5 +1,5 @@
 var $ = jQuery.noConflict();
-    
+
 var formNewTracklist = $('form#wpsstm-new-tracklist');
 var formToggleTracklist = $('form#wpsstm-toggle-tracklists');
 

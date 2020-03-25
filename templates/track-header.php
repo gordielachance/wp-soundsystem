@@ -17,7 +17,7 @@ if ( $notices_el = WP_SoundSystem::get_notices_output($wpsstm_track->notices) ){
     <h2 class="wpsstm-track-title" itemprop="name" title="<?php echo $wpsstm_track->title;?>"><?php echo $wpsstm_track->title;?></h2>
     <h3 class="wpsstm-track-album" itemprop="inAlbum" title="<?php echo $wpsstm_track->album;?>"><?php echo $wpsstm_track->album;?></h3>
 </div>
-    <?php 
+    <?php
     /*
 if ($wpsstm_track->from_tracklist){
     $from_title = get_the_title($wpsstm_track->from_tracklist);

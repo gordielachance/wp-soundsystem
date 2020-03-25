@@ -3,7 +3,7 @@ var $ = jQuery.noConflict();
 class WpsstmLink extends HTMLElement{
     constructor() {
         super(); //required to be first
-        
+
         this.index =            undefined;
         this.post_id =          undefined;
         this.src =              undefined;
@@ -28,22 +28,22 @@ class WpsstmLink extends HTMLElement{
 
         var isValueChanged = (newVal !== oldVal);
         if (!isValueChanged) return;
-        
+
         var link = this;
 
         //link.debug(`Attribute ${attrName} changed from ${oldVal} to ${newVal}`);
 
         switch (attrName) {
         }
-        
-        
+
+
     }
     adoptedCallback(){
         /*
         The custom element has been moved into a new document (e.g. someone called document.adoptNode(el)).
         */
     }
-    
+
     static get observedAttributes() {
         return [];
     }
@@ -51,7 +51,7 @@ class WpsstmLink extends HTMLElement{
     get playable() {
         return this.hasAttribute('wpsstm-playable');
     }
-    
+
     set playable(value) {
         const isChecked = Boolean(value);
         if (isChecked) {
@@ -60,12 +60,12 @@ class WpsstmLink extends HTMLElement{
             this.removeAttribute('wpsstm-playable');
         }
     }
-    
+
     ///
     ///
-    
+
     debug(data,msg){
-        
+
         //add prefix
         if (this.post_id){
             var prefix = '[link:'+this.post_id+']';
@@ -75,7 +75,7 @@ class WpsstmLink extends HTMLElement{
                 msg = prefix + ' ' + msg;
             }
         }
-        
+
         wpsstm_debug(data,msg);
     }
 
@@ -91,7 +91,7 @@ class WpsstmLink extends HTMLElement{
             e.preventDefault();
             link.trash_link();
         });
-        
+
 
 
     }
@@ -106,13 +106,13 @@ class WpsstmLink extends HTMLElement{
         obj[key] = link[key];
         return obj;
         }, {});
-        
+
         //track
         filtered.track = link.track.to_ajax();
 
         return filtered;
     }
-    
+
     trash_link(){
         var link = this;
         var $instances = link.get_instances();

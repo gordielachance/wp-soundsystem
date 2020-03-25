@@ -3,11 +3,11 @@ var $ = jQuery.noConflict();
 $.fn.wpsstmJsonViewer = function() {
 
     this.filter( "textarea" ).each(function() {
-        
+
         var $input = $(this);
         var $container = $input.closest('.wpsstm-json');
         var $output = $container.find('.wpsstm-json-output');
-        
+
         //setup dom
         if ( $container.length == 0 ){
             $input.addClass('wpsstm-json-input');
@@ -30,11 +30,11 @@ $.fn.wpsstmJsonViewer = function() {
 };
 
 function wpsstm_js_notice(msg,preprendTo){
-    
+
     if (typeof preprendTo === 'undefined'){
         preprendTo = $('body');
     }
-    
+
     preprendTo = preprendTo.get(0);
 
     var noticeBlock = $('<div class="wpsstm-block-notice"></div>').get(0);
@@ -44,7 +44,7 @@ function wpsstm_js_notice(msg,preprendTo){
     noticeBlock.append(closeNotice);
 
     preprendTo.prepend(noticeBlock);
-    
+
     $('html, body').animate({
         scrollTop: $(noticeBlock).offset().top - ( $(window).height() / 3) //not at the very top
     }, 500);
@@ -53,7 +53,7 @@ function wpsstm_js_notice(msg,preprendTo){
 
 function wpsstm_debug(data,msg){
     if (!wpsstmL10n.debug) return;
-    
+
     //data
     if (typeof data !== 'object'){
         msg = msg + ' - ' + data;
@@ -66,7 +66,7 @@ function wpsstm_debug(data,msg){
     }else{
         console.log('[wpsstm]' + msg);
     }
-    
+
     //data
     if (typeof data !== 'undefined'){
         console.log(data);
