@@ -212,7 +212,7 @@ wpsstm-tracklist{
         @include display-flex();
         padding:.5em;
 
-        .wpsstm-new-track-data{
+        .wpsstm-new-track-data-row{
             @include display-flex();
             @include flex-grow(1);
             @include flex-shrink(1);

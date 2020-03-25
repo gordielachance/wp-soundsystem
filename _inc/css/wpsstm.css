@@ -704,7 +704,7 @@ wpsstm-tracklist .wpsstm-new-track {
   padding: .5em;
 }
 /* line 215, ../scss/_wpsstm-tracklists.scss */
-wpsstm-tracklist .wpsstm-new-track .wpsstm-new-track-data {
+wpsstm-tracklist .wpsstm-new-track .wpsstm-new-track-data-row {
   display: -webkit-flex;
   display: flex;
   -webkit-flex-grow: 1;
