@@ -605,6 +605,7 @@ class WPSSTM_Core_Importer{
           if ( !isset($domains[$key]) ){
               $domains[$key]['image'] = $image;
               $domains[$key]['name'] = $name;
+              $domains[$key]['service_url'] = $url;
           }else{
               $domains[$key]['name'] .= ', ' . $name;
           }

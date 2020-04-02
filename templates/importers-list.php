@@ -98,7 +98,7 @@ if ( $domains && !is_wp_error($domains) ){
 
     foreach($domains as $domain){
 
-        $item = sprintf('<img src="%s" title="%s"/>',$domain['image'],$domain['name']);
+        $item = sprintf('<a href="%s" title="%s" target="_blank"><img src="%s" title="%s"/></a>',$domain['service_url'],$domain['name'],$domain['image'],$domain['name']);
         $service_items[] = $item;
     }
     //wrap
