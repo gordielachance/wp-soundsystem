@@ -43,21 +43,25 @@ $notice = $wpsstm_tracklist->importer_notice();
             <?php
         }
 
+        /*
+        Queue
+        Tracks list
+        We DO output the container even if there is no tracks as it is required by some JS (to add a new track row).
+        */
 
-        if ( $wpsstm_tracklist->have_subtracks() ) {
-            ?>
-            <div class="wpsstm-tracks-list">
-                <?php
-
-                while ( $wpsstm_tracklist->have_subtracks() ) {
-                    $wpsstm_tracklist->the_subtrack();
-                    global $wpsstm_track;
-                    echo $wpsstm_track->get_track_html();
-                }
-                ?>
-           </div>
-            <?php
-        }
+        ?>
+        <div class="wpsstm-tracks-list">
+          <?php
+          if ( $wpsstm_tracklist->have_subtracks() ) {
+            while ( $wpsstm_tracklist->have_subtracks() ) {
+                $wpsstm_tracklist->the_subtrack();
+                global $wpsstm_track;
+                echo $wpsstm_track->get_track_html();
+            }
+          }
+          ?>
+        </div>
+        <?php
 
         /*
         new subtrack
