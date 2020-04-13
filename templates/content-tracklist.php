@@ -12,11 +12,11 @@ $notice = $wpsstm_tracklist->importer_notice();
 ?>
 <wpsstm-tracklist <?php echo $wpsstm_tracklist->get_tracklist_attr();?>>
     <?php
-    
+
     if ( $wpsstm_tracklist->get_options('header') ){
         wpsstm_locate_template( 'content-tracklist-header.php', true, false );
     }
-    
+
     /*
     Player
     */
@@ -27,11 +27,11 @@ $notice = $wpsstm_tracklist->importer_notice();
     /*
     Queue
     */
-    
+
     ?>
     <section class="wpsstm-tracklist-queue">
         <?php
-        
+
         /*
         Notices
         */
@@ -42,8 +42,8 @@ $notice = $wpsstm_tracklist->importer_notice();
             </ul>
             <?php
         }
-        
-        
+
+
         if ( $wpsstm_tracklist->have_subtracks() ) {
             ?>
             <div class="wpsstm-tracks-list">
