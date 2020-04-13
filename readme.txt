@@ -142,6 +142,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 3.2.8 =
+* bugfix add new row to empty tracklist
+
 = 3.2.6 =
 * fixed rewrite rules
 
