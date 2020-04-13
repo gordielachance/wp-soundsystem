@@ -1349,24 +1349,30 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
     function get_importer(){
-      if (!$this->post_id) return false;
+      if (!$this->post_id || !$this->feed_url) return false;
 
-      if ( $this->feed_url && ( !$slug = get_post_meta( $this->post_id,WPSSTM_Core_Radios::$importer_slug_meta_name,true) ) ){
+      if ( !$slug = get_post_meta( $this->post_id,WPSSTM_Core_Radios::$importer_slug_meta_name,true) ){
 
         $response = WPSSTM_Core_API::api_request('importer/',array('url'=>$this->feed_url));
-        if ( !is_wp_error($response) && ($slug = wpsstm_get_array_value(array('importer','slug'),$response)) ){
+
+        if ( is_wp_error($response) ) return $response;
+
+        if ( $slug = wpsstm_get_array_value(array('importer','slug'),$response) ){
           update_post_meta( $this->post_id,WPSSTM_Core_Radios::$importer_slug_meta_name,$slug);
         }
       }
 
-      if ( !$slug ) return;
+      if ( !$slug ) return new WP_Error( 'missing_importer_slug', __("Missing importer slug.",'wpsstm') );
 
       $importers = WPSSTM_Core_Importer::get_importers();
+      if ( is_wp_error($importers) ) return $importers;
 
       foreach($importers as $importer){
         if ($importer['slug'] !== $slug) continue;
         return $importer;
       }
+
+      return new WP_Error( 'missing_importer', __("No importer found.",'wpsstm') );
 
     }
 

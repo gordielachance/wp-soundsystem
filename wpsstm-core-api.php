@@ -30,7 +30,13 @@ class WPSSTM_Core_API {
 
   public static function is_premium(){
     $token = self::get_token();
-    return !is_wp_error($token) ? (bool)$token : $token;
+
+    if ( is_wp_error($token) ){
+      WP_SoundSystem::debug_log($token->get_error_message());
+      return false;
+    }
+
+    return (bool)$token;
   }
 
   public static function get_token(){

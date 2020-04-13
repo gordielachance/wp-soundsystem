@@ -373,7 +373,7 @@ class WPSSTM_Core_Track_Links{
                 //desc
                 $desc = sprintf("If this track doesn't have any links, we'll try to get them automatically when the track is played.",'wpsstm');
 
-                if (!$is_premium){
+                if ( !$is_premium ){
                     $premium_desc = sprintf("API key required.",'wpsstm');
                     $desc .= sprintf('  <strong>%s</strong>',$premium_desc);
                 }
@@ -652,7 +652,7 @@ class WPSSTM_Core_Track_Links{
 
         //check enabled
         if ( !$enabled = wpsstm()->get_options('autolink') ){
-            return new WP_Error( 'wpsstm_autolink_disabled', __("Autolink is disabled.",'wpsstm'));
+          return new WP_Error( 'wpsstm_autolink_disabled', __("Autolink is disabled.",'wpsstm'));
         }
 
         //check bot user
@@ -663,14 +663,12 @@ class WPSSTM_Core_Track_Links{
         $has_spotify_api = $wpsstm_spotify->can_spotify_api();
 
         if ( $has_spotify_api !== true ){
-            return new WP_Error( 'wpsstm_spotify_api_missing',__('This requires a Spotify Client ID & Client Secret.','wpsstm') );
+          return new WP_Error( 'wpsstm_spotify_api_missing',__('This requires a Spotify Client ID & Client Secret.','wpsstm') );
         }
 
         //wpssstm API
-        $is_premium = WPSSTM_Core_API::is_premium();
-
-        if ( $is_premium !== true ){
-            return new WP_Error( 'wpsstm_premium_missing',__('This requires you to be Premium.','wpsstm') );
+        if ( !WPSSTM_Core_API::is_premium() ){
+          return new WP_Error( 'wpsstm_premium_missing',__('This requires you to be Premium.','wpsstm') );
         }
 
         //TOFIXKKK TO CHECK has links providers ?

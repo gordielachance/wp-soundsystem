@@ -576,7 +576,7 @@ class WPSSTM_Core_Importer{
 
       if (false === $importers){
         $importers = WPSSTM_Core_API::api_request('importers');
-        if ( is_wp_error($importers) || !$importers ) return false;
+        if ( is_wp_error($importers) || !$importers ) return $importers;
         set_transient( self::$importers_transient_name, $importers, 1 * DAY_IN_SECONDS );
       }
 

@@ -574,24 +574,6 @@ class WPSSTM_Settings {
             $client_secret
         );
 
-        /*
-        errors
-        */
-
-        //register errors
-        if ( is_wp_error($valid_token) ){
-            add_settings_error('api_token',$valid_token->get_error_code(),$valid_token->get_error_message(),'inline');
-        }
-
-        /*
-        if ( !$valid_token || is_wp_error($valid_token) ){
-            $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstm'));
-            $desc = sprintf( __('WP Soundsystem uses an external API for several features. Get a free API key %s.','wpsstm'),$link);
-
-            add_settings_error('api_token','api_get_token',$desc,'inline');
-        }
-        */
-
         //display errors
         settings_errors('api_token');
 
@@ -599,32 +581,30 @@ class WPSSTM_Settings {
 
     function wpsstmapi_apipremium_callback(){
 
-        $response = null;
-        $response = WPSSTM_Core_API::is_premium();
+        if ( !WPSSTM_Core_API::is_premium() ){
 
-        //register errors
-        if ( is_wp_error($response) ){
-            add_settings_error('api_premium',$response->get_error_code(),$response->get_error_message(),'inline');
-        }
+          //check for errors
+          $token = WPSSTM_Core_API::get_token();
+          if ( is_wp_error($token) ){
+              add_settings_error('api_premium',$token->get_error_code(),$token->get_error_message(),'inline');
+          }
 
-        if ( !$response || is_wp_error($response) ){
+          $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('Get premium','wpsstm'));
+          $desc = sprintf(__('%s and unlock powerful features : Tracklists Importer, Tracks Autolink...  First and foremost, it is a nice way to support this  plugin, and to ensure its durability.  Thanks for your help!','wppstm'),$link);
 
-            $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('Get premium','wpsstm'));
-            $desc = sprintf(__('%s and unlock powerful features : Tracklists Importer, Tracks Autolink...  First and foremost, it is a nice way to support this  plugin, and to ensure its durability.  Thanks for your help!','wppstm'),$link);
-
-            add_settings_error('api_premium','api_get_premium',$desc,'inline');
+          add_settings_error('api_premium','api_get_premium',$desc,'inline');
 
         }else{
 
-            $datas = WPSSTM_Core_API::get_api_userdatas();
-            if ( !is_wp_error($datas) ){
-              if ( $expires_at = wpsstm_get_array_value('expires_at',$datas) ){
-                $date = date( 'Y-m-d H:i:s', strtotime($expires_at) );
-                echo get_date_from_gmt($date , get_option( 'date_format' ) );
-              }else{
-                  echo '—';
-              }
+          $datas = WPSSTM_Core_API::get_api_userdatas();
+          if ( !is_wp_error($datas) ){
+            if ( $expires_at = wpsstm_get_array_value('expires_at',$datas) ){
+              $date = date( 'Y-m-d H:i:s', strtotime($expires_at) );
+              echo get_date_from_gmt($date , get_option( 'date_format' ) );
+            }else{
+                echo '—';
             }
+          }
 
         }
 

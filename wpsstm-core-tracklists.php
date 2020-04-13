@@ -355,12 +355,14 @@ class WPSSTM_Core_Tracklists{
     public static function tracklist_columns_register($columns){
       global $post;
 
+      $is_premium = WPSSTM_Core_API::is_premium();
+
       if ( in_array($post->post_type,wpsstm()->tracklist_post_types) ){
         $columns['tracks-count'] = __('Tracks Count','wpsstm');
         $columns['tracklist-favoritedby'] = __('Favorited','wpsstm');
       }
 
-      if ( $post->post_type == wpsstm()->post_type_radio ){
+      if ( ( $post->post_type == wpsstm()->post_type_radio ) && $is_premium ){
         $columns['tracklist-importer'] = __('Importer','wpsstm');
       }
 
@@ -379,13 +381,17 @@ class WPSSTM_Core_Tracklists{
                 }
             break;
             case 'tracklist-favoritedby':
-                if ($list = $wpsstm_tracklist->get_favorited_by_list() ){
-                    $output = $list;
-                }
+              if ($list = $wpsstm_tracklist->get_favorited_by_list() ){
+                  $output = $list;
+              }
             break;
             case 'tracklist-importer':
-              if ( $importer = $wpsstm_tracklist->get_importer() ){
-                $output = wpsstm_get_array_value(array('infos','name'),$importer);
+              $importer = $wpsstm_tracklist->get_importer();
+
+              if ( is_wp_error($importer) ){
+                $output = $importer->get_error_message();
+              }else if ( $importer ){
+                  $output = wpsstm_get_array_value(array('infos','name'),$importer);
               }
             break;
 
