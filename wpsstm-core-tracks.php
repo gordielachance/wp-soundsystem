@@ -183,12 +183,10 @@ class WPSSTM_Core_Tracks{
       global $wpsstm_track;
       $success = null;
 
-      if ( !$subtrack_id = get_query_var( 'subtrack_id' ) ) return;
       if ( 'manage' !== get_query_var( 'wpsstm_action' ) ) return; //action does not exist
 
       $manager_action = wpsstm_get_array_value(array('wpsstm_manager_action'),$_REQUEST);
       $manager_data = wpsstm_get_array_value(array('wpsstm_manager_data'),$_REQUEST);
-
 
       switch ($manager_action){
         case 'toggle_tracklists':
