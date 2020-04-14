@@ -180,100 +180,98 @@ class WPSSTM_Core_Tracks{
     }
 
     function handle_manager_action(){
-        global $wpsstm_track;
-        $success = null;
+      global $wpsstm_track;
+      $success = null;
 
-        if ( !$subtrack_id = get_query_var( 'subtrack_id' ) ) return;
-        if ( 'manage' !== get_query_var( 'wpsstm_action' ) ) return; //action does not exist
+      if ( !$subtrack_id = get_query_var( 'subtrack_id' ) ) return;
+      if ( 'manage' !== get_query_var( 'wpsstm_action' ) ) return; //action does not exist
 
-        $manager_action = wpsstm_get_array_value(array('wpsstm_manager_action'),$_REQUEST);
-        $manager_data = wpsstm_get_array_value(array('wpsstm_manager_data'),$_REQUEST);
-
-
-        switch ($manager_action){
-            case 'toggle_tracklists':
-
-                $checked_tracklists = wpsstm_get_array_value(array('new_tids'),$manager_data);
-                $previous_values = wpsstm_get_array_value(array('old_tids'),$manager_data);
-                $edit_values = array();
-
-                if (!$previous_values) break; //no range to compare to
-
-                //use bool values instead of strings
-                foreach((array)$previous_values as $key => $value){
-                    $previous_values[$key] = ($value === '1') ? true : false;
-                }
-
-                foreach((array)$checked_tracklists as $key => $value){
-                    $checked_tracklists[$key] = true;
-                }
-
-                //build an array containing the tracklists IDs that have been updated
-                foreach((array)$previous_values as $key => $value){
-                    if ( $value && !array_key_exists($key,$checked_tracklists) ){//item has been unchecked
-                        $edit_values[$key] = false;
-                    }elseif ( !$value && array_key_exists($key,$checked_tracklists) ){//item has been checked
-                        $edit_values[$key] = true;
-                    }
-                }
-
-                //process changed values
-                if ($edit_values){
-
-                    foreach($edit_values as $tracklist_id => $is_child){
-
-                        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-
-                        if ($is_child){
-                            $success = $tracklist->queue_track($wpsstm_track);
-                        }else{
-                            $success = $tracklist->dequeue_track($wpsstm_track);
-                        }
-
-                        if ( is_wp_error($success) ){
-                            break; //break at first error
-                        }
-                    }
-
-                }
+      $manager_action = wpsstm_get_array_value(array('wpsstm_manager_action'),$_REQUEST);
+      $manager_data = wpsstm_get_array_value(array('wpsstm_manager_data'),$_REQUEST);
 
 
+      switch ($manager_action){
+        case 'toggle_tracklists':
 
-            break;
+          $checked_tracklists = wpsstm_get_array_value(array('new_tids'),$manager_data);
+          $previous_values = wpsstm_get_array_value(array('old_tids'),$manager_data);
+          $edit_values = array();
 
-            case 'new_tracklist':
-                $tracklist_title = wpsstm_get_array_value(array('new_tracklist_title'),$manager_data);
-                if (!$tracklist_title){
-                    $success = new WP_Error('wpsstm_missing_tracklist_title',__('Missing tracklist title','wpsstm'));
-                }else{
+          if (!$previous_values) break; //no range to compare to
 
-                    //create new tracklist
-                    $tracklist = new WPSSTM_Post_Tracklist();
-                    $tracklist->title = $tracklist_title;
+          //use bool values instead of strings
+          foreach((array)$previous_values as $key => $value){
+            $previous_values[$key] = ($value === '1') ? true : false;
+          }
 
-                    $success = $tracklist->save_tracklist();
+          foreach((array)$checked_tracklists as $key => $value){
+            $checked_tracklists[$key] = true;
+          }
 
-                    //append subtrack if any
-                    if ( !is_wp_error($success) ){
-                        $tracklist_id = $success;
-                        $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
-                        $success = $tracklist->queue_track($wpsstm_track);
-                    }
-                }
-
-
-
-            break;
-        }
-
-        if ($success){
-            if ( is_wp_error($success) ){
-                //TOUFIX we should remove that track notice function.
-                $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
-            }else{
-                $wpsstm_track->add_notice('success',__('Track action success!','wpsstm'));
+          //build an array containing the tracklists IDs that have been updated
+          foreach((array)$previous_values as $key => $value){
+            if ( $value && !array_key_exists($key,$checked_tracklists) ){//item has been unchecked
+              $edit_values[$key] = false;
+            }elseif ( !$value && array_key_exists($key,$checked_tracklists) ){//item has been checked
+              $edit_values[$key] = true;
             }
+          }
+
+          //process changed values
+          if ($edit_values){
+
+            foreach($edit_values as $tracklist_id => $is_child){
+
+              $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+
+              if ($is_child){
+                $success = $tracklist->queue_track($wpsstm_track);
+              }else{
+                $success = $tracklist->dequeue_track($wpsstm_track);
+              }
+
+              if ( is_wp_error($success) ){
+                break; //break at first error
+              }
+            }
+
+          }
+
+        break;
+
+        case 'new_tracklist':
+          $tracklist_title = wpsstm_get_array_value(array('new_tracklist_title'),$manager_data);
+          if (!$tracklist_title){
+            $success = new WP_Error('wpsstm_missing_tracklist_title',__('Missing tracklist title','wpsstm'));
+          }else{
+
+            //create new tracklist
+            $tracklist = new WPSSTM_Post_Tracklist();
+            $tracklist->title = $tracklist_title;
+
+            $success = $tracklist->save_tracklist();
+
+            //append subtrack if any
+            if ( !is_wp_error($success) ){
+              $tracklist_id = $success;
+              $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
+              $success = $tracklist->queue_track($wpsstm_track);
+            }
+          }
+
+
+
+        break;
+      }
+
+      if ($success){
+        if ( is_wp_error($success) ){
+          //TOUFIX we should remove that track notice function.
+          $wpsstm_track->add_notice($success->get_error_code(),$success->get_error_message());
+        }else{
+          $wpsstm_track->add_notice('success',__('Track action success!','wpsstm'));
         }
+      }
 
     }
 
