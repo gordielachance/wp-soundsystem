@@ -79,7 +79,7 @@ class WPSSTM_Core_Importer{
         $wp_scripts = wp_scripts();
 
         // JS
-        wp_register_script( 'wpsstm-importer', wpsstm()->plugin_url . '_inc/js/wpsstm-importer.js',array('jquery','jquery-ui-tabs'),wpsstm()->version);
+        wp_register_script( 'wpsstm-importer', wpsstm()->plugin_url . '_inc/js/wpsstm-importer.js',array('jquery'),wpsstm()->version);
 
         //CSS
         wp_register_style( 'wpsstm-importer', wpsstm()->plugin_url . '_inc/css/wpsstm-importer.css',null,wpsstm()->version );

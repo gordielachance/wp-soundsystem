@@ -2,8 +2,14 @@ var $ = jQuery.noConflict();
 
 $( document ).ready(function() {
 
-    /* Backend */
-    $("#wpsstm-metabox-importer").tabs();
+    var $feedUrlHelpContent = $("#wpsstm-importers");
+    var $feedUrlHelpHandle = $("#feed-url-help");
+    $feedUrlHelpContent.hide();
+
+    $feedUrlHelpHandle.click(function(e) {
+      e.preventDefault();
+      $feedUrlHelpContent.toggle();
+    });
 
     /*
     advanced selectors
