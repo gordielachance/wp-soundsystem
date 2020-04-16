@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://www.spiff-radio.org/?p=287854
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 3.2.9
+Version: 3.3.0
 License: GPL2
 */
 
@@ -36,7 +36,7 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '3.2.9';
+    public $version = '3.3.0';
     /**
     * @public string plugin DB version
     */
@@ -241,7 +241,7 @@ class WP_SoundSystem {
         if ($current_version==$this->db_version) return false;
         if(!$current_version){ //not installed
 
-            $this->setup_subtracks_table();
+            $this->create_subtracks_table();
             $this->create_bot_user();
             $this->create_import_page();
             $this->create_nowplaying_post();
@@ -543,7 +543,7 @@ class WP_SoundSystem {
         return $this->update_option( 'sitewide_favorites_id', $page_id );
     }
 
-    function setup_subtracks_table(){
+    function create_subtracks_table(){
         global $wpdb;
 
         self::debug_log('creating subtracks table...');

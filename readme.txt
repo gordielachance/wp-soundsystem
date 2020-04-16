@@ -142,30 +142,21 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= 3.2.9 =
-* bugfix playlist manager was broken
-
-= 3.2.8 =
-* bugfix add new row to empty tracklist
-
-= 3.2.6 =
-* fixed rewrite rules
+= 3.3.0 =
+* bugfix subtracks table was not created at installation (#153)
+* bugfix playlist manager was broken (#152)
+* bugfix add new row to empty tracklist (#148)
+* bugfix rewrite rules
 
 = 3.2.5 =
 * improved plugin settings : maintenance
 * track links :improved excluded hosts queries
 * do not delete links alongside with tracks, just remove the post_parent value (faster)
-
-= 3.2.4 =
 * better way to add tracks to a Playlist
-
-= 3.2.3 =
 * added 'wpsstm_populated_tracklist' action hook
 * improved 'Now Playing' and 'Sitewide favorites'
 * better code for tracklist options / time stuff
 * database upgrade: v214
-
-= 3.2.2 =
 * fix click on player's track position
 * fix styles on track displayed in data engines metaboxes
 * fix get_tracklist_html (cache) when displaying several playlists
