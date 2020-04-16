@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://www.spiff-radio.org/?p=287854
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 3.3.0
+Version: 3.3.1
 License: GPL2
 */
 
@@ -36,11 +36,11 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '3.3.0';
+    public $version = '3.3.1';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '215';
+    public $db_version = '216';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -241,13 +241,17 @@ class WP_SoundSystem {
         if ($current_version==$this->db_version) return false;
         if(!$current_version){ //not installed
 
-            $this->create_subtracks_table();
-            $this->create_bot_user();
-            $this->create_import_page();
-            $this->create_nowplaying_post();
-            $this->create_sitewide_favorites_post();
+          self::debug_log('install plugin...');
+
+          $this->create_subtracks_table();
+          $this->create_bot_user();
+          $this->create_import_page();
+          $this->create_nowplaying_post();
+          $this->create_sitewide_favorites_post();
 
         }else{
+
+            self::debug_log(array('from'=>$current_version,'to'=>$this->db_version),'upgrade plugin...');
 
             if ($current_version < 201){
                 //
@@ -463,6 +467,11 @@ class WP_SoundSystem {
 
             }
 
+            if ($current_version < 216){
+              //check that the subtracks table exists since we had a bug with it before this version
+              $this->create_subtracks_table();
+            }
+
         }
 
         //update DB version
@@ -546,9 +555,18 @@ class WP_SoundSystem {
     function create_subtracks_table(){
         global $wpdb;
 
+        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+
         self::debug_log('creating subtracks table...');
 
-        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+        //checks that it already exists
+        $query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $subtracks_table ) );
+        if ( $wpdb->get_var( $query ) == $subtracks_table ){
+          self::debug_log('...subtracks table already exists, skip.');
+          return true;
+        }
+
+        //do create it
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE $subtracks_table (
