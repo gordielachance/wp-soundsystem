@@ -5,7 +5,7 @@ Description: Manage a music library within Wordpress; including playlists, track
 Plugin URI: https://www.spiff-radio.org/?p=287854
 Author: G.Breant
 Author URI: https://profiles.wordpress.org/grosbouff/#content-plugins
-Version: 3.2.9
+Version: 3.3.3
 License: GPL2
 */
 
@@ -36,11 +36,11 @@ class WP_SoundSystem {
     /**
     * @public string plugin version
     */
-    public $version = '3.2.9';
+    public $version = '3.3.3';
     /**
     * @public string plugin DB version
     */
-    public $db_version = '216';
+    public $db_version = '217';
     /** Paths *****************************************************************/
     public $file = '';
     /**
@@ -241,6 +241,8 @@ class WP_SoundSystem {
         if ($current_version==$this->db_version) return false;
         if(!$current_version){ //not installed
 
+          self::debug_log('install plugin...');
+
           $this->create_subtracks_table();
           $this->create_bot_user();
           $this->create_import_page();
@@ -249,15 +251,17 @@ class WP_SoundSystem {
 
         }else{
 
-          if ($current_version < 212){
-              $results = $wpdb->query( "UPDATE `$wpdb->posts` SET `post_type` = 'wpsstm_radio' WHERE `wp_posts`.`post_type` = 'wpsstm_live_playlist'");
-              $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
-              $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `time` `subtrack_time` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'");
-              $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `track_order` `subtrack_order` int(11) NOT NULL DEFAULT '0'");
-              $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD subtrack_author bigint(20) UNSIGNED NULL" );
+          self::debug_log(array('from'=>$current_version,'to'=>$this->db_version),'upgrade plugin...');
 
-              $this->create_nowplaying_post();
-              $this->create_sitewide_favorites_post();
+          if ($current_version < 212){
+            $results = $wpdb->query( "UPDATE `$wpdb->posts` SET `post_type` = 'wpsstm_radio' WHERE `wp_posts`.`post_type` = 'wpsstm_live_playlist'");
+            $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `ID` `subtrack_id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT" );
+            $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `time` `subtrack_time` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00'");
+            $results = $wpdb->query( "ALTER TABLE `$subtracks_table` CHANGE `track_order` `subtrack_order` int(11) NOT NULL DEFAULT '0'");
+            $results = $wpdb->query( "ALTER TABLE `$subtracks_table` ADD subtrack_author bigint(20) UNSIGNED NULL" );
+
+            $this->create_nowplaying_post();
+            $this->create_sitewide_favorites_post();
 
           }
 
@@ -324,6 +328,11 @@ class WP_SoundSystem {
           }
 
           if ($current_version < 216){
+            //check that the subtracks table exists since we had a bug with it before this version
+            $this->create_subtracks_table();
+          }
+
+          if ($current_version < 217){
 
             $querystr = $wpdb->prepare( "SELECT post_id,meta_value FROM `$wpdb->postmeta` WHERE meta_key = %s", '_wpsstm_scraper_options' );
             $results = $wpdb->get_results ( $querystr );
@@ -443,9 +452,18 @@ class WP_SoundSystem {
     function create_subtracks_table(){
         global $wpdb;
 
+        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+
         self::debug_log('creating subtracks table...');
 
-        $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
+        //checks that it already exists
+        $query = $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $subtracks_table ) );
+        if ( $wpdb->get_var( $query ) == $subtracks_table ){
+          self::debug_log('...subtracks table already exists, skip.');
+          return true;
+        }
+
+        //do create it
         $charset_collate = $wpdb->get_charset_collate();
 
         $sql = "CREATE TABLE $subtracks_table (
