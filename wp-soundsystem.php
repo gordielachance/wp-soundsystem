@@ -241,7 +241,7 @@ class WP_SoundSystem {
         if ($current_version==$this->db_version) return false;
         if(!$current_version){ //not installed
 
-          $this->setup_subtracks_table();
+          $this->create_subtracks_table();
           $this->create_bot_user();
           $this->create_import_page();
           $this->create_nowplaying_post();
@@ -440,8 +440,10 @@ class WP_SoundSystem {
         return $this->update_option( 'sitewide_favorites_id', $page_id );
     }
 
-    function setup_subtracks_table(){
+    function create_subtracks_table(){
         global $wpdb;
+
+        self::debug_log('creating subtracks table...');
 
         $subtracks_table = $wpdb->prefix . $this->subtracks_table_name;
         $charset_collate = $wpdb->get_charset_collate();
@@ -454,7 +456,7 @@ class WP_SoundSystem {
             subtrack_author bigint(20) UNSIGNED NULL,
             subtrack_order int(11) NOT NULL DEFAULT '0',
             subtrack_time datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-            PRIMARY KEY  (ID)
+            PRIMARY KEY (subtrack_id)
         ) $charset_collate;";
 
         require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
