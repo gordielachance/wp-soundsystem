@@ -37,6 +37,10 @@ class WPSSTM_Core_Tracklists{
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_radio), array(__class__,'tracklist_columns_register') );
         add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_album), array(__class__,'tracklist_columns_register') );
 
+        add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_playlist), array(__class__,'tracklist_sortable_columns') );
+        add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_radio), array(__class__,'tracklist_sortable_columns') );
+        add_filter( sprintf('manage_edit-%s_sortable_columns',wpsstm()->post_type_album), array(__class__,'tracklist_sortable_columns') );
+
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_playlist), array(__class__,'tracklists_columns_content') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_radio), array(__class__,'tracklists_columns_content') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'tracklists_columns_content') );
@@ -44,6 +48,7 @@ class WPSSTM_Core_Tracklists{
 
         //tracklist queries
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracklists') );
+        add_filter( 'pre_get_posts', array($this,'sort_tracklists') );
         //TOUFIX used ? not a duplicate of stuff in core tracks ?
 
         //post content
@@ -369,6 +374,13 @@ class WPSSTM_Core_Tracklists{
       return $columns;
     }
 
+    public static function tracklist_sortable_columns( $columns ) {
+      //TOUFIX$columns['tracks-count'] = 'tracks_count';
+      //TOUFIX$columns['tracklist-favoritedby'] = 'favorited_count';
+      $columns['tracklist-importer'] = 'importer_name';
+      return $columns;
+    }
+
     public static function tracklists_columns_content($column){
         global $wpsstm_tracklist;
 
@@ -649,10 +661,26 @@ class WPSSTM_Core_Tracklists{
         }else{
             $query->set ( 'post__in', array(0) ); //force no results
         }
-
-
-
         return $query;
+    }
+
+    function sort_tracklists( $query ) {
+
+      $orderby = $query->get( 'orderby');
+      switch ($orderby){
+        case 'tracks_count':
+          die("TOUFIX sort by tracks count");
+        break;
+        case 'favorited_count':
+          die("TOUFIX sort by favorited count");
+        break;
+        case 'importer_name':
+          $query->set('meta_key',WPSSTM_Core_Radios::$importer_slug_meta_name);
+          $query->set('orderby','meta_value');
+        break;
+      }
+
+      return $query;
     }
 
     /*
