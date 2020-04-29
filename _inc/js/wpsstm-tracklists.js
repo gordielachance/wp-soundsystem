@@ -648,7 +648,7 @@ class WpsstmTracklist extends HTMLElement{
         var allowed = ['post_id'];
         var filtered = Object.keys(tracklist)
         .filter(key => allowed.includes(key))
-        .reduce((obj, key) => {
+        .reduce((obj, key) =>{
             obj[key] = tracklist[key];
             return obj;
         }, {});
@@ -957,8 +957,8 @@ class WpsstmTracklist extends HTMLElement{
         /*
         TOUFIX TOUCHECK this preloads the tracks SEQUENCIALLY
         var results = [];
-        return tracks_slice.toArray().reduce((promise, track) => {
-            return promise.then((result) => {
+        return tracks_slice.toArray().reduce((promise, track) =>{
+            return promise.then((result) =>{
                 return track.track_autolink().then(result => results.push(result));
             })
             .catch(console.error);

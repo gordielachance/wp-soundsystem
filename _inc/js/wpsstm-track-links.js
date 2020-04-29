@@ -102,7 +102,7 @@ class WpsstmLink extends HTMLElement{
         var allowed = ['index','post_id'];
         var filtered = Object.keys(link)
         .filter(key => allowed.includes(key))
-        .reduce((obj, key) => {
+        .reduce((obj, key) =>{
         obj[key] = link[key];
         return obj;
         }, {});
