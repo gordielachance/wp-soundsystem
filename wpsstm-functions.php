@@ -66,6 +66,9 @@ function wpsstm_clean_array($array){
 function wpsstm_readonly( $readonly, $current = true, $echo = true ) {
 	return __checked_selected_helper( $readonly, $current, $echo, 'readonly' );
 }
+function wpsstm_required( $readonly, $current = true, $echo = true ) {
+	return __checked_selected_helper( $readonly, $current, $echo, 'required' );
+}
 
 
 /*

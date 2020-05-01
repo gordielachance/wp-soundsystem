@@ -1376,6 +1376,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
+    function get_schema(){
+      $importer = $this->get_importer();
+      if ( is_wp_error($importer) ){
+        return $importer;
+      }
+      return wpsstm_get_array_value('schema',$importer);
+    }
+
     function tracklist_log($data,$title = null){
 
       //global log
@@ -1422,7 +1430,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       if ( !current_user_can($tracklist_obj->cap->edit_post,$this->post_id) ) return;
 
       $importer_url =  get_edit_post_link( $this->post_id ) . '#wpsstm-metabox-importer';
-      $importer_el = sprintf('<a href="%s">%s</a>',$importer_url,__('Tracklist Importer settings','wpsstm'));
+      $importer_el = sprintf('<a href="%s">%s</a>',$importer_url,__('Tracklist Importer','wpsstm'));
       $notice = sprintf(__('You may also want to edit the %s.','wpsstm'),$importer_el);
       $this->add_notice('importer-settings', $notice );
     }

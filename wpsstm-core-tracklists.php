@@ -513,7 +513,7 @@ class WPSSTM_Core_Tracklists{
         $post_id = get_the_ID();
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
 
-        $wpsstm_tracklist->tracklist_log("Populated global backend tracklist");
+        //$wpsstm_tracklist->tracklist_log("Populated global backend tracklist");
 
     }
 
