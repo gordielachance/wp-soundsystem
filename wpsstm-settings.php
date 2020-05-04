@@ -785,6 +785,10 @@ class WPSSTM_Settings {
             <h2><?php _e('WP SoundSystem Settings','wpsstm');?></h2>
 
             <?php
+            if( isset($_GET['settings-updated']) ) {
+              $notice = __('Settings have been saved; and API data has been reloaded.','wpsstm');
+              printf('<div class="notice inline"><p>%s</p></div>',$notice);
+            }
 
             settings_errors('wpsstm_option_group');
 
