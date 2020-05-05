@@ -173,23 +173,23 @@ class WPSSTM_Tracklist{
 		}
 	}
 
-    function get_player_actions(){
-        $actions = array();
-        return apply_filters('wpsstm_get_player_actions',$actions);
-    }
+  function get_player_actions(){
+      $actions = array();
+      return apply_filters('wpsstm_get_player_actions',$actions);
+  }
 
-    function get_audio_attr($values_attr=null){
+  function get_audio_attr($values_attr=null){
 
-        //https://www.w3schools.com/tags/tag_audio.asp
-        $values_defaults = array();
+      //https://www.w3schools.com/tags/tag_audio.asp
+      $values_defaults = array();
 
-        $values_attr = array_merge($values_defaults,(array)$values_attr);
+      $values_attr = array_merge($values_defaults,(array)$values_attr);
 
-        return wpsstm_get_html_attr($values_attr);
-    }
+      return wpsstm_get_html_attr($values_attr);
+  }
 
-    function tracklist_log($data,$title = null){
-        WP_SoundSystem::debug_log($data,$title);
-    }
+  function tracklist_log($data,$title = null){
+      WP_SoundSystem::debug_log($data,$title);
+  }
 
 }
