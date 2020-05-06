@@ -89,9 +89,10 @@ class WPSSTM_Core_Tracklists{
     }
 
     function add_tracklist_query_vars($vars){
-        $vars[] = 'tracklists-favorited-by';
-        $vars[] = 'pulse-max';
-        return $vars;
+      $vars[] = 'tracklists-favorited-by';
+      $vars[] = 'favtrack-playlists';
+      $vars[] = 'pulse-max';
+      return $vars;
     }
 
     /*

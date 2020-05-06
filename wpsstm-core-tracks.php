@@ -585,7 +585,7 @@ class WPSSTM_Core_Tracks{
       if ( !$query->get( 'subtrack_favorites' ) ) return $where;
 
       //get all favorited tracklists
-      if ( !$ids = WPSSTM_Core_User::get_sitewide_favorites_tracklist_ids() ){
+      if ( !$ids = WPSSTM_Core_User::get_sitewide_favtracks_playlist_ids() ){
           $ids = array(0);//so won't fetch anything
       }
 
@@ -1410,7 +1410,7 @@ class WPSSTM_Core_Tracks{
 
     static function get_last_user_favorite($user_id = null){
 
-      if ( !$love_id = WPSSTM_Core_User::get_user_favorites_tracklist_id( $user_id ) ) return;
+      if ( !$love_id = WPSSTM_Core_User::get_user_favtracks_playlist_id( $user_id ) ) return;
 
       $track_args = array(
         'post_type' =>              wpsstm()->post_type_track,

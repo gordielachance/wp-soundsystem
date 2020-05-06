@@ -209,13 +209,13 @@ class WPSSTM_Core_BuddyPress{
 
     function user_favorite_tracks_subnav_title(){
         $user_id = bp_displayed_user_id();
-        $tracklist_id = WPSSTM_Core_User::get_user_favorites_tracklist_id($user_id);
+        $tracklist_id = WPSSTM_Core_User::get_user_favtracks_playlist_id($user_id);
         echo get_the_title($tracklist_id);
     }
 
     function user_favorite_tracks_subnav_content(){
         $user_id = bp_displayed_user_id();
-        $tracklist_id = WPSSTM_Core_User::get_user_favorites_tracklist_id($user_id);
+        $tracklist_id = WPSSTM_Core_User::get_user_favtracks_playlist_id($user_id);
         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
         echo $tracklist->get_tracklist_html();
     }
@@ -245,7 +245,7 @@ class WPSSTM_Core_BuddyPress{
 
         $user_id = get_current_user_id();
         $user_link = bp_core_get_userlink( $user_id );
-        $favorites_id = WPSSTM_Core_User::get_user_favorites_tracklist_id($user_id);
+        $favorites_id = WPSSTM_Core_User::get_user_favtracks_playlist_id($user_id);
 
         $track_link = sprintf('<strong>%s</strong>',(string)$track);
 

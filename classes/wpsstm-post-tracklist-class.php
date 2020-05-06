@@ -1170,7 +1170,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         do_action('wpsstm_queue_track',$track,$this->post_id);
 
         //favorites ?
-        if ( $this->post_id == WPSSTM_Core_User::get_user_favorites_tracklist_id() ){
+        if ( $this->post_id == WPSSTM_Core_User::get_user_favtracks_playlist_id() ){
             do_action('wpsstm_love_track',$track,true);
         }
       }
@@ -1191,7 +1191,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       }
 
       //favorites ?
-      if ( $this->post_id == WPSSTM_Core_User::get_user_favorites_tracklist_id() ){
+      if ( $this->post_id == WPSSTM_Core_User::get_user_favtracks_playlist_id() ){
         do_action('wpsstm_love_track',$track,false);
       }
 
@@ -1459,6 +1459,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       );
       return $links_url;
     }
+
 
     /*
     Reindex 'subtrack_order' based on subtrack_time

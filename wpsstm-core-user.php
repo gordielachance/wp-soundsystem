@@ -9,7 +9,7 @@ class WPSSTM_Core_User{
     Get the ID of the 'favorite tracks' tracklist for a user, or create it and store option
     */
 
-    public static function get_user_favorites_tracklist_id($user_id = null){
+    public static function get_user_favtracks_playlist_id($user_id = null){
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
 
@@ -22,14 +22,14 @@ class WPSSTM_Core_User{
         }
 
         return $love_id;
-        
+
     }
 
     /*
     Get the IDs of the 'favorite tracks' tracklists for everyone
     */
 
-    static function get_sitewide_favorites_tracklist_ids(){
+    static function get_sitewide_favtracks_playlist_ids(){
         global $wpdb;
         //get all subtracks metas
         $querystr = $wpdb->prepare( "SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = '%s'", 'wp_' . self::$favorites_tracklist_usermeta_key );
@@ -60,7 +60,7 @@ class WPSSTM_Core_User{
     /*
     create new tracklist
     */
-    public static function create_user_favorites_tracklist($user_id = null){
+    public static function create_user_favtracks_playlist($user_id = null){
 
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;

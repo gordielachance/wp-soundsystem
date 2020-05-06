@@ -7,6 +7,10 @@ class WPSSTM_Core_Playlists{
         add_action( 'init', array($this,'register_post_type_playlist' ));
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_playlists_submenu' ) );
 
+        add_filter( 'pre_get_posts', array($this,'pre_get_posts_favtracks_playlists') );
+
+        add_filter( sprintf("views_edit-%s",wpsstm()->post_type_playlist), array($this,'register_favtracks_playlists_view') );
+
     }
 
     function register_post_type_playlist() {
@@ -128,6 +132,43 @@ class WPSSTM_Core_Playlists{
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
 
+    }
+
+    function register_favtracks_playlists_view($views){
+
+        $screen = get_current_screen();
+
+        $link = add_query_arg(
+          array(
+            'post_type'=>wpsstm()->post_type_playlist,
+            'favtrack-playlists'=>true
+          ),
+          admin_url('edit.php')
+        );
+
+        $attr = array(
+            'href' =>   $link,
+        );
+
+        $attr['class'] = get_query_var( 'favtrack-playlists' ) ? 'current' : null;
+
+        $count = count(WPSSTM_Core_User::get_sitewide_favtracks_playlist_ids());
+
+        $views['favtracks-playlists'] = sprintf('<a %s>%s <span class="count">(%d)</span></a>',wpsstm_get_html_attr($attr),__('Favorite Tracks','wpsstm'),$count);
+
+        return $views;
+    }
+
+    function pre_get_posts_favtracks_playlists( $query ) {
+
+      if ( !$query->get( 'favtrack-playlists' ) ) return $query;
+
+      if ( $ids = WPSSTM_Core_User::get_sitewide_favtracks_playlist_ids() ){
+          $query->set ( 'post__in', $ids );
+      }else{
+          $query->set ( 'post__in', array(0) ); //force no results
+      }
+      return $query;
     }
 
 
