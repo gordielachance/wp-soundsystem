@@ -1,7 +1,7 @@
 <?php
 //define('WPSSTM_API_URL','http://localhost:3000/');
 define('WPSSTM_API_URL','https://wpsstmapi.herokuapp.com/');
-define('WPSSTM_API_REGISTER_URL','https://www.spiff-radio.org/?p=287875');
+define('WPSSTM_API_REGISTER_URL','https://github.com/gordielachance/wp-soundsystem/wiki/SoundSystem-API');
 
 class WPSSTM_Core_API {
 
