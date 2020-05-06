@@ -306,155 +306,229 @@ class WPSSTM_Core_Importer{
         );
     }
 
-    static function css_selector_block($keys){
-        global $wpsstm_tracklist;
+    //when a node has a $ref property, merge it with its definition
+    static function instantiate_schema_references($node,$parent = null,$schema = null){
 
-        //path
-        $selector_slug = implode('-',$keys);
-        $path_keys = array_merge(array('selectors'),$keys,array('path'));
-        $path_keys_html = implode('',array_map(function ($el) {return sprintf('[%s]',$el);},$path_keys));
-        $path = $wpsstm_tracklist->get_importer_options($path_keys );
-        $path_forced = null;//TOUFIX
-        $path_disabled = disabled( (bool)$path_forced, true, false );
-        $path = ( $path ? htmlentities($path) : null);
+      if (!$parent) $schema = $node;
 
-        //regex
-        $regex_keys = array_merge(array('selectors'),$keys,array('regex'));
-        $regex_keys_html = implode('',array_map(function ($el) {return sprintf('[%s]',$el);},$regex_keys));
-        $regex = $wpsstm_tracklist->get_importer_options( $regex_keys );
-        $regex_forced = null;//TOUFIX
-        $regex_disabled = disabled( (bool)$regex_forced, true, false );
-        $regex = ( $regex ? htmlentities($regex) : null);
+      $refpath = isset($node['$ref']) ? $node['$ref'] : null;
 
-        //attr
-        $attr_keys = array_merge(array('selectors'),$keys,array('attr'));
-        $attr_keys_html = implode('',array_map(function ($el) {return sprintf('[%s]',$el);},$attr_keys));
-        $attr = $wpsstm_tracklist->get_importer_options( $attr_keys );
-        $attr_forced = null;//TOUFIX
-        $attr_disabled = disabled( (bool)$attr_forced, true, false );
-        $attr = ( $attr ? htmlentities($attr) : null);
+      //if this node has a $ref, get it then merge it.
+      if ($refpath){
+        $refpath = ltrim($refpath,"#/");//remove root prefix
 
-        ?>
-        <div class="wpsstm-importer-selector">
-            <?php
+        $refarr = explode('/',$refpath);
+        if ( $refnode = wpsstm_get_array_value($refarr,$schema) ){
+          $node = array_replace_recursive($refnode,$node);//merge
+        }
 
-            //build info
+      }
 
-            $info = null;
+      if ( isset($node['properties']) ){
+        foreach($node['properties'] as $key=>&$property){
+          $property = self::instantiate_schema_references($property,$node,$schema);
+          //$property['$id'] = $node['$id'] . '/' . $key;
+        }
+      }
 
-            switch($selector_slug){
-                    case 'playlist-tracks':
-                        $info = sprintf(
-                            __('eg. %s','wpsstm'),
-                            '<code>#content #tracklist .track</code>'
-                        );
-                    break;
-                    case 'track-artist':
-                        $info = sprintf(
-                            __('eg. %s','wpsstm'),
-                            '<code>h4 .artist strong</code>'
-                        );
-                    break;
-                    case 'track-title':
-                        $info = sprintf(
-                            __('eg. %s','wpsstm'),
-                            '<code>span.track</code>'
-                        );
-                    break;
-                    case 'track-album':
-                        $info = sprintf(
-                            __('eg. %s','wpsstm'),
-                            '<code>span.album</code>'
-                        );
-                    break;
-                    case 'track-image':
-                        $info = sprintf(
-                            __('eg. %s','wpsstm'),
-                            '<code>a.album-art img</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
-                        );
-                    break;
-                    case 'track-link':
-                        $info = sprintf(
-                            __('eg. %s','wpsstm'),
-                            '<code>audio link</code> '. sprintf( __('(set %s for attribute)','wpsstm'),'<code>src</code>') . ' ' . __('or an url','wpsstm')
-                        );
-                    break;
-            }
-
-            //TOUFIX TOUCHECK URGENT this relative path stuff
-            $track_prefix = 'track-';
-            $is_track_selector = ( substr($selector_slug, 0, strlen($track_prefix)) === $track_prefix );
-            if ( $is_track_selector &&  ( $relative_path = $wpsstm_tracklist->get_importer_options(array('selectors','playlist','tracks','path')) ) ){
-              printf(
-                  '<span class="tracks-selector-prefix">%1$s</span>',
-                  $relative_path
-              );
-            }
-
-            // if this is a preset default, set as readonly
-
-            printf(
-                '<input type="text" class="wpsstm-importer-selector-jquery wpsstm-fullwidth" name="%s" value="%s" %s />',
-                'wpsstm_importer'.$path_keys_html,
-                $path,
-                $path_disabled
-            );
-
-            //regex
-            //uses a table so the style matches with the global form (WP-core styling)
-            ?>
-        </div>
-        <div class="wpsstm-importer-selector-advanced">
-            <?php
-            if ($info){
-                printf('<p class="wpsstm-importer-track-selector-desc">%s</p>',$info);
-            }
-            ?>
-            <table class="form-table">
-                <tbody>
-                    <tr>
-                        <th scope="row"><?php _e('Tag attribute','wpsstm');?></th>
-                        <td>
-                            <div>
-                                <?php
-
-                                printf(
-                                    '<p class="wpsstm-importer-selector-attr"><input class="wpsstm-fullwidth" name="%s" type="text" value="%s" %s/></p>',
-                                    'wpsstm_importer'.$attr_keys_html,
-                                    $attr,
-                                    $attr_disabled
-                                );
-                                ?>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th scope="row"><?php _e('Regex pattern','wpsstm');?></th>
-                        <td>
-                            <div>
-                                <?php
-
-                                printf(
-                                    '<p class="wpsstm-importer-selector-regex">
-                                    <span>~</span>
-                                    <input class="regex" name="%s" type="text" value="%s" %s />
-                                    <span>~mi</span>
-                                    </p>',
-                                    'wpsstm_importer'.$regex_keys_html,
-                                    $regex,
-                                    $regex_disabled
-                                );
-                                ?>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        <?php
+      return $node;
 
     }
 
+    private static function get_schema_node_id($nodekeys){
+      //remove the 'properties' values out of the nodekeys
+      $nodekeys = array_values(array_diff( $nodekeys, array('properties') ));
+      return implode('_',$nodekeys);
+    }
+
+    private static function get_schema_node_input_name($nodekeys){
+      //remove the 'properties' values out of the nodekeys
+      $nodekeys = array_values(array_diff( $nodekeys, array('properties') ));
+
+      $chain = array_map(
+         function ($el) {
+            return sprintf('[%s]',$el);
+         },
+         $nodekeys
+      );
+      return 'wpsstm_importer' . implode('',$chain);
+    }
+
+    private static function get_schema_node_classes($node,$nodekeys=array(),$tree=array()){
+      $classes = array(
+        'wpsstm-wizard-node',
+        'wpsstm-wizard-node-active',
+        sprintf('wpsstm-wizard-node-%s',$node['type'])
+      );
+
+      //ref class
+      if( isset($node['$ref']) ){
+        //$refpath = ltrim($refpath,"#/");//remove root prefix
+        $classes[] = sprintf('wpsstm-wizard-node-%s',sanitize_title($node['$ref']));
+      }
+
+      if ( self::is_schema_node_required($tree,$nodekeys) ){
+        $classes[] = 'wpsstm-wizard-node-required';
+      }
+
+      if ( self::is_schema_node_readonly($tree,$nodekeys) ){
+        $classes[] = 'wpsstm-wizard-node-readonly';
+      }
+
+      if ( isset($node['properties']) && count($node['properties']) ){
+        $classes[] = 'wpsstm-wizard-parent-node';
+      }
+
+      return $classes;
+    }
+
+    private static function is_schema_node_required($tree,$nodekeys=array()){
+      $requiredPath = $nodekeys;
+      $lastKey = array_pop($requiredPath);
+      array_pop($requiredPath);
+      $requiredPath = array_merge($requiredPath,array('required'));
+      $required = in_array($lastKey,wpsstm_get_array_value($requiredPath,$tree));
+      //printf("REQUIRED: %s - %s in %s<br/>",$required,$lastKey,json_encode($requiredPath));µ
+      return $required;
+    }
+
+    private static function is_schema_node_readonly($tree,$nodekeys=array()){
+
+      $node = wpsstm_get_array_value($nodekeys,$tree);
+
+      if ( wpsstm_get_array_value('readOnly',$node) ){ //this node
+        return true;
+      }
+
+      if ( empty($nodekeys) ) return;
+
+      //check ancestors
+      array_pop($nodekeys);
+
+
+      return self::is_schema_node_readonly($tree,$nodekeys);
+    }
+
+    private static function get_schema_node_db_value($nodekeys){
+      global $wpsstm_tracklist;
+      //remove the 'properties' values out of the nodekeys
+      $db_nodekeys = array_values(array_diff( $nodekeys, array('properties') ));
+      return $wpsstm_tracklist->get_importer_options($db_nodekeys);
+    }
+
+    static function parse_schema_node($tree,$nodekeys=array()){
+      global $wpsstm_tracklist;
+
+      $is_root = empty($nodekeys);
+      $node = wpsstm_get_array_value($nodekeys,$tree);
+
+      if ( self::is_schema_node_readonly($tree,$nodekeys) ) return;
+
+      $el_id  = self::get_schema_node_id($nodekeys);
+      $el_name = self::get_schema_node_input_name($nodekeys);
+
+      $title = wpsstm_get_array_value('title',$node);
+      $default = wpsstm_get_array_value('default',$node);
+      $readonly = self::is_schema_node_readonly($tree,$nodekeys);
+      $required = self::is_schema_node_required($tree,$nodekeys);
+      $examples = wpsstm_get_array_value('examples',$node);
+      $properties = isset($node['properties']) ? $node['properties'] : array();
+      $db_value = self::get_schema_node_db_value($nodekeys);
+      $value = ( $readonly || !$db_value ) ? $default : $db_value;
+
+      $container_attributes = array(
+        'id'=>      sprintf('%s_container',$el_id),
+        'class'=>   implode(' ',self::get_schema_node_classes($node,$nodekeys,$tree))
+      );
+
+      $attributes = array(
+        'name' =>         $el_name,
+        'id' =>           $el_id,
+        'disabled'=>      (bool)$readonly,
+        'required'=>      (bool)$required,
+      );
+
+      ob_start();
+
+      ?>
+      <div <?php echo wpsstm_get_html_attr($container_attributes);?>>
+        <?php
+
+        //title
+        if ( !$is_root && $title ){
+          $title = $required ? $title.=' *' : $title;
+        }
+
+        switch ($node['type']){
+          case 'object':
+
+            if ($title){
+              $title = count($properties) ? $title.='<a class="wpsstm-wizard-node-handle wpsstm-wizard-node-handle-close" href="#"><i class="fa fa-angle-up" aria-hidden="true"></i></a><a class="wpsstm-wizard-node-handle wpsstm-wizard-node-handle-open" href="#"><i class="fa fa-angle-down" aria-hidden="true"></i></a>' : $title;
+              printf('<p><strong>%s</strong></p>',$title);
+            }
+
+            foreach($properties as $key=>$property){
+              $new_nodekeys = array_merge($nodekeys,array('properties',$key));
+              echo self::parse_schema_node($tree,$new_nodekeys);
+            }
+
+          break;
+
+          case 'string':
+
+            $attributes = array_merge(
+              $attributes,
+              array(
+                'placeholder' =>  $examples ? sprintf(__('eg. %s, ...','wpsstm'),implode(',',$examples)) : null,
+                'type' =>         'text',
+                'value'=>         $value ? htmlentities($value) : null,
+              )
+            );
+
+            //regex exception
+            if (end($nodekeys) === 'regex'){
+              $input = sprintf('<span><code>~</code><input %s /><code>~mi</code></span>',wpsstm_get_html_attr($attributes));
+            }else{
+              $input = sprintf('<span><input %s /></span>',wpsstm_get_html_attr($attributes));
+            }
+
+            $label = sprintf('<label for="%s">%s</label>',$el_id,$title);
+
+            printf('<div class="wpsstm-wizard-node-content">%s</div>',$input.$label);
+
+          break;
+
+          case 'boolean':
+
+            $attributes = array_merge(
+              $attributes,
+              array(
+                'type' =>         'checkbox',
+                'value'=>         'on',
+                'checked'=>       (bool)$value,
+              )
+            );
+
+
+
+            $input = sprintf('<span><input %s /></span>',wpsstm_get_html_attr($attributes));
+            $label = sprintf('<label for="%s">%s</label>',$el_id,$title);
+
+            printf('<div class="wpsstm-wizard-node-content">%s</div>',$input.$label);
+
+          break;
+
+          default:
+            print_r(json_encode($node));echo"<br/>";echo"<br/>";
+          break;
+        }
+      ?>
+      </div>
+      <?php
+
+      return ob_get_clean();
+
+    }
 
     static function sanitize_importer_settings($input){
       //TOUFIX TOUCHECK be sure that we sanitize correctly.

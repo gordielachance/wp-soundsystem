@@ -12,25 +12,13 @@ $( document ).ready(function() {
     });
 
     /*
-    advanced selectors
+    schema nodes
     */
 
-    //should we show it by default ?
-    $('.wpsstm-importer-selector-advanced').each(function() {
-        var advanced_block = $(this);
-        var inputs_filled = advanced_block.find('input').filter(function (index) {
-            return !!this.value;
-        });
-        if ( inputs_filled.length > 0 ){
-            $(this).addClass('active');
-        }
-    });
-
-    $('a.wpsstm-importer-selector-toggle-advanced').click(function(e) {
+    $('a.wpsstm-wizard-node-handle').click(function(e) {
         e.preventDefault();
-        var selector_row = $(this).parents('.wpsstm-importer-row');
-        var advanced_row = selector_row.find('.wpsstm-importer-selector-advanced');
-        advanced_row.toggleClass('active');
+        var node = $(this).closest('.wpsstm-wizard-node');
+        node.toggleClass('wpsstm-wizard-node-active');
     });
 
 });

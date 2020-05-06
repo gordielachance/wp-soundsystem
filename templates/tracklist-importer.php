@@ -31,64 +31,58 @@ $load_tracklist = isset($_GET['wpsstm_load_tracklist']);
     </p>
 </div>
 
-<!--parser-->
-<div id="wpsstm-importer-step-parser" class="wpsstm-importer-section wpsstm-importer-section-advanced">
-  <h3><?php _e('Importer settings');?></h3>
+<?php
+//advanced importer
+if ( $importer = $wpsstm_tracklist->get_importer() ) {
 
-  <?php
-  $notice = __('Some extra settings are required to retrieve your tracklist.','wpsstm');
-  printf('<div class="notice notice-warning inline"><p>%s</p></div>',$notice);
+  if ( is_wp_error($importer) ){
+    printf('<div class="notice notice-warning inline"><p>%s</p></div>',$importer->get_error_message());
+  }else{
 
-  ?>
-
-  <div>
-      <?php
-
-      $xpath_selectors_link = sprintf('<a href="https://en.wikipedia.org/wiki/XPath" target="_blank">%s</a>',__('XPath selectors','wpsstm'));
-      $jquery_selectors_link = sprintf('<a href="http://www.w3schools.com/jquery/jquery_ref_selectors.asp" target="_blank">%s</a>',__('jQuery selectors','wpsstm'));
-      $regexes_link = sprintf('<a href="http://regex101.com" target="_blank">%s</a>',__('regular expressions','wpsstm'));
-
-      printf(__('Depending of the document, use %s or %s to target the data for each track.','wpsstm'),$xpath_selectors_link,$jquery_selectors_link);
-      echo"<br/>";
-      printf(__('It is also possible to target the attribute of an element or to filter the data with a %s by using %s advanced settings for each item.','wpsstm'),$regexes_link,'<i class="fa fa-cog" aria-hidden="true"></i>');
-
-      ?>
-  </div>
-    <h4 class="wpsstm-importer-section-label"><?php _e('Playlist','wpsstm');?></h4>
-    <!--tracks selector-->
-    <div id="wpsstm-importer-selectors-playlist">
-      <div id="wpsstm-importer-selectors-playlist-tracks" class="wpsstm-importer-row">
-          <h4 class="wpsstm-importer-row-label"><?php _e('Tracks Selector','wpsstm');?></h4>
-          <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('playlist','tracks'));?></div>
+    ?>
+    <div id="wpsstm-importer-content-type" class="wpsstm-importer-section">
+      <div id="wpsstm-importer-content-type" class="wpsstm-importer-row">
+          <h4 class="wpsstm-importer-row-label"><?php _e('Content-Type','wpsstm');?></h4>
+          <div class="wpsstm-importer-row-content"><?php echo wpsstm_get_array_value(array('infos','content_type'),$importer);?>
+            <?php
+            if ( $body_url = $wpsstm_tracklist->get_radio_content_url() ){
+              ?>
+              - <a href="<?php echo $body_url;?>" target="_blank"><?php _e('View content','wpsstm');?></a></div>
+              <?php
+            }
+             ?>
+      </div>
+      <div id="wpsstm-importer-name" class="wpsstm-importer-row">
+          <h4 class="wpsstm-importer-row-label"><?php _e('Importer','wpsstm');?></h4>
+          <div class="wpsstm-importer-row-content"><?php echo wpsstm_get_array_value(array('infos','name'),$importer);?></div>
       </div>
     </div>
-    <div class="wpsstm-importer-section-label">
-        <h4><?php _e('Single Track','wpsstm');?></h4>
-    </div>
-    <div id="wpsstm-importer-selectors-track">
-        <div id="wpsstm-importer-selectors-track-artist" class="wpsstm-importer-row">
-            <h5 class="wpsstm-importer-row-label"><?php _e('Artist Selector','wpsstm'); echo WPSSTM_Core_Importer::advanced_selectors_link()?></h5>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','artist'));?></div>
-        </div>
-        <div id="wpsstm-importer-selectors-track-title" class="wpsstm-importer-row">
-            <h5 class="wpsstm-importer-row-label"><?php _e('Title Selector','wpsstm'); echo WPSSTM_Core_Importer::advanced_selectors_link()?></h5>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','title'));?></div>
-        </div>
-        <div id="wpsstm-importer-selectors-track-album" class="wpsstm-importer-row">
-            <h5 class="wpsstm-importer-row-label"><?php _e('Album Selector','wpsstm'); echo WPSSTM_Core_Importer::advanced_selectors_link()?></h5>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','album'));?></div>
-        </div>
-        <div id="wpsstm-importer-selectors-track-image" class="wpsstm-importer-row">
-            <h5 class="wpsstm-importer-row-label"><?php _e('Image Selector','wpsstm'); echo WPSSTM_Core_Importer::advanced_selectors_link()?></h5>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','image'));?></div>
-        </div>
-        <div id="wpsstm-importer-selectors-track-links" class="wpsstm-importer-row">
-            <h5 class="wpsstm-importer-row-label"><?php _e('Links Selector','wpsstm'); echo WPSSTM_Core_Importer::advanced_selectors_link()?></h5>
-            <div class="wpsstm-importer-row-content"><?php WPSSTM_Core_Importer::css_selector_block(array('track','link'));?></div>
-        </div>
-    </div>
-</div>
+    <?php
 
-<?php
+    $schema = $wpsstm_tracklist->get_schema();
+    $schema = WPSSTM_Core_Importer::instantiate_schema_references($schema);
+    $selectors = wpsstm_get_array_value(array('properties','selectors'),$schema);
+
+    if ( $advanced = WPSSTM_Core_Importer::parse_schema_node($schema,array('properties','selectors')) ){
+      ?>
+      <div id="wpsstm-importer-schema" class="wpsstm-importer-section">
+        <h3><?php _e('Advanced settings','wpsstm');?></h3>
+        <?php
+
+        //notice
+        $wiki_link = sprintf('<a href="https://github.com/gordielachance/wp-soundsystem/wiki/Tracklist-importer" target="_blank">%s</a>',__('wiki','wpsstm'));
+        $notice = sprintf(__('Need some help there ? Read the %s.','wpsstm'),$wiki_link);
+        printf('<div class="notice notice-warning inline"><p>%s</p></div>',$notice);
+
+        //schema
+        echo $advanced;
+        ?>
+      </div>
+      <?php
+    }
+  }
+
+}
+
 wp_nonce_field( 'wpsstm_tracklist_importer_meta_box', 'wpsstm_tracklist_importer_meta_box_nonce' );
 ?>

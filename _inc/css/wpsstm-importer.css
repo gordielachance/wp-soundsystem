@@ -217,7 +217,7 @@ input.wpsstm-fullwidth {
   padding:.5em;
 }
 
-#wpsstm-metabox-importer .wpsstm-wizard-node.wpsstm-wizard-node-readonly{
+#wpsstm-metabox-importer .wpsstm-wizard-node.wpsstm-wizard-node-readonly > .wpsstm-wizard-node-content{
   opacity: .5;
 }
 
