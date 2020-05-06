@@ -11,13 +11,13 @@ wpsstm-tracklist{
         list-style: none;
         width:100%;
         font-size:.8em;
-        
+
         > * {
             &:nth-child(odd){
                 background: rgba(0, 0, 0, 0.03);
             }
         }
-        
+
     }
     .wpsstm-tracklist-notices{
         position:relative;
@@ -26,9 +26,9 @@ wpsstm-tracklist{
         list-style: none!important;
         margin: 0 !important;
     }
-    
+
     &.wpsstm-post-tracklist{
-        
+
         .wpsstm-tracklist-actions{
             display:block;
             list-style: none;
@@ -38,16 +38,16 @@ wpsstm-tracklist{
             .wpsstm-tracklist-action{
                 padding: .5em;
                 font-size:.8em;
-                
+
                 &:hover{
                     border-color:#F7F7F7;
                     background:rgba(0, 0, 0, .025);
                 }
-                
+
             }
         }
     }
-    
+
     &.tracklist-bottom-player .wpsstm-player{
         position: fixed;
         bottom: 0;
@@ -58,7 +58,7 @@ wpsstm-tracklist{
     &:not(.tracklist-active).tracklist-bottom-player .wpsstm-player{
         display:none;
     }
-    
+
     &.tracklist-expired{
         .wpsstm-reload-bt{
             animation: opacityPulse 1s linear infinite;
@@ -70,7 +70,7 @@ wpsstm-tracklist{
         margin-bottom:1em;
         font-size:.9em;
         text-align:center;
-        
+
         .wpsstm-tracklist-infos{
             @include display-flex();
 
@@ -167,8 +167,8 @@ wpsstm-tracklist{
         }
 
     }
-    
-    &:not(.has-player){    
+
+    &:not(.has-player){
         .wpsstm-tracklist-play-bt,
         wpsstm-track .wpsstm-track-action-play{
             display:none;
@@ -182,14 +182,14 @@ wpsstm-tracklist{
         .wpsstm-tracklist-play-bt{
             display:none;
         }
-    } 
+    }
 
     &:not(.tracklist-expired){
         .wpsstm-tracklist-action-refresh{
             @include opacity(.5);
         }
     }
-    
+
     &.favorited-tracklist{
         .wpsstm-tracklist-action.action-favorite{
             display:none;
@@ -207,12 +207,12 @@ wpsstm-tracklist{
             display:none;
         }
     }
-    
+
     .wpsstm-new-track{
         @include display-flex();
         padding:.5em;
 
-        .wpsstm-new-track-data{
+        .wpsstm-new-track-data-row{
             @include display-flex();
             @include flex-grow(1);
             @include flex-shrink(1);
@@ -235,8 +235,8 @@ wpsstm-tracklist{
             border:1px solid red;
         }
     }
-    
-    
+
+
     //play BT
 
     &[wpsstm-playable]:not(.tracklist-has-played){
@@ -251,7 +251,7 @@ wpsstm-tracklist{
     &:not(.tracklist-playing) .wpsstm-tracklist-play-bt .wpsstm-icon:before{
         content:"\f04b"; //.fa-play
     }
-    
+
     &.tracklist-has-played{
         .wpsstm-tracklist-cover{
             .wpsstm-tracklist-play-bt{
@@ -268,11 +268,11 @@ wpsstm-tracklist{
             content:"\f04c"; //.fa-pause;
         }
     }
-    
+
     &:not([wpsstm-playable]) .wpsstm-tracklist-play-bt{
         display:none;
     }
-    
+
     &.standalone-track{
         .wpsstm-track-position{
             display:none;
@@ -281,7 +281,7 @@ wpsstm-tracklist{
 }
 
 .wpsstm-tracklist-actions{
-    
+
     clear:both;
 
     .wpsstm-tracklist-action{

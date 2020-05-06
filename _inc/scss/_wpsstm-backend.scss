@@ -19,7 +19,7 @@
 }
 
 .postbox{
-    
+
     .wpsstm-fullwidth{
         padding: 3px 8px;
         font-size: 1.7em;
@@ -30,7 +30,7 @@
         margin: 0 0 3px;
         background-color: #fff;
     }
-    
+
     //track links metabox
     &#wpsstm-metabox-track-links{
         .wpsstm-submit-wrapper{
@@ -39,7 +39,7 @@
     }
 
     &#wpsstm_mb_entries{
-        
+
         //summary
 
         > label {
@@ -52,9 +52,9 @@
         #wpsstm-mb-section-data{
             display:none;
         }
-        
 
-        
+
+
         //entries
         table.wp-list-table{
             border:none;
@@ -65,9 +65,9 @@
 
             }
 
-            
+
         }
-        
+
         &.table-mbz-summary{
             table.wp-list-table{
                 tfoot{
@@ -77,7 +77,7 @@
         }
 
     }
-    
+
     .wpsstm-data-metabox{
         //header
         //TOUFIX this should not be done through CSS but through PHP
@@ -98,5 +98,5 @@
         }
 
     }
-    
+
 }

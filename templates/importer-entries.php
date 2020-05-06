@@ -10,7 +10,7 @@ $recent_wizard_args = array(
 );
 $recent_wizard_q = new WP_Query( $recent_wizard_args );
 ?>
-<?php if ( $recent_wizard_q->have_posts() ) { 
+<?php if ( $recent_wizard_q->have_posts() ) {
     ?>
     <section id="wpsstm-frontend-importer-recent">
         <h3><?php _e('Recently');?></h3>
@@ -20,14 +20,14 @@ $recent_wizard_q = new WP_Query( $recent_wizard_args );
                 ?>
                 <li>
                     <a href="<?php echo get_permalink();?>">
-                    <?php 
+                    <?php
                     if ( $title = get_the_title() ){
                         ?>
                         <strong><?php echo $title; ?></strong>
                         <?php
                     }
                     ?>
-                    <span><?php echo wpsstm_shorten_text($tracklist->feed_url);?></span>
+                    <span><?php echo wpsstm_shorten_text(esc_html($tracklist->feed_url));?></span>
                     </a>
                 </li>
             <?php endwhile; ?><!-- end of the loop -->

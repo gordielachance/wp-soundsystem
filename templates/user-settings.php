@@ -16,14 +16,14 @@ do_action( 'bp_before_member_settings_template' ); ?>
 
 <form action="<?php echo bp_displayed_user_domain() . bp_get_settings_slug() . '/general'; ?>" method="post" class="standard-form" id="settings-form">
 
-    
+
     <h2>Last.fm</h2>
     <?php
     if (!$connected){
         $lastfm_auth_url = $wpsstm_lastfm->get_app_auth_url();
         $lastfm_auth_link = sprintf('<a href="%s">%s</a>',$lastfm_auth_url,__('here','wpsstm'));
         ?>
-    
+
         <div class="info bp-feedback">
             <span class="bp-icon" aria-hidden="true"></span>
             <p class="text">
@@ -31,7 +31,7 @@ do_action( 'bp_before_member_settings_template' ); ?>
                 <?php printf(__("Click %s.","wpsstm"),$lastfm_auth_link);?><br/>
             </p>
         </div>
-    
+
         <?php
     }else{
         $user_metas = $wpsstm_lastfm->lastfm_user->get_lastfm_user_metas();
@@ -52,7 +52,7 @@ do_action( 'bp_before_member_settings_template' ); ?>
 	<label for="user-lastfm-scrobble">
     <input type="checkbox" name="user-lastfm-scrobble" value="on" <?php checked($enabled);?>/> <?php _e('Scrobble tracks to Last.fm','wpsstm');?>
     </label>
-    
+
 	<div class="submit">
 		<input type="submit" name="submit" value="<?php esc_attr_e( 'Save Changes', 'buddypress' ); ?>" id="submit" class="auto" />
 	</div>

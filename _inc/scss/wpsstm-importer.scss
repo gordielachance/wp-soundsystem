@@ -3,183 +3,32 @@
 @import "_wpsstm-shared";
 
 #wpsstm-metabox-importer{
-
-    h3{
-        font-weight: bold;
+  .wpsstm-wizard-node{
+    .wpsstm-wizard-node{
+      margin:.5em;
+      border:2px solid #DDD;
+      padding:.5em;
     }
-    h4{
-        
-    }
-    
-    #wpsstm-importer-services{
-        li{
-            width: 40px;
-            height: 40px;
-        }
+    &.wpsstm-wizard-node-readonly > .wpsstm-wizard-node-content{
+      @include opacity(.5);
     }
 
-    .wpsstm-importer-row{
-        @include display-flex();
-        padding: .25em 0;
-        > * {
-            &.wpsstm-importer-row-label{
-                margin:0;
-                padding:0;
-            }
-            &.wpsstm-importer-row-content{
-                @include flex-grow(1);
-                margin-left:2em;
-            }
-        }
-
-    }
-    
-    input[type="text"],input[type="number"]{
-        padding: .5em;
-    }
-    
-    button[type="submit"] {
-        margin: 1em auto;
-        display:block;
+    .wpsstm-wizard-node-handle{
+      display:inline-block;
+      margin-left:.5em;
     }
 
-    pre.wpsstm-raw, pre.wpsstm-raw code {
-        //Instead of the line below you could use @includebox-sizing($bs)
-        box-sizing: border-box;
-        webkit-box-sizing: border-box;
-        display: block;
-        white-space: pre-wrap;
-        white-space: -pre-wrap;
-        word-wrap: break-word;
-        width: 100%;
-        overflow: auto;
+    &.wpsstm-wizard-node-active >p .wpsstm-wizard-node-handle-open{
+      display:none;
     }
-    pre.wpsstm-raw {
-            max-height: 200px;
-            border: 1px solid lightgrey;
-            padding: 10px;
-            code {
-                    background: none;
-            }
+    &:not(.wpsstm-wizard-node-active){
+      >p .wpsstm-wizard-node-handle-close,
+      .wpsstm-wizard-node{
+        display:none;
+      }
     }
+  }
 
-    .tracks-selector-prefix {
-            color: lightgrey;
-            padding-right: 0.5em;
-    }
-    .wpsstm-importer-selector-toggle-advanced {
-            text-decoration: none;
-    }
-
-    #wpsstm-tracks-raw{
-        max-height: calc(3 * 211px);
-        overflow-y: auto;
-    }
-
-    #wpsstm-importer-sections-header{
-        clear:both;
-        overflow:auto;
-        li {
-                display: inline-block;
-                &.ui-tabs-active a {
-                        background: white;
-                        border-bottom: 0;
-                }
-        }
-    }
-
-    .wpsstm-importer-section{
-
-        
-        .wpsstm-importer-section-label{
-            margin:1em;
-        }
-        
-        input:disabled{
-            color:#CCC;
-        }
-
-        .wpsstm-importer-selector{
-            @include display-flex();
-            justify-content: center;
-            align-items: center;
-            input[type="text"]{
-                flex-grow: 1;
-            }
-        }
-        
-        .wpsstm-importer-selector-advanced{
-            display: none;
-            &.active{
-                display: block;
-            }
-            .wpsstm-importer-track-selector-desc{
-                font-style:italic;
-                code{
-                    font-style:normal;
-                }
-            }
-            table{
-                td {
-                    color: #999;
-                    padding: 5px;
-                    font-family: Consolas, Monaco, monospace;
-                }
-                .wpsstm-importer-selector-regex {
-                    @include display-flex();
-                    color:lightgrey;
-                }
-            }
-        }
-        
-    }
-    
-    //tabs
-    &.ui-tabs{
-        ul.ui-tabs-nav{
-            li.ui-state-default{
-                &.ui-state-active{
-                    background: #f9f9f9;
-                }
-            }
-        }
-
-        .ui-tabs-panel{
-            padding:1em;
-            background: #f9f9f9;
-        }
-        
-        //second level
-        .ui-tabs{
-            ul.ui-tabs-nav{
-                li.ui-state-default{
-                    &.ui-state-active{
-                        background: #FFF;
-                    }
-                }
-            }
-
-            .ui-tabs-panel{
-                background: #FFF;
-            }
-        
-        }
-        
-    }
-    
-    .wpsstm-debug-log-bt{
-        .wpsstm-debug-log-icon{
-            @extend .wpsstm-icon;
-            @extend .wpsstm-no-underline;
-        }
-        &.wpsstm-loading{
-            .wpsstm-debug-log-icon{
-                @extend .wpsstm-loading-icon;
-                @extend .wpsstm-freeze;
-            }
-        }
-    }
-    
 }
 
 //tabs

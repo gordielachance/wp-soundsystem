@@ -13,11 +13,11 @@ class WPSSTM_Tracklist{
     var $author = null;
     var $location = null;
     var $date_timestamp = null;
-    
+
     //datas
     var $tracks = array();
     var $notices = array();
-    
+
     var $track;
     var $current_track = -1;
     var $track_count = null;
@@ -26,9 +26,9 @@ class WPSSTM_Tracklist{
     /*
     $input_tracks = array of tracks objects or array of track IDs
     */
-    
+
     function add_tracks($input_tracks){
-        
+
         $add_tracks = array();
 
         //force array
@@ -47,15 +47,15 @@ class WPSSTM_Tracklist{
                     $track = new WPSSTM_Track($track_id,$this);
                 }
             }
-            
+
             $add_tracks[] = $track;
         }
 
         $new_tracks = $this->validate_tracks($add_tracks);
-        
+
         $this->tracks = array_merge($this->tracks,$new_tracks);
         $this->track_count = count($this->tracks);
-        
+
         return $new_tracks;
     }
 
@@ -77,21 +77,21 @@ class WPSSTM_Tracklist{
             }
             $valid_tracks[] = $track;
         }
-        
+
         if ( $rejected_tracks ){
             $error_codes = array_unique($error_codes);
-            
+
             $cleared_tracks = array();
             foreach ($rejected_tracks as $track){
                 $cleared_tracks[] = $track->to_array();
             }
-            
+
             $this->tracklist_log(array( 'count'=>count($rejected_tracks),'codes'=>json_encode($error_codes),'rejected'=>array($cleared_tracks) ), "WPSSTM_Tracklist::validate_tracks");
         }
 
         return $valid_tracks;
     }
-    
+
     /*
     Return one level array
     */
@@ -101,7 +101,7 @@ class WPSSTM_Tracklist{
             'post_id' => $this->post_id,
             'index' => $this->index,
         );
-        
+
         return array_filter($arr);
 
     }
@@ -172,26 +172,24 @@ class WPSSTM_Tracklist{
 			$this->track = $this->tracks[0];
 		}
 	}
-    
-    function get_player_actions(){
-        $actions = array();
-        return apply_filters('wpsstm_get_player_actions',$actions);
-    }
-    
-    function get_audio_attr($values_attr=null){
-        
-        //https://www.w3schools.com/tags/tag_audio.asp
-        $values_defaults = array();
 
-        $values_attr = array_merge($values_defaults,(array)$values_attr);
-        
-        return wpsstm_get_html_attr($values_attr);
-    }
-    
-    function tracklist_log($data,$title = null){
-        WP_SoundSystem::debug_log($data,$title);
-    }
+  function get_player_actions(){
+      $actions = array();
+      return apply_filters('wpsstm_get_player_actions',$actions);
+  }
+
+  function get_audio_attr($values_attr=null){
+
+      //https://www.w3schools.com/tags/tag_audio.asp
+      $values_defaults = array();
+
+      $values_attr = array_merge($values_defaults,(array)$values_attr);
+
+      return wpsstm_get_html_attr($values_attr);
+  }
+
+  function tracklist_log($data,$title = null){
+      WP_SoundSystem::debug_log($data,$title);
+  }
 
 }
-
-

@@ -10,7 +10,6 @@ class WPSSTM_Settings {
 		add_action( 'admin_menu', array( $this, 'create_admin_menu' ), 8 );
         add_action( 'admin_init', array( $this, 'settings_init' ), 5 );
         add_action( 'admin_init', array( $this, 'system_settings_init' ), 15 );
-        add_action( 'current_screen', array( $this, 'settings_clear_premium_transients' ), 5 );
 	}
 
     function create_admin_menu(){
@@ -55,6 +54,8 @@ class WPSSTM_Settings {
         Maintenance
         */
 
+        self::clear_premium_transients();
+
         //reset
         if ( self::is_settings_reset() ) return;
 
@@ -62,18 +63,18 @@ class WPSSTM_Settings {
         if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_orphan_tracks'),$_POST) ){
             WPSSTM_Core_Tracks::batch_delete_orphan_tracks();
         }
-        
+
         //orphan links
         if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_orphan_links'),$_POST) ){
             WPSSTM_Core_Track_Links::batch_delete_orphan_links();
         }
-        
-        
+
+
         //excluded host links
         if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_excluded_hosts_links'),$_POST) ){
             WPSSTM_Core_Track_Links::batch_delete_excluded_hosts_links();
         }
-        
+
         //unused terms
         if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_unused_music_terms'),$_POST) ){
             WP_SoundSystem::batch_delete_unused_music_terms();
@@ -159,9 +160,9 @@ class WPSSTM_Settings {
         WPSSTM API
         */
 
-        $old_token = wpsstm()->get_options('wpsstmapi_token');
+        $old_token = wpsstm()->get_options('wpsstmapi_key');
 
-        $new_input['wpsstmapi_token'] = trim( wpsstm_get_array_value('wpsstmapi_token',$input) );
+        $new_input['wpsstmapi_key'] = trim( wpsstm_get_array_value('wpsstmapi_key',$input) );
 
         $new_input['details_engines'] = (array)$input['details_engines'];
 
@@ -169,17 +170,11 @@ class WPSSTM_Settings {
 
     }
 
-    function settings_clear_premium_transients(){
-        //force API checks by deleting some transients
-        if ( !WP_SoundSystem::is_settings_page() ) return;
-        self::clear_premium_transients();
-    }
-
     public static function clear_premium_transients(){
         WP_SoundSystem::debug_log('deleted premium transients...');
         delete_transient( WPSSTM_Core_Importer::$importers_transient_name );
-        delete_transient( WPSSTM_Core_API::$valid_token_transient_name );
-        delete_transient( WPSSTM_Core_API::$premium_expiry_transient_name );
+        delete_transient( WPSSTM_Core_API::$token_transient_name );
+        delete_transient( WPSSTM_Core_API::$premium_userdata_transient_name );
     }
 
     function settings_init(){
@@ -201,7 +196,7 @@ class WPSSTM_Settings {
         );
 
         add_settings_field(
-            'wpsstmapi_token',
+            'wpsstmapi_key',
             __('API Key','wpsstm'),
             array( $this, 'wpsstmapi_apitoken_callback' ),
             'wpsstm-settings-page',
@@ -409,7 +404,7 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
-        
+
         add_settings_field(
             'batch_delete_orphan_links',
             __('Delete orphan links','wpsstm'),
@@ -417,7 +412,7 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
-        
+
         add_settings_field(
             'batch_delete_excluded_hosts_links',
             __('Delete excluded hosts links','wpsstm'),
@@ -425,7 +420,7 @@ class WPSSTM_Settings {
             'wpsstm-settings-page', // Page
             'settings_maintenance'//section
         );
-        
+
         add_settings_field(
             'batch_delete_unused_music_terms',
             __('Delete unused music terms','wpsstm'),
@@ -561,39 +556,18 @@ class WPSSTM_Settings {
             );
         }
 
-        //register errors
-        $valid_token = WPSSTM_Core_API::has_valid_api_token();
-
     }
 
     function wpsstmapi_apitoken_callback(){
         //client secret
-        $client_secret = wpsstm()->get_options('wpsstmapi_token');
-        $valid_token = WPSSTM_Core_API::has_valid_api_token();
+        $client_secret = wpsstm()->get_options('wpsstmapi_key');
+        $valid_token = WPSSTM_Core_API::get_token();
 
         printf(
-            '<p><input type="text" name="%s[wpsstmapi_token]" value="%s" class="wpsstm-fullwidth" /></p>',
+            '<p><input type="text" name="%s[wpsstmapi_key]" value="%s" class="wpsstm-fullwidth" /></p>',
             wpsstm()->meta_name_options,
             $client_secret
         );
-
-        /*
-        errors
-        */
-
-        //register errors
-        if ( is_wp_error($valid_token) ){
-            add_settings_error('api_token',$valid_token->get_error_code(),$valid_token->get_error_message(),'inline');
-        }
-
-        /*
-        if ( !$valid_token || is_wp_error($valid_token) ){
-            $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstm'));
-            $desc = sprintf( __('WP Soundsystem uses an external API for several features. Get a free API key %s.','wpsstm'),$link);
-
-            add_settings_error('api_token','api_get_token',$desc,'inline');
-        }
-        */
 
         //display errors
         settings_errors('api_token');
@@ -602,30 +576,30 @@ class WPSSTM_Settings {
 
     function wpsstmapi_apipremium_callback(){
 
-        $response = null;
-        $response = WPSSTM_Core_API::is_premium();
+        if ( !WPSSTM_Core_API::is_premium() ){
 
-        //register errors
-        if ( is_wp_error($response) ){
-            add_settings_error('api_premium',$response->get_error_code(),$response->get_error_message(),'inline');
-        }
+          //check for errors
+          $token = WPSSTM_Core_API::get_token();
+          if ( is_wp_error($token) ){
+              add_settings_error('api_premium',$token->get_error_code(),$token->get_error_message(),'inline');
+          }
 
-        if ( !$response || is_wp_error($response) ){
+          $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('Get premium','wpsstm'));
+          $desc = sprintf(__('%s and unlock powerful features : Tracklists Importer, Tracks Autolink...  First and foremost, it is a nice way to support this  plugin, and to ensure its durability.  Thanks for your help!','wppstm'),$link);
 
-            $link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('Get premium','wpsstm'));
-            $desc = sprintf(__('%s and unlock powerful features : Tracklists Importer, Tracks Autolink...  First and foremost, it is a nice way to support this  plugin, and to ensure its durability.  Thanks for your help!','wppstm'),$link);
-
-            add_settings_error('api_premium','api_get_premium',$desc,'inline');
+          add_settings_error('api_premium','api_get_premium',$desc,'inline');
 
         }else{
 
-            $datas = WPSSTM_Core_API::get_premium_datas();
-
-            if ( $expiry = wpsstm_get_array_value('expiry',$datas) ){
-                echo get_date_from_gmt( date( 'Y-m-d H:i:s', $expiry ), get_option( 'date_format' ) );
+          $datas = WPSSTM_Core_API::get_api_userdatas();
+          if ( !is_wp_error($datas) ){
+            if ( $expires_at = wpsstm_get_array_value('expires_at',$datas) ){
+              $date = date( 'Y-m-d H:i:s', strtotime($expires_at) );
+              echo get_date_from_gmt($date , get_option( 'date_format' ) );
             }else{
                 echo '—';
             }
+          }
 
         }
 
@@ -781,7 +755,7 @@ class WPSSTM_Settings {
           __("Batch delete orphan tracks.","wpsstm")
       );
     }
-    
+
     function batch_delete_orphan_links_callback(){
       printf(
           '<input type="checkbox" name="%s[batch_delete_orphan_links]" value="on"/><label>%s</label>',
@@ -789,7 +763,7 @@ class WPSSTM_Settings {
           __("Batch delete orphan links.","wpsstm")
       );
     }
-    
+
     function batch_delete_excluded_hosts_links_callback(){
       printf(
           '<input type="checkbox" name="%s[batch_delete_excluded_hosts_links]" value="on"/><label>%s</label>',
@@ -811,6 +785,10 @@ class WPSSTM_Settings {
             <h2><?php _e('WP SoundSystem Settings','wpsstm');?></h2>
 
             <?php
+            if( isset($_GET['settings-updated']) ) {
+              $notice = __('Settings have been saved; and API data has been reloaded.','wpsstm');
+              printf('<div class="notice inline"><p>%s</p></div>',$notice);
+            }
 
             settings_errors('wpsstm_option_group');
 

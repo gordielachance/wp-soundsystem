@@ -9,7 +9,7 @@ global $wpsstm_track;
                 <span itemprop="position"><?php echo $wpsstm_track->position;?></span>
             </span>
             <span class="wpsstm-track-image" itemprop="image">
-                <?php 
+                <?php
                 if ($image_url = wpsstm_get_post_image_url($wpsstm_track->post_id) ){
                     ?>
                     <img src="<?php echo $image_url;?>" />
@@ -21,7 +21,7 @@ global $wpsstm_track;
         <div class="wpsstm-track-info">
             <span class="wpsstm-track-artist" itemprop="byArtist" title="<?php echo $wpsstm_track->artist;?>"><?php echo $wpsstm_track->artist;?></span>
             <span class="wpsstm-track-title" itemprop="name" title="<?php echo $wpsstm_track->title;?>"><?php echo $wpsstm_track->title;?></span>
-            <?php 
+            <?php
             if ($wpsstm_track->album) {
                 ?>
                 <span class="wpsstm-track-album" itemprop="inAlbum" title="<?php echo $wpsstm_track->album;?>"><?php echo $wpsstm_track->album;?></span>
@@ -29,13 +29,13 @@ global $wpsstm_track;
             }
             ?>
         </div>
-        <?php 
+        <?php
 
         //track actions
         if ( $actions = $wpsstm_track->get_track_links() ){
             echo get_actions_list($actions,'track');
         }
-        
+
         ?>
     </div>
     <?php

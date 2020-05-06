@@ -1,37 +1,37 @@
 <?php
 class WPSSTM_Core_Albums{
-    
+
     function __construct() {
 
         add_action( 'init', array($this,'register_post_type_album' ));
         add_action( 'init', array($this,'register_album_taxonomy' ));
-        
+
         add_action( 'wpsstm_register_submenus', array( $this, 'backend_albums_submenu' ) );
-        
+
         add_action( 'add_meta_boxes', array($this, 'metabox_album_register'));
 
         add_filter( 'the_title', array($this, 'the_album_post_title'), 9, 2 );
-        
+
     }
 
     function metabox_album_register(){
 
-        add_meta_box( 
-            'wpsstm-album-info', 
+        add_meta_box(
+            'wpsstm-album-info',
             __('Album','wpsstm'),
             array('WPSSTM_Core_Tracks','metabox_music_infos_content'),
-            wpsstm()->post_type_album, 
-            'after_title', 
-            'high' 
+            wpsstm()->post_type_album,
+            'after_title',
+            'high'
         );
     }
-    
+
     //add custom admin submenu under WPSSTM
     function backend_albums_submenu($parent_slug){
         //capability check
         $post_type_slug = wpsstm()->post_type_album;
         $post_type_obj = get_post_type_object($post_type_slug);
-        
+
          add_submenu_page(
                 $parent_slug,
                 $post_type_obj->labels->name, //page title - TO FIX TO CHECK what is the purpose of this ?
@@ -39,7 +39,7 @@ class WPSSTM_Core_Albums{
                 $post_type_obj->cap->edit_posts, //cap required
                 sprintf('edit.php?post_type=%s',$post_type_slug) //url or slug
          );
-        
+
     }
 
     function register_post_type_album() {
@@ -72,7 +72,7 @@ class WPSSTM_Core_Albums{
             'items_list_navigation' => __( 'Albums list navigation', 'wpsstm' ),
             'filter_items_list'     => __( 'Filter albums list', 'wpsstm' ),
         );
-        $args = array( 
+        $args = array(
             'labels' => $labels,
             'hierarchical' => false,
             'supports' => array( 'author','thumbnail','comments' ),
@@ -91,24 +91,24 @@ class WPSSTM_Core_Albums{
                 'with_front' => FALSE
             ),
             /**
-             * A string used to build the edit, delete, and read capabilities for posts of this type. You 
-             * can use a string or an array (for singular and plural forms).  The array is useful if the 
-             * plural form can't be made by simply adding an 's' to the end of the word.  For example, 
+             * A string used to build the edit, delete, and read capabilities for posts of this type. You
+             * can use a string or an array (for singular and plural forms).  The array is useful if the
+             * plural form can't be made by simply adding an 's' to the end of the word.  For example,
              * array( 'box', 'boxes' ).
              */
             'capability_type'     => 'album', // string|array (defaults to 'post')
             /**
-             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for 
-             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the 
+             * Whether WordPress should map the meta capabilities (edit_post, read_post, delete_post) for
+             * you.  If set to FALSE, you'll need to roll your own handling of this by filtering the
              * 'map_meta_cap' hook.
              */
             'map_meta_cap'        => true, // bool (defaults to FALSE)
             /**
-             * Provides more precise control over the capabilities than the defaults.  By default, WordPress 
-             * will use the 'capability_type' argument to build these capabilities.  More often than not, 
-             * this results in many extra capabilities that you probably don't need.  The following is how 
-             * I set up capabilities for many post types, which only uses three basic capabilities you need 
-             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type 
+             * Provides more precise control over the capabilities than the defaults.  By default, WordPress
+             * will use the 'capability_type' argument to build these capabilities.  More often than not,
+             * this results in many extra capabilities that you probably don't need.  The following is how
+             * I set up capabilities for many post types, which only uses three basic capabilities you need
+             * to assign to roles: 'manage_examples', 'edit_examples', 'create_examples'.  Each post type
              * is unique though, so you'll want to adjust it to fit your needs.
              */
             'capabilities' => array(
@@ -135,7 +135,7 @@ class WPSSTM_Core_Albums{
         );
         register_post_type( wpsstm()->post_type_album, $args );
     }
-    
+
     function register_album_taxonomy(){
 
         $labels = array(
@@ -176,7 +176,7 @@ class WPSSTM_Core_Albums{
             'show_tagcloud'              => false,
             'capabilities'               => $capabilities,
         );
-        
+
         register_taxonomy(
             WPSSTM_Core_Tracks::$album_taxonomy,
             array(
@@ -187,19 +187,19 @@ class WPSSTM_Core_Albums{
         );
 
     }
-    
+
     function the_album_post_title($title,$post_id){
         //post type check
         $post_type = get_post_type($post_id);
         if ( $post_type !== wpsstm()->post_type_album ) return $title;
         $title = wpsstm_get_post_track($post_id);
         $artist = wpsstm_get_post_artist($post_id);
-        
+
         if (!$title || !$artist) return null;
-        
+
         return sprintf('"%s" - %s',$title,$artist);
     }
-    
+
 }
 function wpsstm_albums_init(){
     new WPSSTM_Core_Albums();

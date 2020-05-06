@@ -32,17 +32,17 @@ $edit_cap = $post_type_obj->cap->edit_posts;
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" >
     <?php wp_head(); ?>
 </head>
-<body <?php body_class($body_classes); ?>>  
+<body <?php body_class($body_classes); ?>>
     <?php
 
     if ( !get_current_user_id() ){ //not logge
-        
+
         $wp_auth_link = sprintf('<a href="%s">%s</a>',wp_login_url($manager_redirect_url),__('here','wpsstm'));
         $wp_auth_text = sprintf(__('This requires you to be logged.  You can login or subscribe %s.','wpsstm'),$wp_auth_link);
         printf('<p class="wpsstm-notice">%s</p>',$wp_auth_text);
 
     }else{
-        
+
         /*
         Track header if any
         */
@@ -61,7 +61,7 @@ $edit_cap = $post_type_obj->cap->edit_posts;
             </form>
         <?php
         }
-        
+
         if ( current_user_can($edit_cap) ){
             ?>
             <form action="<?php echo $wpsstm_track->get_track_action_url('manage');?>" id="wpsstm-toggle-tracklists" method="post">
@@ -85,7 +85,7 @@ $edit_cap = $post_type_obj->cap->edit_posts;
 
                 $args = apply_filters('wpsstm_tracklist_manager_query',$args);
                 $tracklist_query = new WP_Query( $args );
-            
+
                 //TOUFIX TOUCHECK duplicate of tracklists-list.php ?
 
                 if ( $tracklist_query->have_posts() ) {

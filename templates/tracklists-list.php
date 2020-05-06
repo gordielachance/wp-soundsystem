@@ -44,7 +44,7 @@ if ( $tracklist_query->have_posts() ) {
                         <input name="wpsstm_manager_data[old_tids][<?php echo $wpsstm_tracklist->post_id;?>]" type="hidden" value="<?php echo $old_value;?>" />
                         <?php
                     }
-            
+
                     ?>
                 </span>
                 <span class="wpsstm-tracklist-title" itemprop="name" title="<?php echo get_the_title();?>">

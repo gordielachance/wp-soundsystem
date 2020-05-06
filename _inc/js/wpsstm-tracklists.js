@@ -3,7 +3,7 @@ var $ = jQuery.noConflict();
 class WpsstmTracklist extends HTMLElement{
     constructor() {
         super(); //required to be first
-        
+
         this.index =            undefined;
         this.post_id =          undefined;
         this.isExpired =        undefined;
@@ -11,7 +11,7 @@ class WpsstmTracklist extends HTMLElement{
 
         this.mediaElement =     undefined;
         this.tracksHistory =    [];
-        
+
         this.$shuffleTracksBt = undefined;
         this.$loopTracksBt =    undefined;
         this.$previousTrackBt = undefined;
@@ -21,7 +21,7 @@ class WpsstmTracklist extends HTMLElement{
         $(this).on('playerInit',WpsstmTracklist._PlayerInitEvent);
     }
     connectedCallback(){
-        
+
         var tracklist =                 this;
         tracklist.post_id =             Number( $(tracklist).data('wpsstm-tracklist-id') );
         tracklist.is_shuffle =          ( localStorage.getItem("wpsstm-shuffle-tracklist") == 'true' );
@@ -31,9 +31,9 @@ class WpsstmTracklist extends HTMLElement{
         tracklist.$loopTracksBt =       $(tracklist).find('.wpsstm-loop-bt');
         tracklist.$previousTrackBt =    $(tracklist).find('.wpsstm-previous-track-bt');
         tracklist.$nextTrackBt =        $(tracklist).find('.wpsstm-next-track-bt');
-        
+
         var tracklistReady = $.Deferred();
-        
+
         tracklist.init_tracklist_expiration();
         var needsRefresh = (wpsstmL10n.ajax_radios && tracklist.isExpired );
 
@@ -44,7 +44,7 @@ class WpsstmTracklist extends HTMLElement{
             tracklist.renderQueue();
             tracklistReady.resolve();
         }
-        
+
         tracklistReady.always(function(data){
             tracklist.renderPlayer();
         });
@@ -66,19 +66,19 @@ class WpsstmTracklist extends HTMLElement{
         The custom element has been moved into a new document (e.g. someone called document.adoptNode(el)).
         */
     }
-    
+
     static get observedAttributes() {
         return ['wpsstm-playable'];
     }
-    
+
     get tracks(){
         return $(this).find('.wpsstm-tracks-list wpsstm-track').toArray();
     }
-    
+
     get playerTrack(){
         return $(this).find('.player-track wpsstm-track').get(0);
     }
-    
+
     set playerTrack(track){
         var tracklist = this;
 
@@ -86,23 +86,23 @@ class WpsstmTracklist extends HTMLElement{
         if ( tracklist.playerTrack.queueIdx && (track.queueIdx == tracklist.playerTrack.queueIdx) ){
             return;
         }
-        
+
         tracklist.current_track = track;
-        
+
         var $clone = $(track).clone();
 
         $(tracklist.playerTrack.parentNode).empty().append( $clone );
 
         //once rendered, update clone to match the track values
         $clone.get(0).queueIdx = tracklist.current_track.queueIdx;
-        
+
         tracklist.updatePlayerControls();
     }
-    
+
     get playable() {
         return this.hasAttribute('wpsstm-playable');
     }
-    
+
     set playable(value) {
         const isChecked = Boolean(value);
         if (isChecked) {
@@ -111,10 +111,10 @@ class WpsstmTracklist extends HTMLElement{
             this.removeAttribute('wpsstm-playable');
         }
     }
-    
+
     ///
     ///
-    
+
     debug(data,msg){
 
         //add prefix
@@ -131,9 +131,9 @@ class WpsstmTracklist extends HTMLElement{
     }
 
     renderHeader(){
-        
+
         var tracklist = this;
-        
+
         /*
         Tracklist actions
         */
@@ -141,12 +141,12 @@ class WpsstmTracklist extends HTMLElement{
         //toggle favorite
         $(tracklist).find('.wpsstm-tracklist-action-favorite,.wpsstm-tracklist-action-unfavorite').click(function(e) {
             e.preventDefault();
-            
+
             var do_love = $(this).hasClass('wpsstm-tracklist-action-favorite');
 
             tracklist.toggle_favorite_tracklist(do_love);
         });
-        
+
         /*
         Refresh
         */
@@ -157,11 +157,11 @@ class WpsstmTracklist extends HTMLElement{
                 tracklist.reloadTracklist(autoplay);
             });
         }
-        
+
         /*
         Play
         */
-        
+
         //container play icon
         $(tracklist).find('.wpsstm-tracklist-play-bt').click(function(e) {
             e.preventDefault();
@@ -169,19 +169,19 @@ class WpsstmTracklist extends HTMLElement{
 
             var track = (tracklist.current_track) ? tracklist.current_track : tracklist.tracks[0];
             if (!track) return;
-            
+
             tracklist.playTrack(track);
 
         });
-        
+
     }
-    
+
     renderPlayer(){
-        
+
         var tracklist = this;
-        
+
         if ( !tracklist.playerTrack ) return;
-        
+
         $(tracklist.tracks).on('started', WpsstmTracklist._startedTrackEvent);
 
         /*
@@ -210,7 +210,7 @@ class WpsstmTracklist extends HTMLElement{
             }, 500);
 
         });
-        
+
         /*
         Previous track
         */
@@ -218,7 +218,7 @@ class WpsstmTracklist extends HTMLElement{
             e.preventDefault();
             tracklist.previousTrackJump();
         });
-        
+
         /*
         Next track
         */
@@ -226,7 +226,7 @@ class WpsstmTracklist extends HTMLElement{
             e.preventDefault();
             tracklist.nextTrackJump();
         });
-        
+
         /*
         Loop button
         */
@@ -247,18 +247,18 @@ class WpsstmTracklist extends HTMLElement{
                 localStorage.setItem("wpsstm-loop-tracklist", false);
                 tracklist.$loopTracksBt.removeClass('active');
             }
-            
+
             tracklist.updatePlayerControls();
 
         });
-        
+
         /*
         Shuffle button
         */
         if ( tracklist.is_shuffle ){
             tracklist.$shuffleTracksBt.addClass('active');
         }
-        
+
         tracklist.$shuffleTracksBt.find('a').click(function(e) {
             e.preventDefault();
 
@@ -271,14 +271,14 @@ class WpsstmTracklist extends HTMLElement{
             }else{
                 localStorage.removeItem("wpsstm-shuffle-tracklist");
                 tracklist.$shuffleTracksBt.removeClass('active');
-            }            
+            }
 
         });
-        
+
         /*
         Init player
         */
-        
+
         $(tracklist).find('audio').mediaelementplayer({
             classPrefix: 'mejs-',
             // All the config related to HLS
@@ -303,11 +303,11 @@ class WpsstmTracklist extends HTMLElement{
         });
 
     }
-    
+
     renderQueue(){
-        
+
         var tracklist = this;
-        
+
         //playable ?
         if ( tracklist.playerTrack ){ //check player is enabled
             var tracks_playable = tracklist.tracks.filter(function (track) {
@@ -333,7 +333,7 @@ class WpsstmTracklist extends HTMLElement{
             var newRow = baseRow.clone();
             tracksList.append( newRow );
         });
-        
+
         //remove new track row
         tracksList.on( "click",'.wpsstm-remove-new-track-row', function(e) {
             var row = $(this).parents('.wpsstm-new-track');
@@ -342,9 +342,9 @@ class WpsstmTracklist extends HTMLElement{
 
         //submit new track
         tracksList.on( "click",'.wpsstm-save-new-track-row', function(e) {
-            
+
             e.preventDefault();
-            
+
             var row = $(this).parents('.wpsstm-new-track');
             var track = new WpsstmTrack();
             track.track_artist = row.find('input[name="wpsstm_track_data[artist]"]').val();
@@ -371,7 +371,7 @@ class WpsstmTracklist extends HTMLElement{
                 if (data.success === false) {
                     console.log(data);
                 }
-                
+
                 if (data.html){
                     row.replaceWith($(data.html));
                 }
@@ -396,7 +396,7 @@ class WpsstmTracklist extends HTMLElement{
         $(tracklist).find( '.wpsstm-tracks-list' ).sortable({
             axis: "y",
             handle: '.wpsstm-track-action-move',
-            start: function(event, ui) { 
+            start: function(event, ui) {
                 startSortIdx = ui.item.index();
             },
             update: function(event, ui) {
@@ -414,15 +414,15 @@ class WpsstmTracklist extends HTMLElement{
 
             }
         });
-        
+
     }
-    
+
     reloadTracklist(autoplay){
         var tracklist = this;
         var success = $.Deferred();
-        
+
         tracklist.debug("reload tracklist... - autoplay ? " + (autoplay === true) );
-        
+
         var abord_reload = function(e) {
             if ( (e.key === "Escape") ) { // escape key maps to keycode `27`
                 request.abort();
@@ -430,9 +430,9 @@ class WpsstmTracklist extends HTMLElement{
         }
 
         tracklist.stopCurrentMedia();
-        
+
         ///
-        
+
         var ajax_data = {
             action:     'wpsstm_reload_tracklist',
             tracklist:      tracklist.to_ajax(),
@@ -459,10 +459,10 @@ class WpsstmTracklist extends HTMLElement{
                 /*
                 Swap content, but keep player intact so we don't mess with the Autoplay Policy.
                 */
-                
+
                 //swap attributes
-                wpsstmSwapNodeAttributes(tracklist,newTracklist);   
-                
+                wpsstmSwapNodeAttributes(tracklist,newTracklist);
+
                 //header
                 var $oldTracklistHeader =   $(tracklist).find('>section.wpsstm-tracklist-header');
                 var $newTracklistHeader =   $(newTracklist).find('>section.wpsstm-tracklist-header');
@@ -472,7 +472,7 @@ class WpsstmTracklist extends HTMLElement{
                 var $oldTracklistQueue =    $(tracklist).find('>section.wpsstm-tracklist-queue');
                 var $newTracklistQueue =    $(newTracklist).find('>section.wpsstm-tracklist-queue');
                 $oldTracklistQueue.replaceWith( $newTracklistQueue );
-                
+
                 //reset expiration
                 tracklist.init_tracklist_expiration();
 
@@ -484,16 +484,16 @@ class WpsstmTracklist extends HTMLElement{
             tracklist.current_link = undefined;
             tracklist.renderHeader();
             tracklist.renderQueue();
-            
+
             var autoplayTrack = (autoplay) ? tracklist.tracks[0] : undefined;
-            
+
             //wait a few seconds so we're sure that links are initialized.
             //https://stackoverflow.com/questions/58354531/custom-elements-connectedcallback-wait-for-parent-node-to-be-available-bef/58362114#58362114
             if (autoplayTrack){
                 tracklist.debug("autoplay track...");
                 setTimeout(function(){ tracklist.playTrack(autoplayTrack); }, 1000);
             }
- 
+
         })
         .fail(function (xhr, ajaxOptions, thrownError) {
             console.log(xhr.status);
@@ -504,13 +504,13 @@ class WpsstmTracklist extends HTMLElement{
             $(tracklist).removeClass('tracklist-reloading');
             $(document).unbind( "keyup.reloadtracklist", abord_reload );
         })
-        
+
         return success.promise();
     }
-    
+
     toggle_favorite_tracklist(do_love){
         var tracklist = this;
-        
+
         if (do_love){
             var link_el = $(tracklist).find('.wpsstm-tracklist-action-favorite');
         }else{
@@ -519,10 +519,10 @@ class WpsstmTracklist extends HTMLElement{
 
         var ajax_data = {
             action:     'wpsstm_tracklist_toggle_favorite',
-            tracklist:  tracklist.to_ajax(),   
+            tracklist:  tracklist.to_ajax(),
             do_love:    do_love,
         };
-        
+
         link_el.removeClass('action-error');
         link_el.addClass('action-loading');
 
@@ -557,7 +557,7 @@ class WpsstmTracklist extends HTMLElement{
             link_el.removeClass('action-loading');
         })
     }
-    
+
     init_tracklist_expiration(){
         var tracklist = this;
 
@@ -571,7 +571,7 @@ class WpsstmTracklist extends HTMLElement{
 
         if (remaining_sec > 0){
             tracklist.isExpired = false;
-            
+
             var expirationTimer = setTimeout(function(){
                 tracklist.isExpired = true;
                 $(tracklist).addClass('tracklist-expired');
@@ -583,7 +583,7 @@ class WpsstmTracklist extends HTMLElement{
             tracklist.isExpired = true;
             $(tracklist).addClass('tracklist-expired');
         }
-        
+
         if (remaining_sec <= 0){
             tracklist.debug("tracklist has expired "+Math.abs(remaining_sec)+" seconds ago");
         }else{
@@ -610,7 +610,7 @@ class WpsstmTracklist extends HTMLElement{
             new_pos:    new_pos,
             track:      track.to_ajax(),
         };
-        
+
         $(track).addClass('track-loading');
         link_el.removeClass('action-error');
         link_el.addClass('action-loading');
@@ -648,7 +648,7 @@ class WpsstmTracklist extends HTMLElement{
         var allowed = ['post_id'];
         var filtered = Object.keys(tracklist)
         .filter(key => allowed.includes(key))
-        .reduce((obj, key) => {
+        .reduce((obj, key) =>{
             obj[key] = tracklist[key];
             return obj;
         }, {});
@@ -660,7 +660,7 @@ class WpsstmTracklist extends HTMLElement{
         var tracks_playable = [];
 
         if ( !tracklist.tracks ) return;
-        
+
         var current_track_idx = $(tracklist.tracks).index( $(tracklist.current_track) );
         if (current_track_idx == -1) return; //index not found
 
@@ -678,7 +678,7 @@ class WpsstmTracklist extends HTMLElement{
             return track.playable;
         });
 
-        
+
         //shuffle ?
         if (tracklist.is_shuffle){
             tracks_playable = wpsstm_shuffle(tracks_playable);
@@ -686,13 +686,13 @@ class WpsstmTracklist extends HTMLElement{
 
         return tracks_playable[0];
     }
-    
+
     get_next_track(){
         var tracklist = this;
         var tracks_playable = [];
 
         if ( !tracklist.tracks ) return;
-        
+
         var current_track_idx = $(tracklist.tracks).index( $(tracklist.current_track) );
         if (current_track_idx == -1) return; //index not found
 
@@ -715,7 +715,7 @@ class WpsstmTracklist extends HTMLElement{
 
         return tracks_playable[0];
     }
-    
+
     previousTrackJump(){
 
         var tracklist = this;
@@ -725,24 +725,24 @@ class WpsstmTracklist extends HTMLElement{
             tracklist.debug("no previous track");
             return;
         }
-            
+
         tracklist.playTrack(previousTrack);
     }
-    
+
     nextTrackJump(){
 
         var tracklist =         this;
         var nextTrack =         tracklist.get_next_track();
-        
+
         if (!nextTrack){
             tracklist.debug("no next track");
             return;
         }
-        
+
         var currentTrackIdx =   $(tracklist.tracks).index( tracklist.current_track );
         var nextTrackIdx =      $(tracklist.tracks).index( nextTrack );
         var isQueueLoop =       (nextTrackIdx < currentTrackIdx );
-            
+
         if (isQueueLoop && wpsstmL10n.ajax_radios && tracklist.isExpired ){
             tracklist.reloadTracklist(true);
         }else{
@@ -750,7 +750,7 @@ class WpsstmTracklist extends HTMLElement{
         }
         /*
         We're looping the tracklist, warn the playlist - useful to reload expired tracklists.
-        
+
         */
 
 
@@ -759,7 +759,7 @@ class WpsstmTracklist extends HTMLElement{
     updatePlayerControls(){
 
         var tracklist = this;
-        
+
         /*
         Previous track bt
         */
@@ -777,9 +777,9 @@ class WpsstmTracklist extends HTMLElement{
     }
 
     playLink(link){
-        
+
         if (!link) return;
-        
+
         var tracklist = this;
         var success = $.Deferred();
 
@@ -787,16 +787,16 @@ class WpsstmTracklist extends HTMLElement{
         var track = link.closest('wpsstm-track');
 
         if( !link.playable ){
-            
+
             success.reject('cannot play this link');
-            
+
         }else{
-            
+
             tracklist.stopCurrentMedia();
 
             tracklist.playerTrack = track;
             tracklist.current_link = link;
-            
+
             $(track).trigger('request');
 
             link.get_instances().addClass('link-active link-loading');
@@ -820,26 +820,26 @@ class WpsstmTracklist extends HTMLElement{
             tracklist.mediaElement.setSrc(link.src);
             tracklist.mediaElement.load();
         }
-        
+
         success.fail(function (reason) {
             link.debug(reason);
             tracklist.stopCurrentMedia();
         })
-        
+
         return success.promise();
-        
+
     }
-    
+
     playTrack(track){
-        
+
         if (!track) return;
-        
+
         var tracklist = this;
         var success = $.Deferred();
 
         tracklist.stopCurrentMedia();
         tracklist.playerTrack = track;
-        
+
         track.get_instances().addClass('track-active track-loading');
         $(tracklist).addClass('tracklist-loading tracklist-active tracklist-has-played');
 
@@ -847,23 +847,23 @@ class WpsstmTracklist extends HTMLElement{
         Wait for track to be ready
         */
         var trackready = $.Deferred();
-        
+
         //should we autolink ?
         var $links = $(track).find('wpsstm-track-link');
         var $sources = $links.filter('[wpsstm-playable]');
-        
+
         if ( track.can_autolink && !$sources.length ){
             trackready = track.track_autolink()
         }else{
             trackready.resolve();
         }
-        
+
         /*
         Track is now ready, try to play links
         */
-        
+
         trackready.always(function(v) {
-            
+
             /*
             Check this is still the track requested
             */
@@ -872,12 +872,12 @@ class WpsstmTracklist extends HTMLElement{
                 success.resolve();
                 return success.promise();
             }
-            
+
 
             /*
             Play first available link
             */
-            
+
             var playableLinks = $(track).find('wpsstm-track-link').filter(function (index) {
                 return this.playable;
             });
@@ -899,7 +899,7 @@ class WpsstmTracklist extends HTMLElement{
 
                     var link = playableLinks[index];
                     var playLink = tracklist.playLink(link);
-                    
+
                     playLink.done(function(data){
                         success.resolve();
                     })
@@ -911,7 +911,7 @@ class WpsstmTracklist extends HTMLElement{
             }
 
         })
-        
+
         /*
         Success ?
         */
@@ -927,11 +927,11 @@ class WpsstmTracklist extends HTMLElement{
             tracklist.stopCurrentMedia();
             tracklist.nextTrackJump();
         })
-        
+
         return success.promise();
-        
+
     }
-    
+
     /*
     preload links for the X next tracks
     */
@@ -944,7 +944,7 @@ class WpsstmTracklist extends HTMLElement{
         //keep only tracks after this one
         var rtrack_in = track_index + 1;
         var next_tracks = $(tracklist.tracks).slice( rtrack_in );
-        
+
         //consider only the next X tracks
         var tracks_slice = next_tracks.slice( 0, max_items );
 
@@ -953,20 +953,20 @@ class WpsstmTracklist extends HTMLElement{
             var playable_links = $(this).find('wpsstm-track-link[wpsstm-playable]');
             return ( this.can_autolink && !playable_links.length );
         });
-        
+
         /*
         TOUFIX TOUCHECK this preloads the tracks SEQUENCIALLY
         var results = [];
-        return tracks_slice.toArray().reduce((promise, track) => {
-            return promise.then((result) => {
+        return tracks_slice.toArray().reduce((promise, track) =>{
+            return promise.then((result) =>{
                 return track.track_autolink().then(result => results.push(result));
             })
             .catch(console.error);
         }, Promise.resolve());
         */
-        
-        $(tracks_slice).each(function(index, track_to_preload) {	
-            track_to_preload.track_autolink();	
+
+        $(tracks_slice).each(function(index, track_to_preload) {
+            track_to_preload.track_autolink();
         });
 
     }
@@ -975,43 +975,43 @@ class WpsstmTracklist extends HTMLElement{
 
         var tracklist = this;
         tracklist.debug("Player is ready!");
-        
+
         //load link
         $(tracklist).on('click', 'wpsstm-track-link .wpsstm-track-link-action-play,wpsstm-track-link[wpsstm-playable] .wpsstm-link-title', function(e) {
             e.preventDefault();
-            
+
             var link = this.closest('wpsstm-track-link');
-            
+
             if ( tracklist.current_link && (link.post_id === tracklist.current_link.post_id) ){
-                
+
                 //toggle play/pause
                 if ( tracklist.mediaElement.paused ){
                     tracklist.mediaElement.play();
                 }else{
                     tracklist.mediaElement.pause();
                 }
-                
+
             }else{
                 tracklist.playLink(link);
             }
-            
+
         });
-        
+
         //load track
         $(tracklist).on('click','wpsstm-track .wpsstm-track-action-play', function(e) {
             e.preventDefault();
-            
+
             var track = this.closest('wpsstm-track');
 
             if ( tracklist.current_track && (track.queueIdx === tracklist.current_track.queueIdx) ){
-                
+
                 //toggle play/pause
                 if ( tracklist.mediaElement.paused ){
                     tracklist.mediaElement.play();
                 }else{
                     tracklist.mediaElement.pause();
                 }
-                
+
             }else{
                 tracklist.playTrack(track);
             }
@@ -1026,19 +1026,19 @@ class WpsstmTracklist extends HTMLElement{
             mediaElement.play();
         })
         .on('error', function(error) {
-            
+
             var mediaElement = this;
             var tracklist = mediaElement.closest('wpsstm-tracklist');
             var track = tracklist.current_track;
             var link = tracklist.current_link;
-            
+
             link.get_instances().toArray().forEach(function(item) {
                 item.playable = false;
             });
-            
+
         })
         .on('play', function() {
-            
+
             var mediaElement = this;
             var tracklist = mediaElement.closest('wpsstm-tracklist');
             var track = tracklist.current_track;
@@ -1047,14 +1047,14 @@ class WpsstmTracklist extends HTMLElement{
             link.get_instances().toArray().forEach(function(item) {
                 item.playable = true;
             });
-            
+
             $(tracklist).removeClass('tracklist-loading').addClass('tracklist-playing tracklist-has-played');
             track.get_instances().removeClass('track-loading').addClass('track-playing track-has-played');
             link.get_instances().removeClass('link-loading').addClass('link-playing link-has-played');
 
         })
         .on('pause', function() {
-            
+
             var mediaElement = this;
             var tracklist = mediaElement.closest('wpsstm-tracklist');
             var track = tracklist.current_track;
@@ -1063,15 +1063,15 @@ class WpsstmTracklist extends HTMLElement{
             $(tracklist).removeClass('tracklist-playing');
             track.get_instances().removeClass('track-playing');
             link.get_instances().removeClass('link-playing');
-            
+
         })
         .on('ended', function() {
-            
+
             var mediaElement = this;
             var tracklist = mediaElement.closest('wpsstm-tracklist');
             var track = tracklist.current_track;
             var link = tracklist.current_link;
-            
+
             tracklist.stopCurrentMedia();
             //Play next song if any
             tracklist.nextTrackJump();
@@ -1082,7 +1082,7 @@ class WpsstmTracklist extends HTMLElement{
         */
         var tracklist = this;
         var autoplayTrack = $(tracklist.tracks).filter('.track-autoplay').get(0);
-        
+
         //wait a few seconds so we're sure that links are initialized.
         //https://stackoverflow.com/questions/58354531/custom-elements-connectedcallback-wait-for-parent-node-to-be-available-bef/58362114#58362114
         if (autoplayTrack){
@@ -1091,7 +1091,7 @@ class WpsstmTracklist extends HTMLElement{
         }
 
     }
-    
+
     static _startedTrackEvent(e){
 
         var track = e.target;
@@ -1102,14 +1102,14 @@ class WpsstmTracklist extends HTMLElement{
         if (lastPlayedTrack !== track){
             tracklist.tracksHistory.push(track); //history
         }
-        
+
         //local scrobble
-        
+
         var track = this;
 
         var ajax_data = {
             action:     'wpsstm_track_start',
-            track:      track.to_ajax(),   
+            track:      track.to_ajax(),
         };
 
         var request = $.ajax({
@@ -1122,7 +1122,7 @@ class WpsstmTracklist extends HTMLElement{
             track.debug(ajax_data,"track start request failed");
         })
     }
-    
+
     stopCurrentMedia(){
         var tracklist = this;
         var mediaElement = tracklist.mediaElement;
@@ -1133,22 +1133,22 @@ class WpsstmTracklist extends HTMLElement{
         mediaElement.currentTime = 0;
 
         $(tracklist).removeClass('tracklist-playing');
-        
+
         var track =     tracklist.current_track;
         var link =      tracklist.current_link;
-        
+
         $(track).trigger('stopped');
 
         if (track){
             track.get_instances().removeClass('track-active track-loading track-playing');
         }
-        
+
         if (link){
             link.get_instances().removeClass('link-active link-loading link-playing');
         }
 
     }
- 
+
 }
 
 window.customElements.define('wpsstm-tracklist', WpsstmTracklist);

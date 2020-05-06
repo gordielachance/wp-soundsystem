@@ -23,7 +23,7 @@
   10%, 90% {
     transform: translate3d(-1px, 0, 0);
   }
-  
+
   20%, 80% {
     transform: translate3d(2px, 0, 0);
   }
@@ -40,13 +40,13 @@
 @mixin striped-bg ($color-a:rgba(black, 0.05), $color-b:rgba(0, 0, 0, 0), $direction: 45deg) {
     background-size: 30px 30px;
     background-image: linear-gradient(
-        $direction, 
-        $color-a    25%, 
-        $color-b    25%, 
-        $color-b    50%, 
-        $color-a    50%, 
-        $color-a    75%, 
-        $color-b    75%, 
+        $direction,
+        $color-a    25%,
+        $color-b    25%,
+        $color-b    50%,
+        $color-a    50%,
+        $color-a    75%,
+        $color-b    75%,
         $color-b
     );
     animation: barberpole 0.5s linear infinite;

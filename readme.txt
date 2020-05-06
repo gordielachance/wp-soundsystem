@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: https://www.spiff-radio.org/?p=287871
 Tags: music,audio player,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks
 Requires at least: 4.9
-Tested up to: 5.3.2
+Tested up to: 5.4.1
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -22,7 +22,7 @@ It goes *further* by using its own **customizable player** : no brands, no logos
 
 Playing tracks does not rely on a single service, since multiple links can be associated to a track (Youtube, Soundcloud, Spotify, audio files, anything!).
 
-= tracklists =
+= Tracklists =
 
 We have two types of tracklists : Playlists, and Radios.
 
@@ -61,7 +61,8 @@ It will search for remote links and attach them to your tracks automatically.
 
 Import [XSPF playlists](http://xspf.org/) using the *Tracklist Importer*.
 
-If you have an [API key](https://www.spiff-radio.org/?p=287875), you could also import playlists from various services: *Last.fm, Spotify, SoundCloud, Deezer, Musicbrainz, Radionomy, Hypem, 8tracks, BBC, indieshuffle, Online Radio Box, radio.fr, RadioKing, Reddit, SomaFM, Soundsgood,...*
+If you have an [API key](https://github.com/gordielachance/wp-soundsystem/wiki/SoundSystem-API), you could also import playlists from various services: *Last.fm, Spotify, SoundCloud, Deezer, Musicbrainz, Radionomy, Hypem, 8tracks, BBC, indieshuffle, Online Radio Box, radio.fr, RadioKing, Reddit, SomaFM, Soundsgood,...*
+
 Custom setups are also available, if you are somewhat familiar with [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp).
 
 [Frontend Importer on Spiff Radio](https://www.spiff-radio.org/?p=213)
@@ -86,16 +87,21 @@ It will also fire new *BuddyPress activity* items.
 WP SoundSystem is dev friendly, and has been designed to be extendable.
 Wanna give a hand as developer ? Check the [Github](https://github.com/gordielachance/wp-soundsystem) repo.
 
-= WP SoundSystem API =
+= SoundSystem API =
 
-Get more out of this plugin by [registering an API key](https://www.spiff-radio.org/?p=287875); which will enable
+The [SoundSystem API](https://github.com/gordielachance/wp-soundsystem/wiki/SoundSystem-API) has been developed in Ruby in parallel of this plugin.
+Get extra features by [registering an API key](https://www.spiff-radio.org/contact) !
 
-* Direct import from a lot of music services
-* the Autolink module
+Some of its feature are:
+
+* Playlist import from a lot of music services
+* the Autolink module, which will get audio sources for your tracks automatically.
 
 Those are optionals, but are nice features to a solid plugin.
 Consider getting one as a nice way to support the work done –hundred of hours– , and to ensure its durability!
 Price is 5$/month or 50$/year.
+
+Since the API is independent of the plugin, it might also be used by other developers.
 
 = Donate =
 Whatever, if you like this plugin, please also consider [making a donation](https://www.spiff-radio.org/?p=287871).
@@ -142,7 +148,14 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= 3.3.0 =
+= 3.3.4 =
+
+* MAJOR UPDATE !
+* switch to the [SoundSystem API](https://github.com/gordielachance/wp-soundsystem/wiki/SoundSystem-API)
+* new Importer wizard
+* new view for playlists : 'Favorite Tracks'
+* sort radios by Importer name
+* database upgrade: v217
 * bugfix subtracks table was not created at installation (#153)
 * bugfix playlist manager was broken (#152)
 * bugfix add new row to empty tracklist (#148)

@@ -9,7 +9,7 @@
  */
 function wpsstm_get_array_value($keys = null, $array){
     if (!$keys) return $array;
-    
+
     $keys = (array)$keys;
     $first_key = $keys[0];
     if(count($keys) > 1) {
@@ -19,13 +19,36 @@ function wpsstm_get_array_value($keys = null, $array){
     }elseif (isset($array[$first_key])){
         return $array[$first_key];
     }
-    
+
     return false;
 }
 
 function wpsstm_is_associative_array(array $arr){
     if (array() === $arr) return false;
     return array_keys($arr) !== range(0, count($arr) - 1);
+}
+
+//clean all empty values from array
+function wpsstm_clean_array($array){
+    if (is_array($array)){
+        foreach ($array as $key => $sub_array){
+            $result = wpsstm_clean_array($sub_array);
+            if ($result === false)
+            {
+                unset($array[$key]);
+            }
+            else
+            {
+                $array[$key] = $result;
+            }
+        }
+    }
+
+    if (empty($array))  {
+        return false;
+    }
+
+    return $array;
 }
 
 /**
@@ -43,22 +66,25 @@ function wpsstm_is_associative_array(array $arr){
 function wpsstm_readonly( $readonly, $current = true, $echo = true ) {
 	return __checked_selected_helper( $readonly, $current, $echo, 'readonly' );
 }
+function wpsstm_required( $readonly, $current = true, $echo = true ) {
+	return __checked_selected_helper( $readonly, $current, $echo, 'required' );
+}
 
 
 /*
 Locate a template & fallback in plugin's folder
 */
 function wpsstm_locate_template( $template_name, $load = false, $require_once = true ) {
-    
+
     if ( !$located = locate_template( 'wpsstm/' . $template_name ) ) {
         // Template not found in theme's folder, use plugin's template as a fallback
         $located = wpsstm()->plugin_dir . 'templates/' . $template_name;
     }
-    
+
     if ( $load && ('' != $located) ){
         load_template( $located, $require_once );
     }
-    
+
     return $located;
 }
 

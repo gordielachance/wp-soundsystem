@@ -11,7 +11,7 @@
                 </div>
                 <div itemprop="image">
                     <?php
-                    if ( has_post_thumbnail($wpsstm_tracklist->post_id) ) { 
+                    if ( has_post_thumbnail($wpsstm_tracklist->post_id) ) {
                         echo get_the_post_thumbnail( $wpsstm_tracklist->post_id, 'post-thumbnail' );
                     }
                     ?>
@@ -51,7 +51,7 @@
                         }
                         ?>
                     </li>
-                    <?php 
+                    <?php
                 }
 
                 //tracks count
@@ -73,8 +73,8 @@
                         if ($wpsstm_tracklist_url){
                             ?>
                             <li class="wpsstm-live-tracklist-link">
-                                <a target="_blank" href="<?php echo $wpsstm_tracklist_url;?>">
-                                    <?php echo wpsstm_shorten_text($wpsstm_tracklist_url);?>
+                                <a target="_blank" href="<?php echo esc_attr($wpsstm_tracklist_url);?>">
+                                    <?php echo wpsstm_shorten_text(esc_html($wpsstm_tracklist_url));?>
                                 </a>
                             </li>
                             <?php

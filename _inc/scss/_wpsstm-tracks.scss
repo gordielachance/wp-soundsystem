@@ -25,7 +25,7 @@
 
         }
     }
-    
+
     .wpsstm-track-pre{
         @include flex-grow(0);
         @include flex-shrink(0);
@@ -59,10 +59,10 @@
                     display:initial;
                 }
             }
-            
+
         }
     }
-    
+
     .wpsstm-track-info{
         @include display-flex();
         @include flex-shrink(1);
@@ -91,7 +91,7 @@
             }
         }
     }
-    
+
     .wpsstm-track-actions{
         @include display-flex();
         @include flex-shrink(0);
@@ -101,11 +101,11 @@
             @extend .wpsstm-action-icon;
         }
     }
-    
+
     .wpsstm-track-action-play{
         margin:0;
     }
-    
+
     &:not(.track-playing) .wpsstm-track-action-play:before{
         content:"\f04b"; //.fa-play
     }
@@ -141,7 +141,7 @@
             display:inherit;
         }
     }
-    
+
     &[data-sources-count="0"]{
         @include opacity(.25);
     }
@@ -150,7 +150,7 @@
         .wpsstm-track-links{
             display:none!important;
         }
-    } 
+    }
 
     &:not(.track-active){
         @include opacity(.5);
@@ -163,7 +163,7 @@
     &.track-active{
         @include opacity(1);
     }
-    
+
     &.favorited-track{
         .wpsstm-track-action.action-favorite{
             display:none;
@@ -174,7 +174,7 @@
             display:none;
         }
     }
-    
+
     &.track-details-loading,
     &.track-links-loading{
         @extend .wpsstm-freeze;
@@ -196,7 +196,7 @@
     span{
         display:none;
     }
-    
+
     &.wpsstm-track-action-play:before{
         content: "\f127";//.fa-chain-broken;
     }

@@ -27,7 +27,7 @@ $player-text-color:#FFF;
                 @include flex-grow(1);
             }
         }
-        
+
         .wpsstm-player-actions{
             margin-right:.5em;
             @include flex-shrink(0);

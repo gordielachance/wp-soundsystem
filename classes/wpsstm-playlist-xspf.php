@@ -83,7 +83,7 @@ class Xspf {
 
         return $this->_xml->saveXML();
     }
-	
+
 	/**
 	 * Creates and returns an element containing a DOMText value
 	 * @param string $name the element name
@@ -95,7 +95,7 @@ class Xspf {
 		$element->appendChild(new \DOMText($val));
 		return $element;
 	}
-	
+
 	/**
 	 * Creates and returns an element containing CDATA
 	 * @param string $name the element name
