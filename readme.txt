@@ -62,6 +62,7 @@ It will search for remote links and attach them to your tracks automatically.
 Import [XSPF playlists](http://xspf.org/) using the *Tracklist Importer*.
 
 If you have an [API key](https://github.com/gordielachance/wp-soundsystem/wiki/SoundSystem-API), you could also import playlists from various services: *Last.fm, Spotify, SoundCloud, Deezer, Musicbrainz, Radionomy, Hypem, 8tracks, BBC, indieshuffle, Online Radio Box, radio.fr, RadioKing, Reddit, SomaFM, Soundsgood,...*
+
 Custom setups are also available, if you are somewhat familiar with [CSS selectors](https://www.w3schools.com/cssref/css_selectors.asp).
 
 [Frontend Importer on Spiff Radio](https://www.spiff-radio.org/?p=213)
@@ -164,17 +165,11 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 * improved plugin settings : maintenance
 * track links :improved excluded hosts queries
 * do not delete links alongside with tracks, just remove the post_parent value (faster)
-
-= 3.2.4 =
 * better way to add tracks to a Playlist
-
-= 3.2.3 =
 * added 'wpsstm_populated_tracklist' action hook
 * improved 'Now Playing' and 'Sitewide favorites'
 * better code for tracklist options / time stuff
 * database upgrade: v214
-
-= 3.2.2 =
 * fix click on player's track position
 * fix styles on track displayed in data engines metaboxes
 * fix get_tracklist_html (cache) when displaying several playlists
