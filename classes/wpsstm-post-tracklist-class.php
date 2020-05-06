@@ -1460,6 +1460,17 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       return $links_url;
     }
 
+    /*
+    API endpoint that would print out the content of the reached documentation_link
+    */
+
+    function get_radio_content_url(){
+      return;//TOUFIX URGENT!
+      if (!$this->feed_url) return;
+      if ( wpsstm_is_local_file($feed_url) ) return $feed_url;
+      if ( !WPSSTM_Core_API::is_premium() ) return;
+      return WPSSTM_API_URL . sprintf('tracklist/body?url=%s',urlencode($this->feed_url));
+    }
 
     /*
     Reindex 'subtrack_order' based on subtrack_time
