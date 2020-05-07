@@ -80,6 +80,11 @@ class WPSSTM_Settings {
             WP_SoundSystem::batch_delete_unused_music_terms();
         }
 
+        //autolink
+        if ( wpsstm_get_array_value(array('wpsstm_options','batch_delete_autolink_time'),$_POST) ){
+          WP_SoundSystem::batch_delete_autolink_time();
+        }
+
         /*
         Bot user
         */
@@ -429,6 +434,16 @@ class WPSSTM_Settings {
             'settings_maintenance'//section
         );
 
+        if ( wpsstm()->get_options('autolink_timeout') ){
+          add_settings_field(
+              'batch_delete_autolink_time',
+              __('Delete autolink timelock','wpsstm'),
+              array( $this, 'batch_delete_autolink_time_callback' ),
+              'wpsstm-settings-page', // Page
+              'settings_maintenance'//section
+          );
+        }
+
     }
 
     public static function section_desc_empty(){
@@ -776,6 +791,14 @@ class WPSSTM_Settings {
           '<input type="checkbox" name="%s[batch_delete_unused_music_terms]" value="on"/><label>%s</label>',
           wpsstm()->meta_name_options,
           __("Batch delete unused music terms.","wpsstm")
+      );
+    }
+    function batch_delete_autolink_time_callback(){
+      $hours = floor(wpsstm()->get_options('autolink_timeout') / 60 / 60);
+      printf(
+          '<input type="checkbox" name="%s[batch_delete_autolink_time]" value="on"/><label>%s</label>',
+          wpsstm()->meta_name_options,
+          sprintf(__("Batch delete the time tracks were autosourced - so sources will be queried again without waiting the %s hours delay.","wpsstm"),$hours)
       );
     }
 

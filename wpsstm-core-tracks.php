@@ -106,7 +106,6 @@ class WPSSTM_Core_Tracks{
       if ( !is_single() || ( get_post_type() != wpsstm()->post_type_track ) ) return;
 
       $wpsstm_track = new WPSSTM_Track($post);
-      $wpsstm_track->track_log("Populated global frontend track");
 
     }
 
@@ -120,7 +119,6 @@ class WPSSTM_Core_Tracks{
       if ( !$is_track_backend  ) return;
 
       $wpsstm_track = new WPSSTM_Track($post);
-      $wpsstm_track->track_log("Populated global backend track");
     }
 
     /*

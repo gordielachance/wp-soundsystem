@@ -593,7 +593,7 @@ class WPSSTM_Track{
     Check if a track has been autolinked recently
     */
 
-    public function is_autolink_paused(){
+    public function is_autolink_timelock(){
 
         if ( !$autolinked = get_post_meta( $this->post_id, WPSSTM_Core_Track_Links::$autolink_time_metakey, true ) ) return;
 
@@ -618,7 +618,7 @@ class WPSSTM_Track{
         $can_autolink = WPSSTM_Core_Track_Links::can_autolink();
         if ( $can_autolink !== true ) return $can_autolink;
 
-        if ( !$force && ( $this->is_autolink_paused() ) ){
+        if ( !$force && ( $this->is_autolink_timelock() ) ){
             return new WP_Error( 'wpsstm_autolink_disabled', __("Track has already been autolinkd recently.",'wpsstm') );
         }
 
@@ -657,9 +657,19 @@ class WPSSTM_Track{
 
         $new_links = apply_filters('wpsstm_autolink_filtered',$new_links,$this);
 
-        //limit autolink results
-        $limit_autolinks = (int)wpsstm()->get_options('limit_autolinks');
-        $new_links = array_slice($new_links, 0, $limit_autolinks);
+        //limit to X links per host (we don't want 20 youtube links)
+        if ( $limit_autolinks = (int)wpsstm()->get_options('limit_autolinks') ){
+
+          $freq = []; // frequency table
+          $new_links = array_filter($new_links, function($link) use($limit_autolinks,&$freq) {
+
+            $host = parse_url($link->url, PHP_URL_HOST);
+            $freq[$host] = ($freq[$host] ?? 0) + 1;
+            return $freq[$host] <= $limit_autolinks;
+          });
+
+        }
+
         $new_links = apply_filters('wpsstm_track_autolinks',$new_links);
 
         $this->add_links($new_links);
@@ -915,7 +925,7 @@ class WPSSTM_Track{
             'data-wpsstm-subtrack-id' =>        $this->subtrack_id,
             'data-wpsstm-subtrack-position' =>  $this->position,
             'data-wpsstm-track-id' =>           $this->post_id,
-            'can-autolink' =>                   !$this->is_autolink_paused(),
+            'can-autolink' =>                   !$this->is_autolink_timelock(),
             'wpsstm-playable' =>                wpsstm()->get_options('player_enabled'),
         );
 

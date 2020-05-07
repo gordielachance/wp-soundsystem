@@ -137,7 +137,7 @@ class WPSSTM_Track_Link{
         if ( $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ){
             foreach($excluded_hosts as $host){
                 if (strpos($this->url,$host) !== false) {
-                    return new WP_Error( 'wpsstm_excluded_host', __('Host excluded (see plugin options)','wpsstm'), array('permalink'=>$this->url,'excluded_host'=>$host) );
+                    return new WP_Error( 'wpsstm_excluded_host', sprintf(__('Host %s excluded','wpsstm'),$host), array('permalink'=>$this->url,'excluded_host'=>$host) );
                 }
             }
 

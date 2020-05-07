@@ -109,7 +109,7 @@ class WP_SoundSystem {
             'bot_user_id'                       => null,
             'autolink'                          => true,
             'autolink_timeout'                  => 7 * DAY_IN_SECONDS,
-            'limit_autolinks'                   => 5,//max number of links returned by autolink
+            'limit_autolinks'                   => 5,//max number of links per host returned by autolink
             'wpsstmapi_key'                     => null,
             'wpsstmapi_timeout'                 => 20,//timeout for API requests (seconds)
             'details_engines'                   => array('musicbrainz','spotify'),
@@ -513,6 +513,11 @@ class WP_SoundSystem {
             wp_delete_term( $term->term_id, $term->taxonomy );
         }
 
+    }
+
+    public static function batch_delete_autolink_time(){
+      global $wpdb;
+      $wpdb->delete($wpdb->prefix.'postmeta', array('meta_key' =>WPSSTM_Core_Track_Links::$autolink_time_metakey));
     }
 
     /*
