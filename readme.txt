@@ -148,13 +148,14 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
-= 3.3.4 =
+= 3.3.5 =
 
 * MAJOR UPDATE !
 * switch to the [SoundSystem API](https://github.com/gordielachance/wp-soundsystem/wiki/SoundSystem-API)
 * new Importer wizard
 * new view for playlists : 'Favorite Tracks'
 * sort radios by Importer name
+* autolink: limit autolinks to X links --> limit autolinks to X links per host * batch delete autolink timelocks metas
 * database upgrade: v217
 * bugfix subtracks table was not created at installation (#153)
 * bugfix playlist manager was broken (#152)
