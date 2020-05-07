@@ -168,13 +168,6 @@ wpsstm-tracklist{
 
     }
 
-    &:not(.has-player){
-        .wpsstm-tracklist-play-bt,
-        wpsstm-track .wpsstm-track-action-play{
-            display:none;
-        }
-    }
-
     &.tracklist-reloading{
         @extend .wpsstm-freeze;
         @include striped-bg();

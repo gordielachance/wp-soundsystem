@@ -6,9 +6,15 @@
     <div class="wpsstm-tracklist-infos">
         <div class="wpsstm-tracklist-cover">
             <div><!--for square ratio-->
-                <div class="wpsstm-tracklist-play-bt">
-                    <i class="wpsstm-icon"></i>
-                </div>
+                <?php
+                if ( $wpsstm_tracklist->get_options('playable') ){
+                  ?>
+                  <div class="wpsstm-tracklist-play-bt">
+                      <i class="wpsstm-icon"></i>
+                  </div>
+                  <?php
+                }
+                ?>
                 <div itemprop="image">
                     <?php
                     if ( has_post_thumbnail($wpsstm_tracklist->post_id) ) {

@@ -779,6 +779,7 @@ class WPSSTM_Track{
         $tracklist_post_type_obj =  $post_type_playlist ? get_post_type_object($post_type_playlist) : null;
         $can_edit_tracklist =       ( $tracklist_post_type_obj && current_user_can($tracklist_post_type_obj->cap->edit_post,$tracklist_id) );
         $can_manage_playlists =     WPSSTM_Core_User::can_manage_playlists();
+        $can_play_track =           wpsstm()->get_options('player_enabled') && $this->tracklist->get_options('playable');
 
         /*
         Track
@@ -792,7 +793,7 @@ class WPSSTM_Track{
         $can_dequeue_track =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
 
         //play
-        if ( wpsstm()->get_options('player_enabled') ){
+        if ( $can_play_track ){
             $actions['play'] = array(
                 'text' =>      __('Play Track','wpsstm'),
                 'href' =>       '#',
