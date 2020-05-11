@@ -45,10 +45,12 @@ class WPSSTM_Core_Tracklists{
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_radio), array(__class__,'tracklists_columns_content') );
         add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_album), array(__class__,'tracklists_columns_content') );
 
-
         //tracklist queries
         add_filter( 'pre_get_posts', array($this,'pre_get_posts_loved_tracklists') );
-        add_filter( 'pre_get_posts', array($this,'sort_tracklists') );
+        add_filter( 'pre_get_posts', array($this,'sort_tracklists_by_importer_name') );
+        add_filter( 'posts_clauses', array($this,'sort_tracklists_by_tracks_count'), 10, 2 );
+        add_filter( 'posts_clauses', array($this,'sort_tracklists_by_favoriters_count'), 10, 2 );
+
         //TOUFIX used ? not a duplicate of stuff in core tracks ?
 
         //post content
@@ -365,7 +367,7 @@ class WPSSTM_Core_Tracklists{
 
       if ( in_array($post->post_type,wpsstm()->tracklist_post_types) ){
         $columns['tracks-count'] = __('Tracks Count','wpsstm');
-        $columns['tracklist-favoritedby'] = __('Favorited','wpsstm');
+        $columns['tracklist-favoriters'] = __('Favorited','wpsstm');
       }
 
       if ( ( $post->post_type == wpsstm()->post_type_radio ) && $is_premium ){
@@ -376,8 +378,8 @@ class WPSSTM_Core_Tracklists{
     }
 
     public static function tracklist_sortable_columns( $columns ) {
-      //TOUFIX$columns['tracks-count'] = 'tracks_count';
-      //TOUFIX$columns['tracklist-favoritedby'] = 'favorited_count';
+      $columns['tracks-count'] = 'tracks_count';
+      $columns['tracklist-favoriters'] = 'favoriters_count';
       $columns['tracklist-importer'] = 'importer_name';
       return $columns;
     }
@@ -393,8 +395,8 @@ class WPSSTM_Core_Tracklists{
                     $output = $tracks_count;
                 }
             break;
-            case 'tracklist-favoritedby':
-              if ($list = $wpsstm_tracklist->get_favorited_by_list() ){
+            case 'tracklist-favoriters':
+              if ($list = $wpsstm_tracklist->get_favoriters_list() ){
                   $output = $list;
               }
             break;
@@ -498,8 +500,6 @@ class WPSSTM_Core_Tracklists{
 
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
 
-        $wpsstm_tracklist->tracklist_log("Populated global frontend tracklist");
-
     }
 
     function populate_global_tracklist_backend(){
@@ -513,8 +513,6 @@ class WPSSTM_Core_Tracklists{
 
         $post_id = get_the_ID();
         $wpsstm_tracklist = new WPSSTM_Post_Tracklist($post_id);
-
-        //$wpsstm_tracklist->tracklist_log("Populated global backend tracklist");
 
     }
 
@@ -665,23 +663,53 @@ class WPSSTM_Core_Tracklists{
         return $query;
     }
 
-    function sort_tracklists( $query ) {
-
+    function sort_tracklists_by_importer_name( $query ) {
       $orderby = $query->get( 'orderby');
-      switch ($orderby){
-        case 'tracks_count':
-          die("TOUFIX sort by tracks count");
-        break;
-        case 'favorited_count':
-          die("TOUFIX sort by favorited count");
-        break;
-        case 'importer_name':
-          $query->set('meta_key',WPSSTM_Core_Radios::$importer_slug_meta_name);
-          $query->set('orderby','meta_value');
-        break;
+      if ($orderby === 'importer_name'){
+        $query->set('meta_key',WPSSTM_Core_Radios::$importer_slug_meta_name);
+        $query->set('orderby','meta_value');
+      }
+      return $query;
+    }
+
+    function sort_tracklists_by_tracks_count ($clauses, $query) {
+      global $wpdb;
+
+      if ( !in_array($query->get( 'post_type'),wpsstm()->tracklist_post_types) ) return $clauses;
+
+      if ($query->get( 'orderby') === 'tracks_count'){
+
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+        $order = $query->get( 'order') ? $query->get( 'order') : 'ASC';
+
+        $clauses['fields'] .=   ", COUNT(subtracks.subtrack_id) AS tracks_count";
+        $clauses['join'] .=     " LEFT JOIN {$subtracks_table} AS subtracks ON {$wpdb->posts}.ID = subtracks.tracklist_id";
+        $clauses['groupby'] =   "{$wpdb->posts}.ID";
+        $clauses['orderby'] =   sprintf("tracks_count %s",$order);
+
       }
 
-      return $query;
+      return $clauses;
+    }
+
+    function sort_tracklists_by_favoriters_count ($clauses, $query) {
+      global $wpdb;
+
+      if ( !in_array($query->get( 'post_type'),wpsstm()->tracklist_post_types) ) return $clauses;
+
+      if ($query->get( 'orderby') === 'favoriters_count'){
+
+        $order = $query->get( 'order') ? $query->get( 'order') : 'ASC';
+
+        $clauses['fields'] .=   ", COUNT(metas.meta_id) AS favoriters_count";
+        $clauses['join'] .=     " LEFT JOIN {$wpdb->postmeta} AS metas ON {$wpdb->posts}.ID = metas.post_id";
+        $clauses['where'] .=    sprintf(" AND metas.meta_key='%s'",WPSSTM_Core_User::$loved_tracklist_meta_key);
+        $clauses['groupby'] =   "{$wpdb->posts}.ID";
+        $clauses['orderby'] =   sprintf("favoriters_count %s",$order);
+
+      }
+
+      return $clauses;
     }
 
     /*
