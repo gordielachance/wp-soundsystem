@@ -41,6 +41,7 @@ class WPSSTM_Core_Tracks{
 
       add_filter( sprintf('manage_%s_posts_columns',wpsstm()->post_type_track), array(__class__,'tracks_columns_register') );
       add_action( sprintf('manage_%s_posts_custom_column',wpsstm()->post_type_track), array(__class__,'tracks_columns_content') );
+
       add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(__class__,'register_orphan_tracks_view') );
       add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(__class__,'register_tracklist_tracks_view') );
       add_filter( sprintf("views_edit-%s",wpsstm()->post_type_track), array(wpsstm(),'register_imported_view'), 5 );
@@ -55,6 +56,7 @@ class WPSSTM_Core_Tracks{
       /*
       QUERIES
       */
+      //TOUFIX TOUCHECK clean this ?
       add_filter( 'pre_get_posts', array($this,'filter_single_subtrack_query') );
       add_filter( 'posts_join', array($this,'include_subtracks_query_join'), 10, 2 );
       add_filter( 'posts_join', array($this,'exclude_subtracks_query_join'), 10, 2 );
@@ -356,20 +358,18 @@ class WPSSTM_Core_Tracks{
       $after = array();
 
       $after['track-links'] = __('Links','wpsstm');
-      $after['track-playlists'] = __('Playlists','wpsstm');
-      $after['track-favoritedby'] = __('Favorited','wpsstm');
+      $after['track-tracklists'] = __('Tracklists','wpsstm');
+      $after['track-favoriters'] = __('Favorited','wpsstm');
 
       return array_merge($before,$defaults,$after);
     }
-
-
 
     static public function tracks_columns_content($column){
       global $post;
       global $wpsstm_track;
 
       switch ( $column ) {
-          case 'track-playlists':
+          case 'track-tracklists':
 
             if ( $list = $wpsstm_track->get_parents_list() ){
               echo $list;
@@ -379,10 +379,10 @@ class WPSSTM_Core_Tracks{
 
 
           break;
-          case 'track-favoritedby':
+          case 'track-favoriters':
             $output = '—';
 
-            if ( $list = $wpsstm_track->get_favorited_by_list() ){
+            if ( $list = $wpsstm_track->get_favoriters_list() ){
               $output = $list;
             }
             echo $output;

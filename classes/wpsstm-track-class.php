@@ -510,15 +510,15 @@ class WPSSTM_Track{
         return $wpdb->get_col( $querystr);
     }
 
-    function is_track_favorited_by($user_id = null){
+    function has_track_favoriters($user_id = null){
         if (!$user_id) $user_id = get_current_user_id();
         if (!$user_id) return;
 
-        $favorited_by = $this->get_favoriters();
-        return in_array($user_id,(array)$favorited_by);
+        $favoriters = $this->get_favoriters();
+        return in_array($user_id,(array)$favoriters);
     }
 
-    function get_favorited_by_list(){
+    function get_favoriters_list(){
         $list = null;
         if ( !$user_ids = $this->get_favoriters() ) return;
 
@@ -935,7 +935,7 @@ class WPSSTM_Track{
     private function get_track_classes(){
 
         $add_classes = array(
-            ( $this->is_track_favorited_by() ) ? 'favorited-track' : null,
+            ( $this->has_track_favoriters() ) ? 'favorited-track' : null,
             is_wp_error( $this->validate_track() ) ? 'wpsstm-invalid-track' : null,//TOUFIX URGENT NEEDED ?
             ( ( $autoplay_id = wpsstm_get_array_value('subtrack_autoplay',$_GET) ) && ($autoplay_id == $this->subtrack_id) ) ? 'track-autoplay' : null,
         );

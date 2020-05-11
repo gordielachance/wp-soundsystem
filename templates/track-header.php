@@ -45,11 +45,11 @@ if ( $playlists_list = $wpsstm_track->get_parents_list() ){
 /*
 Favorited by
 */
-if ( $loved_list = $wpsstm_track->get_favorited_by_list() ){
+if ( $list = $wpsstm_track->get_favoriters_list() ){
     ?>
     <div class="wpsstm-track-loved-by">
         <label><?php _e('Loved by:','wpsstm');?></label>
-        <?php echo $loved_list; ?>
+        <?php echo $list; ?>
     </div>
     <?php
 }
