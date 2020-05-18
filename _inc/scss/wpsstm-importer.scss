@@ -1,5 +1,3 @@
-@import "compass/css3";
-@import "compass/typography/text/ellipsis";
 @import "_wpsstm-shared";
 
 #wpsstm-metabox-importer{
@@ -10,7 +8,7 @@
       padding:.5em;
     }
     &.wpsstm-wizard-node-readonly > .wpsstm-wizard-node-content{
-      @include opacity(.5);
+      opacity:.5;
     }
 
     .wpsstm-wizard-node-handle{
@@ -86,7 +84,7 @@
             line-height: 1em;
             line-height:1.5em;
             a{
-                @include display-flex();
+                display:flex;
                 strong{
                     margin-right:.25em;
                 }

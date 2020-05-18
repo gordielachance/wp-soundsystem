@@ -1,4 +1,4 @@
-@include keyframes(opacityPulse){
+@keyframes opacityPulse {
     0% {opacity: 1;}
     50% {opacity: 0.5; }
     100% {opacity: 1;}
@@ -89,7 +89,7 @@ input{
 
 .wpsstm-freeze{
     pointer-events: none;
-    @include opacity(.5);
+    opacity:.5;
 }
 
 .wpsstm-icon{
@@ -124,7 +124,9 @@ input{
 }
 
 .wpsstm-ellipsis{
-    @include ellipsis($no-wrap: true);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .wpsstm-icon-input{
@@ -159,7 +161,7 @@ input{
     padding:.75em;
     position:relative;
     z-index:10;
-    @include display-flex;
+    display:flex;
     > *{
         flex:1;
         &.wpsstm-close-notice{
@@ -170,7 +172,7 @@ input{
 }
 
 .wpsstm-align-both{
-    @include display-flex();
-    @include justify-content(center);
-    @include align-items(center);
+    display:flex;
+    justify-content: center;
+    align-items:center;
 }

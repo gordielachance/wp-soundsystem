@@ -1,5 +1,5 @@
 wpsstm-track-link{
-    @include display-flex();
+    display:flex;
     label{
         @extend .wpsstm-can-click;
     }
@@ -17,9 +17,9 @@ wpsstm-track-link{
     position:relative;
     padding-left:1em;
     line-height:2em;
-    @include flex-grow(0);
-    @include transition-property(margin-bottom);
-    @include transition-duration(.2s);
+    flex-grow:0;
+    transition-property: margin-bottom;
+    transition-duration: .2s;
 
 
     &.active{
@@ -77,8 +77,8 @@ wpsstm-track-link{
         .wpsstm-track-link-actions{
             margin:0;
             padding-right: .5em;
-            @include display-flex();
-            @include flex-shrink(0);
+            display:flex;
+            flex-shrink:0;
 
             .wpsstm-track-link-action{
                 margin:auto!important;
@@ -103,7 +103,7 @@ wpsstm-track-link{
         }
 
         &.link-active{
-            @include display-flex();
+            display:flex;
         }
 
         .wpsstm-track-link-action-provider:before{
