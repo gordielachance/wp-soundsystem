@@ -17,7 +17,7 @@ class WPSSTM_Core_BuddyPress{
 
         add_action( 'bp_before_member_header_meta', array($this,'user_playing_track_meta') );
         add_action( 'bp_before_member_header_meta', array($this,'user_last_favorite_track_meta') );
-        
+
     }
 
     function register_music_menu() {
@@ -240,11 +240,15 @@ class WPSSTM_Core_BuddyPress{
 
     function queue_track_activity($track,$tracklist_id){
 
-        //check tracklist is published
+        //bot check
+        $user_id = $track->subtrack_author;
+        $bot_id = wpsstm()->get_options('bot_user_id');
+        if ( $bot_id && ($user_id == $bot_id) ) return;
+
+        //tracklist status check
         if ( get_post_status( $tracklist_id ) !== 'publish' ) return;
 
-        $user_id = get_current_user_id();
-        $user_link = bp_core_get_userlink( $user_id );
+        $user_link = bp_core_get_userlink($user_id);
         $favorites_id = WPSSTM_Core_User::get_user_favtracks_playlist_id($user_id);
 
         $track_link = sprintf('<strong>%s</strong>',(string)$track);

@@ -218,12 +218,7 @@ class WPSSTM_Core_Playlists{
       //clear
       $clear = $this->clear_now_playing();
 
-      //update
-      $now_track = clone $track;
-      $now_track->subtrack_id = null; //reset subtrack
-      $now_track->subtrack_author = get_current_user_id();
-
-      return $tracklist->insert_subtrack($now_track);
+      return $tracklist->queue_track($track);
     }
 
     private function clear_now_playing(){

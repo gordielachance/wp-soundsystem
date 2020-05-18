@@ -1083,9 +1083,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       foreach((array)$tracks as $index=>$new_track){
 
         $new_track->position = $index + 1;
-        $new_track->subtrack_author = $bot_id; //set bot as author
-
-        $success = $this->insert_subtrack($new_track);
+        $success = $this->queue_track($new_track,$bot_id);
 
         //populate subtrack ID
         if( is_wp_error($success) ){
@@ -1154,63 +1152,43 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       return $track->validate_track();
     }
 
-    function queue_track(WPSSTM_Track $track){
-
-      if ( !$this->user_can_edit_tracklist() ){
-        return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to queue this track.",'wpsstm') );
-      }
-
-      //unset some subtracks vars or subtrack will be moved instead of added
-      $new_track = clone $track;
-      $new_track->subtrack_id = null;
-
-      $success = $this->insert_subtrack($new_track);
-
-      if ( $success && !is_wp_error($success) ){
-        do_action('wpsstm_queue_track',$track,$this->post_id);
-
-        //favorites ?
-        if ( $this->post_id == WPSSTM_Core_User::get_user_favtracks_playlist_id() ){
-            do_action('wpsstm_love_track',$track,true);
-        }
-      }
-
-      return $success;
-
-    }
-
-    function dequeue_track(WPSSTM_Track $track){
-
-      $this->tracklist_log($track->to_array(),"dequeue track");
-
-      $success = $this->unlink_subtrack($track);
-
-      if ( is_wp_error($success) ){
-        $track->track_log(array('subtrack'=>$track->subtrack_id,'error'=>$success),"Error while unqueuing subtrack" );
-        return $success;
-      }
-
-      //favorites ?
-      if ( $this->post_id == WPSSTM_Core_User::get_user_favtracks_playlist_id() ){
-        do_action('wpsstm_love_track',$track,false);
-      }
-
-      do_action('wpsstm_dequeue_track',$track,$this->post_id);
-
-      return true;
-
-    }
-
     /*
     TO FIX TO CHECK maybe we also should have a function to save multiple subtracks in one single query ?
     I mean when we have playlists with hundreds of subtracks to save...
     */
 
-    public function insert_subtrack(WPSSTM_Track $track){
+    public function queue_track(WPSSTM_Track $input_track,$user_id = null){
       global $wpdb;
       $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
-      //NO capability check here, should be done upstream, because we should be able to use this function automatically (eg. live tracklist update)
+      /*
+      user check
+      */
+
+      if (!$user_id) $user_id = get_current_user_id();
+
+      if (!$user_id){
+        return new WP_Error( 'wpsstm_missing_user_id', __("A user ID is required to insert a subtrack.",'wpsstm') );
+      }
+
+      $is_bot = ( $user_id == wpsstm()->get_options('bot_user_id') );
+
+      //capability check except if this function is run automatically
+      if ( !$is_bot && !$this->user_can_edit_tracklist() ){
+        return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to queue this track.",'wpsstm') );
+      }
+
+      /*
+      track check
+      */
+
+      //clone subtrack object / unset its subtrack ID (if any) or subtrack will be moved instead of added
+      $track = clone $input_track;
+      $track->tracklist_id = $this->post_id;
+      $track->subtrack_id = null;
+      $track->subtrack_author = $user_id;
+      $track->subtrack_order = $this->get_last_subtrack_pos() + 1;
+      $track->subtrack_time = current_time('mysql');
 
       $valid = $this->validate_subtrack($track);
       if ( is_wp_error( $valid ) ) return $valid;
@@ -1240,22 +1218,18 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
       }
 
-      $track_data = array(
-          'track_id' =>   $track->post_id
-      );
-
       /*
       insert subtrack
       */
-      if (!$track->subtrack_id){
-        $subtrack_data['subtrack_time'] =       current_time('mysql');
-        $subtrack_data['tracklist_id'] =        $this->post_id;
-        $subtrack_data['from_tracklist'] =      $track->from_tracklist;
-        $subtrack_data['subtrack_author'] =     ($author = $track->subtrack_author) ? $author : get_current_user_id();
-        $subtrack_data['subtrack_order'] =      $this->get_last_subtrack_pos() + 1;
 
-        $track_data = array_merge($track_data,$subtrack_data);
-      }
+      $track_data = array(
+          'track_id'=>            $track->post_id,
+          'subtrack_time'=>       $track->subtrack_time,
+          'tracklist_id'=>        $track->tracklist_id,
+          'from_tracklist'=>      $track->from_tracklist,
+          'subtrack_author'=>     $track->subtrack_author,
+          'subtrack_order'=>      $track->subtrack_order,
+      );
 
       $success = $wpdb->insert($subtracks_table,$track_data);
       //$track->track_log(array('success'=>$success,'subtrack_id'=>$wpdb->insert_id,'data'=>$track_data), "add subtrack" );
@@ -1264,35 +1238,56 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       $track->subtrack_id = $wpdb->insert_id;
 
+      do_action('wpsstm_queue_track',$track,$this->post_id);
+
+      //favorites ?
+      if ( $this->post_id == WPSSTM_Core_User::get_user_favtracks_playlist_id() ){
+        do_action('wpsstm_love_track',$track,true);
+      }
+
       return $track->subtrack_id;
 
     }
 
-    private function unlink_subtrack(WPSSTM_Track $track){
-        if ( !$track->subtrack_id ){
-          return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
-        }
+    public function dequeue_track(WPSSTM_Track $track){
 
-        //capability check
-        if ( !$this->user_can_edit_tracklist() ){
-          return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist",'wpsstm') );
-        }
+      $this->tracklist_log($track->to_array(),"dequeue track");
 
-        global $wpdb;
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+      if ( !$track->subtrack_id ){
+        return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
+      }
 
-        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE subtrack_id = '%s'", $track->subtrack_id );
-        $result = $wpdb->get_results ( $querystr );
+      //capability check
+      if ( !$this->user_can_edit_tracklist() ){
+        return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist",'wpsstm') );
+      }
 
-        //update tracks range
-        if ( !is_wp_error($result) ){
-          $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET subtrack_order = subtrack_order - 1 WHERE tracklist_id = %d AND subtrack_order > %d",$this->post_id,$track->position);
-          $range_success = $wpdb->get_results ( $querystr );
-          $track->track_log(array('subtrack_id'=>$track->subtrack_id,'tracklist'=>$this->post_id),"dequeued subtrack");
-          $track->subtrack_id = null;
-        }
+      global $wpdb;
+      $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
+      $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE subtrack_id = '%s'", $track->subtrack_id );
+      $result = $wpdb->get_results ( $querystr );
+
+      if ( is_wp_error($result) ){
+        $track->track_log(array('subtrack'=>$track->subtrack_id,'error'=>$result),"Error while unqueuing subtrack" );
         return $result;
+      }
+
+      //update tracks range
+      //TOUFIX should be hooked on action instead ?
+      $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET subtrack_order = subtrack_order - 1 WHERE tracklist_id = %d AND subtrack_order > %d",$this->post_id,$track->position);
+      $range_success = $wpdb->get_results ( $querystr );
+      $track->track_log(array('subtrack_id'=>$track->subtrack_id,'tracklist'=>$this->post_id),"dequeued subtrack");
+      $track->subtrack_id = null;
+
+      //favorites ?
+      if ( $this->post_id == WPSSTM_Core_User::get_user_favtracks_playlist_id() ){
+        do_action('wpsstm_love_track',$track,false);
+      }
+
+      do_action('wpsstm_dequeue_track',$track,$this->post_id);
+
+      return true;
     }
 
     public function get_static_subtracks(){
