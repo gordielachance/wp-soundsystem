@@ -462,34 +462,6 @@ class WPSSTM_Track{
 
     }
 
-
-    function unlink_subtrack(){
-        if ( !$this->subtrack_id ){
-            return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
-        }
-
-        //capability check
-        if ( !$this->tracklist->user_can_edit_tracklist() ){
-            return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist",'wpsstm') );
-        }
-
-        global $wpdb;
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-
-        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE subtrack_id = '%s'", $this->subtrack_id );
-        $result = $wpdb->get_results ( $querystr );
-
-        //update tracks range
-        if ( !is_wp_error($result) ){
-            $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET subtrack_order = subtrack_order - 1 WHERE tracklist_id = %d AND subtrack_order > %d",$this->tracklist->post_id,$this->position);
-            $range_success = $wpdb->get_results ( $querystr );
-             $this->track_log(array('subtrack_id'=>$this->subtrack_id,'tracklist'=>$this->tracklist->post_id),"dequeued subtrack");
-            $this->subtrack_id = null;
-        }
-
-        return $result;
-    }
-
     function get_favoriters(){
         global $wpdb;
 
@@ -800,7 +772,7 @@ class WPSSTM_Track{
         $can_delete_track =         ( $this->post_id && current_user_can($track_type_obj->cap->delete_posts) );
 
         $can_move_subtrack =        ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
-        $can_dequeue_track =      ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
+        $can_dequeue_track =        ( $this->subtrack_id && $can_edit_tracklist && ($this->tracklist->tracklist_type == 'static') );
 
         //play
         if ( $can_play_track ){
@@ -1171,39 +1143,6 @@ class WPSSTM_Track{
             $title = sprintf('%s - "%s"',$this->artist,$this->title);
         }
         return $title;
-    }
-
-    private function clear_now_playing(){
-        global $wpdb;
-        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
-
-        $nowplaying_id = wpsstm()->get_options('nowplaying_id');
-        if (!$nowplaying_id) return new WP_Error('missing_nowplaying_id','Missing Now Playing Radio ID');
-
-        if ( !$delay = wpsstm()->get_options('play_history_timeout') ) return false;
-
-        $now = current_time('timestamp');
-        $limit = $now - $delay;
-        $limit_datetime = date("Y-m-d H:i:s", $limit);
-
-        $query = $wpdb->prepare(" DELETE FROM `$subtracks_table` WHERE tracklist_id = %s AND subtrack_time < %s",$nowplaying_id,$limit_datetime);
-        //WP_SoundSystem::debug_log($query,"clear now playing");
-        return $wpdb->query($query);
-
-    }
-
-    function insert_now_playing(){
-        $nowplaying_id = wpsstm()->get_options('nowplaying_id');
-        if (!$nowplaying_id) return new WP_Error('missing_nowplaying_id','Missing Now Playing Radio ID');
-
-        $clear = $this->clear_now_playing();
-
-        $now_track = clone $this;
-        $now_track->subtrack_id = null; //reset subtrack
-        $now_track->subtrack_author = get_current_user_id();
-
-        $tracklist = new WPSSTM_Post_Tracklist($nowplaying_id);
-        return $tracklist->insert_subtrack($now_track);
     }
 
     /*

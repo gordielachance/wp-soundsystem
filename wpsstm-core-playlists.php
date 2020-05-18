@@ -11,6 +11,13 @@ class WPSSTM_Core_Playlists{
 
         add_filter( sprintf("views_edit-%s",wpsstm()->post_type_playlist), array($this,'register_favtracks_playlists_view') );
 
+        /*
+        ajax
+        */
+
+        add_action('wp_ajax_wpsstm_track_start', array($this,'ajax_update_now_playing'));
+        add_action('wp_ajax_nopriv_wpsstm_track_start', array($this,'ajax_update_now_playing'));
+
     }
 
     function register_post_type_playlist() {
@@ -171,6 +178,73 @@ class WPSSTM_Core_Playlists{
       return $query;
     }
 
+    function ajax_update_now_playing(){
+
+      $ajax_data = wp_unslash($_POST);
+
+      $track = new WPSSTM_Track();
+      $track->from_array($ajax_data['track']);
+
+      $result = array(
+        'input'         => $ajax_data,
+        'timestamp'     => current_time('timestamp'),
+        'error_code'    => null,
+        'message'       => null,
+        'track'         => $track,
+        'success'       => false,
+      );
+
+      $success = $this->insert_now_playing($track);
+
+      if ( is_wp_error($success) ){
+        $result['error_code'] = $success->get_error_code();
+        $result['message'] = $success->get_error_message();
+      }else{
+        $result['success'] = $success;
+      }
+
+      header('Content-type: application/json');
+      wp_send_json( $result );
+
+    }
+
+    private function insert_now_playing(WPSSTM_Track $track){
+
+      //get playlist
+      $nowplaying_id = wpsstm()->get_options('nowplaying_id');
+      if (!$nowplaying_id) return new WP_Error('missing_nowplaying_id','Missing Now Playing Playlist ID');
+      $tracklist = new WPSSTM_Post_Tracklist($nowplaying_id);
+
+      //clear
+      $clear = $this->clear_now_playing();
+
+      //update
+      $now_track = clone $track;
+      $now_track->subtrack_id = null; //reset subtrack
+      $now_track->subtrack_author = get_current_user_id();
+
+      return $tracklist->insert_subtrack($now_track);
+    }
+
+    private function clear_now_playing(){
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+
+        //get playlist
+        $nowplaying_id = wpsstm()->get_options('nowplaying_id');
+        if (!$nowplaying_id) return new WP_Error('missing_nowplaying_id','Missing Now Playing Radio ID');
+
+        if ( !$delay = wpsstm()->get_options('play_history_timeout') ) return false;
+
+        $now = current_time('timestamp');
+        $limit = $now - $delay;
+        $limit_datetime = date("Y-m-d H:i:s", $limit);
+
+        $query = $wpdb->prepare(" DELETE FROM `$subtracks_table` WHERE tracklist_id = %s AND subtrack_time < %s",$nowplaying_id,$limit_datetime);
+        //WP_SoundSystem::debug_log($query,"clear now playing");
+        return $wpdb->query($query);
+
+    }
 
 }
 

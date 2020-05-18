@@ -889,7 +889,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       $tracklist = $this->get_remote_tracklist();
       if ( is_wp_error($tracklist) ) return $tracklist;
 
-      $success = $this->update_tracklist_post($tracklist);
+      $success = $this->fill_local_tracklist($tracklist);
       if( is_wp_error($success) ) return $success;
 
       return $this->populate_tracklist_post();
@@ -1020,7 +1020,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     Clear the stored subtracks and add the new ones
     */
 
-    private function update_tracklist_post(WPSSTM_Tracklist $tracklist){
+    private function fill_local_tracklist(WPSSTM_Tracklist $tracklist){
       global $wpdb;
       $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
@@ -1183,7 +1183,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       $this->tracklist_log($track->to_array(),"dequeue track");
 
-      $success = $track->unlink_subtrack();
+      $success = $this->unlink_subtrack($track);
 
       if ( is_wp_error($success) ){
         $track->track_log(array('subtrack'=>$track->subtrack_id,'error'=>$success),"Error while unqueuing subtrack" );
@@ -1236,7 +1236,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       //check track is not already part of this playlist
       if ( $tracklist_ids = $track->get_in_tracklists_ids() ){
         if ( in_array($this->post_id,$tracklist_ids) ){
-          return new WP_Error( 'wpsstm_duplicate_subtrack', __("This track is already added to the tracklist.",'wpsstm') );
+          return new WP_Error( 'wpsstm_duplicate_subtrack', __("This track is already part of this tracklist.",'wpsstm') );
         }
       }
 
@@ -1266,6 +1266,33 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       return $track->subtrack_id;
 
+    }
+
+    private function unlink_subtrack(WPSSTM_Track $track){
+        if ( !$track->subtrack_id ){
+          return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
+        }
+
+        //capability check
+        if ( !$this->user_can_edit_tracklist() ){
+          return new WP_Error( 'wpsstm_missing_capability', __("You don't have the capability required to edit this tracklist",'wpsstm') );
+        }
+
+        global $wpdb;
+        $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+
+        $querystr = $wpdb->prepare( "DELETE FROM `$subtracks_table` WHERE subtrack_id = '%s'", $track->subtrack_id );
+        $result = $wpdb->get_results ( $querystr );
+
+        //update tracks range
+        if ( !is_wp_error($result) ){
+          $querystr = $wpdb->prepare( "UPDATE $subtracks_table SET subtrack_order = subtrack_order - 1 WHERE tracklist_id = %d AND subtrack_order > %d",$this->post_id,$track->position);
+          $range_success = $wpdb->get_results ( $querystr );
+          $track->track_log(array('subtrack_id'=>$track->subtrack_id,'tracklist'=>$this->post_id),"dequeued subtrack");
+          $track->subtrack_id = null;
+        }
+
+        return $result;
     }
 
     public function get_static_subtracks(){
