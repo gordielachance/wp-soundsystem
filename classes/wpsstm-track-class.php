@@ -163,18 +163,45 @@ class WPSSTM_Track{
     }
 
     /*
-    Get IDs of the parent tracklists (albums / playlists / radios) for a track.
+    Get a list of pairs tracklist_id->subtrack_id based on the track id.
     */
-    function get_in_tracklists_ids(){
+    function get_subtrack_pairs(){
         global $wpdb;
         $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
 
-        $querystr = sprintf("SELECT `tracklist_id` FROM `$subtracks_table` WHERE `track_id`=%d",$this->post_id );
+        $querystr = sprintf("SELECT `subtrack_id`,`tracklist_id` FROM `$subtracks_table` WHERE `track_id`=%d",$this->post_id );
 
-        $tracklist_ids = $wpdb->get_col($querystr);
+        $results = $wpdb->get_results($querystr);
+        if ( is_wp_error($results) || empty($results) ) return $results;
 
-        return $tracklist_ids;
+        $pairs = array();
 
+        foreach((array)$results as $result){
+          $pairs[$result->tracklist_id] = $result->subtrack_id;
+        }
+
+        return $pairs;
+
+    }
+
+    /*
+    Get the ID of the subtrack matching this track within the tracklist of favorites tracks
+    */
+
+    function get_matching_favorites_id(){
+      if ( !$tracklist_id = WPSSTM_Core_User::get_user_favtracks_playlist_id() ) return;
+      $subtracks = $this->get_subtrack_pairs();
+      if ( is_wp_error($subtracks) ) return $subtracks;
+      return ( isset($subtracks[$tracklist_id]) ) ? $subtracks[$tracklist_id] : null;
+    }
+
+    /*
+    Get the IDs of the parent tracklists for a track.
+    */
+    function get_in_tracklists_ids(){
+      $subtracks = $this->get_subtrack_pairs();
+      if ( is_wp_error($subtracks) ) return $subtracks;
+      return array_keys($subtracks);
     }
 
     function get_parents_list(){
@@ -433,9 +460,14 @@ class WPSSTM_Track{
         $tracklist = new WPSSTM_Post_Tracklist($tracklist_id);
 
         if ($bool){
-            $success = $tracklist->queue_track($this);
+          $success = $tracklist->queue_track($this);
         }else{
-            $success = $tracklist->dequeue_track($this);
+          $favorite_id = $this->get_matching_favorites_id();
+          if ( $favorite_id && !is_wp_error($favorite_id) ){
+            $favorite_subtrack = new WPSSTM_Track();
+            $favorite_subtrack->populate_subtrack_id($favorite_id);
+            $success = $tracklist->dequeue_track($favorite_subtrack);
+          }
         }
 
         $this->track_log(array('track'=>$this->to_array(),'do_love'=>$bool,'success'=>$success),"toggle favorite");

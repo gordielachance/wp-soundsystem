@@ -1211,7 +1211,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return new WP_Error( 'wpsstm_missing_track_id', __('Missing track ID.','wpsstm') );
       }
 
-      //check track is not already part of this playlist
+      //check track is not already part of this playlist.  We don't allow duplicate tracks in tracklists since it is harder to handle (when dequeuing tracks, etc) and is illogical in a way.
       if ( $tracklist_ids = $track->get_in_tracklists_ids() ){
         if ( in_array($this->post_id,$tracklist_ids) ){
           return new WP_Error( 'wpsstm_duplicate_subtrack', __("This track is already part of this tracklist.",'wpsstm') );
@@ -1255,6 +1255,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       if ( !$track->subtrack_id ){
         return new WP_Error( 'wpsstm_missing_subtrack_id', __("Required subtrack ID missing.",'wpsstm') );
+      }
+
+      if ( $track->tracklist->post_id != $this->post_id ){ //just a security check
+        return new WP_Error( 'wpsstm_subtrack_mismatch', __("Subtrack & playlist mismatch.",'wpsstm') );
       }
 
       //capability check
