@@ -148,6 +148,12 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 3.3.6 =
+* tracklists : fixed sort by tracks count / sort by favorited count
+* removed Compass dependencies
+* some parts of the code cleaned (queuing/dequeuing tracks, track template)
+* hook 'wpsstm_love_track' splitted into 'wpsstm_love_track' & 'wpsstm_unlove_track'
+
 = 3.3.5 =
 
 * MAJOR UPDATE !
