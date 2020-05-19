@@ -336,10 +336,10 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         if ($do_love){
             $success = add_post_meta( $this->post_id, WPSSTM_Core_User::$loved_tracklist_meta_key, $user_id );
-            do_action('wpsstm_love_tracklist',$this->post_id,$this);
+            do_action('wpsstm_love_tracklist',$this);
         }else{
             $success = delete_post_meta( $this->post_id,WPSSTM_Core_User::$loved_tracklist_meta_key, $user_id );
-            do_action('wpsstm_unlove_tracklist',$this->post_id,$this);
+            do_action('wpsstm_unlove_tracklist',$this);
         }
         return $success;
     }
@@ -1242,7 +1242,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       //favorites ?
       if ( $this->post_id == WPSSTM_Core_User::get_user_favtracks_playlist_id() ){
-        do_action('wpsstm_love_track',$track,true);
+        do_action('wpsstm_love_track',$track);
       }
 
       return $track->subtrack_id;
@@ -1282,7 +1282,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       //favorites ?
       if ( $this->post_id == WPSSTM_Core_User::get_user_favtracks_playlist_id() ){
-        do_action('wpsstm_love_track',$track,false);
+        do_action('wpsstm_unlove_track',$track);
       }
 
       do_action('wpsstm_dequeue_track',$track,$this->post_id);

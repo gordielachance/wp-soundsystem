@@ -45,13 +45,14 @@ class WPSSTM_LastFM{
         /*
         AJAX
         */
-        
+
         //enable scrobbler
         add_action('wp_ajax_wpsstm_lastfm_toggle_user_scrobbler',array($this,'ajax_lastm_toggle_user_scrobbler') );
         add_action('wp_ajax_nopriv_wpsstm_lastfm_toggle_user_scrobbler', array($this,'ajax_lastm_toggle_user_scrobbler')); //for call to action
 
         //love & unlove
-        add_action('wpsstm_love_track',array($this,'user_love_track'), 10, 2 );
+        add_action('wpsstm_love_track',array($this,'lastfm_track_love') );
+        add_action('wpsstm_unlove_track',array($this,'lastfm_track_unlove') );
 
 
         //updateNowPlaying
@@ -432,8 +433,11 @@ class WPSSTM_LastFM{
         wp_send_json( $result );
     }
 
-    function user_love_track($track,$do_love){
-        return $this->lastfm_user->love_lastfm_track($track,$do_love);
+    function lastfm_track_love($track){
+        return $this->lastfm_user->toggle_lastfm_track_love($track,true);
+    }
+    function lastfm_track_unlove($track){
+        return $this->lastfm_user->toggle_lastfm_track_love($track,false);
     }
 
     function ajax_lastfm_now_playing_track(){
@@ -778,7 +782,7 @@ class WPSSTM_LastFM_User{
 
     }
 
-    public function love_lastfm_track(WPSSTM_Track $track,$do_love = null){
+    public function toggle_lastfm_track_love(WPSSTM_Track $track,$do_love = null){
 
         $connected = $this->is_user_connected();
         if ( is_wp_error($connected) || !$connected ) return $connected;

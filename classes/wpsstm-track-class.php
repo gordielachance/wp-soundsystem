@@ -438,7 +438,7 @@ class WPSSTM_Track{
             $success = $tracklist->dequeue_track($this);
         }
 
-        $this->track_log(array('track'=>$this->to_array(),'do_love'=>$bool,'success'=>$success),"toggle_favorite");
+        $this->track_log(array('track'=>$this->to_array(),'do_love'=>$bool,'success'=>$success),"toggle favorite");
 
         return $success;
 

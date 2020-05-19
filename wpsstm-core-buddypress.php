@@ -296,9 +296,9 @@ class WPSSTM_Core_BuddyPress{
         bp_activity_delete_by_item_id( $args );
     }
 
-    function love_tracklist_activity($tracklist_id){
+    function love_tracklist_activity($tracklist){
         $user_link = bp_core_get_userlink( get_current_user_id() );
-        $tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($tracklist_id),get_the_title($tracklist_id));
+        $tracklist_link = sprintf('<a href="%s">%s</a>',get_permalink($tracklist->post_id),get_the_title($tracklist->post_id));
 
         //TO FIX
         //switch different action depending on the post type ?
@@ -309,9 +309,9 @@ class WPSSTM_Core_BuddyPress{
             //'content' =>
             'component' =>      WPSSTM_BASE_SLUG,
             'type' =>           'loved_tracklist',
-            'primary_link' =>   get_permalink($tracklist_id),
+            'primary_link' =>   get_permalink($tracklist->post_id),
             //'user_id' =>
-            'item_id' =>        $tracklist_id,
+            'item_id' =>        $tracklist->post_id,
             //'secondary_item_id' =>
             //'recorded_time' =>
             //'hide_sitewide' =>
@@ -321,10 +321,10 @@ class WPSSTM_Core_BuddyPress{
         $activity_id = bp_activity_add($args);
     }
 
-    function unlove_tracklist_activity($tracklist_id){
+    function unlove_tracklist_activity($tracklist){
         $args = array(
             'component' =>      WPSSTM_BASE_SLUG,
-            'item_id' =>        $tracklist_id,
+            'item_id' =>        $tracklist->post_id,
             'type' =>           'loved_tracklist',
         );
         bp_activity_delete_by_item_id( $args );
