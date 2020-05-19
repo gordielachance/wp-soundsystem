@@ -183,7 +183,7 @@ class WpsstmTrack extends HTMLElement{
 
         //move play button at the beginning of the row
         var playLinkEl = $(track).find('.wpsstm-track-action-play');
-        playLinkEl.parents('.wpsstm-track').find('.wpsstm-track-pre').prepend(playLinkEl);
+        playLinkEl.parents('.wpsstm-track-row').prepend(playLinkEl);
 
     }
 
