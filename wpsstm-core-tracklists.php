@@ -368,6 +368,7 @@ class WPSSTM_Core_Tracklists{
       if ( in_array($post->post_type,wpsstm()->tracklist_post_types) ){
         $columns['tracks-count'] = __('Tracks Count','wpsstm');
         $columns['tracklist-favoriters'] = __('Favorited','wpsstm');
+        $columns['last-queued'] = __('Last queued','wpsstm');
       }
 
       if ( ( $post->post_type == wpsstm()->post_type_radio ) && $is_premium ){
@@ -407,6 +408,11 @@ class WPSSTM_Core_Tracklists{
                 $output = $importer->get_error_message();
               }else if ( $importer ){
                   $output = wpsstm_get_array_value(array('infos','name'),$importer);
+              }
+            break;
+            case 'last-queued':
+              if ( $date = $wpsstm_tracklist->get_last_subtrack_time() ){
+                $output = date(__( 'Y/m/d' ), strtotime($date));
               }
             break;
 

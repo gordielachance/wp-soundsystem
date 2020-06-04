@@ -1374,6 +1374,14 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       return $wpdb->get_var($querystr);
     }
 
+    function get_last_subtrack_time(){
+      global $wpdb;
+      if (!$this->post_id) return false;
+      $subtracks_table = $wpdb->prefix . wpsstm()->subtracks_table_name;
+      $querystr = $wpdb->prepare( "SELECT subtrack_time FROM `$subtracks_table` WHERE tracklist_id = %d ORDER BY `subtrack_time` DESC LIMIT 0,1", $this->post_id );
+      return $wpdb->get_var($querystr);
+    }
+
     function get_importer(){
       if (!$this->post_id || !$this->feed_url) return false;
 
