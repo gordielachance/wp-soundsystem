@@ -387,7 +387,7 @@ class WPSSTM_Core_Importer{
       $lastKey = array_pop($requiredPath);
       array_pop($requiredPath);
       $requiredPath = array_merge($requiredPath,array('required'));
-      $required = in_array($lastKey,wpsstm_get_array_value($requiredPath,$tree));
+      $required = in_array($lastKey,(array)wpsstm_get_array_value($requiredPath,$tree));
       //printf("REQUIRED: %s - %s in %s<br/>",$required,$lastKey,json_encode($requiredPath));µ
       return $required;
     }
@@ -480,16 +480,18 @@ class WPSSTM_Core_Importer{
               $attributes,
               array(
                 'placeholder' =>  $examples ? sprintf(__('eg. %s, ...','wpsstm'),implode(',',$examples)) : null,
-                'type' =>         'text',
-                'value'=>         $value ? htmlentities($value) : null,
+                'type' =>         'text'
               )
             );
 
+            //Since wpsstm_get_html_attr is converting our HTML entities, keep value OUT of it (we want the raw value eg for regexes!)
+            $value = htmlentities($value);
+
             //regex exception
             if (end($nodekeys) === 'regex'){
-              $input = sprintf('<span><code>~</code><input %s /><code>~mi</code></span>',wpsstm_get_html_attr($attributes));
+              $input = sprintf('<span><code>~</code><input %s value="%s"/><code>~mi</code></span>',wpsstm_get_html_attr($attributes),$value);
             }else{
-              $input = sprintf('<span><input %s /></span>',wpsstm_get_html_attr($attributes));
+              $input = sprintf('<span><input %s value="%s"/></span>',wpsstm_get_html_attr($attributes),$value);
             }
 
             $label = sprintf('<label for="%s">%s</label>',$el_id,$title);
