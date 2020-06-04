@@ -19,7 +19,6 @@ class WPSSTM_Core_Radios{
 
         add_filter( 'pre_get_posts', array($this,'pre_get_tracklist_by_pulse') );
         add_filter( 'wpsstm_tracklist_classes', array($this, 'live_tracklist_classes'), 10, 2 );
-        add_filter( 'wpsstm_tracklist_actions', array($this, 'filter_live_tracklist_actions'),10,2 );
 
 
         //backend
@@ -164,20 +163,6 @@ class WPSSTM_Core_Radios{
             $classes[] = 'wpsstm-live-tracklist';
         }
         return $classes;
-    }
-
-    function filter_live_tracklist_actions($actions,$tracklist){
-
-        if ($tracklist->tracklist_type !== 'live' ) return $actions;
-        if (!$tracklist->feed_url) return $actions;
-
-        $new_actions['refresh'] = array(
-            'text' =>       __('Refresh', 'wpsstm'),
-            'href' =>       $tracklist->get_tracklist_action_url('refresh'),
-            'classes' =>    array('wpsstm-reload-bt'),
-        );
-
-        return $new_actions + $actions;
     }
 
     function pre_get_tracklist_by_pulse( $query ) {

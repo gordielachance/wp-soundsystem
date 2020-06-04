@@ -36,7 +36,7 @@ class WPSSTM_LastFM{
         add_action( 'wp_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
         add_action( 'admin_enqueue_scripts', array($this,'enqueue_lastfm_scripts_styles'));
 
-        add_filter('wpsstm_get_player_actions', array($this,'get_lastfm_actions'));
+        add_filter('wpsstm_player_context_menu_items', array($this,'append_lastfm_player_context_menu_items'));
 
         /*backend*/
         add_action( 'admin_init', array( $this, 'lastfm_settings_init' ) );
@@ -543,15 +543,26 @@ class WPSSTM_LastFM{
 
     }
 
-    function get_lastfm_actions($actions = null){
+    function append_lastfm_player_context_menu_items($items = array()){
 
-        $actions['scrobbler'] = array(
-            'text' =>       __('Last.fm scrobble', 'wpsstm'),
-            'href' =>       wp_login_url( get_permalink() ),
-            'classes' =>    array('wpsstm-tooltip'),
+        $items['scrobbler'] = sprintf(
+          '<a %s><span>%s</span></a>',
+          wpsstm_get_html_attr(
+            array(
+              'href'=>       wp_login_url( get_permalink() ),
+              'class'=>     implode(' ',array(
+                'wpsstm-action',
+                'wpsstm-player-action',
+                'wpsstm-player-action-scrobbler'
+              )),
+              'title'=>     __('Last.fm scrobble', 'wpsstm'),
+              'rel'=>       'nofollow',
+            )
+          ),
+          __('Last.fm scrobble', 'wpsstm'),
         );
 
-        return $actions;
+        return $items;
     }
 
     public function can_lastfm_api(){

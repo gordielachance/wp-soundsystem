@@ -19,8 +19,8 @@ Render container even if there is no links, as it is used by JS.
             ?>
             <wpsstm-track-link <?php echo wpsstm_get_html_attr($wpsstm_link->get_single_link_attributes());?> >
                 <?php
-                if ( $actions = $wpsstm_link->get_link_actions('page') ){
-                    echo get_actions_list($actions,'track-link');
+                if ( $items = $wpsstm_link->get_track_link_context_menu_items('page') ){
+                    echo get_context_menu($items,'track-link');
                 }
                 ?>
                 <a class="wpsstm-link-title" href="<?php echo $wpsstm_link->url;?>" target="_blank"><?php echo $wpsstm_link->get_link_title();?></a>

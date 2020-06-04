@@ -106,46 +106,27 @@ function wpsstm_get_post_duration($post_id = null,$seconds = false){
     return get_post_meta( $post_id, WPSSTM_Core_Tracks::$duration_metakey, true );
 }
 
-function wpsstm_get_blank_action(){
-    return array(
-        'text' =>           null,
-        'desc' =>           null,
-        'href' =>           '#',
-        'classes' =>        array(),
-        'target' =>         null,
-        'rel' =>            'nofollow',
+function get_context_menu($items,$prefix){
+
+    //wrap
+    $items = array_map(
+       function ($el) {
+          return "<li>{$el}</li>";
+       },
+       (array)$items
     );
-}
 
-function get_actions_list($actions,$prefix){
-    $track_actions_list = array();
+    $container_attr = array(
+      'class'=> implode(' ',array(
+        'wpsstm-actions-list',
+        'wpsstm-collapsable-actions-list',
+        sprintf('wpsstm-%s-actions',$prefix),
+      ))
+    );
 
-    $default_action = wpsstm_get_blank_action();
+    $handle= sprintf('<a class="wpsstm-actions-list-handle" href="#"><i class="fa fa-ellipsis-v" aria-hidden="true"></i></a>');
+    return sprintf('<div %s>%s<ul>%s</ul></div>',wpsstm_get_html_attr($container_attr),$handle,implode("\n",$items));
 
-    foreach($actions as $slug => $action){
-        //$loading = '<i class="fa fa-circle-o-notch fa-fw fa-spin"></i>';
-
-        $action = wp_parse_args($action,$default_action);
-
-        $classes = $action['classes'];
-        $classes[] = 'wpsstm-action';
-        $classes[] = sprintf('wpsstm-%s-action',$prefix);
-        $classes[] = sprintf('wpsstm-%s-action-%s',$prefix,$slug);
-        $classes = array_unique($classes);
-
-        $action['title'] =  ($action['desc']) ?$action['desc'] : $action['text'];
-        $action['class'] =  implode(' ',$classes);
-
-        //cleanup - TO FIX we should filter attributes within wpsstm_get_html_attr() ?
-        unset($action['classes'],$action['desc']);
-
-        $link = sprintf('<a %s><span>%s</span></a>',wpsstm_get_html_attr($action),$action['text']);
-        $track_actions_list[] = $link;
-    }
-
-    if ( !empty($track_actions_list) ){
-        return sprintf('<div class="wpsstm-%s-actions wpsstm-actions-list">%s</div>',$prefix,implode("\n",$track_actions_list));
-    }
 }
 
 function wpsstm_get_datetime($timestamp){

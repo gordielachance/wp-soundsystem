@@ -28,8 +28,8 @@ global $wpsstm_track;
     </span>
     <?php
     //track actions
-    if ( $actions = $wpsstm_track->get_track_links() ){
-      echo get_actions_list($actions,'track');
+    if ( $items = $wpsstm_track->get_track_context_menu_items() ){
+      echo get_context_menu($items,'track');
     }
     ?>
   </div>

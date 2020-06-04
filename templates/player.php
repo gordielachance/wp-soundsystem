@@ -13,9 +13,8 @@ global $wpsstm_tracklist;
             <span class="wpsstm-player-extra wpsstm-shuffle-bt"><a title="<?php _e('Random Wisdom','wpsstm');?>" href="#"><i class="fa fa-random" aria-hidden="true"></i></a></span>
             <?php
             //player actions
-            if ( $actions = $wpsstm_tracklist->get_player_actions() ){
-                $list = get_actions_list($actions,'player');
-                echo $list;
+            if ( $items = $wpsstm_tracklist->get_player_context_menu_items() ){
+              echo get_context_menu($items,'player');
             }
             ?>
     </div>

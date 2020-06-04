@@ -173,9 +173,9 @@ class WPSSTM_Tracklist{
 		}
 	}
 
-  function get_player_actions(){
+  function get_player_context_menu_items(){
       $actions = array();
-      return apply_filters('wpsstm_get_player_actions',$actions);
+      return apply_filters('wpsstm_player_context_menu_items',$actions);
   }
 
   function get_audio_attr($values_attr=null){

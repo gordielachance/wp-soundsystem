@@ -784,9 +784,9 @@ class WPSSTM_Track{
         return $url;
     }
 
-    function get_track_links(){
+    function get_track_context_menu_items(){
 
-        $actions = array();
+        $items = array();
 
         $tracklist_id =             $this->tracklist->post_id;
         $post_type_playlist =       $tracklist_id ? get_post_type($tracklist_id) : null;
@@ -808,31 +808,71 @@ class WPSSTM_Track{
 
         //play
         if ( $can_play_track ){
-            $actions['play'] = array(
-                'text' =>      __('Play Track','wpsstm'),
-                'href' =>       '#',
-            );
+
+          $items['play'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href' =>     '#',
+                'class' =>    implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-action',
+                  'wpsstm-track-action-play'
+                )),
+                'title' =>    __('Play Track','wpsstm'),
+                'rel' =>      'nofollow',
+              )
+            ),
+            __('Play Track','wpsstm')
+          );
+
         }
 
-        //favorite
+
+        /*
+        toggle favorite
+        */
         if ( wpsstm()->get_options('playlists_manager') && ( !get_current_user_id() || $can_manage_playlists ) ){
 
-            $url_favorite = $this->get_track_action_url('favorite');
-            $url_unfavorite = $this->get_track_action_url('unfavorite');
+          //favorite
+          $url_favorite = $this->get_track_action_url('favorite');
+          $items['favorite'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href' =>     get_current_user_id() ? $url_favorite : wp_login_url($url_favorite),
+                'class' =>    implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-action',
+                  'wpsstm-track-action-favorite',
+                  'action-favorite'
+                )),
+                'title' =>    __('Add track to favorites','wpsstm'),
+                'rel' =>      'nofollow',
+              )
+            ),
+            __('Favorite','wpsstm')
+          );
 
-            $actions['favorite'] = array(
-                'text' =>      __('Favorite','wpsstm'),
-                'href' =>       get_current_user_id() ? $url_favorite : wp_login_url($url_favorite),
-                'desc' =>       __('Add track to favorites','wpsstm'),
-                'classes' =>    array('action-favorite'),
-            );
-
-            $actions['unfavorite'] = array(
-                'text' =>      __('Favorite','wpsstm'),
-                'href' =>       get_current_user_id() ? $url_unfavorite : wp_login_url($url_unfavorite),
-                'desc' =>       __('Remove track from favorites','wpsstm'),
-                'classes' =>    array('action-unfavorite'),
-            );
+          //unfavorite
+          $url_unfavorite = $this->get_track_action_url('unfavorite');
+          $items['unfavorite'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href' =>     get_current_user_id() ? $url_unfavorite : wp_login_url($url_unfavorite),
+                'class' =>    implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-action',
+                  'wpsstm-track-action-unfavorite',
+                  'action-unfavorite'
+                )),
+                'title' =>    __('Remove track from favorites','wpsstm'),
+                'rel' =>      'nofollow',
+              )
+            ),
+            __('Favorite','wpsstm')
+          );
 
         }
 
@@ -841,31 +881,70 @@ class WPSSTM_Track{
         */
 
         if ($this->tracklist->tracklist_type == 'static'){
-            $actions['share'] = array(
-                'text' =>      __('Share'),
-                'desc' =>       __('Share track','wpsstm'),
-                'href' =>       $this->get_track_action_url('share'),
-                'target' =>     '_blank',
-                'classes' =>    array('no-link-icon'), //TOUFIX this is for gordo theme, should not be in this plugin
-            );
+
+          $items['share'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>    $this->get_track_action_url('share'),
+                'class'=>   implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-action',
+                  'wpsstm-track-action-share',
+                  'no-link-icon'
+                )),
+                'title'=>   __('Share track','wpsstm'),
+                'rel'=>     'nofollow',
+                'target'=>  '_blank',
+              )
+            ),
+            __('Share'),
+          );
+
         }
 
         if ($can_dequeue_track){
-            $actions['dequeue'] = array(
-                'text' =>      __('Remove'),
-                'classes' =>    array('wpsstm-advanced-action'),
-                'desc' =>       __('Remove from playlist','wpsstm'),
-                'href' =>       $this->get_track_action_url('dequeue'),
-            );
+
+          $items['dequeue'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>    $this->get_track_action_url('dequeue'),
+                'class'=>   implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-action',
+                  'wpsstm-track-action-remove',
+                  'wpsstm-advanced-action'
+                )),
+                'title'=>   __('Remove from tracklist','wpsstm'),
+                'rel'=>     'nofollow',
+              )
+            ),
+            __('Remove'),
+          );
+
         }
 
         if ($can_move_subtrack){
-            $actions['move'] = array(
-                'text' =>      __('Move', 'wpsstm'),
-                'desc' =>       __('Drag to move track in tracklist', 'wpsstm'),
-                'classes' =>    array('wpsstm-advanced-action'),
-                'href' =>       $this->get_track_action_url('move'),
-            );
+
+          $items['move'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>    $this->get_track_action_url('move'),
+                'class'=>   implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-action',
+                  'wpsstm-track-action-move',
+                  'wpsstm-advanced-action'
+                )),
+                'title'=>   __('Drag to move track in tracklist', 'wpsstm'),
+                'rel'=>     'nofollow',
+              )
+            ),
+            __('Move', 'wpsstm'),
+          );
+
         }
 
         //playlists manager
@@ -873,49 +952,93 @@ class WPSSTM_Track{
 
             $url = $this->get_track_action_url('manage');
 
-            $actions['toggle-tracklists'] = array(
-                'text' =>      __('Playlists manager','wpsstm'),
-                'href' =>       get_current_user_id() ? $url : wp_login_url($url),
-                'classes' =>    array('wpsstm-action-popup'),
+            $items['tracklists'] = sprintf(
+              '<a %s><span>%s</span></a>',
+              wpsstm_get_html_attr(
+                array(
+                  'href'=>    get_current_user_id() ? $url : wp_login_url($url),
+                  'class'=>   implode(' ',array(
+                    'wpsstm-action',
+                    'wpsstm-track-action',
+                    'wpsstm-track-action-tracklists',
+                    'wpsstm-action-popup',
+                    ( get_current_user_id() && !$can_manage_playlists ) ? 'wpsstm-freeze' : null,
+                  )),
+                  'title'=>   __('Playlists manager','wpsstm'),
+                  'rel'=>     'nofollow',
+                )
+              ),
+              __('Playlists manager','wpsstm'),
             );
-
-            if ( get_current_user_id() && !$can_manage_playlists ){
-                $actions['toggle-tracklists'][] = 'wpsstm-disabled-action';
-            }
 
         }
 
         //delete track
         if ($can_delete_track){
-            $actions['trash'] = array(
-                'text' =>      __('Trash'),
-                'classes' =>    array('wpsstm-advanced-action'),
-                'desc' =>       __('Trash this track','wpsstm'),
-                'href' =>       $this->get_track_action_url('trash'),
-            );
 
-            $is_trashed = ( get_post_type($this->post_id) === 'trash' );
-            if ($is_trashed){
-                $actions['trash']['classes'][] = 'wpsstm-freeze';
-            }
+          $items['trash'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>    $this->get_track_action_url('trash'),
+                'class'=>   implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-action',
+                  'wpsstm-track-action-trash',
+                  ( get_post_type($this->post_id) === 'trash' ) ? 'wpsstm-freeze' : null,
+                )),
+                'title'=>   __('Trash'),
+                'rel'=>     'nofollow',
+              )
+            ),
+            __('Trash'),
+          );
+
 
         }
 
         //backend
         if ($can_edit_track){
-            $actions['edit-backend'] = array(
-                'text' =>      __('Edit Track','wpsstm'),
-                'classes' =>    array('wpsstm-advanced-action','wpsstm-action-popup'),
-                'href' =>       get_edit_post_link( $this->post_id ),
-            );
+
+          $items['edit'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>    get_edit_post_link( $this->post_id ),
+                'class'=>   implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-action',
+                  'wpsstm-track-action-edit',
+                  'wpsstm-advanced-action',
+                  'wpsstm-action-popup'
+                )),
+                'title'=>   __('Edit'),
+                'rel'=>     'nofollow',
+              )
+            ),
+            __('Edit'),
+          );
+
         }
 
-        $actions['toggle-links'] = array(
-            'text' =>      __('Tracks Links'),
-            'href' =>       '#',
+        $items['links'] = sprintf(
+          '<a %s><span>%s</span></a>',
+          wpsstm_get_html_attr(
+            array(
+              'href'=>    '#',
+              'class'=>   implode(' ',array(
+                'wpsstm-action',
+                'wpsstm-track-action',
+                'wpsstm-track-action-links',
+              )),
+              'title'=>   __('Links','wpsstm'),
+              'rel'=>     'nofollow',
+            )
+          ),
+          __('Links','wpsstm'),
         );
 
-        return apply_filters('wpsstm_track_actions',$actions);
+        return apply_filters('wpsstm_track_context_menu_items',$items);
 
     }
 

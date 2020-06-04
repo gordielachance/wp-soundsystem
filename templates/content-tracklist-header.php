@@ -94,9 +94,8 @@
     </div>
     <?php
     //actions
-    if ( $actions = $wpsstm_tracklist->get_tracklist_actions() ){
-        $list = get_actions_list($actions,'tracklist');
-        echo $list;
+    if ( $items = $wpsstm_tracklist->get_tracklist_context_menu_items() ){
+      echo get_context_menu($items,'tracklist');
     }
     ?>
 </section>

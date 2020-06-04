@@ -253,8 +253,8 @@ class WPSSTM_Track_Link{
         return $url;
     }
 
-    function get_link_actions($context = null){
-        $actions = array();
+    function get_track_link_context_menu_items($context = null){
+        $items = array();
 
         $link_type_obj = get_post_type_object(wpsstm()->post_type_track_link);
 
@@ -263,52 +263,115 @@ class WPSSTM_Track_Link{
         $can_delete_link = current_user_can($link_type_obj->cap->delete_post,$this->post_id);
         $can_reorder_links = $this->track->user_can_reorder_links();
 
-        $actions['provider'] = array(
-            'text' =>       wpsstm_get_url_domain($this->url),
-            'href' =>       $this->url,
-            'target' =>     '_blank',
+        //provider
+        $provider_domain =  wpsstm_get_url_domain($this->url);
+
+        $items['provider'] = sprintf(
+          '<a %s><span>%s</span></a>',
+          wpsstm_get_html_attr(
+            array(
+              'href'=>      $this->url,
+              'target'=>    '_blank',
+              'class'=>     implode(' ',array(
+                'wpsstm-action',
+                'wpsstm-track-link-action',
+                'wpsstm-track-link-action-provider'
+              )),
+              'title'=>     $provider_domain,
+              'rel'=>       'nofollow',
+            )
+          ),
+          $provider_domain
         );
 
-        if ($can_delete_link){
-            $actions['trash'] = array(
-                'text' =>       __('Trash'),
-                'desc' =>       __('Trash this link','wpsstm'),
-                'href' =>       $this->get_link_action_url('trash'),
-            );
 
-            $is_trashed = ( get_post_type($this->post_id) === 'trash' );
-            if ($is_trashed){
-                $actions['trash']['classes'][] = 'wpsstm-freeze';
-            }
+        if ($can_delete_link){
+
+          $items['trash'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>      $this->get_link_action_url('trash'),
+                'class'=>     implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-link-action',
+                  'wpsstm-track-link-action-trash',
+                  ( get_post_type($this->post_id) === 'trash' ) ? 'wpsstm-freeze' : null
+                )),
+                'title'=>     __('Trash'),
+                'rel'=>       'nofollow',
+              )
+            ),
+            __('Trash'),
+          );
 
         }
 
         if ( $can_reorder_links ){
-            $actions['move'] = array(
-                'text' =>       __('Move', 'wpsstm'),
-                'desc' =>       __('Change link position','wpsstm'),
-            );
+
+          $items['move'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>      '#',
+                'class'=>     implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-link-action',
+                  'wpsstm-track-link-action-move'
+                )),
+                'title'=>     __('Move', 'wpsstm'),
+                'rel'=>       'nofollow',
+              )
+            ),
+            __('Move', 'wpsstm'),
+          );
+
         }
 
         if ( $can_edit_link ){
-            $actions['edit-backend'] = array(
-                'text' =>      __('Edit'),
-                'classes' =>    array('wpsstm-advanced-action'),
-                'href' =>       get_edit_post_link( $this->post_id ),
-            );
+
+          $items['edit'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>      get_edit_post_link( $this->post_id ),
+                'class'=>     implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-link-action',
+                  'wpsstm-track-link-action-edit',
+                  'wpsstm-advanced-action'
+                )),
+                'title'=>      __('Edit'),
+                'rel'=>       'nofollow',
+              )
+            ),
+             __('Edit'),
+          );
+
         }
 
         if ( $this->is_playable_link() ){
-            $actions['play'] = array(
-                'text' =>       __('Play', 'wpsstm'),
-                'href' =>       '#',
-            );
-            ?>
-            <?php
+
+          $items['edit'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>       '#',
+                'class'=>     implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-track-link-action',
+                  'wpsstm-track-link-action-play',
+                )),
+                'title'=>      __('Play', 'wpsstm'),
+                'rel'=>       'nofollow',
+              )
+            ),
+            __('Play', 'wpsstm'),
+          );
+
         }
 
-
-        return apply_filters('wpsstm_link_actions',$actions,$context);
+        return apply_filters('wpsstm_track_link_context_menu_items',$items,$context);
     }
 
     function is_playable_link(){

@@ -358,7 +358,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         return in_array($user_id,(array)$favoriters);
     }
 
-    function get_tracklist_actions(){
+    function get_tracklist_context_menu_items(){
 
         if (!$this->post_id) return; //eg. new tracklist
 
@@ -385,93 +385,206 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         $actions = array();
 
-
-
         //share
-        $actions['share'] = array(
-            'text' =>       __('Share', 'wpsstm'),
-            'classes' =>    array('wpsstm-advanced-action'),
-            'href' =>       $this->get_tracklist_action_url('share'),
-            'classes' =>    array('wpsstm-tracklist-popup wpsstm-action-popup'),
+        $items['share'] = sprintf(
+          '<a %s><span>%s</span></a>',
+          wpsstm_get_html_attr(
+            array(
+              'href'=>      $this->get_tracklist_action_url('share'),
+              'class'=>     implode(' ',array(
+                'wpsstm-action',
+                'wpsstm-tracklist-action',
+                'wpsstm-tracklist-action-share',
+                'wpsstm-advanced-action',
+                'wpsstm-tracklist-popup',
+                'wpsstm-action-popup'
+              )),
+              'title'=>     __('Share', 'wpsstm'),
+              'rel'=>       'nofollow',
+            )
+          ),
+          __('Share', 'wpsstm'),
         );
 
         //export
-        $url_export = $this->get_tracklist_action_url('export');
-        $url_export = add_query_arg(array('dl'=>true),$url_export);
-        $actions['export'] = array(
-            'text' =>       __('Export', 'wpsstm'),
-            'classes' =>    array('wpsstm-advanced-action'),
-            'desc' =>       __('Export to XSPF', 'wpsstm'),
-            'href' =>       get_current_user_id() ? $url_export : wp_login_url($url_export),
-            'target' =>     '_blank',
+        $export_url = $this->get_tracklist_action_url('export');
+        $export_url = add_query_arg(array('dl'=>true),$url_export);
+        $items['export'] = sprintf(
+          '<a %s><span>%s</span></a>',
+          wpsstm_get_html_attr(
+            array(
+              'href'=>      get_current_user_id() ? $export_url : wp_login_url($export_url),
+              'target'=>    '_blank',
+              'class'=>     implode(' ',array(
+                'wpsstm-action',
+                'wpsstm-tracklist-action',
+                'wpsstm-tracklist-action-export',
+                'wpsstm-advanced-action'
+              )),
+              'title'=>     __('Export', 'wpsstm'),
+              'rel'=>       'nofollow',
+            )
+          ),
+          __('Export', 'wpsstm'),
         );
 
-        //favorite / unfavorite
-        $url_favorite = $this->get_tracklist_action_url('favorite');
-        $url_unfavorite = $this->get_tracklist_action_url('unfavorite');
-
-        $actions['favorite'] = array(
-            'text' =>      __('Favorite','wpsstm'),
-            'href' =>       get_current_user_id() ? $url_favorite : wp_login_url($url_favorite),
-            'desc' =>       __('Add tracklist to favorites','wpsstm'),
-            'classes' =>    array('action-favorite'),
+        //favorite
+        $favorite_url = $this->get_tracklist_action_url('favorite');
+        $items['favorite'] = sprintf(
+          '<a %s><span>%s</span></a>',
+          wpsstm_get_html_attr(
+            array(
+              'href'=>       get_current_user_id() ? $favorite_url : wp_login_url($favorite_url),
+              'class'=>     implode(' ',array(
+                'wpsstm-action',
+                'wpsstm-tracklist-action',
+                'wpsstm-tracklist-action-favorite',
+                'action-favorite'
+              )),
+              'title'=>     __('Favorite','wpsstm'),
+              'rel'=>       'nofollow',
+            )
+          ),
+          __('Favorite','wpsstm'),
         );
-        $actions['unfavorite'] = array(
-            'text' =>      __('Unfavorite','wpsstm'),
-            'href' =>       get_current_user_id() ? $url_unfavorite : wp_login_url($url_unfavorite),
-            'desc' =>       __('Remove tracklist from favorites','wpsstm'),
-            'classes' =>    array('action-unfavorite'),
+
+        //unfavorite
+        $unfavorite_url = $this->get_tracklist_action_url('unfavorite');
+        $items['unfavorite'] = sprintf(
+          '<a %s><span>%s</span></a>',
+          wpsstm_get_html_attr(
+            array(
+              'href'=>       get_current_user_id() ? $unfavorite_url : wp_login_url($unfavorite_url),
+              'class'=>     implode(' ',array(
+                'wpsstm-action',
+                'wpsstm-tracklist-action',
+                'wpsstm-tracklist-action-favorite',
+                'action-unfavorite'
+              )),
+              'title'=>     __('Unfavorite','wpsstm'),
+              'rel'=>       'nofollow',
+            )
+          ),
+          __('Unfavorite','wpsstm'),
         );
 
         //toggle type
         if ( $this->feed_url && $this->user_can_toggle_playlist_type() ){
 
             if($this->tracklist_type == 'live'){
-                $actions['live'] = array(
-                    'text' =>      __('Stop sync', 'wpsstm'),
-                    'classes' =>    array('wpsstm-advanced-action'),
-                    'desc' =>       __('Convert this radio to a static playlist', 'wpsstm'),
-                    'href' =>       $this->get_tracklist_action_url('static'),
-                    'target' =>     '_parent',
-                );
+
+              $items['to-playlist'] = sprintf(
+                '<a %s><span>%s</span></a>',
+                wpsstm_get_html_attr(
+                  array(
+                    'href'=>      $this->get_tracklist_action_url('static'),
+                    'target'=>    '_parent',
+                    'class'=>     implode(' ',array(
+                      'wpsstm-action',
+                      'wpsstm-tracklist-action',
+                      'wpsstm-tracklist-action-to-playlist',
+                      'wpsstm-advanced-action'
+                    )),
+                    'title'=>     __('Convert this radio to a static playlist', 'wpsstm'),
+                    'rel'=>       'nofollow',
+                  )
+                ),
+                __('Stop sync', 'wpsstm'),
+              );
+
             }else{
-                $actions['static'] = array(
-                    'text' =>      __('Sync', 'wpsstm'),
-                    'classes' =>    array('wpsstm-advanced-action'),
-                    'desc' =>       __('Restore this playlist back to a radio', 'wpsstm'),
-                    'href' =>       $this->get_tracklist_action_url('live'),
-                    'target' =>     '_parent',
-                );
+
+              $items['to-radio'] = sprintf(
+                '<a %s><span>%s</span></a>',
+                wpsstm_get_html_attr(
+                  array(
+                    'href'=>      $this->get_tracklist_action_url('live'),
+                    'target'=>    '_parent',
+                    'class'=>     implode(' ',array(
+                      'wpsstm-action',
+                      'wpsstm-tracklist-action',
+                      'wpsstm-tracklist-action-to-radio',
+                      'wpsstm-advanced-action'
+                    )),
+                    'title'=>     __('Restore this playlist back to a radio', 'wpsstm'),
+                    'rel'=>       'nofollow',
+                  )
+                ),
+                __('Sync', 'wpsstm'),
+              );
+
             }
         }
 
         //edit backend
         if ( $can_edit_tracklist ){
-            $actions['edit-backend'] = array(
-                'text' =>       __('Edit'),
-                'classes' =>    array('wpsstm-advanced-action','wpsstm-tracklist-popup'),
-                'href' =>       get_edit_post_link( $this->post_id ),
-            );
+
+          $items['edit'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>      get_edit_post_link( $this->post_id ),
+                'class'=>     implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-tracklist-action',
+                  'wpsstm-tracklist-action-edit',
+                  'wpsstm-advanced-action',
+                  'wpsstm-tracklist-popup'
+                )),
+                'title'=>     __('Edit'),
+                'rel'=>       'nofollow',
+              )
+            ),
+            __('Edit'),
+          );
+
         }
 
         //trash tracklist
         if ( $can_trash_tracklist ){
 
-            $actions['trash'] = array(
-                'text' =>      __('Trash'),
-                'classes' =>    array('wpsstm-advanced-action'),
-                'desc' =>       __('Trash this tracklist','wpsstm'),
-                'href' =>       $this->get_tracklist_action_url('trash'),
-            );
-
-            $is_trashed = ( get_post_type($this->post_id) === 'trash' );
-            if ($is_trashed){
-                $actions['trash']['classes'][] = 'wpsstm-freeze';
-            }
+          $items['trash'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>      $this->get_tracklist_action_url('trash'),
+                'class'=>     implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-tracklist-action',
+                  'wpsstm-tracklist-action-trash',
+                  'wpsstm-advanced-action',
+                  ( get_post_type($this->post_id) === 'trash' ) ? 'wpsstm-freeze' : null
+                )),
+                'title'=>     __('Trash'),
+                'rel'=>       'nofollow',
+              )
+            ),
+            __('Trash'),
+          );
 
         }
 
-        return apply_filters('wpsstm_tracklist_actions',$actions, $this);
+        if ( $this->feed_url && ($tracklist->tracklist_type === 'live') ){
+          $items['refresh'] = sprintf(
+            '<a %s><span>%s</span></a>',
+            wpsstm_get_html_attr(
+              array(
+                'href'=>      $this->get_tracklist_action_url('refresh'),
+                'class'=>     implode(' ',array(
+                  'wpsstm-action',
+                  'wpsstm-tracklist-action',
+                  'wpsstm-tracklist-action-refresh',
+                  'wpsstm-reload-bt',
+                )),
+                'title'=>     __('Refresh', 'wpsstm'),
+                'rel'=>       'nofollow',
+              )
+            ),
+            __('Refresh', 'wpsstm'),
+          );
+        }
+
+        return apply_filters('wpsstm_track_link_context_menu_items',$items, $this);
     }
 
     function get_tracklist_url(){
