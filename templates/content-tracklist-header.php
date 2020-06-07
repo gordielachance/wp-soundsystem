@@ -72,7 +72,7 @@
                 ?>
                 <?php
                     //original link
-                    if ($wpsstm_tracklist->tracklist_type == 'live'){
+                    if ($wpsstm_tracklist->feed_url){
 
                         $wpsstm_tracklist_url = ($wpsstm_tracklist->website_url) ? $wpsstm_tracklist->website_url : $wpsstm_tracklist->feed_url;
 
