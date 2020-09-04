@@ -29,14 +29,15 @@ class WPSSTM_Core_API {
   }
 
   public static function is_premium(){
-    $token = self::get_token();
 
-    if ( is_wp_error($token) ){
-      WP_SoundSystem::debug_log($token->get_error_message());
+    $membership = WPSSTM_Core_API::get_api_userdatas();
+
+    if ( is_wp_error($membership) ){
+      WP_SoundSystem::debug_log($membership->get_error_message());
       return false;
     }
 
-    return (bool)$token;
+    return isset($membership['is_premium']) ? (bool)$membership['is_premium'] : false;
   }
 
   public static function get_token(){
@@ -86,7 +87,7 @@ class WPSSTM_Core_API {
     return $token;
   }
 
-  static function api_request($endpoint = null, $params=null,$method = 'GET'){
+  static function api_request($endpoint, $params=null,$method = 'GET'){
 
     if (!$endpoint){
         return new WP_Error('wpsstmapi_no_api_url',__("Missing API endpoint",'wpsstm'));
