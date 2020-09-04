@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: https://www.spiff-radio.org/?p=287871
 Tags: music,audio player,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks
 Requires at least: 4.9
-Tested up to: 5.4.1
+Tested up to: 5.5.1
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -147,6 +147,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 9. Music menu on a BuddyPress profile
 
 == Changelog ==
+
+= 3.3.7 =
+* match updated API
 
 = 3.3.6 =
 * tracklists : fixed sort by tracks count / sort by favorited count
