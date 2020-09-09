@@ -764,9 +764,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       }
 
       /*
-      Create playlist from the XSPF array
+      Create playlist from the API results
       */
-
       $playlist = new WPSSTM_Tracklist();
       $playlist_tracks = array();
 
@@ -1005,7 +1004,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         $tracklist = self::get_tracklist_from_api_response($response);
-        $importer_slug = wpsstm_get_array_value( array('importer','slug'),$response );
+        $importer_slug = wpsstm_get_array_value( array('playlist','meta','wpsstmapi/importer_slug'),$response );
 
       }
 
