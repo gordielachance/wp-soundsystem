@@ -628,12 +628,12 @@ class WPSSTM_Settings {
 
       }
 
-        /*
-        errors
-        */
+      /*
+      errors
+      */
 
-        //display errors
-        settings_errors('api_premium');
+      //display errors
+      settings_errors('api_premium');
 
     }
 

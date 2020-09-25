@@ -19,6 +19,7 @@ class WPSSTM_Core_API {
         WP_SoundSystem::debug_log('get api user datas...');
 
         $datas = WPSSTM_Core_API::api_request('auth/userdata');
+
         if ( is_wp_error($datas) ) return $datas;
 
         set_transient( self::$premium_userdata_transient_name, $datas, 1 * DAY_IN_SECONDS );
@@ -33,7 +34,6 @@ class WPSSTM_Core_API {
     $membership = WPSSTM_Core_API::get_api_userdatas();
 
     if ( is_wp_error($membership) ){
-      WP_SoundSystem::debug_log($membership->get_error_message());
       return false;
     }
 
@@ -62,6 +62,14 @@ class WPSSTM_Core_API {
 
       $request = wp_remote_post($url,$args);
       if ( is_wp_error($request) ) return $request;
+
+      $response_code = wp_remote_retrieve_response_code($request);
+
+      if ( $response_code == 503 ){
+        $message = __('Service unavailable','wpsstm');
+        WP_SoundSystem::debug_log($message);
+        return new WP_Error('api_error',$message );
+      }
 
       $response = wp_remote_retrieve_body( $request );
       if ( is_wp_error($response) ) return $response;
@@ -133,8 +141,12 @@ class WPSSTM_Core_API {
 
     $headers = wp_remote_retrieve_headers($request);
     $response_code = wp_remote_retrieve_response_code($request);
-    $response = wp_remote_retrieve_body( $request );
-    $response = json_decode($response, true);
+
+    if ( $response_code == 503 ){
+      $message = __('Service unavailable','wpsstm');
+      WP_SoundSystem::debug_log($message);
+      return new WP_Error('api_error',$message );
+    }
 
     //invalid token, redo.
     if ( in_array($response_code,array(401,422,498)) ){
@@ -142,9 +154,13 @@ class WPSSTM_Core_API {
       WPSSTM_Settings::clear_premium_transients();
     }
 
+    $response = wp_remote_retrieve_body( $request );
+    $response = json_decode($response, true);
+
     //api error
     if ( $error_msg = wpsstm_get_array_value('error',$response) ){
       $error = sprintf(__('Error %s: %s','wpsstm'),$response_code,$error_msg);
+      WP_SoundSystem::debug_log($error);
       return new WP_Error('api_error',$error );
     }
 
