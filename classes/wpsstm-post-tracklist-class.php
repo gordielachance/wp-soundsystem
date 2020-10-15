@@ -805,7 +805,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $track->duration = wpsstm_get_array_value('duration',$track_arr);
 
         //links
-        if ( $link_urls = wpsstm_get_array_value('link',$track_arr) ){
+        if ( $link_urls = wpsstm_get_array_value('location',$track_arr) ){
 
           $addlinks = array();
 
