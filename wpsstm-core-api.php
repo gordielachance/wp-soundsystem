@@ -66,7 +66,7 @@ class WPSSTM_Core_API {
       $response_code = wp_remote_retrieve_response_code($request);
 
       if ( $response_code == 503 ){
-        $message = __('Service unavailable','wpsstm');
+        $message = __('API unavailable','wpsstm');
         WP_SoundSystem::debug_log($message);
         return new WP_Error('api_error',$message );
       }
@@ -143,7 +143,7 @@ class WPSSTM_Core_API {
     $response_code = wp_remote_retrieve_response_code($request);
 
     if ( $response_code == 503 ){
-      $message = __('Service unavailable','wpsstm');
+      $message = __('API unavailable','wpsstm');
       WP_SoundSystem::debug_log($message);
       return new WP_Error('api_error',$message );
     }
