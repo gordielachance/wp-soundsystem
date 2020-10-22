@@ -148,6 +148,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 
 == Changelog ==
 
+= 3.3.9 =
+* API update
+
 = 3.3.7 =
 * match updated API
 

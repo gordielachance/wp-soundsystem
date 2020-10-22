@@ -962,7 +962,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         API
         */
 
-        $response = WPSSTM_Core_API::api_request('tracklist/import',$params);
+        $response = WPSSTM_Core_API::api_request('v2/playlist/import',$params);
         if ( is_wp_error($response) ){
 
           $error = $response;
@@ -1378,7 +1378,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       if ( !$slug = get_post_meta( $this->post_id,WPSSTM_Core_Radios::$importer_slug_meta_name,true) ){
 
-        $response = WPSSTM_Core_API::api_request('importer/',array('url'=>$this->feed_url));
+        $response = WPSSTM_Core_API::api_request('v2/importer/',array('url'=>$this->feed_url));
 
         if ( is_wp_error($response) ) return $response;
 
@@ -1494,7 +1494,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       if (!$this->feed_url) return;
       if ( wpsstm_is_local_file($feed_url) ) return $feed_url;
       if ( !WPSSTM_Core_API::is_premium() ) return;
-      return WPSSTM_API_URL . sprintf('tracklist/body?url=%s',urlencode($this->feed_url));
+      return WPSSTM_API_URL . sprintf('v2/tracklist/body?url=%s',urlencode($this->feed_url));
     }
 
     /*

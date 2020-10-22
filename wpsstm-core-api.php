@@ -18,7 +18,7 @@ class WPSSTM_Core_API {
 
         WP_SoundSystem::debug_log('get api user datas...');
 
-        $datas = WPSSTM_Core_API::api_request('auth/userdata');
+        $datas = WPSSTM_Core_API::api_request('v2/auth/userdata');
 
         if ( is_wp_error($datas) ) return $datas;
 
@@ -51,7 +51,7 @@ class WPSSTM_Core_API {
 
     if ( false === ( $token = get_transient(self::$token_transient_name ) ) ) {
 
-      $url = WPSSTM_API_URL . 'auth/token';
+      $url = WPSSTM_API_URL . 'v2/auth/token';
 
       //build headers
       $args = array(
@@ -100,6 +100,8 @@ class WPSSTM_Core_API {
     if (!$endpoint){
         return new WP_Error('wpsstmapi_no_api_url',__("Missing API endpoint",'wpsstm'));
     }
+
+
 
     $rest_url = WPSSTM_API_URL . $endpoint;
 
@@ -191,13 +193,20 @@ class WPSSTM_Core_API {
         return new WP_Error( 'missing_spotify_id',__( 'Missing Spotify ID.', 'wpsstmapi' ));
     }
 
-    $args = array('spotify_id'=>$music_id);
-    $response = self::api_request('track/links',$args);
+    $args = [
+      'track' => [ //jspf track
+        'creator'=>$track->artist,
+        'title'=>$track->title,
+        'identifier'=>(array)sprintf('https://open.spotify.com/track/%s',$music_id)
+      ]
+    ];
+
+    $response = self::api_request('v2/track/links',$args,'POST');
 
     if ( is_wp_error($response) ){
       WP_SoundSystem::debug_log('Error while filtering autolinks');
     }else{
-      $new_links = wpsstm_get_array_value('items',$response);
+      $new_links = wpsstm_get_array_value('links',$response);
       $links = array_merge((array)$links,(array)$new_links);
     }
 
