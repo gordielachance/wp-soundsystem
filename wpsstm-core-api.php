@@ -101,7 +101,15 @@ class WPSSTM_Core_API {
         return new WP_Error('wpsstmapi_no_api_url',__("Missing API endpoint",'wpsstm'));
     }
 
+    //TOUFIX URGENT we don't need this premium check : request should be (or not) accepted at the API url.
+    $premium_endpoints = array(
+      'v2/playlist/import',
+      'v2/track/links'
+    );
 
+    if ( in_array($endpoint,$premium_endpoints) && !self::is_premium() ){
+      return new WP_Error('api_key_required',__("An API key is required.",'wpsstm'));
+    }
 
     $rest_url = WPSSTM_API_URL . $endpoint;
 
