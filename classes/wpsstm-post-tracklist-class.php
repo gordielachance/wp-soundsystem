@@ -750,10 +750,6 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    private static function get_tracklist_from_xspf_response($response){
-      die("TOUFIX");//URGENT!!!
-    }
-
     private static function get_tracklist_from_api_response($response){
 
       if ( is_wp_error($response) ) return $response;
@@ -924,89 +920,62 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       update_post_meta( $this->post_id, WPSSTM_Core_Radios::$import_attempt_time_meta_name, current_time( 'timestamp', true ) );//save import time attempt
 
       /*
-      Get tracklist from either XSPF url or from API import
+      Get tracklist from API import
       */
 
-      if ( wpsstm_is_xpsf_url($feed_url) ){
+      $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
+      $params = array(
+        'url' =>        $feed_url,
+        'options'=>     $importer_options
+      );
 
-        $this->tracklist_log("...is an XSPF url, do not query WPSSTM API.");
+      /*
+      API
+      */
 
-        //check is local file
-        //holy mole ! Please get premium instead of hacking my plugin !
-        if ( !WPSSTM_Core_API::is_premium() && !wpsstm_is_local_file($feed_url) ) {
-          $error = new WP_Error( 'missing_api_key', __('Importing remote files requires an API key.','wpsstm') );
+      $response = WPSSTM_Core_API::api_request('v2/playlist/import',$params);
+      if ( is_wp_error($response) ){
+
+        $error = $response;
+        $error_code = $error->get_error_code();
+        $error_message = $error->get_error_message();
+
+        //TOUFIX URGENT HANDLE ERRORS
+
+        switch($error_code){
+          case 'rest_forbidden':
 
           if ( current_user_can('manage_options') ){
-            $this->add_notice('missing_api_key',$error->get_error_message() );
+            $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstmapi') );
+            $this->add_notice('wpsstm-api-error',sprintf(__('An API key is needed. Get one %s.','wpsstm'),$api_link)  );
           }
 
-          return $error;
+          break;
+
+          case 'import_error':
+
+            //return the other error
+            $error_codes =  $error->get_error_codes();
+            $error_code =   $error_codes[1];
+            $error_msg =    $error->get_error_message($error_code);
+            $error_data =   $error->get_error_data($error_code);
+
+            $this->add_notice($error_code,$error_msg);
+
+            $error = new WP_Error($error_code,$error_msg,$error_data);
+
+          break;
+
+          default:
+            $this->add_notice('wpsstm-api-error',$error_message  );
+          break;
         }
 
-        $response = wp_remote_get( $feed_url );
-        $xspf = wp_remote_retrieve_body( $response );
-        if ( is_wp_error($xspf) ) return $xspf;
-
-        $tracklist = self::get_tracklist_from_xspf_response($xspf);
-        $importer_slug = 'XspfImporter';//hardcoded
-
-      }else{
-
-        $importer_options = get_post_meta($this->post_id, WPSSTM_Post_Tracklist::$importer_options_meta_name,true);
-        $params = array(
-          'url' =>        $feed_url,
-          'options'=>     $importer_options
-        );
-
-        /*
-        API
-        */
-
-        $response = WPSSTM_Core_API::api_request('v2/playlist/import',$params);
-        if ( is_wp_error($response) ){
-
-          $error = $response;
-          $error_code = $error->get_error_code();
-          $error_message = $error->get_error_message();
-
-          //TOUFIX URGENT HANDLE ERRORS
-
-          switch($error_code){
-            case 'rest_forbidden':
-
-            if ( current_user_can('manage_options') ){
-              $api_link = sprintf('<a href="%s" target="_blank">%s</a>',WPSSTM_API_REGISTER_URL,__('here','wpsstmapi') );
-              $this->add_notice('wpsstm-api-error',sprintf(__('An API key is needed. Get one %s.','wpsstm'),$api_link)  );
-            }
-
-            break;
-
-            case 'import_error':
-
-              //return the other error
-              $error_codes =  $error->get_error_codes();
-              $error_code =   $error_codes[1];
-              $error_msg =    $error->get_error_message($error_code);
-              $error_data =   $error->get_error_data($error_code);
-
-              $this->add_notice($error_code,$error_msg);
-
-              $error = new WP_Error($error_code,$error_msg,$error_data);
-
-            break;
-
-            default:
-              $this->add_notice('wpsstm-api-error',$error_message  );
-            break;
-          }
-
-          return $error;
-        }
-
-        $tracklist = self::get_tracklist_from_api_response($response);
-        $importer_slug = wpsstm_get_array_value( array('playlist','meta','wpsstmapi/importer_slug'),$response );
-
+        return $error;
       }
+
+      $tracklist = self::get_tracklist_from_api_response($response);
+      $importer_slug = wpsstm_get_array_value( array('playlist','meta','wpsstmapi/importer_slug'),$response );
 
       //save importer slug
       update_post_meta( $this->post_id,WPSSTM_Core_Radios::$importer_slug_meta_name,$importer_slug);
