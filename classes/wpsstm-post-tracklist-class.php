@@ -1526,88 +1526,88 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
     }
 
 
-      function to_jspf(){
+    function to_jspf(){
 
-        $blank_jspf_playlist = [
-          "title"=>        null,
-          "creator"=>      null,
-          "annotation"=>   null,
-          "info"=>         null,
-          "location"=>     null,
-          "identifier"=>   null,
-          "image"=>        null,//
-          "date"=>         null,
-          "license"=>      null,
-          "attribution"=>  [],
-          "link"=>         [],
-          "meta"=>         [],
-          "extension"=>    (object)[],
-          "track"=>        []
-        ];
+      $blank_jspf_playlist = [
+        "title"=>        null,
+        "creator"=>      null,
+        "annotation"=>   null,
+        "info"=>         null,
+        "location"=>     null,
+        "identifier"=>   null,
+        "image"=>        null,//
+        "date"=>         null,
+        "license"=>      null,
+        "attribution"=>  [],
+        "link"=>         [],
+        "meta"=>         [],
+        "extension"=>    (object)[],
+        "track"=>        []
+      ];
 
-        $blank_jspf_track = [
-          "location"=>     [],
-          "identifier"=>   [],
-          "title"=>        null,
-          "creator"=>      null,
-          "annotation"=>   null,
-          "info"=>         null,
-          "image"=>        null,
-          "album"=>        null,
-          "trackNum"=>     null,
-          "duration"=>     null,
-          "link"=>         [],
-          "meta"=>         [],
-          "extension"=>    (object)[]
-        ];
+      $blank_jspf_track = [
+        "location"=>     [],
+        "identifier"=>   [],
+        "title"=>        null,
+        "creator"=>      null,
+        "annotation"=>   null,
+        "info"=>         null,
+        "image"=>        null,
+        "album"=>        null,
+        "trackNum"=>     null,
+        "duration"=>     null,
+        "link"=>         [],
+        "meta"=>         [],
+        "extension"=>    (object)[]
+      ];
 
-        //subtracks
-        $jspf_tracks = [];
+      //subtracks
+      $jspf_tracks = [];
+      $this->populate_subtracks();
+      if ( $this->have_subtracks() ) {
+          while ( $this->have_subtracks() ) {
+              $this->the_subtrack();
+              global $wpsstm_track;
 
-        if ( $this->have_subtracks() ) {
-            while ( $this->have_subtracks() ) {
-                $this->the_subtrack();
-                global $wpsstm_track;
+              $wpsstm_track->populate_links();
 
-                $wpsstm_track->populate_links();
+              $identifiers = [];
+              if ($wpsstm_track->musicbrainz_id){
+                $identifiers[] = sprintf('https://musicbrainz.org/recording/%s',$wpsstm_track->musicbrainz_id);
+              }
+              if ($wpsstm_track->spotify_id){
+                $identifiers[] = sprintf('https://open.spotify.com/track/%s',$wpsstm_track->spotify_id);
+              }
 
-                $identifiers = [];
-                if ($wpsstm_track->musicbrainz_id){
-                  $identifiers[] = sprintf('https://musicbrainz.org/recording/%s',$wpsstm_track->musicbrainz_id);
-                }
-                if ($wpsstm_track->spotify_id){
-                  $identifiers[] = sprintf('https://open.spotify.com/track/%s',$wpsstm_track->spotify_id);
-                }
+              $jspf_track = [
+                'title'=>      $wpsstm_track->title,
+                'creator'=>    $wpsstm_track->artist,
+                'album'=>      $wpsstm_track->album,
+                'duration'=>   $wpsstm_track->duration,
+                'image'=>      wpsstm_get_post_image_url($wpsstm_track->post_id),
+                'link'=>       array_column($wpsstm_track->links, 'url'),
+              ];
 
-                $jspf_track = [
-                  'title'=>      $wpsstm_track->title,
-                  'creator'=>    $wpsstm_track->artist,
-                  'album'=>      $wpsstm_track->album,
-                  'duration'=>   $wpsstm_track->duration,
-                  'image'=>      wpsstm_get_post_image_url($wpsstm_track->post_id),
-                  'link'=>       array_column($wpsstm_track->links, 'url'),
-                ];
+              $jspf_tracks[] = (object) array_merge((array)$blank_jspf_track, (array)$jspf_track);
 
-                $jspf_tracks[] = (object) array_merge((array)$blank_jspf_track, (array)$jspf_track);
-
-            }
-        }
-
-        //playlist
-        $jspf_playlist = [
-          'title'=>      get_the_title( $this->post_id ),
-          'creator'=>    $this->author,
-          'image'=>      wpsstm_get_post_image_url($this->post_id),
-          'date'=>       $this->date_timestamp ? gmdate(DATE_ISO8601,$this->date_timestamp) : null,
-          'location'=>   $this->location,
-          'annotation'=>  get_post_field('post_content', $this->post_id),
-          'track'=>      $jspf_tracks
-        ];
-
-        $jspf_playlist = array_merge((array)$blank_jspf_playlist, (array)$jspf_playlist);
-
-        return [
-          'playlist'=> $jspf_playlist
-        ];
+          }
       }
+
+      //playlist
+      $jspf_playlist = [
+        'title'=>      get_the_title( $this->post_id ),
+        'creator'=>    $this->author,
+        'image'=>      wpsstm_get_post_image_url($this->post_id),
+        'date'=>       $this->date_timestamp ? gmdate(DATE_ISO8601,$this->date_timestamp) : null,
+        'location'=>   $this->location,
+        'annotation'=>  get_post_field('post_content', $this->post_id),
+        'track'=>      $jspf_tracks
+      ];
+
+      $jspf_playlist = array_merge((array)$blank_jspf_playlist, (array)$jspf_playlist);
+
+      return [
+        'playlist'=> $jspf_playlist
+      ];
+    }
 }
