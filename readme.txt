@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: https://www.spiff-radio.org/?p=287871
 Tags: music,audio player,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks
 Requires at least: 4.9
-Tested up to: 5.6.0
+Tested up to: 5.6.1
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -147,6 +147,9 @@ See the [Frequently Asked Questions](https://github.com/gordielachance/wp-sounds
 9. Music menu on a BuddyPress profile
 
 == Changelog ==
+
+= 3.4.1 =
+* WPSSTM_Post_Tracklist: to_jspf() - new method
 
 = 3.4.0 =
 * XSPF file import bugfix
