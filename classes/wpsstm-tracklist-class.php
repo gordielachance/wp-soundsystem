@@ -23,6 +23,23 @@ class WPSSTM_Tracklist{
     var $track_count = null;
     var $in_subtracks_loop = false;
 
+    static $blank_jspf = [
+      "title"=>        null,
+      "creator"=>      null,
+      "annotation"=>   null,
+      "info"=>         null,
+      "location"=>     null,
+      "identifier"=>   null,
+      "image"=>        null,
+      "date"=>         null,
+      "license"=>      null,
+      "attribution"=>  [],
+      "link"=>         [],
+      "meta"=>         [],
+      "extension"=>    [],
+      "track"=>        []
+    ];
+
     /*
     $input_tracks = array of tracks objects or array of track IDs
     */

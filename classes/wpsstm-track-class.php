@@ -1,5 +1,4 @@
 <?php
-
 class WPSSTM_Track{
     public $post_id = null;
 
@@ -29,6 +28,22 @@ class WPSSTM_Track{
     public $from_tracklist = null;
 
     public $notices = array();
+
+    static $blank_jspf = [
+      "location"=>     [],
+      "identifier"=>   [],
+      "title"=>        null,
+      "creator"=>      null,
+      "annotation"=>   null,
+      "info"=>         null,
+      "image"=>        null,
+      "album"=>        null,
+      "trackNum"=>     null,
+      "duration"=>     null,
+      "link"=>         [],
+      "meta"=>         [],
+      "extension"=>    []
+    ];
 
     function __construct( $post = null, $tracklist = null ){
 
