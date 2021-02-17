@@ -158,3 +158,17 @@ function wpsstm_shorten_text($str,$skiptext = ' ... '){
 function wpsstm_get_notice($msg){
     return sprintf('<div class="wpsstm-block-notice"><span>%s</span><a href="#" class="wpsstm-close-notice"><i class="fa fa-close"></i></a></div>',$msg);
 }
+
+function wpsstm_array_remove_empty($haystack){
+    foreach ($haystack as $key => $value) {
+        if (is_array($value)) {
+            $haystack[$key] = wpsstm_array_remove_empty($haystack[$key]);
+        }
+
+        if (empty($haystack[$key])) {
+            unset($haystack[$key]);
+        }
+    }
+
+    return $haystack;
+}

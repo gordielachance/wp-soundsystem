@@ -143,6 +143,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         //importer options
         $db_importer_options = (array)get_post_meta($this->post_id,self::$importer_options_meta_name,true);
         $this->importer_options = array_replace_recursive($this->default_importer_options,$db_importer_options);//last one has priority
+        $this->importer_options = wpsstm_array_remove_empty($this->importer_options);//remove empties as it fucks up with Ruby API //TOUFIX TOUCHECK
 
         //title (will be filtered)
         $this->title = get_the_title($this->post_id);
