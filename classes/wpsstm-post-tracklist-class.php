@@ -1,6 +1,6 @@
 <?php
 
-use LaLit\XML2Array;
+require wpsstm()->plugin_dir . '_inc/php/xspf.php';
 
 class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
@@ -1524,6 +1524,46 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       return $total_updated;
 
+    }
+
+    public function to_xspf(){
+
+      $xspf = new mptre\Xspf();
+
+      //playlist
+      if ( $title = get_the_title( $this->post_id ) ){
+          $xspf->addPlaylistInfo('title', $title);
+      }
+
+      if ( $author = $this->author ){
+          $xspf->addPlaylistInfo('creator', $author);
+      }
+
+      if ( $timestamp = $this->date_timestamp ){
+          $date = gmdate(DATE_ISO8601,$timestamp);
+          $xspf->addPlaylistInfo('date', $date);
+      }
+
+      if ( $location = $this->location ){
+          $xspf->addPlaylistInfo('location', $location);
+      }
+
+      $annotation = get_post_field('post_content', $this->post_id);
+      $xspf->addPlaylistInfo('annotation', $annotation);
+
+
+      //subtracks
+      $this->populate_subtracks();
+      if ( $this->have_subtracks() ) {
+          while ( $this->have_subtracks() ) {
+              $this->the_subtrack();
+              global $wpsstm_track;
+              $arr = $wpsstm_track->to_xspf_array();
+              $xspf->addTrack($arr);
+          }
+      }
+
+      return $xspf->output();
     }
 
     public function to_jspf($with_track_links=true){
