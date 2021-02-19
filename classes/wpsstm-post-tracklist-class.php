@@ -1588,14 +1588,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         'meta'=>        $metas
       ];
 
-      return array_merge((array)WPSSTM_Tracklist::$blank_jspf, (array)$jspf_playlist);
+      $jspf_playlist = array_merge((array)WPSSTM_Tracklist::$blank_jspf, (array)$jspf_playlist);
 
-      //TOUFIX URGENT jspf should be wrapped in a playlist attribute ?
-      /*
       return [
         'playlist'=> $jspf_playlist
       ];
-      */
+
     }
 
     public function to_xspf(){
