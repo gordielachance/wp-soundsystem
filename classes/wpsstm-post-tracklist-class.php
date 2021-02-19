@@ -1558,7 +1558,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                   'link'=>       array_column($wpsstm_track->links, 'url'),
                 ];
 
-                $jspf_tracks[] = (object) array_merge((array)WPSSTM_Track::$blank_jspf, (array)$jspf_track);
+                $jspf_tracks[] = array_merge((array)WPSSTM_Track::$blank_jspf, (array)$jspf_track);
 
             }
         }
@@ -1598,39 +1598,26 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     public function to_xspf(){
 
+      $jspf = $this->to_jspf();
+      $playlist = $jspf['playlist'];
+
       $xspf = new mptre\Xspf();
 
-      //playlist
-      if ( $title = get_the_title( $this->post_id ) ){
-          $xspf->addPlaylistInfo('title', $title);
-      }
-
-      if ( $author = $this->author ){
-          $xspf->addPlaylistInfo('creator', $author);
-      }
-
-      if ( $timestamp = $this->date_timestamp ){
-          $date = gmdate(DATE_ISO8601,$timestamp);
-          $xspf->addPlaylistInfo('date', $date);
-      }
-
-      if ( $location = $this->location ){
-          $xspf->addPlaylistInfo('location', $location);
-      }
-
-      $annotation = get_post_field('post_content', $this->post_id);
-      $xspf->addPlaylistInfo('annotation', $annotation);
-
+      $xspf->addPlaylistInfo('title', $playlist['title']);
+      $xspf->addPlaylistInfo('creator', $playlist['creator']);
+      $xspf->addPlaylistInfo('date', $playlist['date']);
+      $xspf->addPlaylistInfo('location', $playlist['location']);
+      $xspf->addPlaylistInfo('annotation', $playlist['annotation']);
 
       //subtracks
-      $this->populate_subtracks();
-      if ( $this->have_subtracks() ) {
-          while ( $this->have_subtracks() ) {
-              $this->the_subtrack();
-              global $wpsstm_track;
-              $arr = $wpsstm_track->to_xspf_array();
-              $xspf->addTrack($arr);
-          }
+      foreach ($playlist['track'] as $track) {
+
+        //TOUFIX Xspf class breaks with arrays, so pass only strings
+        $clean_track = array_filter($track,function($var){
+          return is_string($var);
+        });
+
+        $xspf->addTrack($clean_track);
       }
 
       return $xspf->output();

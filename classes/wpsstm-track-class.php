@@ -265,21 +265,6 @@ class WPSSTM_Track{
 
     }
 
-    /**
-    http://www.xspf.org/xspf-v1.html#rfc.section.4.1.1.2.14.1.1
-    */
-
-    function to_xspf_array(){
-        $output = array(
-            'title'         => $this->title,
-            'creator'       => $this->artist,
-            'album'         => $this->album
-        );
-
-        $output = apply_filters('wpsstm_get_track_xspf',$output,$this);
-        return array_filter($output);
-    }
-
     function get_track_html(){
         global $wpsstm_track;
 
