@@ -1526,6 +1526,78 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
+    public function to_jspf($with_track_links=true){
+
+      $jspf_tracks = [];
+      if ( $this->tracklist_type !== 'live' ){
+        //subtracks
+        $this->populate_subtracks();
+        if ( $this->have_subtracks() ) {
+            while ( $this->have_subtracks() ) {
+                $this->the_subtrack();
+                global $wpsstm_track;
+
+                if ($with_track_links){
+                  $wpsstm_track->populate_links();
+                }
+
+                $identifiers = [];
+                if ($wpsstm_track->musicbrainz_id){
+                  $identifiers[] = sprintf('https://musicbrainz.org/recording/%s',$wpsstm_track->musicbrainz_id);
+                }
+                if ($wpsstm_track->spotify_id){
+                  $identifiers[] = sprintf('https://open.spotify.com/track/%s',$wpsstm_track->spotify_id);
+                }
+
+                $jspf_track = [
+                  'title'=>      $wpsstm_track->title,
+                  'creator'=>    $wpsstm_track->artist,
+                  'album'=>      $wpsstm_track->album,
+                  'duration'=>   $wpsstm_track->duration,
+                  'image'=>      wpsstm_get_post_image_url($wpsstm_track->post_id),
+                  'link'=>       array_column($wpsstm_track->links, 'url'),
+                ];
+
+                $jspf_tracks[] = (object) array_merge((array)WPSSTM_Track::$blank_jspf, (array)$jspf_track);
+
+            }
+        }
+      }
+
+      //metas
+      $metas = [
+        'post_id' => $this->post_id
+      ];
+      if ( $this->tracklist_type === 'live' ){
+        $radio_metas = array(
+          'import_url' =>$this->feed_url,
+          'import_options' => $this->importer_options
+        );
+		$metas = array_merge($metas,$radio_metas);
+      }
+
+      //playlist
+      $jspf_playlist = [
+        'title'=>      get_the_title( $this->post_id ),
+        'creator'=>    $this->author,
+        'image'=>      wpsstm_get_post_image_url($this->post_id),
+        'date'=>       $this->date_timestamp ? gmdate(DATE_ISO8601,$this->date_timestamp) : null,
+        'location'=>   $this->location,
+        'annotation'=>  get_post_field('post_content', $this->post_id),
+        'track'=>      $jspf_tracks,
+        'meta'=>        $metas
+      ];
+
+      return array_merge((array)WPSSTM_Tracklist::$blank_jspf, (array)$jspf_playlist);
+
+      //TOUFIX URGENT jspf should be wrapped in a playlist attribute ?
+      /*
+      return [
+        'playlist'=> $jspf_playlist
+      ];
+      */
+    }
+
     public function to_xspf(){
 
       $xspf = new mptre\Xspf();
@@ -1566,72 +1638,4 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       return $xspf->output();
     }
 
-    public function to_jspf($with_track_links=true){
-
-      $jspf_tracks = [];
-      if ( $this->tracklist_type !== 'live' ){
-        //subtracks
-        $this->populate_subtracks();
-        if ( $this->have_subtracks() ) {
-            while ( $this->have_subtracks() ) {
-                $this->the_subtrack();
-                global $wpsstm_track;
-
-                if ($with_track_links){
-                  $wpsstm_track->populate_links();
-                }
-
-                $identifiers = [];
-                if ($wpsstm_track->musicbrainz_id){
-                  $identifiers[] = sprintf('https://musicbrainz.org/recording/%s',$wpsstm_track->musicbrainz_id);
-                }
-                if ($wpsstm_track->spotify_id){
-                  $identifiers[] = sprintf('https://open.spotify.com/track/%s',$wpsstm_track->spotify_id);
-                }
-
-                $jspf_track = [
-                  'title'=>      $wpsstm_track->title,
-                  'creator'=>    $wpsstm_track->artist,
-                  'album'=>      $wpsstm_track->album,
-                  'duration'=>   $wpsstm_track->duration,
-                  'image'=>      wpsstm_get_post_image_url($wpsstm_track->post_id),
-                  'link'=>       array_column($wpsstm_track->links, 'url'),
-                ];
-
-                $jspf_tracks[] = (object) array_merge((array)WPSSTM_Track::$blank_jspf, (array)$jspf_track);
-
-            }
-        }
-      }
-
-      //metas
-      $metas = [];
-      if ( $this->tracklist_type === 'live' ){
-        $metas = array(
-          'import_url' =>$this->feed_url,
-          'import_options' => $this->importer_options
-        );
-      }
-
-      //playlist
-      $jspf_playlist = [
-        'title'=>      get_the_title( $this->post_id ),
-        'creator'=>    $this->author,
-        'image'=>      wpsstm_get_post_image_url($this->post_id),
-        'date'=>       $this->date_timestamp ? gmdate(DATE_ISO8601,$this->date_timestamp) : null,
-        'location'=>   $this->location,
-        'annotation'=>  get_post_field('post_content', $this->post_id),
-        'track'=>      $jspf_tracks,
-        'meta'=>        $metas
-      ];
-
-      return array_merge((array)WPSSTM_Tracklist::$blank_jspf, (array)$jspf_playlist);
-
-      //TOUFIX URGENT jspf should be wrapped in a playlist attribute ?
-      /*
-      return [
-        'playlist'=> $jspf_playlist
-      ];
-      */
-    }
 }
