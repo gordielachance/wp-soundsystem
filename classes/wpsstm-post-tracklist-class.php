@@ -1578,13 +1578,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       //playlist
       $jspf_playlist = [
-        'title'=>      get_the_title( $this->post_id ),
-        'creator'=>    $this->author,
-        'image'=>      wpsstm_get_post_image_url($this->post_id),
-        'date'=>       $this->date_timestamp ? gmdate(DATE_ISO8601,$this->date_timestamp) : null,
-        'location'=>   $this->location,
+        'title'=>       html_entity_decode( get_the_title( $this->post_id ) ),//TOUFIX why here and not elsewhere ?
+        'creator'=>     $this->author,
+        'image'=>       wpsstm_get_post_image_url($this->post_id),
+        'date'=>        $this->date_timestamp ? gmdate(DATE_ISO8601,$this->date_timestamp) : null,
+        'location'=>    $this->location,
         'annotation'=>  get_post_field('post_content', $this->post_id),
-        'track'=>      $jspf_tracks,
+        'track'=>       $jspf_tracks,
         'meta'=>        $metas
       ];
 
