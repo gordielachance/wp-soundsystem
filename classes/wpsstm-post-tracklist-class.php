@@ -1526,7 +1526,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    public function to_jspf($with_track_links=true){
+    public function to_jspf($get_links=false){
 
       $jspf_tracks = [];
       if ( $this->tracklist_type !== 'live' ){
@@ -1537,7 +1537,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                 $this->the_subtrack();
                 global $wpsstm_track;
 
-                if ($with_track_links){
+                if ($get_links){
                   $wpsstm_track->populate_links();
                 }
 
@@ -1597,9 +1597,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    public function to_xspf(){
+    public function to_xspf($get_links=false){
 
-      $jspf = $this->to_jspf();
+      $jspf = $this->to_jspf($get_links);
       $playlist = $jspf['playlist'];
 
       $xspf = new mptre\Xspf();
