@@ -1605,6 +1605,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       $xspf->addPlaylistInfo('title', $playlist['title']);
       $xspf->addPlaylistInfo('creator', $playlist['creator']);
+      $xspf->addPlaylistInfo('image', $playlist['image']);
       $xspf->addPlaylistInfo('date', $playlist['date']);
       $xspf->addPlaylistInfo('location', $playlist['location']);
       $xspf->addPlaylistInfo('annotation', $playlist['annotation']);
