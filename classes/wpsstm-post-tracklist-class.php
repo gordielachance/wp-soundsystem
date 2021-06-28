@@ -1612,13 +1612,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       //subtracks
       foreach ($playlist['track'] as $track) {
-
-        //TOUFIX Xspf class breaks with arrays, so pass only strings
-        $clean_track = array_filter($track,function($var){
-          return is_string($var);
-        });
-
-        $xspf->addTrack($clean_track);
+        $xspf->addTrack($track);
       }
 
       return $xspf->output();

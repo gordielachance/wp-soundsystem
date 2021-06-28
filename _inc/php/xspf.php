@@ -83,28 +83,36 @@ class Xspf {
 
         return $this->_xml->saveXML();
     }
-	
+
 	/**
 	 * Creates and returns an element containing a DOMText value
 	 * @param string $name the element name
 	 * @param string $val the element value
 	 * @return \DOMElement the new element
 	 */
-	private function createDOMTextElement($name, $val) {
+	private function createDOMTextElement($name, $values) {
 		$element = $this->_xml->createElement($name);
-		$element->appendChild(new \DOMText($val));
+
+    foreach ((array)$values as $key => $val) {
+      $element->appendChild(new \DOMText($val));
+    }
+
 		return $element;
 	}
-	
+
 	/**
 	 * Creates and returns an element containing CDATA
 	 * @param string $name the element name
 	 * @param string $val the element value
 	 * @return \DOMElement the new element
 	 */
-	private function createCDATAElement($name, $val) {
+	private function createCDATAElement($name, $values) {
 		$element = $this->_xml->createElement($name);
-		$element->appendChild(new \DOMCdataSection($val));
+
+    foreach ((array)$values as $key => $val) {
+      $element->appendChild(new \DOMCdataSection($val));
+    }
+
 		return $element;
 	}
 
