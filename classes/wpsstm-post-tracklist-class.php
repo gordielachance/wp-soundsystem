@@ -1565,15 +1565,16 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       }
 
       //metas
-      $metas = [
+      $metas = array(
         'post_id' => $this->post_id
-      ];
+      );
+
       if ( $this->tracklist_type === 'live' ){
         $radio_metas = array(
           'import_url' =>$this->feed_url,
           'import_options' => $this->importer_options
         );
-		$metas = array_merge($metas,$radio_metas);
+	      $metas = array_merge($metas,$radio_metas);
       }
 
       //playlist
