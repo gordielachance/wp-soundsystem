@@ -63,8 +63,11 @@ class Xspf {
         $track = $this->_xml->createElement('track');
 
         foreach ($trackInfo as $key => $val) {
-            $info = $this->createCDATAElement($key, $val);
-            $track->appendChild($info);
+            //we might have several values (location,link...), so consider everything like an array
+            foreach ((array)$val as $childVal) {
+              $info = $this->createCDATAElement($key, $childVal);
+              $track->appendChild($info);
+            }
         }
 
         $this->_tracklist->appendChild($track);
@@ -90,12 +93,9 @@ class Xspf {
 	 * @param string $val the element value
 	 * @return \DOMElement the new element
 	 */
-	private function createDOMTextElement($name, $values) {
+	private function createDOMTextElement($name, $val) {
 		$element = $this->_xml->createElement($name);
-
-    foreach ((array)$values as $key => $val) {
-      $element->appendChild(new \DOMText($val));
-    }
+    $element->appendChild(new \DOMText($val));
 
 		return $element;
 	}
@@ -106,12 +106,9 @@ class Xspf {
 	 * @param string $val the element value
 	 * @return \DOMElement the new element
 	 */
-	private function createCDATAElement($name, $values) {
+	private function createCDATAElement($name, $val) {
 		$element = $this->_xml->createElement($name);
-
-    foreach ((array)$values as $key => $val) {
-      $element->appendChild(new \DOMCdataSection($val));
-    }
+    $element->appendChild(new \DOMCdataSection($val));
 
 		return $element;
 	}
