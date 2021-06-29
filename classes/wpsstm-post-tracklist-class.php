@@ -1526,47 +1526,50 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    public function to_jspf($get_links=false){
+    public function to_jspf($with_tracks=false){
 
       $jspf_tracks = [];
       if ( $this->tracklist_type !== 'live' ){
-        //subtracks
-        $this->populate_subtracks();
-        if ( $this->have_subtracks() ) {
-            while ( $this->have_subtracks() ) {
-                $this->the_subtrack();
-                global $wpsstm_track;
 
-                if ($get_links){
+        if ($with_tracks){
+
+          //subtracks
+          $this->populate_subtracks();
+          if ( $this->have_subtracks() ) {
+              while ( $this->have_subtracks() ) {
+                  $this->the_subtrack();
+                  global $wpsstm_track;
+
                   $wpsstm_track->populate_links();
-                }
 
-                $identifiers = [];
-                if ($wpsstm_track->musicbrainz_id){
-                  $identifiers[] = sprintf('https://musicbrainz.org/recording/%s',$wpsstm_track->musicbrainz_id);
-                }
-                if ($wpsstm_track->spotify_id){
-                  $identifiers[] = sprintf('https://open.spotify.com/track/%s',$wpsstm_track->spotify_id);
-                }
+                  $identifiers = [];
+                  if ($wpsstm_track->musicbrainz_id){
+                    $identifiers[] = sprintf('https://musicbrainz.org/recording/%s',$wpsstm_track->musicbrainz_id);
+                  }
+                  if ($wpsstm_track->spotify_id){
+                    $identifiers[] = sprintf('https://open.spotify.com/track/%s',$wpsstm_track->spotify_id);
+                  }
 
-                $jspf_track = [
-                  'title'=>      $wpsstm_track->title,
-                  'creator'=>    $wpsstm_track->artist,
-                  'album'=>      $wpsstm_track->album,
-                  'duration'=>   $wpsstm_track->duration,
-                  'image'=>      wpsstm_get_post_image_url($wpsstm_track->post_id),
-                  'link'=>       array_column($wpsstm_track->links, 'url'),
-                ];
+                  $jspf_track = [
+                    'title'=>      $wpsstm_track->title,
+                    'creator'=>    $wpsstm_track->artist,
+                    'album'=>      $wpsstm_track->album,
+                    'duration'=>   $wpsstm_track->duration,
+                    'image'=>      wpsstm_get_post_image_url($wpsstm_track->post_id),
+                    'link'=>       array_column($wpsstm_track->links, 'url'),
+                  ];
 
-                $jspf_tracks[] = array_merge((array)WPSSTM_Track::$blank_jspf, (array)$jspf_track);
+                  $jspf_tracks[] = array_merge((array)WPSSTM_Track::$blank_jspf, (array)$jspf_track);
 
-            }
+              }
+          }
         }
+
       }
 
       //metas
       $metas = array(
-        array('post_id'=>$this->post_id)
+        'post_id'=>$this->post_id
       );
 
       if ( $this->tracklist_type === 'live' ){
@@ -1597,9 +1600,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     }
 
-    public function to_xspf($get_links=false){
+    public function to_xspf($with_tracks=false){
 
-      $jspf = $this->to_jspf($get_links);
+      $jspf = $this->to_jspf($with_tracks);
       $playlist = $jspf['playlist'];
 
       $xspf = new mptre\Xspf();
