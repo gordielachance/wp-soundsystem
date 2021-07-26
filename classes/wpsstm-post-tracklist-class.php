@@ -1575,7 +1575,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       if ( $this->tracklist_type === 'live' ){
         $radio_metas = array(
           array('import_url' =>$this->feed_url),
-          array('import_options' => $this->importer_options)
+          array('import_options' => (object)$this->importer_options)
         );
 	      $metas = array_merge($metas,$radio_metas);
       }
