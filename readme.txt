@@ -3,7 +3,7 @@ Contributors: grosbouff
 Donate link: https://www.spiff-radio.org/?p=287871
 Tags: music,audio player,playlist,importer,stream,MusicBrainz,Spotify,XSPF,artists,albums,tracks
 Requires at least: 4.9
-Tested up to: 5.6.1
+Tested up to: 5.8
 Stable tag: trunk
 License: GPLv2 or later
 
@@ -90,7 +90,7 @@ Wanna give a hand as developer ? Check the [Github](https://github.com/gordielac
 = SoundSystem API =
 
 The [SoundSystem API](https://github.com/gordielachance/wp-soundsystem/wiki/SoundSystem-API) has been developed in Ruby in parallel of this plugin.
-Get extra features by [registering an API key](https://www.spiff-radio.org/contact) !
+Get extra features by registering an API key !
 
 Some of its feature are:
 
@@ -98,10 +98,11 @@ Some of its feature are:
 * the Autolink module, which will get audio sources for your tracks automatically.
 
 Those are optionals, but are nice features to a solid plugin.
-Consider getting one as a nice way to support the work done –hundred of hours– , and to ensure its durability!
-Price is 5$/month or 50$/year.
+Consider getting one as a nice way to support the work done –hundred of hours– , and to ensure its durability.
 
 Since the API is independent of the plugin, it might also be used by other developers.
+
+More informations [here](https://github.com/gordielachance/wp-soundsystem/wiki/SoundSystem-API).
 
 = Donate =
 Whatever, if you like this plugin, please also consider [making a donation](https://www.spiff-radio.org/?p=287871).
