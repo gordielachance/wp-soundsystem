@@ -1569,7 +1569,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       //metas (an array of objects)
       $metas = array(
-        array('post_id'=>$this->post_id)
+        array('post_id'=>$this->post_id),
+        array('post_status'=>get_post_status($this->post_id))
       );
 
       if ( $this->tracklist_type === 'live' ){
