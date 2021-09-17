@@ -47,7 +47,8 @@ function wpsstm_get_percent_bar($percent){
 
 function wpsstm_get_post_image_url($post_id = null){
     global $post;
-    if (!$post_id) $post_id = $post->ID;
+    if (!$post_id && $post) $post_id = $post->ID;
+    if (!$post_id) return;
 
     //easier to use a meta like this than to upload the remote image if the track is imported
 
