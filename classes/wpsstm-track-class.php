@@ -1331,10 +1331,13 @@ class WPSSTM_Track{
 
       //metas (an array of objects)
       $metas = array();
+      /*
+      //TOUFIX URGENT fucks up with  mptre\Xspf->createCDATAElement('meta', Array)
       if ($this->post_id){
         $metas[] = array('post_id'=>$this->post_id);
         $metas[] = array('post_status'=>get_post_status($this->post_id));
       }
+      */
 
       $arr = [
         'title'=>         $this->title,
