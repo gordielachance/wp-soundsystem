@@ -1216,6 +1216,89 @@ class WPSSTM_Track{
 
     }
 
+    public static function get_musicbrainz_track_id($url){
+      $regex = '~^https://www.musicbrainz.org/track/([^/]+)/?$~i';
+      preg_match($regex, $url, $matches);
+      return $matches[1] ?? null;
+    }
+
+    public static function get_spotify_track_id($url){
+      $regex = '~^https://open.spotify.com/track/([^/]+)/?$~i';
+      preg_match($regex, $url, $matches);
+      return $matches[1] ?? null;
+    }
+
+    function from_jspf($jspf){
+
+      //remove properties that do not exists in our blank array
+      $arr = array_intersect_key((array)$jspf, self::$blank_jspf);
+      $arr = array_merge(self::$blank_jspf,$arr);
+
+      //title
+      $this->title = $arr['title'] ?? null;
+
+      //creator
+      $this->artist = $arr['creator'] ?? null;
+
+      //album
+      $this->album = $arr['album'] ?? null;
+
+      //image
+      $this->image_url = $arr['image'] ?? null;
+
+      //trackNum
+      $this->position = $arr['trackNum'] ?? null;
+
+      //duration
+      $this->duration = $arr['duration'] ?? null;
+
+      //links
+      $link_urls = $arr['location'] ?? [];
+      if ( $link_urls ){
+
+        $addlinks = array();
+
+        foreach($link_urls as $url){
+          $link = new WPSSTM_Track_Link();
+          $link->url = $url;
+          $link->is_bot = true;
+          $addlinks[] = $link;
+        }
+
+        $this->add_links($addlinks);
+
+      }
+
+      //identifiers
+      //TOUFIX TOUCHECK is this implemented in API ?
+      $identifiers = $arr['identifier'] ?? [];
+      if ( $identifiers ){
+        $identifiers = (array)$identifiers;
+
+        foreach($identifiers as $url){
+
+          //MusicBrainz
+          if ($mbid = self::get_musicbrainz_track_id($url) ){
+            print_r($mbid);die();
+            $this->musicbrainz_id = $mbid;
+            continue;
+          }
+
+          //Spotify
+          if ($sid = self::get_spotify_track_id($url) ){
+            $this->spotify_id = $sid;
+            continue;
+          }
+
+        }
+
+      }
+
+      //meta
+
+      //extension
+    }
+
     function populate_subtrack_id($subtrack_id){
 
         //get post
@@ -1233,6 +1316,41 @@ class WPSSTM_Track{
 
         //populate post
         return $this->populate_track_post($post);
+    }
+
+    public function to_jspf(){
+
+      //identifiers
+      $identifiers = [];
+      if ($this->musicbrainz_id){
+        $identifiers[] = sprintf('https://musicbrainz.org/recording/%s',$this->musicbrainz_id);
+      }
+      if ($this->spotify_id){
+        $identifiers[] = sprintf('https://open.spotify.com/track/%s',$this->spotify_id);
+      }
+
+      //metas (an array of objects)
+      $metas = array();
+      if ($this->post_id){
+        $metas[] = array('post_id'=>$this->post_id);
+        $metas[] = array('post_status'=>get_post_status($this->post_id));
+      }
+
+      $arr = [
+        'title'=>         $this->title,
+        'creator'=>       $this->artist,
+        'album'=>         $this->album,
+        'duration'=>      $this->duration,
+        'image'=>         wpsstm_get_post_image_url($this->post_id),
+        'link'=>          array_column($this->links, 'url'),
+        'identifier'=>    $identifiers,
+        'meta'=>          $metas,
+        'trackNum'=>      $this->position
+      ];
+
+      $arr = array_merge(self::$blank_jspf,$arr);
+
+      return $arr;
     }
 
 }

@@ -40,6 +40,42 @@ class WPSSTM_Tracklist{
       "track"=>        []
     ];
 
+    function from_jspf($jspf){
+
+      $jspf = wpsstm_get_array_value('playlist',$jspf);
+      if (!$jspf){
+        return new WP_Error('missing_playlist_node','no playlist node in the response');
+      }
+
+      //remove properties that do not exists in our blank array
+      $arr = array_intersect_key($jspf, self::$blank_jspf);
+      $arr = array_merge(self::$blank_jspf,$arr);
+
+      $playlist->title = $arr['title'] ?? null;
+      $playlist->author = $arr['creator'] ?? null;
+      $playlist->location = $arr['location'] ?? null;
+
+      $date = $arr['date'] ?? null;
+      if ( $date ){
+        $playlist->date_timestamp = strtotime($date);//TOUFIX TOUCHECK
+      }
+
+      //TRACKS
+      $tracks_out = array();
+      $tracks_in = $arr['track'] ?? [];
+
+
+      foreach ((array)$tracks_in as $track_arr) {
+
+        $track = new WPSSTM_Track();
+        $track->from_jspf($track_arr);
+
+        $tracks_out[] = $track;
+      }
+
+      $playlist->add_tracks($tracks_out);
+    }
+
     /*
     $input_tracks = array of tracks objects or array of track IDs
     */

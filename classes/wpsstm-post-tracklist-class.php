@@ -755,104 +755,12 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       if ( is_wp_error($response) ) return $response;
 
-      $jspf = wpsstm_get_array_value('playlist',$response);
-      if (!$jspf){
-        return new WP_Error('missing_playlist_node','no playlist node in the response');
-      }
-
       /*
       Create playlist from the API results
       */
       $playlist = new WPSSTM_Tracklist();
-      $playlist_tracks = array();
+      $playlist->from_jspf($jspf);
 
-      $playlist->title = wpsstm_get_array_value('title',$jspf);
-      $playlist->author = wpsstm_get_array_value('creator',$jspf);
-      $playlist->location = wpsstm_get_array_value('location',$jspf);
-
-      if ($date = wpsstm_get_array_value('date',$jspf) ){
-        $playlist->date_timestamp = strtotime($date);//TOUFIX TOUCHECK
-      }
-
-      $tracks_arr = wpsstm_get_array_value(array('track'),$jspf);
-
-
-      foreach ((array)$tracks_arr as $track_arr) {
-
-        $track = new WPSSTM_Track();
-
-        //identifier
-
-        //title
-        $track->title = wpsstm_get_array_value('title',$track_arr);
-
-        //creator
-        $track->artist = wpsstm_get_array_value('creator',$track_arr);
-
-        //album
-        $track->album = wpsstm_get_array_value('album',$track_arr);
-
-        //image
-        $track->image_url = wpsstm_get_array_value('image',$track_arr);
-
-        //trackNum
-        $track->position = wpsstm_get_array_value('trackNum',$track_arr);
-
-        //duration
-        $track->duration = wpsstm_get_array_value('duration',$track_arr);
-
-        //links
-        if ( $link_urls = wpsstm_get_array_value('location',$track_arr) ){
-
-          $addlinks = array();
-
-          foreach($link_urls as $url){
-            $link = new WPSSTM_Track_Link();
-            $link->url = $url;
-            $link->is_bot = true;
-            $addlinks[] = $link;
-          }
-
-          $track->add_links($addlinks);
-
-        }
-
-        //identifiers
-        //TOUFIX TOUCHECK is this implemented in API ?
-        if ( $identifiers = wpsstm_get_array_value('identifier',$track_arr) ){
-          $identifiers = (array)$identifiers;
-
-          foreach($identifiers as $url){
-
-            //MusicBrainz
-            $regex = '~^https://www.musicbrainz.org/track/([^/]+)/?$~i';
-            preg_match($regex, $url, $matches);
-
-            if ( $mbid = wpsstm_get_array_value(1,$matches) ){
-                $track->musicbrainz_id = $mbid;
-                continue;
-            }
-            //Spotify
-            $regex = '~^https://open.spotify.com/track/([^/]+)/?$~i';
-            preg_match($regex, $url, $matches);
-
-            if ( $mbid = wpsstm_get_array_value(1,$matches) ){
-                $track->musicbrainz_id = $mbid;
-                continue;
-            }
-
-          }
-
-        }
-
-        //meta
-
-        //extension
-
-        $playlist_tracks[] = $track;
-      }
-
-      $playlist->add_tracks($playlist_tracks);
 
       return $playlist;
     }
@@ -1541,25 +1449,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                   global $wpsstm_track;
 
                   $wpsstm_track->populate_links();
-
-                  $identifiers = [];
-                  if ($wpsstm_track->musicbrainz_id){
-                    $identifiers[] = sprintf('https://musicbrainz.org/recording/%s',$wpsstm_track->musicbrainz_id);
-                  }
-                  if ($wpsstm_track->spotify_id){
-                    $identifiers[] = sprintf('https://open.spotify.com/track/%s',$wpsstm_track->spotify_id);
-                  }
-
-                  $jspf_track = [
-                    'title'=>      $wpsstm_track->title,
-                    'creator'=>    $wpsstm_track->artist,
-                    'album'=>      $wpsstm_track->album,
-                    'duration'=>   $wpsstm_track->duration,
-                    'image'=>      wpsstm_get_post_image_url($wpsstm_track->post_id),
-                    'link'=>       array_column($wpsstm_track->links, 'url'),
-                  ];
-
-                  $jspf_tracks[] = array_merge((array)WPSSTM_Track::$blank_jspf, (array)$jspf_track);
+                  $jspf_tracks[] = $wpsstm_track->to_jspf();
 
               }
           }
@@ -1568,10 +1458,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       }
 
       //metas (an array of objects)
-      $metas = array(
-        array('post_id'=>$this->post_id),
-        array('post_status'=>get_post_status($this->post_id))
-      );
+      $metas = array();
+      if ($this->post_id){
+        $metas[] = array('post_id'=>$this->post_id);
+        $metas[] = array('post_status'=>get_post_status($this->post_id));
+      }
 
       if ( $this->tracklist_type === 'live' ){
         $radio_metas = array(
