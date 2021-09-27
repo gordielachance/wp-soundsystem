@@ -1449,7 +1449,9 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
                   global $wpsstm_track;
 
                   $wpsstm_track->populate_links();
-                  $jspf_tracks[] = $wpsstm_track->to_jspf();
+                  $jspf_track = $wpsstm_track->to_jspf();
+                  $jspf_track = json_decode($jspf_track);
+                  $jspf_tracks[] = $jspf_track;
 
               }
           }
@@ -1486,9 +1488,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       $jspf_playlist = array_merge((array)WPSSTM_Tracklist::$blank_jspf, (array)$jspf_playlist);
 
-      return [
+      $jspf_playlist = [
         'playlist'=> $jspf_playlist
       ];
+
+      return json_encode($jspf_playlist);
 
     }
 

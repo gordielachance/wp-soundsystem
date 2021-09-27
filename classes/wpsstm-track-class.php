@@ -1353,7 +1353,7 @@ class WPSSTM_Track{
 
       $arr = array_merge(self::$blank_jspf,$arr);
 
-      return $arr;
+      return json_encode($arr);
     }
 
 }
