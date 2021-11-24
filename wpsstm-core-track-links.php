@@ -772,6 +772,8 @@ class WPSSTM_Core_Track_Links{
 
         if (false === $link_ids){
 
+            $link_ids = array();
+
             if ( $excluded_hosts = wpsstm()->get_options('excluded_track_link_hosts') ){
 
                 $exclude_query = array();

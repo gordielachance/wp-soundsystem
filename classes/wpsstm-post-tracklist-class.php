@@ -759,9 +759,8 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       Create playlist from the API results
       */
       $playlist = new WPSSTM_Tracklist();
-      $playlist->from_jspf($jspf);
-
-
+      $playlist->from_jspf($response);
+      
       return $playlist;
     }
 

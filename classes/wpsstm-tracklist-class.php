@@ -73,7 +73,7 @@ class WPSSTM_Tracklist{
         $tracks_out[] = $track;
       }
 
-      $playlist->add_tracks($tracks_out);
+      $this->add_tracks($tracks_out);
     }
 
     /*
