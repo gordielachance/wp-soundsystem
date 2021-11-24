@@ -108,7 +108,7 @@ class WPSSTM_Core_API {
     );
 
     if ( in_array($endpoint,$premium_endpoints) && !self::is_premium() ){
-      return new WP_Error('api_key_required',__("An API key is required.",'wpsstm'));
+      return new WP_Error('api_key_required',__("A SoundSystem API key is required.",'wpsstm'));
     }
 
     $rest_url = WPSSTM_API_URL . $endpoint;
