@@ -1503,7 +1503,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     public function to_xspf($with_tracks=false){
 
-      $jspf = $this->to_jspf($with_tracks);
+      $jspf = json_decode($this->to_jspf($with_tracks),true);
       $playlist = $jspf['playlist'];
 
       $xspf = new mptre\Xspf();
