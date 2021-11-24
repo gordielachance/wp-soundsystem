@@ -53,6 +53,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         $this->options = $this->default_options;
 
         if ($post){
+
             if ( is_a($post,'WP_Post') ){
                 $this->populate_tracklist_post($post->ID);
             }elseif ( $post_id = filter_var($post, FILTER_VALIDATE_INT) ){
@@ -760,7 +761,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
       */
       $playlist = new WPSSTM_Tracklist();
       $playlist->from_jspf($response);
-      
+
       return $playlist;
     }
 
@@ -1172,6 +1173,11 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
     public function get_static_subtracks(){
       global $wpdb;
+
+      if (!$this->post_id){
+        $this->tracklist_log('wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
+        return new WP_Error( 'wpsstm_missing_post_id', __('Required tracklist ID missing.','wpsstm') );
+      }
 
       $track_args = array(
         'posts_per_page'=>          -1,
