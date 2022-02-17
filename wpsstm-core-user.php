@@ -31,11 +31,18 @@ class WPSSTM_Core_User{
 
     static function get_sitewide_favtracks_playlist_ids(){
         global $wpdb;
-        //get all subtracks metas
         $querystr = $wpdb->prepare( "SELECT meta_value FROM $wpdb->usermeta WHERE meta_key = '%s'", 'wp_' . self::$favorites_tracklist_usermeta_key );
 
         $ids = $wpdb->get_col( $querystr);
         return $ids;
+    }
+
+    static function get_favtracks_user_id($post_id){
+        global $wpdb;
+        $querystr = $wpdb->prepare( "SELECT user_id FROM $wpdb->usermeta WHERE meta_key = '%s' AND meta_value = '%s'", 'wp_' . self::$favorites_tracklist_usermeta_key, $post_id );
+
+        if ( !$row = $wpdb->get_row( $querystr) ) return;
+        return $row->user_id;
     }
 
     /*

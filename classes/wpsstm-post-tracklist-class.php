@@ -1466,9 +1466,25 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       //metas (an array of objects)
       $metas = array();
+
       if ($this->post_id){
+
+        //favpost
+        $favpost_usernames = array_map(function($user_id) {
+          return get_the_author_meta( 'user_login', $user_id );
+        },(array)$this->get_tracklist_favoriters());
+
+        //favtracks
+        $favtracks_username = '';
+        if ( $user_id = WPSSTM_Core_User::get_favtracks_user_id($this->post_id) ){
+          $favtracks_username = get_the_author_meta( 'user_login', $user_id );
+        }
+
         $metas[] = array('post_id'=>$this->post_id);
+        $metas[] = array('post_author'=>get_post_field( 'post_author', $this->post_id ));
         $metas[] = array('post_status'=>get_post_status($this->post_id));
+        $metas[] = array('favpost_for'=>$favpost_usernames);
+        $metas[] = array('favtracks_for'=>$favtracks_username);
       }
 
       if ( $this->tracklist_type === 'live' ){
