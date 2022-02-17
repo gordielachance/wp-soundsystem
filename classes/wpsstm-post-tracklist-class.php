@@ -1480,17 +1480,32 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
           $favtracks_username = get_the_author_meta( 'user_login', $user_id );
         }
 
-        $metas[] = array('post_id'=>$this->post_id);
-        $metas[] = array('post_author'=>get_post_field( 'post_author', $this->post_id ));
-        $metas[] = array('post_status'=>get_post_status($this->post_id));
-        $metas[] = array('favpost_for'=>$favpost_usernames);
-        $metas[] = array('favtracks_for'=>$favtracks_username);
+        $tags = array();
+        if ( $tag_names = get_the_terms( $this->post_id, 'post_tag' ) ){
+          $tags = array_map(function($term){
+            return $term->name;
+          },$tag_names);
+        }
+
+        $metas[] = (object)array('post_id'=>$this->post_id);
+        $metas[] = (object)array('post_author'=>get_the_author_meta('user_login',get_post_field( 'post_author', $this->post_id )));
+        $metas[] = (object)array('post_status'=>get_post_status($this->post_id));
+        $metas[] = (object)array('is_radio'=>( $this->tracklist_type === 'live' ));
+        if ($favpost_usernames){
+          $metas[] = (object)array('favpost_for'=>$favpost_usernames);
+        }
+        if ($favtracks_username){
+          $metas[] = (object)array('favtracks_for'=>$favtracks_username);
+        }
+        if ($tags){
+          $metas[] = (object)array('post_tag'=>$tags);
+        }
       }
 
       if ( $this->tracklist_type === 'live' ){
         $radio_metas = array(
-          array('import_url' =>$this->feed_url),
-          array('import_options' => (object)$this->importer_options)
+          (object)array('import_url' =>$this->feed_url),
+          (object)array('import_options' => (object)$this->importer_options)
         );
 	      $metas = array_merge($metas,$radio_metas);
       }
