@@ -132,6 +132,7 @@ class WP_SoundSystem {
         require $this->plugin_dir . 'wpsstm-functions.php';
         require $this->plugin_dir . 'wpsstm-settings.php';
 
+        require $this->plugin_dir . 'wpsstm-core-rest.php';
         require $this->plugin_dir . 'wpsstm-core-tracklists.php';
         require $this->plugin_dir . 'wpsstm-core-playlists.php';
         require $this->plugin_dir . 'wpsstm-core-radios.php';
