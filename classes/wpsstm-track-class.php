@@ -1339,13 +1339,18 @@ class WPSSTM_Track{
       }
       */
 
+      $links = array_map(function($link,$i){
+        $key = sprintf('wpsstm/public/%s',$i+1);
+        return (object)array($key=>$link->url);
+      },(array)$this->links,array_keys($this->links));
+
       $arr = [
         'title'=>         $this->title,
         'creator'=>       $this->artist,
         'album'=>         $this->album,
         'duration'=>      $this->duration,
         'image'=>         wpsstm_get_post_image_url($this->post_id),
-        'link'=>          array_column($this->links, 'url'),
+        'link'=>          $links,
         'identifier'=>    $identifiers,
         'meta'=>          $metas,
         'trackNum'=>      $this->position
