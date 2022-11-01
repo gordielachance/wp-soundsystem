@@ -86,7 +86,7 @@ class WPSSTM_Core_User{
             'post_type'     => wpsstm()->post_type_playlist,
             'post_status'   => 'publish',
             'post_author'   => $user_id,
-            'post_title'    => sprintf(__("%s's favorites tracks",'wpsstm'),$user_info->user_login)
+            'post_title'    => sprintf(__("%s's favorites tracks",'wpsstm'),$user_info->display_name)
         );
 
         $success = wp_insert_post( $playlist_new_args, true );

@@ -151,7 +151,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //author
         $post_author_id = get_post_field( 'post_author', $this->post_id );
-        $this->author = get_the_author_meta( 'display_name', $post_author_id );
+        $this->author = get_the_author_meta( 'user_nicename', $post_author_id );
 
         //location
         $this->location = get_permalink($this->post_id);
@@ -1471,13 +1471,13 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
         //favpost
         $favpost_usernames = array_map(function($user_id) {
-          return get_the_author_meta( 'user_login', $user_id );
+          return get_the_author_meta( 'user_nicename', $user_id );
         },(array)$this->get_tracklist_favoriters());
 
         //favtracks
         $favtracks_username = '';
         if ( $user_id = WPSSTM_Core_User::get_favtracks_user_id($this->post_id) ){
-          $favtracks_username = get_the_author_meta( 'user_login', $user_id );
+          $favtracks_username = get_the_author_meta( 'user_nicename', $user_id );
         }
 
         $tags = array();
@@ -1488,7 +1488,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
         }
 
         $metas[] = (object)array('post_id'=>$this->post_id);
-        $metas[] = (object)array('post_author'=>get_the_author_meta('user_login',get_post_field( 'post_author', $this->post_id )));
+        $metas[] = (object)array('post_author'=>get_the_author_meta('user_nicename',get_post_field( 'post_author', $this->post_id )));
         $metas[] = (object)array('post_status'=>get_post_status($this->post_id));
         $metas[] = (object)array('is_radio'=>( $this->tracklist_type === 'live' ));
         if ($favpost_usernames){
@@ -1512,7 +1512,7 @@ class WPSSTM_Post_Tracklist extends WPSSTM_Tracklist{
 
       //playlist
       $jspf_playlist = [
-        'title'=>       html_entity_decode( get_the_title( $this->post_id ) ),//TOUFIX why here and not elsewhere ?
+        'title'=>       html_entity_decode( WPSSTM_Post_Tracklist::get_tracklist_title($this->post_id) ),//TOUFIX why here and not elsewhere ?
         'creator'=>     $this->author,
         'image'=>       wpsstm_get_post_image_url($this->post_id),
         'date'=>        $this->date_timestamp ? gmdate(DATE_ISO8601,$this->date_timestamp) : null,
